@@ -76,9 +76,15 @@ const Navbar = () => {
             <Button asChild variant="outline">
               <Link to="/contact">Contact</Link>
             </Button>
-            <Button asChild whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} as={motion.button}>
-              <Link to="/pricing">Get Started</Link>
-            </Button>
+            {/* Fix: Remove motion props from Button and add them to a wrapper */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button asChild>
+                <Link to="/pricing">Get Started</Link>
+              </Button>
+            </motion.div>
           </div>
 
           {/* Mobile menu button */}
