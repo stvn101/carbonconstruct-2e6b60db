@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
@@ -26,6 +26,7 @@ const Navbar = () => {
   const navLinks = [
     { title: "Home", path: "/" },
     { title: "About", path: "/about" },
+    { title: "Calculator", path: "/calculator" },
     { title: "Pricing", path: "/pricing" },
     { title: "Blog", path: "/blog" },
     { title: "Contact", path: "/contact" },
