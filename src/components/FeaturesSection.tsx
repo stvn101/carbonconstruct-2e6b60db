@@ -1,5 +1,4 @@
-
-import { Calculator, Database, FileBar, GraduationCap, Leaf, LineChart, BarChart3, FileCheck2 } from "lucide-react";
+import { Calculator, Database, FileText, GraduationCap, Leaf, LineChart, BarChart3, FileCheck2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const FeaturesSection = () => {
@@ -94,7 +93,7 @@ const FeaturesSection = () => {
           <Card className="border-carbon-100 hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-carbon-100">
-                <FileBar className="h-5 w-5 text-carbon-700" />
+                <FileText className="h-5 w-5 text-carbon-700" />
               </div>
               <CardTitle>Project Reporting</CardTitle>
               <CardDescription>

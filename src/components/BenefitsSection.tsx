@@ -1,5 +1,4 @@
-
-import { Award, BadgeCheck, Building, Building2, DollarSign, GlobeCheck, Handshake, TrendingUp } from "lucide-react";
+import { Award, BadgeCheck, Building, Building2, DollarSign, Globe, Handshake, TrendingUp } from "lucide-react";
 
 const BenefitCard = ({ icon: Icon, title, description }: { icon: React.ComponentType<any>, title: string, description: string }) => {
   return (
@@ -46,7 +45,7 @@ const BenefitsSection = () => {
           />
           
           <BenefitCard 
-            icon={GlobeCheck} 
+            icon={Globe} 
             title="Environmental Impact" 
             description="Make a measurable difference in reducing carbon emissions and fighting climate change through better building practices."
           />
