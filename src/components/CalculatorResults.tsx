@@ -1,297 +1,367 @@
 
-import { motion } from "framer-motion";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
-import { Leaf, Info } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  CalculationResult,
-  MaterialInput,
-  TransportInput,
-  EnergyInput,
-  generateSuggestions,
-  MATERIAL_FACTORS,
-  TRANSPORT_FACTORS,
-  ENERGY_FACTORS
+import React from "react";
+import { 
+  BarChart, 
+  Bar, 
+  Cell, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie,
+  TooltipProps
+} from "recharts";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Leaf, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  Material, 
+  Transport, 
+  Energy, 
+  MATERIAL_FACTORS, 
+  TRANSPORT_FACTORS, 
+  ENERGY_FACTORS,
+  CalculationResult 
 } from "@/lib/carbonCalculations";
-
-const COLORS = ["#2DD4BF", "#0EA5E9", "#8B5CF6", "#EC4899", "#F97316", "#10B981", "#6366F1", "#ef4444"];
+import { useNavigate } from "react-router-dom";
 
 interface CalculatorResultsProps {
   result: CalculationResult;
-  materials: MaterialInput[];
-  transport: TransportInput[];
-  energy: EnergyInput[];
+  suggestions: string[];
+  onRecalculate: () => void;
 }
 
-const CalculatorResults = ({ result, materials, transport, energy }: CalculatorResultsProps) => {
-  // Prepare data for the summary pie chart
-  const summaryData = [
-    { name: "Materials", value: result.materialEmissions },
-    { name: "Transport", value: result.transportEmissions },
-    { name: "Energy", value: result.energyEmissions }
+// Custom tooltip formatting for charts
+const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const value = typeof payload[0].value === 'number' ? payload[0].value.toFixed(2) : payload[0].value;
+    return (
+      <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
+        <p className="font-medium">{`${label}`}</p>
+        <p className="text-carbon-600">{`${value} kg CO2e`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CalculatorResults: React.FC<CalculatorResultsProps> = ({ 
+  result, 
+  suggestions,
+  onRecalculate
+}) => {
+  const navigate = useNavigate();
+  
+  // Transform data for material emissions chart
+  const materialChartData = Object.entries(result.breakdownByMaterial)
+    .map(([key, value]) => ({
+      name: MATERIAL_FACTORS[key as Material].name,
+      value: Number(value.toFixed(2))
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // Transform data for transport emissions chart
+  const transportChartData = Object.entries(result.breakdownByTransport)
+    .map(([key, value]) => ({
+      name: TRANSPORT_FACTORS[key as Transport].name,
+      value: Number(value.toFixed(2))
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // Transform data for energy emissions chart
+  const energyChartData = Object.entries(result.breakdownByEnergy)
+    .map(([key, value]) => ({
+      name: ENERGY_FACTORS[key as Energy].name,
+      value: Number(value.toFixed(2))
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // Main emissions breakdown chart
+  const mainBreakdownData = [
+    { 
+      name: 'Materials', 
+      value: Number(result.materialEmissions.toFixed(2)) 
+    },
+    { 
+      name: 'Transport', 
+      value: Number(result.transportEmissions.toFixed(2)) 
+    },
+    { 
+      name: 'Energy', 
+      value: Number(result.energyEmissions.toFixed(2)) 
+    }
   ];
 
-  // Prepare data for the materials bar chart
-  const materialsData = Object.entries(result.breakdownByMaterial).map(([key, value]) => ({
-    name: MATERIAL_FACTORS[key as keyof typeof MATERIAL_FACTORS].name,
-    emissions: value
-  }));
-
-  // Prepare data for the transport bar chart
-  const transportData = Object.entries(result.breakdownByTransport).map(([key, value]) => ({
-    name: TRANSPORT_FACTORS[key as keyof typeof TRANSPORT_FACTORS].name,
-    emissions: value
-  }));
-
-  // Prepare data for the energy bar chart
-  const energyData = Object.entries(result.breakdownByEnergy).map(([key, value]) => ({
-    name: ENERGY_FACTORS[key as keyof typeof ENERGY_FACTORS].name,
-    emissions: value
-  }));
-
-  // Generate improvement suggestions
-  const suggestions = generateSuggestions(result);
+  // Color palette for the charts
+  const COLORS = ['#9b87f5', '#7E69AB', '#6E59A5', '#D6BCFA', '#E5DEFF', '#8B5CF6'];
+  
+  // Calculate emission intensity category
+  let intensityCategory = 'moderate';
+  const emissionsPerUnit = result.totalEmissions;
+  
+  if (emissionsPerUnit < 100) {
+    intensityCategory = 'low';
+  } else if (emissionsPerUnit > 500) {
+    intensityCategory = 'high';
+  }
 
   return (
     <div className="space-y-8">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">Carbon Footprint Results</h2>
+        <p className="text-muted-foreground">
+          Here's a breakdown of the carbon emissions for your construction project.
+        </p>
+      </div>
+      
       {/* Summary Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-      >
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-2xl">Carbon Footprint Results</CardTitle>
-            <CardDescription>
-              Your project's estimated carbon footprint based on the inputs provided
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-carbon-50">
-                <div className="text-sm text-muted-foreground mb-2">Total Emissions</div>
-                <div className="text-3xl font-bold text-carbon-800">
-                  {result.totalEmissions.toLocaleString(undefined, { maximumFractionDigits: 2 })} kg CO<sub>2</sub>e
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-carbon-50">
-                <div className="text-sm text-muted-foreground mb-2">Equivalent To</div>
-                <div className="text-xl font-medium text-carbon-800">
-                  {(result.totalEmissions / 120).toLocaleString(undefined, { maximumFractionDigits: 1 })} trees needed for 1 year
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-carbon-50">
-                <div className="text-sm text-muted-foreground mb-2">Per Square Meter</div>
-                <div className="text-xl font-medium text-carbon-800">
-                  {(result.totalEmissions / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })} kg CO<sub>2</sub>e/m²
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">(Based on 100m² estimate)</div>
-              </div>
+      <Card className="border-carbon-100">
+        <CardHeader>
+          <CardTitle>Total Carbon Footprint</CardTitle>
+          <CardDescription>
+            The overall environmental impact of your project
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center">
+            <span className="text-5xl font-bold text-carbon-600">
+              {result.totalEmissions.toFixed(2)}
+            </span>
+            <span className="text-lg ml-2">kg CO2e</span>
+          </div>
+          
+          <Alert className={
+            intensityCategory === 'low' 
+              ? "border-green-500 bg-green-50 text-green-800" 
+              : intensityCategory === 'high'
+                ? "border-red-500 bg-red-50 text-red-800"
+                : "border-yellow-500 bg-yellow-50 text-yellow-800"
+          }>
+            <div className="flex items-center gap-2">
+              {intensityCategory === 'low' ? (
+                <Leaf className="h-4 w-4" />
+              ) : (
+                <AlertTriangle className="h-4 w-4" />
+              )}
+              <AlertTitle className="font-medium">
+                {intensityCategory === 'low' 
+                  ? 'Low Carbon Intensity' 
+                  : intensityCategory === 'high'
+                    ? 'High Carbon Intensity'
+                    : 'Moderate Carbon Intensity'
+                }
+              </AlertTitle>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+            <AlertDescription className="mt-2 text-sm">
+              {intensityCategory === 'low' 
+                ? 'Great job! Your project has relatively low carbon emissions. Continue these sustainable practices in future projects.'
+                : intensityCategory === 'high'
+                  ? 'Your project has a significant carbon footprint. Consider implementing the suggested improvements to reduce emissions.'
+                  : 'Your project has a moderate carbon footprint. There is room for improvement - check the suggestions below.'
+              }
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
 
-      {/* Emission Breakdown */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-      >
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Emission Breakdown</CardTitle>
-            <CardDescription>
-              See how different aspects of your project contribute to its carbon footprint
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="flex flex-col h-[300px]">
-                <h4 className="text-sm font-medium text-center mb-4">Emissions by Category</h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={summaryData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {summaryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value.toFixed(2)} kg CO₂e`, 'Emissions']} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+      {/* Main Breakdown Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Emissions Breakdown</CardTitle>
+          <CardDescription>
+            Distribution of emissions by category
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={mainBreakdownData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {mainBreakdownData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={({active, payload, label}) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
+                        <p className="font-medium">{payload[0].name}</p>
+                        <p className="text-carbon-600">
+                          {typeof payload[0].value === 'number' ? 
+                            `${payload[0].value.toFixed(2)} kg CO2e` : 
+                            payload[0].value}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-2">
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">Materials</span>
-                    <span className="font-medium">{result.materialEmissions.toLocaleString(undefined, { maximumFractionDigits: 2 })} kg CO₂e</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-500 rounded-full"
-                      style={{ width: `${(result.materialEmissions / result.totalEmissions) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">Transport</span>
-                    <span className="font-medium">{result.transportEmissions.toLocaleString(undefined, { maximumFractionDigits: 2 })} kg CO₂e</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 rounded-full"
-                      style={{ width: `${(result.transportEmissions / result.totalEmissions) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">Energy</span>
-                    <span className="font-medium">{result.energyEmissions.toLocaleString(undefined, { maximumFractionDigits: 2 })} kg CO₂e</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-purple-500 rounded-full"
-                      style={{ width: `${(result.energyEmissions / result.totalEmissions) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {/* Materials Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Material Emissions</CardTitle>
+          <CardDescription>
+            Carbon footprint by material type
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={materialChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis tickFormatter={(value) => typeof value === 'number' ? `${value.toFixed(0)}` : value} />
+                <Tooltip content={({active, payload, label}) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
+                        <p className="font-medium">{label}</p>
+                        <p className="text-carbon-600">
+                          {typeof payload[0].value === 'number' ? 
+                            `${payload[0].value.toFixed(2)} kg CO2e` : 
+                            payload[0].value}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }} />
+                <Bar dataKey="value" fill="#9b87f5" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Detailed Breakdowns */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
-      >
-        {/* Materials Breakdown */}
-        {materialsData.length > 0 && (
-          <Card className="col-span-1 md:col-span-3 lg:col-span-1">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Materials Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={materialsData} layout="vertical">
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="name" width={100} />
-                    <Tooltip 
-                      formatter={(value) => [`${value.toFixed(2)} kg CO₂e`, 'Emissions']}
-                    />
-                    <Bar dataKey="emissions" fill="#2DD4BF" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Transport Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Transport Emissions</CardTitle>
+          <CardDescription>
+            Carbon footprint by transport method
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={transportChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis tickFormatter={(value) => typeof value === 'number' ? `${value.toFixed(0)}` : value} />
+                <Tooltip content={({active, payload, label}) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
+                        <p className="font-medium">{label}</p>
+                        <p className="text-carbon-600">
+                          {typeof payload[0].value === 'number' ? 
+                            `${payload[0].value.toFixed(2)} kg CO2e` : 
+                            payload[0].value}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }} />
+                <Bar dataKey="value" fill="#7E69AB" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Transport Breakdown */}
-        {transportData.length > 0 && (
-          <Card className="col-span-1 md:col-span-3 lg:col-span-1">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Transport Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={transportData} layout="vertical">
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="name" width={100} />
-                    <Tooltip 
-                      formatter={(value) => [`${value.toFixed(2)} kg CO₂e`, 'Emissions']}
-                    />
-                    <Bar dataKey="emissions" fill="#0EA5E9" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Energy Breakdown */}
-        {energyData.length > 0 && (
-          <Card className="col-span-1 md:col-span-3 lg:col-span-1">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Energy Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={energyData} layout="vertical">
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="name" width={100} />
-                    <Tooltip 
-                      formatter={(value) => [`${value.toFixed(2)} kg CO₂e`, 'Emissions']}
-                    />
-                    <Bar dataKey="emissions" fill="#8B5CF6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </motion.div>
+      {/* Energy Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Energy Emissions</CardTitle>
+          <CardDescription>
+            Carbon footprint by energy source
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={energyChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis tickFormatter={(value) => typeof value === 'number' ? `${value.toFixed(0)}` : value} />
+                <Tooltip content={({active, payload, label}) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
+                        <p className="font-medium">{label}</p>
+                        <p className="text-carbon-600">
+                          {typeof payload[0].value === 'number' ? 
+                            `${payload[0].value.toFixed(2)} kg CO2e` : 
+                            payload[0].value}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }} />
+                <Bar dataKey="value" fill="#6E59A5" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Suggestions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.4 }}
-      >
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-emerald-500" />
-              <CardTitle>Improvement Suggestions</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Based on your project's carbon footprint, here are some suggestions to reduce emissions:
-              </AlertDescription>
-            </Alert>
-            <ul className="mt-4 space-y-2">
-              {suggestions.map((suggestion, index) => (
-                <motion.li 
-                  key={index}
-                  className="flex items-start"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + (index * 0.1) }}
-                >
-                  <div className="mr-2 mt-1">
-                    <Leaf className="h-4 w-4 text-emerald-500" />
-                  </div>
-                  <span>{suggestion}</span>
-                </motion.li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </motion.div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Improvement Suggestions</CardTitle>
+          <CardDescription>
+            Recommendations to reduce your project's carbon footprint
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2">
+            {suggestions.map((suggestion, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <Leaf className="h-5 w-5 text-carbon-500 mt-0.5 flex-shrink-0" />
+                <span>{suggestion}</span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+        <CardFooter className="flex justify-between flex-wrap gap-2">
+          <Button onClick={onRecalculate} variant="outline">
+            Recalculate
+          </Button>
+          <Button onClick={() => navigate("/calculator")}>
+            New Calculation
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
