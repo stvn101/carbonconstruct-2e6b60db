@@ -118,7 +118,7 @@ const REGIONS = [
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
-  const [selectedAlternative, setSelectedAlternative] = useState<string>("");
+  const [selectedAlternative, setSelectedAlternative] = useState<string>("none");
   
   const baseOptions = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
     id: key,
@@ -129,7 +129,7 @@ const MaterialDatabase = () => {
     const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRegion = selectedRegion === "all" || 
       (material.region && material.region.includes(selectedRegion));
-    const matchesAlternative = !selectedAlternative || 
+    const matchesAlternative = selectedAlternative === "none" || 
       material.alternativeTo === selectedAlternative;
     
     return matchesSearch && matchesRegion && matchesAlternative;
@@ -213,7 +213,7 @@ const MaterialDatabase = () => {
                     <SelectValue placeholder="All Materials" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Materials</SelectItem>
+                    <SelectItem value="none">All Materials</SelectItem>
                     {baseOptions.map((option) => (
                       <SelectItem key={option.id} value={option.id}>
                         {option.name}
@@ -279,7 +279,7 @@ const MaterialDatabase = () => {
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedRegion("all");
-                    setSelectedAlternative("");
+                    setSelectedAlternative("none");
                   }}
                 >
                   Clear Filters
