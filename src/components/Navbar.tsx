@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Calculator } from "lucide-react";
+import { Menu, X, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
@@ -60,6 +60,24 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
+            {/* Home button */}
+            <motion.div
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="flex items-center gap-1" 
+                asChild
+              >
+                <Link to="/">
+                  <Home className="h-4 w-4" />
+                  <span>Home</span>
+                </Link>
+              </Button>
+            </motion.div>
+            
             {navLinks.slice(1).map((link) => (
               <motion.div
                 key={link.path}
@@ -74,8 +92,8 @@ const Navbar = () => {
                 </Link>
               </motion.div>
             ))}
-            {/* Removed the Contact button */}
-            {/* Fix: Remove motion props from Button and add them to a wrapper */}
+            
+            {/* Get Started button */}
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
