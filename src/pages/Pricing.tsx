@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -11,10 +10,20 @@ import { Check, X } from "lucide-react";
 const Pricing = () => {
   const [annual, setAnnual] = useState(true);
   
+  const monthlyPrices = {
+    starter: 129,
+    professional: 299,
+    enterprise: 599
+  };
+  
+  const calculateAnnualPrice = (monthlyPrice: number) => {
+    return Math.round(monthlyPrice * 12 * 0.8);
+  };
+  
   const plans = [
     {
       name: "Starter",
-      price: annual ? 99 : 129,
+      price: annual ? calculateAnnualPrice(monthlyPrices.starter) : monthlyPrices.starter,
       description: "Best for small construction firms just beginning their sustainability journey.",
       features: [
         "Carbon footprint calculation",
@@ -34,7 +43,7 @@ const Pricing = () => {
     },
     {
       name: "Professional",
-      price: annual ? 249 : 299,
+      price: annual ? calculateAnnualPrice(monthlyPrices.professional) : monthlyPrices.professional,
       description: "Perfect for growing construction companies ready to measure and reduce their carbon impact.",
       features: [
         "Everything in Starter",
@@ -53,7 +62,7 @@ const Pricing = () => {
     },
     {
       name: "Enterprise",
-      price: annual ? 499 : 599,
+      price: annual ? calculateAnnualPrice(monthlyPrices.enterprise) : monthlyPrices.enterprise,
       description: "Complete solution for large construction firms with complex sustainability needs.",
       features: [
         "Everything in Professional",
