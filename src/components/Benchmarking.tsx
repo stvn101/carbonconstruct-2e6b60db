@@ -47,7 +47,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Sample benchmark data
 const INDUSTRY_BENCHMARKS = {
   residential: {
     name: "Residential",
@@ -79,7 +78,6 @@ const INDUSTRY_BENCHMARKS = {
   }
 };
 
-// Sample projects for comparison
 const SAMPLE_PROJECTS = [
   {
     id: 1,
@@ -149,7 +147,6 @@ const SAMPLE_PROJECTS = [
   }
 ];
 
-// Industry average trends (yearly)
 const INDUSTRY_TRENDS = [
   { year: 2018, residential: 380, commercial: 650, industrial: 850, institutional: 570 },
   { year: 2019, residential: 360, commercial: 630, industrial: 820, institutional: 550 },
@@ -159,7 +156,6 @@ const INDUSTRY_TRENDS = [
   { year: 2023, residential: 320, commercial: 580, industrial: 720, institutional: 500 }
 ];
 
-// Sample improvement recommendations
 const IMPROVEMENT_RECOMMENDATIONS = [
   { 
     id: 1, 
@@ -207,18 +203,14 @@ const Benchmarking = () => {
   const [projectType, setProjectType] = useState<keyof typeof INDUSTRY_BENCHMARKS>("residential");
   const [selectedProjects, setSelectedProjects] = useState<number[]>([1, 2, 5]); // Default selected projects
   
-  // Current project (for detailed analysis)
   const currentProject = SAMPLE_PROJECTS.find(p => p.isCurrent) || SAMPLE_PROJECTS[SAMPLE_PROJECTS.length - 1];
   
-  // Filter projects for comparison
   const selectedProjectData = SAMPLE_PROJECTS.filter(project => 
     selectedProjects.includes(project.id)
   );
   
-  // Handle project selection toggle
   const toggleProject = (projectId: number) => {
     if (selectedProjects.includes(projectId)) {
-      // Don't remove if it's the only one left
       if (selectedProjects.length > 1) {
         setSelectedProjects(selectedProjects.filter(id => id !== projectId));
       }
@@ -227,14 +219,12 @@ const Benchmarking = () => {
     }
   };
   
-  // Format emissions for chart
   const chartData = selectedProjectData.map(project => ({
     name: project.name,
     emissions: project.emissions,
     isCurrent: project.isCurrent
   }));
   
-  // Create data for radar chart
   const radarData = [
     {
       subject: "Materials",
@@ -263,14 +253,11 @@ const Benchmarking = () => {
     }
   ];
   
-  // Get current benchmark
   const benchmark = INDUSTRY_BENCHMARKS[projectType];
   
-  // Calculate performance against benchmark
   const performancePercent = ((benchmark.average - currentProject.emissions) / benchmark.average) * 100;
   const isPerformanceGood = performancePercent > 0;
   
-  // Get impact color
   const getImpactColor = (impact: string) => {
     switch (impact) {
       case "high": return "bg-green-500 hover:bg-green-600";
@@ -280,7 +267,6 @@ const Benchmarking = () => {
     }
   };
   
-  // Get complexity color
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
       case "low": return "bg-green-500 hover:bg-green-600";
@@ -305,7 +291,6 @@ const Benchmarking = () => {
           </p>
         </div>
         
-        {/* Project Type Selection */}
         <div className="max-w-md mx-auto mb-8">
           <label htmlFor="project-type" className="block text-sm font-medium mb-2">
             Select Project Type
@@ -326,7 +311,6 @@ const Benchmarking = () => {
           </Select>
         </div>
         
-        {/* Main Benchmark Card */}
         <Card className="mb-8 border-carbon-200">
           <CardHeader>
             <CardTitle>Performance Against {benchmark.name} Benchmark</CardTitle>
@@ -337,7 +321,6 @@ const Benchmarking = () => {
           <CardContent>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                {/* Performance Summary */}
                 <div className="p-6 border rounded-lg bg-carbon-50 mb-4">
                   <div className="text-center mb-4">
                     <h3 className="text-lg font-medium mb-1">Your Performance</h3>
@@ -400,7 +383,6 @@ const Benchmarking = () => {
                   </Alert>
                 </div>
                 
-                {/* Benchmark Details */}
                 <h3 className="font-medium mb-3">Industry Benchmark Details</h3>
                 <Table>
                   <TableBody>
@@ -430,7 +412,6 @@ const Benchmarking = () => {
                 </Table>
               </div>
               
-              {/* Comparison Chart */}
               <div>
                 <h3 className="font-medium mb-3">Project Comparison</h3>
                 <div className="h-72 mb-4">
@@ -450,13 +431,16 @@ const Benchmarking = () => {
                         dataKey="emissions" 
                         name="Carbon Emissions"
                         fill="#a3a3a3"
-                        style={(data: any) => ({ fill: data.isCurrent ? "#9b87f5" : "#a3a3a3" })}
-                      />
+                        fill="#a3a3a3"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.isCurrent ? "#9b87f5" : "#a3a3a3"} />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
                 
-                {/* Toggleable Projects */}
                 <div className="border rounded-lg p-3 bg-gray-50">
                   <h4 className="text-sm font-medium mb-2">Toggle Projects for Comparison</h4>
                   <div className="flex flex-wrap gap-2">
@@ -481,14 +465,12 @@ const Benchmarking = () => {
           </CardContent>
         </Card>
         
-        {/* Detailed Analysis */}
         <Tabs defaultValue="trends" className="mb-8">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
             <TabsTrigger value="trends">Historical Trends</TabsTrigger>
             <TabsTrigger value="categories">Performance by Category</TabsTrigger>
           </TabsList>
           
-          {/* Trends Tab */}
           <TabsContent value="trends">
             <Card>
               <CardHeader>
@@ -568,7 +550,6 @@ const Benchmarking = () => {
             </Card>
           </TabsContent>
           
-          {/* Categories Tab */}
           <TabsContent value="categories">
             <Card>
               <CardHeader>
@@ -675,7 +656,6 @@ const Benchmarking = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Improvement Recommendations */}
         <Card>
           <CardHeader>
             <CardTitle>Improvement Recommendations</CardTitle>

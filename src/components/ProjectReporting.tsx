@@ -37,7 +37,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Sample project data
 const SAMPLE_PROJECTS = [
   {
     id: 1,
@@ -97,7 +96,6 @@ const SAMPLE_PROJECTS = [
   }
 ];
 
-// Sample regulatory requirements
 const REGULATORY_REQUIREMENTS = [
   {
     name: "Carbon Emission Limit",
@@ -128,13 +126,11 @@ const REGULATORY_REQUIREMENTS = [
 const ProjectReporting = () => {
   const [selectedProject, setSelectedProject] = useState(SAMPLE_PROJECTS[0]);
   
-  // Simulating a PDF export
   const handleExportPDF = () => {
     alert("Report export functionality would generate a PDF here.");
     // In a real application, this would generate a PDF using a library like jsPDF or similar
   };
 
-  // Status badge component
   const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
       case "compliant":
@@ -148,7 +144,6 @@ const ProjectReporting = () => {
     }
   };
 
-  // Function to get sustainability score color
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
     if (score >= 60) return "text-yellow-600";
@@ -170,7 +165,6 @@ const ProjectReporting = () => {
           </p>
         </div>
         
-        {/* Project Selection */}
         <div className="grid gap-6 md:grid-cols-4 mb-6">
           {SAMPLE_PROJECTS.map((project) => (
             <Card 
@@ -211,7 +205,6 @@ const ProjectReporting = () => {
           ))}
         </div>
         
-        {/* Detailed Report */}
         <Tabs defaultValue="summary">
           <div className="flex justify-between items-center mb-4">
             <TabsList>
@@ -226,7 +219,6 @@ const ProjectReporting = () => {
             </Button>
           </div>
           
-          {/* Summary Tab */}
           <TabsContent value="summary">
             <Card>
               <CardHeader>
@@ -296,7 +288,6 @@ const ProjectReporting = () => {
             </Card>
           </TabsContent>
           
-          {/* Emissions Tab */}
           <TabsContent value="emissions">
             <Card>
               <CardHeader>
@@ -382,7 +373,6 @@ const ProjectReporting = () => {
             </Card>
           </TabsContent>
           
-          {/* Regulatory Tab */}
           <TabsContent value="regulatory">
             <Card>
               <CardHeader>
@@ -453,7 +443,6 @@ const ProjectReporting = () => {
             </Card>
           </TabsContent>
           
-          {/* Targets Tab */}
           <TabsContent value="targets">
             <Card>
               <CardHeader>
@@ -519,7 +508,7 @@ const ProjectReporting = () => {
                       <Info className="h-4 w-4" />
                       <AlertTitle>Carbon Reduction Impact</AlertTitle>
                       <AlertDescription>
-                        {selectedProject.actualReduction / 100 * (selectedProject.totalEmissions / (1 - selectedProject.actualReduction / 100)).toFixed(1)} kg CO2e emissions prevented
+                        {(selectedProject.actualReduction / 100 * (selectedProject.totalEmissions / (1 - selectedProject.actualReduction / 100))).toFixed(1)} kg CO2e emissions prevented
                       </AlertDescription>
                     </Alert>
                     
