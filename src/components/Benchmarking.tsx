@@ -23,7 +23,8 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar
+  Radar,
+  Cell
 } from "recharts";
 import { 
   Select,
@@ -430,7 +431,6 @@ const Benchmarking = () => {
                       <Bar 
                         dataKey="emissions" 
                         name="Carbon Emissions"
-                        fill="#a3a3a3"
                         fill="#a3a3a3"
                       >
                         {chartData.map((entry, index) => (
