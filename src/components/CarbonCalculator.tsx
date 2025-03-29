@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calculator, Leaf, Truck, Zap } from "lucide-react";
@@ -386,7 +385,13 @@ const CarbonCalculator = () => {
               
               <TabsContent value="results">
                 {calculationResult ? (
-                  <CalculatorResults result={calculationResult} materials={calculationInput.materials} transport={calculationInput.transport} energy={calculationInput.energy} />
+                  <CalculatorResults 
+                    result={calculationResult} 
+                    materials={calculationInput.materials}
+                    transport={calculationInput.transport}
+                    energy={calculationInput.energy}
+                    onRecalculate={handleCalculate}
+                  />
                 ) : (
                   <div className="space-y-6 text-center py-10">
                     <p className="text-lg">Click the calculate button to see results.</p>
