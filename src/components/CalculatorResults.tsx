@@ -32,14 +32,20 @@ import {
   MATERIAL_FACTORS, 
   TRANSPORT_FACTORS, 
   ENERGY_FACTORS,
-  CalculationResult 
+  CalculationResult,
+  MaterialInput,
+  TransportInput,
+  EnergyInput
 } from "@/lib/carbonCalculations";
 import { useNavigate } from "react-router-dom";
 
 interface CalculatorResultsProps {
   result: CalculationResult;
-  suggestions: string[];
-  onRecalculate: () => void;
+  materials: MaterialInput[];
+  transport: TransportInput[];
+  energy: EnergyInput[];
+  suggestions?: string[];
+  onRecalculate?: () => void;
 }
 
 // Custom tooltip formatting for charts
@@ -58,8 +64,17 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 
 const CalculatorResults: React.FC<CalculatorResultsProps> = ({ 
   result, 
-  suggestions,
-  onRecalculate
+  materials,
+  transport,
+  energy,
+  suggestions = [
+    "Consider using low-carbon alternatives for concrete and steel",
+    "Source materials locally to reduce transportation emissions",
+    "Implement renewable energy sources on-site during construction",
+    "Optimize equipment usage to reduce idle time and fuel consumption",
+    "Use recycled and reclaimed materials where possible"
+  ],
+  onRecalculate = () => {}
 }) => {
   const navigate = useNavigate();
   

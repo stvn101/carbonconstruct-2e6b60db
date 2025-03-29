@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Card, 
@@ -450,7 +449,8 @@ const Benchmarking = () => {
                       <Bar 
                         dataKey="emissions" 
                         name="Carbon Emissions"
-                        fill={(data) => data.isCurrent ? "#9b87f5" : "#a3a3a3"}
+                        fill="#a3a3a3"
+                        style={(data: any) => ({ fill: data.isCurrent ? "#9b87f5" : "#a3a3a3" })}
                       />
                     </BarChart>
                   </ResponsiveContainer>

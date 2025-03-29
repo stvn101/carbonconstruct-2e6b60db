@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Table, 
@@ -28,9 +27,17 @@ import { Button } from "@/components/ui/button";
 import { Database, Filter, Search } from "lucide-react";
 import { MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 
-// Extended material database with more details
-const EXTENDED_MATERIALS = {
-  ...MATERIAL_FACTORS,
+interface ExtendedMaterialData {
+  name: string;
+  factor: number;
+  unit: string;
+  region?: string;
+  alternativeTo?: string;
+  notes?: string;
+}
+
+const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
+  ...MATERIAL_FACTORS as Record<string, ExtendedMaterialData>,
   recycledSteel: {
     name: "Recycled Steel",
     factor: 0.63, // kg CO2e per kg (significantly lower than virgin steel)
@@ -97,7 +104,6 @@ const EXTENDED_MATERIALS = {
   }
 };
 
-// Define region data
 const REGIONS = [
   "Global",
   "North America",
@@ -108,20 +114,16 @@ const REGIONS = [
   "Australia"
 ];
 
-type ExtendedMaterial = typeof EXTENDED_MATERIALS[keyof typeof EXTENDED_MATERIALS];
-
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [selectedAlternative, setSelectedAlternative] = useState<string>("");
   
-  // Create a list of materials to show alternatives for
   const baseOptions = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
     id: key,
     name: value.name
   }));
 
-  // Filter materials based on search term, region and alternative
   const filteredMaterials = Object.entries(EXTENDED_MATERIALS).filter(([key, material]) => {
     const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRegion = selectedRegion === "all" || 
@@ -147,7 +149,6 @@ const MaterialDatabase = () => {
           </p>
         </div>
         
-        {/* Search and filters */}
         <Card className="mb-8 border-carbon-100">
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -224,7 +225,6 @@ const MaterialDatabase = () => {
           </CardContent>
         </Card>
         
-        {/* Materials Table */}
         <Card className="border-carbon-100">
           <CardHeader>
             <CardTitle>Construction Materials</CardTitle>
@@ -254,15 +254,15 @@ const MaterialDatabase = () => {
                       {material.factor} ({material.unit})
                     </TableCell>
                     <TableCell>
-                      {(material as ExtendedMaterial).region || "Global"}
+                      {material.region || "Global"}
                     </TableCell>
                     <TableCell>
-                      {(material as ExtendedMaterial).alternativeTo ? 
-                        MATERIAL_FACTORS[(material as ExtendedMaterial).alternativeTo as keyof typeof MATERIAL_FACTORS]?.name : 
+                      {material.alternativeTo ? 
+                        MATERIAL_FACTORS[material.alternativeTo as keyof typeof MATERIAL_FACTORS]?.name : 
                         ""}
                     </TableCell>
-                    <TableCell className="max-w-xs truncate" title={(material as ExtendedMaterial).notes}>
-                      {(material as ExtendedMaterial).notes || ""}
+                    <TableCell className="max-w-xs truncate" title={material.notes}>
+                      {material.notes || ""}
                     </TableCell>
                   </TableRow>
                 ))}
