@@ -74,9 +74,7 @@ const Navbar = () => {
                 </Link>
               </motion.div>
             ))}
-            <Button asChild variant="outline">
-              <Link to="/contact">Contact</Link>
-            </Button>
+            {/* Removed the Contact button */}
             {/* Fix: Remove motion props from Button and add them to a wrapper */}
             <motion.div
               whileHover={{ scale: 1.05 }}
