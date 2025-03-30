@@ -56,13 +56,13 @@ const Calculator = () => {
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
             <div className="flex justify-center">
-              <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full md:w-auto">
-                <TabsTrigger value="calculator">Calculator</TabsTrigger>
-                <TabsTrigger value="materials">Materials</TabsTrigger>
-                <TabsTrigger value="reporting">Reporting</TabsTrigger>
-                <TabsTrigger value="integration">Integration</TabsTrigger>
-                <TabsTrigger value="benchmarking">Benchmarking</TabsTrigger>
-                <TabsTrigger value="education">Education</TabsTrigger>
+              <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full md:w-auto bg-carbon-100 dark:bg-carbon-800">
+                <TabsTrigger value="calculator" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Calculator</TabsTrigger>
+                <TabsTrigger value="materials" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Materials</TabsTrigger>
+                <TabsTrigger value="reporting" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Reporting</TabsTrigger>
+                <TabsTrigger value="integration" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Integration</TabsTrigger>
+                <TabsTrigger value="benchmarking" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Benchmarking</TabsTrigger>
+                <TabsTrigger value="education" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Education</TabsTrigger>
               </TabsList>
             </div>
             
