@@ -9,8 +9,21 @@ import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useEffect } from "react";
 
 const Index = () => {
+  // Add scroll to element handler
+  useEffect(() => {
+    // Check if URL has a hash and scroll to that element
+    if (window.location.hash) {
+      const id = window.location.hash.substring(1);
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
+
   return (
     <motion.div 
       className="min-h-screen flex flex-col"

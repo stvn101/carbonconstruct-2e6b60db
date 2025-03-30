@@ -5,83 +5,59 @@
 
 @layer base {
   :root {
-    --background: 150 30% 98%;
-    --foreground: 148 30% 10%;
-
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 148 30% 10%;
-
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 148 30% 10%;
-
-    --primary: 142 60% 33%;
-    --primary-foreground: 144 60% 98%;
-
-    --secondary: 30 10% 92%;
-    --secondary-foreground: 30 25% 25%;
-
-    --muted: 146 20% 92%;
-    --muted-foreground: 148 20% 40%;
-
-    --accent: 30 15% 90%;
-    --accent-foreground: 30 40% 25%;
-
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 148 20% 85%;
-    --input: 148 20% 85%;
-    --ring: 142 60% 33%;
-
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --carbon-50: 230 29% 95%;
+    --carbon-100: 220 24% 90%;
+    --carbon-200: 220 16% 80%;
+    --carbon-300: 218 15% 70%;
+    --carbon-400: 220 13% 59%;
+    --carbon-500: 220 12% 47%;
+    --carbon-600: 221 14% 38%;
+    --carbon-700: 222 14% 30%;
+    --carbon-800: 224 16% 22%;
+    --carbon-900: 225 20% 14%;
+    --carbon-950: 228 24% 7%;
   }
 
   .dark {
-    --background: 148 30% 8%;
-    --foreground: 148 10% 95%;
-
-    --card: 148 30% 12%;
-    --card-foreground: 148 10% 95%;
-
-    --popover: 148 30% 12%;
-    --popover-foreground: 148 10% 95%;
-
-    --primary: 142 50% 50%;
-    --primary-foreground: 144 60% 5%;
-
-    --secondary: 30 15% 20%;
-    --secondary-foreground: 30 20% 90%;
-
-    --muted: 146 20% 20%;
-    --muted-foreground: 148 10% 70%;
-
-    --accent: 30 15% 25%;
-    --accent-foreground: 30 20% 90%;
-
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 148 20% 25%;
-    --input: 148 20% 25%;
-    --ring: 142 50% 50%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
   }
 }
 
@@ -89,22 +65,26 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-@layer components {
-  .gradient-heading {
-    @apply bg-gradient-to-r from-carbon-600 to-carbon-500 bg-clip-text text-transparent;
-  }
+.gradient-heading {
+  @apply bg-gradient-to-r from-carbon-800 via-carbon-700 to-carbon-600 bg-clip-text text-transparent dark:from-carbon-200 dark:via-carbon-300 dark:to-carbon-400;
+}
 
-  .feature-card {
-    @apply bg-white bg-opacity-90 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300;
-  }
+#root {
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
 
-  .stat-card {
-    @apply bg-carbon-50 border border-carbon-100 rounded-xl p-6 shadow-sm hover:shadow transition-shadow duration-300;
-  }
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
 }

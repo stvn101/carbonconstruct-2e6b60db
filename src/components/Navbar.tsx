@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   
   // Handle scroll effect
   useEffect(() => {
@@ -21,6 +22,26 @@ const Navbar = () => {
     
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Check for dark mode
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains('dark');
+    setIsDarkMode(isDark);
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.attributeName === 'class' &&
+          mutation.target === document.documentElement
+        ) {
+          setIsDarkMode(document.documentElement.classList.contains('dark'));
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
   }, []);
 
   const navLinks = [
@@ -38,6 +59,8 @@ const Navbar = () => {
         scrolled 
           ? "border-border/50 bg-background/95 shadow-sm" 
           : "border-transparent bg-background/80"
+      } ${
+        isDarkMode ? "dark" : ""
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}

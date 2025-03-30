@@ -3,6 +3,21 @@ import { Button } from "@/components/ui/button";
 import { BarChart3, Building2, LeafyGreen } from "lucide-react";
 
 const HeroSection = () => {
+  const handleLearnMore = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const element = document.getElementById('learn-more');
+    if (element) {
+      const navbarHeight = 80; // Approximate navbar height
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <section className="pt-24 pb-12 md:pt-28 md:pb-16">
       <div className="container mx-auto px-4 md:px-6">
@@ -19,10 +34,7 @@ const HeroSection = () => {
                 <a href="#demo">Get Started</a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="#learn-more" onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('learn-more')?.scrollIntoView({ behavior: 'smooth' });
-                }}>Learn More</a>
+                <a href="#learn-more" onClick={handleLearnMore}>Learn More</a>
               </Button>
             </div>
             
@@ -45,7 +57,7 @@ const HeroSection = () => {
           <div className="md:w-1/2">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-tr from-carbon-200 to-carbon-50 rounded-2xl transform rotate-1"></div>
-              <div className="relative bg-white border border-border rounded-2xl shadow-lg p-6 transform -rotate-1">
+              <div className="relative bg-white dark:bg-gray-800 border border-border rounded-2xl shadow-lg p-6 transform -rotate-1">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Project Carbon Dashboard</h3>
                   <BarChart3 className="h-5 w-5 text-carbon-500" />
