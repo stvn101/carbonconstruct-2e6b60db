@@ -118,8 +118,8 @@ const CalculatorResults: React.FC<CalculatorResultsProps> = ({
     }
   ];
 
-  // Color palette for the charts
-  const COLORS = ['#9b87f5', '#7E69AB', '#6E59A5', '#D6BCFA', '#E5DEFF', '#8B5CF6'];
+  // Color palette for the charts - updated to use carbon/green theme colors
+  const COLORS = ['#3e9847', '#25612d', '#214d28', '#8acd91', '#b8e2bc', '#5db166'];
   
   // Calculate emission intensity category
   let intensityCategory = 'moderate';
@@ -141,7 +141,7 @@ const CalculatorResults: React.FC<CalculatorResultsProps> = ({
       </div>
       
       {/* Summary Card */}
-      <Card className="border-carbon-100">
+      <Card className="border-carbon-200">
         <CardHeader>
           <CardTitle>Total Carbon Footprint</CardTitle>
           <CardDescription>
@@ -158,7 +158,7 @@ const CalculatorResults: React.FC<CalculatorResultsProps> = ({
           
           <Alert className={
             intensityCategory === 'low' 
-              ? "border-green-500 bg-green-50 text-green-800" 
+              ? "border-carbon-500 bg-carbon-50 text-carbon-800" 
               : intensityCategory === 'high'
                 ? "border-red-500 bg-red-50 text-red-800"
                 : "border-yellow-500 bg-yellow-50 text-yellow-800"
@@ -269,7 +269,7 @@ const CalculatorResults: React.FC<CalculatorResultsProps> = ({
                   }
                   return null;
                 }} />
-                <Bar dataKey="value" fill="#9b87f5" />
+                <Bar dataKey="value" fill="#3e9847" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -306,7 +306,7 @@ const CalculatorResults: React.FC<CalculatorResultsProps> = ({
                   }
                   return null;
                 }} />
-                <Bar dataKey="value" fill="#7E69AB" />
+                <Bar dataKey="value" fill="#25612d" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -343,7 +343,7 @@ const CalculatorResults: React.FC<CalculatorResultsProps> = ({
                   }
                   return null;
                 }} />
-                <Bar dataKey="value" fill="#6E59A5" />
+                <Bar dataKey="value" fill="#214d28" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -369,10 +369,10 @@ const CalculatorResults: React.FC<CalculatorResultsProps> = ({
           </ul>
         </CardContent>
         <CardFooter className="flex justify-between flex-wrap gap-2">
-          <Button onClick={onRecalculate} variant="outline">
+          <Button onClick={onRecalculate} variant="outline" className="hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300">
             Recalculate
           </Button>
-          <Button onClick={() => navigate("/calculator")}>
+          <Button onClick={() => navigate("/calculator")} className="bg-carbon-600 hover:bg-carbon-700 text-white">
             New Calculation
           </Button>
         </CardFooter>

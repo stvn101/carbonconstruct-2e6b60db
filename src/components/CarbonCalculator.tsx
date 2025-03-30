@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calculator, Leaf, Truck, Zap } from "lucide-react";
@@ -166,19 +167,19 @@ const CarbonCalculator = () => {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-4 mb-6">
-                <TabsTrigger value="materials" className="flex items-center gap-2">
+                <TabsTrigger value="materials" className="flex items-center gap-2 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
                   <Leaf className="h-4 w-4" />
                   <span className="hidden sm:inline">Materials</span>
                 </TabsTrigger>
-                <TabsTrigger value="transport" className="flex items-center gap-2">
+                <TabsTrigger value="transport" className="flex items-center gap-2 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
                   <Truck className="h-4 w-4" />
                   <span className="hidden sm:inline">Transport</span>
                 </TabsTrigger>
-                <TabsTrigger value="energy" className="flex items-center gap-2">
+                <TabsTrigger value="energy" className="flex items-center gap-2 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
                   <Zap className="h-4 w-4" />
                   <span className="hidden sm:inline">Energy</span>
                 </TabsTrigger>
-                <TabsTrigger value="results" className="flex items-center gap-2">
+                <TabsTrigger value="results" className="flex items-center gap-2 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
                   <Calculator className="h-4 w-4" />
                   <span className="hidden sm:inline">Results</span>
                 </TabsTrigger>
@@ -223,7 +224,7 @@ const CarbonCalculator = () => {
                       <div className="md:col-span-2">
                         <Button
                           variant="outline"
-                          className="w-full"
+                          className="w-full hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300"
                           type="button"
                           onClick={() => handleRemoveMaterial(index)}
                         >
@@ -234,10 +235,10 @@ const CarbonCalculator = () => {
                   ))}
                   
                   <div className="flex justify-between">
-                    <Button type="button" onClick={handleAddMaterial}>
+                    <Button type="button" onClick={handleAddMaterial} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                       Add Material
                     </Button>
-                    <Button type="button" onClick={handleNextTab}>
+                    <Button type="button" onClick={handleNextTab} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                       Next: Transport
                     </Button>
                   </div>
@@ -292,7 +293,7 @@ const CarbonCalculator = () => {
                       <div className="md:col-span-2">
                         <Button
                           variant="outline"
-                          className="w-full"
+                          className="w-full hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300"
                           type="button"
                           onClick={() => handleRemoveTransport(index)}
                         >
@@ -304,14 +305,14 @@ const CarbonCalculator = () => {
                   
                   <div className="flex justify-between">
                     <div className="space-x-2">
-                      <Button type="button" variant="outline" onClick={handlePrevTab}>
+                      <Button type="button" variant="outline" onClick={handlePrevTab} className="hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300">
                         Previous
                       </Button>
-                      <Button type="button" onClick={handleAddTransport}>
+                      <Button type="button" onClick={handleAddTransport} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                         Add Transport
                       </Button>
                     </div>
-                    <Button type="button" onClick={handleNextTab}>
+                    <Button type="button" onClick={handleNextTab} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                       Next: Energy
                     </Button>
                   </div>
@@ -357,7 +358,7 @@ const CarbonCalculator = () => {
                       <div className="md:col-span-2">
                         <Button
                           variant="outline"
-                          className="w-full"
+                          className="w-full hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300"
                           type="button"
                           onClick={() => handleRemoveEnergy(index)}
                         >
@@ -369,14 +370,14 @@ const CarbonCalculator = () => {
                   
                   <div className="flex justify-between">
                     <div className="space-x-2">
-                      <Button type="button" variant="outline" onClick={handlePrevTab}>
+                      <Button type="button" variant="outline" onClick={handlePrevTab} className="hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300">
                         Previous
                       </Button>
-                      <Button type="button" onClick={handleAddEnergy}>
+                      <Button type="button" onClick={handleAddEnergy} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                         Add Energy
                       </Button>
                     </div>
-                    <Button type="button" onClick={handleNextTab}>
+                    <Button type="button" onClick={handleNextTab} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                       Calculate Results
                     </Button>
                   </div>
@@ -395,17 +396,17 @@ const CarbonCalculator = () => {
                 ) : (
                   <div className="space-y-6 text-center py-10">
                     <p className="text-lg">Click the calculate button to see results.</p>
-                    <Button type="button" size="lg" onClick={handleCalculate}>
+                    <Button type="button" size="lg" onClick={handleCalculate} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                       Calculate Now
                     </Button>
                   </div>
                 )}
                 
                 <div className="flex justify-between mt-6">
-                  <Button type="button" variant="outline" onClick={handlePrevTab}>
+                  <Button type="button" variant="outline" onClick={handlePrevTab} className="hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300">
                     Previous: Energy
                   </Button>
-                  <Button type="button" onClick={handleCalculate}>
+                  <Button type="button" onClick={handleCalculate} className="bg-carbon-600 hover:bg-carbon-700 text-white">
                     Recalculate
                   </Button>
                 </div>
