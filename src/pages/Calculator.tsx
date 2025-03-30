@@ -10,11 +10,13 @@ import ProjectReporting from "@/components/ProjectReporting";
 import EasyIntegration from "@/components/EasyIntegration";
 import Benchmarking from "@/components/Benchmarking";
 import EducationalResources from "@/components/EducationalResources";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Calculator, FileText, ArrowRight, Zap, Calculator as CalculatorIcon } from "lucide-react";
 
 const Calculator = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("calculator");
   
   // Set active tab based on URL hash or query parameter
@@ -29,6 +31,12 @@ const Calculator = () => {
       setActiveTab(tab);
     }
   }, [location]);
+  
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/calculator#${value}`, { replace: true });
+  };
   
   return (
     <motion.div 
@@ -48,21 +56,39 @@ const Calculator = () => {
       <main className="flex-grow pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Sustainable Construction Tools</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-carbon-900 dark:text-carbon-50">Sustainable Construction Tools</h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Our comprehensive suite of tools helps you measure, analyze, and reduce the carbon footprint of your construction projects.
             </p>
           </div>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
             <div className="flex justify-center">
               <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full md:w-auto bg-carbon-100 dark:bg-carbon-800">
-                <TabsTrigger value="calculator" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Calculator</TabsTrigger>
-                <TabsTrigger value="materials" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Materials</TabsTrigger>
-                <TabsTrigger value="reporting" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Reporting</TabsTrigger>
-                <TabsTrigger value="integration" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Integration</TabsTrigger>
-                <TabsTrigger value="benchmarking" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Benchmarking</TabsTrigger>
-                <TabsTrigger value="education" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">Education</TabsTrigger>
+                <TabsTrigger value="calculator" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                  <CalculatorIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Calculator</span>
+                </TabsTrigger>
+                <TabsTrigger value="materials" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                  <Calculator className="h-4 w-4" />
+                  <span className="hidden sm:inline">Materials</span>
+                </TabsTrigger>
+                <TabsTrigger value="reporting" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Reporting</span>
+                </TabsTrigger>
+                <TabsTrigger value="integration" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                  <ArrowRight className="h-4 w-4" />
+                  <span className="hidden sm:inline">Integration</span>
+                </TabsTrigger>
+                <TabsTrigger value="benchmarking" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                  <Calculator className="h-4 w-4" />
+                  <span className="hidden sm:inline">Benchmarking</span>
+                </TabsTrigger>
+                <TabsTrigger value="education" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                  <Zap className="h-4 w-4" />
+                  <span className="hidden sm:inline">Education</span>
+                </TabsTrigger>
               </TabsList>
             </div>
             
