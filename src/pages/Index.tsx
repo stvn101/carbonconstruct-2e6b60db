@@ -8,6 +8,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Index = () => {
   return (
@@ -19,13 +20,16 @@ const Index = () => {
     >
       <SEO />
       <Navbar />
-      <main>
+      <main id="learn-more">
         <HeroSection />
         <FeaturesSection />
         <TestimonialsSection />
         <BenefitsSection />
         <CTASection />
       </main>
+      <div className="fixed bottom-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
       <Footer />
     </motion.div>
   );
