@@ -69,10 +69,25 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Improve selection text visibility */
+  ::selection {
+    @apply bg-carbon-500 text-white;
+  }
+  
+  .dark ::selection {
+    @apply bg-carbon-400 text-black;
+  }
 }
 
 .gradient-heading {
   @apply bg-gradient-to-r from-carbon-800 via-carbon-700 to-carbon-600 bg-clip-text text-transparent dark:from-carbon-200 dark:via-carbon-300 dark:to-carbon-400;
+}
+
+/* Make gradients more vibrant */
+.gradient-heading strong,
+.gradient-heading b {
+  @apply bg-gradient-to-r from-carbon-700 to-carbon-500 bg-clip-text text-transparent dark:from-carbon-100 dark:via-carbon-200 dark:to-carbon-300;
 }
 
 #root {
