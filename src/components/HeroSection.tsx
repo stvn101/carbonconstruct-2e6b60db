@@ -19,7 +19,10 @@ const HeroSection = () => {
                 <a href="#demo">Get Started</a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="#learn-more">Learn More</a>
+                <a href="#learn-more" onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('learn-more')?.scrollIntoView({ behavior: 'smooth' });
+                }}>Learn More</a>
               </Button>
             </div>
             
