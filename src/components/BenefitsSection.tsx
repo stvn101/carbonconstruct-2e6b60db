@@ -1,3 +1,4 @@
+
 import { Award, BadgeCheck, Building, Building2, DollarSign, Globe, Handshake, TrendingUp } from "lucide-react";
 
 const BenefitCard = ({ icon: Icon, title, description }: { icon: React.ComponentType<any>, title: string, description: string }) => {
@@ -66,23 +67,23 @@ const BenefitsSection = () => {
         <div className="mt-16 bg-carbon-50 border border-carbon-100 rounded-xl p-8 md:p-10">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-3/5 mb-8 md:mb-0 md:pr-8">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">The Construction Industry's Carbon Challenge</h3>
-              <p className="text-lg mb-6 text-muted-foreground">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 inline-block text-black bg-carbon-200 px-2 py-1 rounded">The Construction Industry's Carbon Challenge</h3>
+              <p className="text-lg mb-6 text-black">
                 The building and construction industry accounts for 39% of global carbon emissions. As regulations tighten and client expectations evolve, managing your carbon footprint isn't just good practice—it's becoming essential for business.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-center">
                   <Award className="h-8 w-8 text-carbon-500 mr-3" />
                   <div>
-                    <div className="text-2xl font-bold">39%</div>
-                    <div className="text-sm text-muted-foreground">of global carbon emissions</div>
+                    <div className="text-2xl font-bold text-black">39%</div>
+                    <div className="text-sm text-black">of global carbon emissions</div>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <TrendingUp className="h-8 w-8 text-carbon-500 mr-3" />
                   <div>
-                    <div className="text-2xl font-bold">70%</div>
-                    <div className="text-sm text-muted-foreground">of clients prioritize sustainability</div>
+                    <div className="text-2xl font-bold text-black">70%</div>
+                    <div className="text-sm text-black">of clients prioritize sustainability</div>
                   </div>
                 </div>
               </div>
