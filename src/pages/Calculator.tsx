@@ -12,7 +12,7 @@ import Benchmarking from "@/components/Benchmarking";
 import EducationalResources from "@/components/EducationalResources";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Calculator, FileText, ArrowRight, Zap, Calculator as CalculatorIcon } from "lucide-react";
+import { FileText, ArrowRight, Zap, Calculator as CalculatorIcon, BarChart3 } from "lucide-react";
 
 const Calculator = () => {
   const location = useLocation();
@@ -70,7 +70,7 @@ const Calculator = () => {
                   <span className="hidden sm:inline">Calculator</span>
                 </TabsTrigger>
                 <TabsTrigger value="materials" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                  <Calculator className="h-4 w-4" />
+                  <BarChart3 className="h-4 w-4" />
                   <span className="hidden sm:inline">Materials</span>
                 </TabsTrigger>
                 <TabsTrigger value="reporting" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
@@ -82,7 +82,7 @@ const Calculator = () => {
                   <span className="hidden sm:inline">Integration</span>
                 </TabsTrigger>
                 <TabsTrigger value="benchmarking" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                  <Calculator className="h-4 w-4" />
+                  <BarChart3 className="h-4 w-4" />
                   <span className="hidden sm:inline">Benchmarking</span>
                 </TabsTrigger>
                 <TabsTrigger value="education" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
