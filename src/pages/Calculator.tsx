@@ -13,11 +13,13 @@ import EducationalResources from "@/components/EducationalResources";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FileText, ArrowRight, Zap, Calculator as CalculatorIcon, BarChart3 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Calculator = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("calculator");
+  const isMobile = useIsMobile();
   
   // Set active tab based on URL hash or query parameter
   useEffect(() => {
@@ -53,42 +55,89 @@ const Calculator = () => {
         />
       </Helmet>
       <Navbar />
-      <main className="flex-grow pt-24 pb-12">
+      <main className="flex-grow pt-16 md:pt-24 pb-8 md:pb-12">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-carbon-900 dark:text-carbon-50">Sustainable Construction Tools</h1>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          <div className="text-center mb-4 md:mb-8">
+            <h1 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 text-carbon-900 dark:text-carbon-50">Sustainable Construction Tools</h1>
+            <p className="text-sm md:text-lg text-muted-foreground max-w-3xl mx-auto">
               Our comprehensive suite of tools helps you measure, analyze, and reduce the carbon footprint of your construction projects.
             </p>
           </div>
           
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6 md:mb-8">
             <div className="flex justify-center">
-              <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full md:w-auto bg-carbon-100 dark:bg-carbon-800">
-                <TabsTrigger value="calculator" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+              <TabsList className={`grid ${isMobile ? 'grid-cols-3 gap-1' : 'grid-cols-6'} w-full md:w-auto bg-carbon-100 dark:bg-carbon-800`}>
+                <TabsTrigger 
+                  value="calculator" 
+                  className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
+                >
                   <CalculatorIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">Calculator</span>
                 </TabsTrigger>
-                <TabsTrigger value="materials" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                <TabsTrigger 
+                  value="materials" 
+                  className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
+                >
                   <BarChart3 className="h-4 w-4" />
                   <span className="hidden sm:inline">Materials</span>
                 </TabsTrigger>
-                <TabsTrigger value="reporting" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                <TabsTrigger 
+                  value="reporting" 
+                  className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
+                >
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Reporting</span>
                 </TabsTrigger>
-                <TabsTrigger value="integration" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                  <ArrowRight className="h-4 w-4" />
-                  <span className="hidden sm:inline">Integration</span>
-                </TabsTrigger>
-                <TabsTrigger value="benchmarking" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                  <BarChart3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Benchmarking</span>
-                </TabsTrigger>
-                <TabsTrigger value="education" className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                  <Zap className="h-4 w-4" />
-                  <span className="hidden sm:inline">Education</span>
-                </TabsTrigger>
+                {isMobile ? (
+                  <>
+                    {/* Second row for mobile */}
+                    <TabsTrigger 
+                      value="integration" 
+                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm mt-1"
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                      <span className="hidden sm:inline">Integration</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="benchmarking" 
+                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm mt-1"
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      <span className="hidden sm:inline">Benchmarking</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="education" 
+                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm mt-1"
+                    >
+                      <Zap className="h-4 w-4" />
+                      <span className="hidden sm:inline">Education</span>
+                    </TabsTrigger>
+                  </>
+                ) : (
+                  <>
+                    <TabsTrigger 
+                      value="integration" 
+                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                      <span className="hidden sm:inline">Integration</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="benchmarking" 
+                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      <span className="hidden sm:inline">Benchmarking</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="education" 
+                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
+                    >
+                      <Zap className="h-4 w-4" />
+                      <span className="hidden sm:inline">Education</span>
+                    </TabsTrigger>
+                  </>
+                )}
               </TabsList>
             </div>
             
