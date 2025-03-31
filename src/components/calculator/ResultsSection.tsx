@@ -1,4 +1,5 @@
 
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import CalculatorResults from "../CalculatorResults";
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
@@ -24,8 +25,34 @@ const ResultsSection = ({
 }: ResultsSectionProps) => {
   const isMobile = useIsMobile();
   
+  // Animation variants for staggered animation
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        when: "beforeChildren",
+        staggerChildren: 0.2,
+        duration: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+  
   return (
-    <div>
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {calculationResult ? (
         <CalculatorResults 
           result={calculationResult} 
@@ -35,23 +62,39 @@ const ResultsSection = ({
           onRecalculate={onCalculate}
         />
       ) : (
-        <div className="space-y-4 md:space-y-6 text-center py-6 md:py-10">
-          <div className="flex justify-center">
-            <Calculator className="h-12 w-12 md:h-16 md:w-16 text-carbon-500 mb-2 md:mb-4" />
-          </div>
-          <p className="text-md md:text-lg">Click the calculate button to see results.</p>
-          <Button 
-            type="button" 
-            size={isMobile ? "default" : "lg"} 
-            onClick={onCalculate} 
-            className="bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm"
+        <motion.div 
+          className="space-y-4 md:space-y-6 text-center py-6 md:py-10"
+          variants={containerVariants}
+        >
+          <motion.div 
+            className="flex justify-center"
+            variants={itemVariants}
           >
-            Calculate Now
-          </Button>
-        </div>
+            <Calculator className="h-12 w-12 md:h-16 md:w-16 text-carbon-500 mb-2 md:mb-4" />
+          </motion.div>
+          <motion.p 
+            className="text-md md:text-lg"
+            variants={itemVariants}
+          >
+            Click the calculate button to see results.
+          </motion.p>
+          <motion.div variants={itemVariants}>
+            <Button 
+              type="button" 
+              size={isMobile ? "default" : "lg"} 
+              onClick={onCalculate} 
+              className="bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm animate-pulse"
+            >
+              Calculate Now
+            </Button>
+          </motion.div>
+        </motion.div>
       )}
       
-      <div className="flex flex-col sm:flex-row justify-between gap-2 mt-6">
+      <motion.div 
+        className="flex flex-col sm:flex-row justify-between gap-2 mt-6"
+        variants={itemVariants}
+      >
         <Button 
           type="button" 
           variant="outline" 
@@ -69,8 +112,8 @@ const ResultsSection = ({
         >
           Recalculate
         </Button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
