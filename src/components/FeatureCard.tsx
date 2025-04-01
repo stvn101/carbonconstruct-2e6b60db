@@ -11,6 +11,32 @@ interface FeatureCardProps {
 }
 
 const FeatureCard = ({ icon: Icon, title, description, items }: FeatureCardProps) => {
+  // Add scroll handler function
+  const handleLearnMoreClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
+    // Scroll to the section ID that matches the feature title (replacing spaces with dashes)
+    const sectionId = title.toLowerCase().replace(/\s+/g, '-');
+    const element = document.getElementById(sectionId);
+    
+    if (element) {
+      // Smooth scroll to the element
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    } else {
+      // If no matching element, scroll to features section
+      const featuresSection = document.getElementById('features');
+      if (featuresSection) {
+        window.scrollTo({
+          top: featuresSection.offsetTop + featuresSection.offsetHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ 
@@ -65,7 +91,10 @@ const FeatureCard = ({ icon: Icon, title, description, items }: FeatureCardProps
             whileHover={{ y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <button className="text-sm text-carbon-600 hover:text-carbon-800 font-medium inline-flex items-center dark:text-carbon-300 dark:hover:text-carbon-100 transition-colors duration-300">
+            <button 
+              className="text-sm text-carbon-600 hover:text-carbon-800 font-medium inline-flex items-center dark:text-carbon-300 dark:hover:text-carbon-100 transition-colors duration-300"
+              onClick={handleLearnMoreClick}
+            >
               Learn more
               <svg className="w-4 h-4 ml-1 group-hover:ml-2 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
