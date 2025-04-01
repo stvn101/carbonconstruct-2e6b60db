@@ -1,8 +1,8 @@
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { CalculationResult } from "@/lib/carbonCalculations";
 
 interface EmissionsBreakdownChartProps {
@@ -49,6 +49,26 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
     energy: { color: '#214d28', label: 'Energy' },
   };
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-carbon-600">
+            {typeof payload[0].value === 'number' ? 
+              `${payload[0].value.toFixed(2)} kg CO2e` : 
+              payload[0].value}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderCustomizedLabel = ({ name, percent }: any) => {
+    return `${name}: ${(percent * 100).toFixed(0)}%`;
+  };
+
   return (
     <motion.div
       initial="hidden"
@@ -76,7 +96,7 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
-                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={renderCustomizedLabel}
                     animationBegin={200}
                     animationDuration={800}
                     animationEasing="ease-out"
@@ -88,24 +108,16 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip content={({active, payload}) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
-                          <p className="font-medium">{payload[0].name}</p>
-                          <p className="text-carbon-600">
-                            {typeof payload[0].value === 'number' ? 
-                              `${payload[0].value.toFixed(2)} kg CO2e` : 
-                              payload[0].value}
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }} />
-                  <ChartLegend content={props => (
-                    <ChartLegendContent {...props} className="mt-4" />
-                  )} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend 
+                    layout="horizontal" 
+                    verticalAlign="bottom" 
+                    align="center"
+                    wrapperStyle={{ 
+                      paddingTop: "12px", 
+                      fontSize: "12px" 
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
