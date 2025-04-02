@@ -7,15 +7,26 @@
     <title>CarbonConstruct - Sustainable Carbon Management for Construction</title>
     <meta name="description" content="Track, manage, and reduce your construction project's carbon footprint with CarbonConstruct. The first SaaS platform designed specifically for construction sustainability." />
     <meta name="author" content="CarbonConstruct" />
+    <meta name="keywords" content="sustainable construction, carbon footprint, construction management, green building, carbon tracking, sustainability" />
 
     <meta property="og:title" content="CarbonConstruct - Sustainable Construction Management" />
     <meta property="og:description" content="Track, manage, and reduce your construction project's carbon footprint with CarbonConstruct. The first SaaS platform designed specifically for construction sustainability." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@CarbonConstruct" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
     
     <!-- Facebook Pixel Code - Script portion only -->
     <script>
@@ -29,6 +40,17 @@
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '9151671744940732');
       fbq('track', 'PageView');
+      
+      // Enhanced Facebook Pixel events
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track clicks on CTA buttons
+        const ctaButtons = document.querySelectorAll('a[href="#demo"], button[type="submit"]');
+        ctaButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            fbq('track', 'Lead');
+          });
+        });
+      });
     </script>
     <!-- End Facebook Pixel Script -->
   </head>

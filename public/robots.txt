@@ -1,3 +1,12 @@
+
+# Allow all bots to index the site
+User-agent: *
+Allow: /
+
+# Sitemap location (you can create a sitemap.xml file in the public directory)
+Sitemap: https://carbonconstruct.com/sitemap.xml
+
+# Specific instructions for major bots
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +19,7 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Disallow indexing of admin or private areas (when you have them)
+# User-agent: *
+# Disallow: /admin
+# Disallow: /private
