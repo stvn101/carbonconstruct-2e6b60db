@@ -1,5 +1,6 @@
 
 import { Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 
 interface SEOProps {
   title?: string;
@@ -20,6 +21,13 @@ const SEO = ({
   const siteTitle = "CarbonConstruct";
   const fullTitle = title !== siteTitle ? `${title} | ${siteTitle}` : title;
   const url = canonical ? `${siteUrl}${canonical}` : window.location.href;
+
+  // Track page view when component mounts or route changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'PageView');
+    }
+  }, [url]);
 
   return (
     <Helmet>
