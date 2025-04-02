@@ -17,7 +17,7 @@
     <meta name="twitter:site" content="@CarbonConstruct" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
     
-    <!-- Facebook Pixel Code - Modified to use async script instead of preload -->
+    <!-- Facebook Pixel Code - Script portion only -->
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -30,14 +30,16 @@
       fbq('init', '9151671744940732');
       fbq('track', 'PageView');
     </script>
+    <!-- End Facebook Pixel Script -->
+  </head>
+
+  <body>
+    <!-- Facebook Pixel Noscript - Moved from head to body -->
     <noscript>
       <img height="1" width="1" style="display:none"
            src="https://www.facebook.com/tr?id=9151671744940732&ev=PageView&noscript=1"/>
     </noscript>
-    <!-- End Facebook Pixel Code -->
-  </head>
-
-  <body>
+    
     <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
