@@ -4,18 +4,32 @@ import HeroContent from "./hero/HeroContent";
 import DashboardPreview from "./hero/DashboardPreview";
 import SkeletonHero from "./hero/SkeletonHero";
 import { useState, useEffect } from "react";
+import { LazyMotion, domAnimation } from "framer-motion";
 
 const HeroSection = () => {
   const { scrollToElement } = useScrollTo();
   const handleLearnMore = scrollToElement('learn-more');
   const [isLoading, setIsLoading] = useState(true);
+  const [resourcesLoaded, setResourcesLoaded] = useState(0);
+  const totalResources = 1; // Increase this number if loading more assets
+
+  // Function to track when resources are loaded
+  const handleResourceLoad = () => {
+    setResourcesLoaded(prev => {
+      const newCount = prev + 1;
+      if (newCount >= totalResources) {
+        setIsLoading(false);
+      }
+      return newCount;
+    });
+  };
 
   useEffect(() => {
-    // Simulate loading delay to show skeleton
-    // In a real app, this would be tied to actual resource loading
+    // Fallback to ensure we don't show the skeleton forever
+    // Even if resources fail to load
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1200); // Show skeleton for 1.2 seconds
+    }, 2000); // Max loading time
 
     return () => clearTimeout(timer);
   }, []);
@@ -26,10 +40,12 @@ const HeroSection = () => {
         {isLoading ? (
           <SkeletonHero />
         ) : (
-          <div className="flex flex-col md:flex-row items-center">
-            <HeroContent handleLearnMore={handleLearnMore} />
-            <DashboardPreview />
-          </div>
+          <LazyMotion features={domAnimation}>
+            <div className="flex flex-col md:flex-row items-center">
+              <HeroContent handleLearnMore={handleLearnMore} />
+              <DashboardPreview onLoad={handleResourceLoad} />
+            </div>
+          </LazyMotion>
         )}
       </div>
     </section>

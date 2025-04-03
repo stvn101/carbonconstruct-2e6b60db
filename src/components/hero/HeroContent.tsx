@@ -1,45 +1,25 @@
 
 import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
-import { motion } from "framer-motion";
+import { m as motion } from "framer-motion";
+import { staggerContainer, fadeInUp } from "@/utils/animationVariants";
 
 interface HeroContentProps {
   handleLearnMore: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
-  // Animation variants
-  const staggerContainer = {
-    initial: { opacity: 0 },
-    animate: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
-
-  const itemFade = {
-    initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
-
   return (
     <motion.div 
       className="md:w-1/2 mb-8 md:mb-0 md:pr-8"
       initial="initial"
-      animate="animate"
+      whileInView="animate"
+      viewport={{ once: true, amount: 0.3 }}
       variants={staggerContainer}
     >
       <motion.h1 
         className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight gradient-heading"
-        variants={itemFade}
+        variants={fadeInUp}
       >
         <span className="text-foreground dark:text-foreground">Build Greener, </span>
         <br />
@@ -48,14 +28,14 @@ const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
       
       <motion.p 
         className="text-lg md:text-xl text-carbon-800 dark:text-carbon-200 mb-6 max-w-lg"
-        variants={itemFade}
+        variants={fadeInUp}
       >
         Track, manage, and reduce your construction project's carbon footprint with the first SaaS platform designed specifically for construction sustainability.
       </motion.p>
       
       <motion.div 
         className="flex flex-col sm:flex-row gap-4"
-        variants={itemFade}
+        variants={fadeInUp}
       >
         <Button size="lg" asChild className="bg-carbon-600 hover:bg-carbon-700 text-white transition-transform duration-200 hover:scale-105">
           <a href="#demo">Get Started</a>
@@ -67,7 +47,7 @@ const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
       
       <motion.div 
         className="mt-8 flex flex-col sm:flex-row gap-4 sm:gap-8"
-        variants={itemFade}
+        variants={fadeInUp}
       >
         <motion.div 
           className="flex items-center"
