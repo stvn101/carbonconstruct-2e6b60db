@@ -25,6 +25,11 @@ const ResultsSection = ({
 }: ResultsSectionProps) => {
   const isMobile = useIsMobile();
   
+  // Check if we have valid input data
+  const hasValidInputs = materials.some(m => m.quantity > 0) || 
+                        transport.some(t => t.distance > 0 && t.weight > 0) ||
+                        energy.some(e => e.amount > 0);
+  
   // Animation variants for staggered animation
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -54,7 +59,7 @@ const ResultsSection = ({
       variants={containerVariants}
       className="w-full"
     >
-      {calculationResult ? (
+      {calculationResult && calculationResult.totalEmissions > 0 ? (
         <CalculatorResults 
           result={calculationResult} 
           materials={materials}
@@ -77,7 +82,9 @@ const ResultsSection = ({
             className="text-md md:text-lg"
             variants={itemVariants}
           >
-            Click the calculate button to see results.
+            {!hasValidInputs ? 
+              "Please add some input data in the previous tabs before calculating." : 
+              "Click the calculate button to see results."}
           </motion.p>
           <motion.div variants={itemVariants}>
             <Button 
@@ -85,6 +92,7 @@ const ResultsSection = ({
               size={isMobile ? "default" : "lg"} 
               onClick={onCalculate} 
               className="bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm animate-pulse"
+              disabled={!hasValidInputs}
             >
               Calculate Now
             </Button>
@@ -110,8 +118,9 @@ const ResultsSection = ({
           size={isMobile ? "sm" : "default"}
           onClick={onCalculate} 
           className="bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm mt-2 sm:mt-0"
+          disabled={!hasValidInputs}
         >
-          Recalculate
+          {calculationResult ? "Recalculate" : "Calculate"}
         </Button>
       </motion.div>
     </motion.div>
