@@ -1,5 +1,6 @@
 
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -17,16 +18,16 @@ const Footer = () => {
               Track, manage, and reduce your construction project's carbon footprint with our innovative SaaS platform.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Instagram className="h-5 w-5" />
               </a>
             </div>
@@ -35,32 +36,32 @@ const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Product</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Features</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Pricing</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Case Studies</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Resources</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Demo</a></li>
+              <li><Link to="/#features" className="text-sm text-muted-foreground hover:text-foreground">Features</Link></li>
+              <li><Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</Link></li>
+              <li><Link to="/calculator" className="text-sm text-muted-foreground hover:text-foreground">Case Studies</Link></li>
+              <li><Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground">Resources</Link></li>
+              <li><Link to="/#demo" className="text-sm text-muted-foreground hover:text-foreground">Demo</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Company</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">About</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Blog</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Careers</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Contact</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Partners</a></li>
+              <li><Link to="/about" className="text-sm text-muted-foreground hover:text-foreground">About</Link></li>
+              <li><Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground">Blog</Link></li>
+              <li><Link to="/about#careers" className="text-sm text-muted-foreground hover:text-foreground">Careers</Link></li>
+              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground">Contact</Link></li>
+              <li><Link to="/about#partners" className="text-sm text-muted-foreground hover:text-foreground">Partners</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Legal</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy Policy</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Cookie Policy</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground">Data Processing</a></li>
+              <li><Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-service" className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</Link></li>
+              <li><Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-foreground">Cookie Policy</Link></li>
+              <li><Link to="/data-processing" className="text-sm text-muted-foreground hover:text-foreground">Data Processing</Link></li>
             </ul>
           </div>
         </div>
