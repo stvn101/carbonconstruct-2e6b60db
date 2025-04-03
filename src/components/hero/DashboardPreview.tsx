@@ -1,50 +1,30 @@
 
 import { BarChart3 } from "lucide-react";
-import { motion } from "framer-motion";
-import { useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { m as motion } from "framer-motion";
+import { dashboardVariants, fadeInUp } from "@/utils/animationVariants";
 
-const DashboardPreview = () => {
-  const [imageLoaded, setImageLoaded] = useState(false);
+interface DashboardPreviewProps {
+  onLoad: () => void;
+}
 
-  const dashboardVariants = {
-    initial: { opacity: 0, scale: 0.9, rotate: -1 },
-    animate: { 
-      opacity: 1, 
-      scale: 1,
-      rotate: -1,
-      transition: {
-        duration: 0.7,
-        delay: 0.4,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-  };
-
-  // Show actual content when the main content has loaded
+const DashboardPreview = ({ onLoad }: DashboardPreviewProps) => {
+  // Let the parent know that dashboard content is loaded
   const handleContentLoad = () => {
-    setImageLoaded(true);
+    onLoad();
   };
 
   return (
     <motion.div 
       className="md:w-1/2"
       initial="initial"
-      animate="animate"
-      variants={fadeIn}
+      whileInView="animate"
+      viewport={{ once: true, amount: 0.3 }}
+      variants={fadeInUp}
       onViewportEnter={handleContentLoad}
     >
       <motion.div 
         className="relative"
         variants={dashboardVariants}
-        initial="initial"
-        animate="animate"
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-carbon-300 to-carbon-100 dark:from-carbon-700 dark:to-carbon-500 rounded-2xl transform rotate-1"></div>
         <div className="relative bg-white dark:bg-gray-800 border border-border rounded-2xl shadow-lg p-6 transform -rotate-1">
@@ -56,8 +36,9 @@ const DashboardPreview = () => {
             <motion.div 
               className="bg-secondary/50 p-4 rounded-lg"
               initial={{ width: "0%" }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              whileInView={{ width: "100%" }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
             >
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium">Carbon Score</span>
@@ -67,8 +48,9 @@ const DashboardPreview = () => {
                 <motion.div 
                   className="bg-carbon-500 dark:bg-carbon-400 h-2 rounded-full" 
                   style={{ width: '0%' }}
-                  animate={{ width: '78%' }}
-                  transition={{ duration: 1, delay: 0.9, ease: "easeOut" }}
+                  whileInView={{ width: '78%' }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
                 ></motion.div>
               </div>
             </motion.div>
@@ -83,9 +65,8 @@ const DashboardPreview = () => {
                 <motion.div 
                   key={item.title}
                   className="bg-secondary/50 p-3 rounded-lg"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 1 + (index * 0.15) }}
+                  variants={fadeInUp}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
                   whileHover={{ 
                     scale: 1.03,
                     boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
