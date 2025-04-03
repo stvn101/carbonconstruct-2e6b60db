@@ -1,19 +1,8 @@
+
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useScrollTo } from "@/hooks/useScrollTo";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
-  const navigate = useNavigate();
-  const scrollTo = useScrollTo();
-
-  const handleSectionNavigation = (path: string, section: string) => {
-    if (window.location.pathname === path) {
-      scrollTo(section);
-    } else {
-      navigate(path, { state: { scrollTo: section } });
-    }
-  };
-
   return (
     <footer id="contact" className="bg-background border-t border-border py-12">
       <div className="container mx-auto px-4 md:px-6">
@@ -47,7 +36,7 @@ const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Product</h3>
             <ul className="space-y-2">
-              <li><a onClick={() => handleSectionNavigation('/', 'features')} className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">Features</a></li>
+              <li><Link to="/#features" className="text-sm text-muted-foreground hover:text-foreground">Features</Link></li>
               <li><Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</Link></li>
               <li><Link to="/case-studies" className="text-sm text-muted-foreground hover:text-foreground">Case Studies</Link></li>
               <li><Link to="/resources" className="text-sm text-muted-foreground hover:text-foreground">Resources</Link></li>
