@@ -26,8 +26,18 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
     }
   ];
 
-  // Color palette for the charts - updated to use carbon/green theme colors
-  const COLORS = ['#3e9847', '#25612d', '#214d28', '#8acd91', '#b8e2bc', '#5db166'];
+  // Filter out zero values to prevent rendering issues
+  const filteredData = mainBreakdownData.filter(item => item.value > 0);
+
+  // Calculate percentages for labels
+  const total = filteredData.reduce((acc, item) => acc + item.value, 0);
+  const dataWithPercentage = filteredData.map(item => ({
+    ...item,
+    percentage: ((item.value / total) * 100).toFixed(1)
+  }));
+
+  // Color palette for the charts
+  const COLORS = ['#3e9847', '#25612d', '#214d28', '#8acd91', '#b8e2bc'];
 
   // Animation variants
   const chartVariants = {
@@ -43,21 +53,13 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
     }
   };
 
-  const config = {
-    materials: { color: '#3e9847', label: 'Materials' },
-    transport: { color: '#25612d', label: 'Transport' },
-    energy: { color: '#214d28', label: 'Energy' },
-  };
-
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background border border-border rounded-md shadow-md p-2 text-xs">
+        <div className="bg-background border border-border rounded-md shadow-md p-3 text-sm">
           <p className="font-medium">{payload[0].name}</p>
           <p className="text-carbon-600">
-            {typeof payload[0].value === 'number' ? 
-              `${payload[0].value.toFixed(2)} kg CO2e` : 
-              payload[0].value}
+            {payload[0].value.toFixed(2)} kg CO2e ({payload[0].payload.percentage}%)
           </p>
         </div>
       );
@@ -65,8 +67,28 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
     return null;
   };
 
-  const renderCustomizedLabel = ({ name, percent }: any) => {
-    return `${name}: ${(percent * 100).toFixed(0)}%`;
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    // Only show label if percentage is significant enough
+    if (percent < 0.05) return null;
+
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="#fff" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize="12"
+        fontWeight="500"
+      >
+        {`${name}: ${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
   };
 
   return (
@@ -79,19 +101,19 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
         <CardHeader>
           <CardTitle>Emissions Breakdown</CardTitle>
           <CardDescription>
-            Distribution of emissions by category
+            Distribution of carbon emissions by category
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-72">
-            <ChartContainer config={config}>
+          {filteredData.length > 0 ? (
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={mainBreakdownData}
+                    data={dataWithPercentage}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
+                    labelLine={true}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
@@ -101,7 +123,7 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
                     animationDuration={800}
                     animationEasing="ease-out"
                   >
-                    {mainBreakdownData.map((entry, index) => (
+                    {dataWithPercentage.map((entry, index) => (
                       <Cell 
                         key={`cell-${index}`} 
                         fill={COLORS[index % COLORS.length]} 
@@ -113,15 +135,18 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
                     layout="horizontal" 
                     verticalAlign="bottom" 
                     align="center"
-                    wrapperStyle={{ 
-                      paddingTop: "12px", 
-                      fontSize: "12px" 
-                    }}
+                    formatter={(value, entry, index) => (
+                      <span className="text-sm font-medium">{value}</span>
+                    )}
                   />
                 </PieChart>
               </ResponsiveContainer>
-            </ChartContainer>
-          </div>
+            </div>
+          ) : (
+            <div className="h-72 flex items-center justify-center">
+              <p className="text-muted-foreground">No emission data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
