@@ -16,40 +16,65 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import DataProcessing from "./pages/DataProcessing";
+import CaseStudies from "./pages/CaseStudies";
+import Resources from "./pages/Resources";
+import Demo from "./pages/Demo";
+import Careers from "./pages/Careers";
+import Partners from "./pages/Partners";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./components/ThemeProvider";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/calculator" element={<Calculator />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            <Route path="/data-processing" element={<DataProcessing />} />
-            {/* Redirect routes for direct feature access */}
-            <Route path="/materials" element={<Calculator />} />
-            <Route path="/reporting" element={<Calculator />} />
-            <Route path="/integration" element={<Calculator />} />
-            <Route path="/benchmarking" element={<Calculator />} />
-            <Route path="/education" element={<Calculator />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
+  <ErrorBoundary>
+    <ThemeProvider defaultTheme="light">
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/calculator" element={<Calculator />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
+                <Route path="/data-processing" element={<DataProcessing />} />
+                {/* New routes for footer links */}
+                <Route path="/case-studies" element={<CaseStudies />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/demo" element={<Demo />} />
+                <Route path="/careers" element={<Careers />} />
+                <Route path="/partners" element={<Partners />} />
+                {/* Redirect routes for direct feature access */}
+                <Route path="/materials" element={<Calculator />} />
+                <Route path="/reporting" element={<Calculator />} />
+                <Route path="/integration" element={<Calculator />} />
+                <Route path="/benchmarking" element={<Calculator />} />
+                <Route path="/education" element={<Calculator />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ThemeProvider>
+  </ErrorBoundary>
 );
 
 export default App;

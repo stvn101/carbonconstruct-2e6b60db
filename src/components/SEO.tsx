@@ -12,6 +12,13 @@ interface SEOProps {
   author?: string;
   publishedDate?: string;
   modifiedDate?: string;
+  noIndex?: boolean;
+  noFollow?: boolean;
+  structuredData?: Record<string, any>;
+  twitterCardType?: "summary" | "summary_large_image" | "app" | "player";
+  twitterSite?: string;
+  twitterCreator?: string;
+  ogLocale?: string;
 }
 
 const SEO = ({
@@ -23,12 +30,42 @@ const SEO = ({
   keywords = "sustainable construction, carbon footprint, construction management, green building, carbon tracking, sustainability",
   author = "CarbonConstruct",
   publishedDate,
-  modifiedDate
+  modifiedDate,
+  noIndex = false,
+  noFollow = false,
+  structuredData,
+  twitterCardType = "summary_large_image",
+  twitterSite = "@CarbonConstruct",
+  twitterCreator = "@CarbonConstruct",
+  ogLocale = "en_US"
 }: SEOProps) => {
   const siteUrl = window.location.origin;
   const siteTitle = "CarbonConstruct";
   const fullTitle = title !== siteTitle ? `${title} | ${siteTitle}` : title;
   const url = canonical ? `${siteUrl}${canonical}` : window.location.href;
+
+  // Create default structured data if none provided
+  const defaultStructuredData = {
+    "@context": "https://schema.org",
+    "@type": type === "website" ? "WebSite" : "WebPage",
+    "name": fullTitle,
+    "description": description,
+    "url": url,
+    "image": image,
+    "publisher": {
+      "@type": "Organization",
+      "name": siteTitle,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteUrl}/favicon.ico`
+      }
+    },
+    ...(publishedDate && { "datePublished": publishedDate }),
+    ...(modifiedDate && { "dateModified": modifiedDate })
+  };
+
+  const finalStructuredData = structuredData || defaultStructuredData;
+  const robotsContent = `${noIndex ? 'noindex' : 'index'}, ${noFollow ? 'nofollow' : 'follow'}, max-image-preview:large, max-snippet:-1, max-video-preview:-1`;
 
   // Track page view when component mounts or route changes
   useEffect(() => {
@@ -45,6 +82,9 @@ const SEO = ({
         page_path: window.location.pathname,
       });
     }
+    
+    // Log page view for debugging
+    console.log(`Page viewed: ${fullTitle}`);
   }, [url, fullTitle]);
 
   return (
@@ -58,24 +98,7 @@ const SEO = ({
       
       {/* Structured Data / JSON-LD for better SEO */}
       <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": type === "website" ? "WebSite" : "WebPage",
-          "name": fullTitle,
-          "description": description,
-          "url": url,
-          "image": image,
-          "publisher": {
-            "@type": "Organization",
-            "name": siteTitle,
-            "logo": {
-              "@type": "ImageObject",
-              "url": `${siteUrl}/favicon.ico`
-            }
-          },
-          ...(publishedDate && { "datePublished": publishedDate }),
-          ...(modifiedDate && { "dateModified": modifiedDate })
-        })}
+        {JSON.stringify(finalStructuredData)}
       </script>
 
       {/* Open Graph / Facebook */}
@@ -85,17 +108,18 @@ const SEO = ({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content={siteTitle} />
-      <meta property="og:locale" content="en_US" />
+      <meta property="og:locale" content={ogLocale} />
       
       {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:card" content={twitterCardType} />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
-      <meta name="twitter:creator" content="@CarbonConstruct" />
+      <meta name="twitter:creator" content={twitterCreator} />
+      <meta name="twitter:site" content={twitterSite} />
 
       {/* Additional SEO */}
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <meta name="robots" content={robotsContent} />
       <meta name="apple-mobile-web-app-title" content={siteTitle} />
       <meta name="application-name" content={siteTitle} />
       <meta name="msapplication-TileColor" content="#38a169" />

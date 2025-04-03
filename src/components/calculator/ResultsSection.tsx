@@ -52,6 +52,7 @@ const ResultsSection = ({
       initial="hidden"
       animate="visible"
       variants={containerVariants}
+      className="w-full"
     >
       {calculationResult ? (
         <CalculatorResults 
