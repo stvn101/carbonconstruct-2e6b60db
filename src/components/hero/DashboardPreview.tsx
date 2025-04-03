@@ -1,8 +1,12 @@
 
 import { BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DashboardPreview = () => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const dashboardVariants = {
     initial: { opacity: 0, scale: 0.9, rotate: -1 },
     animate: { 
@@ -23,12 +27,18 @@ const DashboardPreview = () => {
     transition: { duration: 0.6 }
   };
 
+  // Show actual content when the main content has loaded
+  const handleContentLoad = () => {
+    setImageLoaded(true);
+  };
+
   return (
     <motion.div 
       className="md:w-1/2"
       initial="initial"
       animate="animate"
       variants={fadeIn}
+      onViewportEnter={handleContentLoad}
     >
       <motion.div 
         className="relative"
