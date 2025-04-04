@@ -1,3 +1,4 @@
+
 // Carbon emission factors (kg CO2e per unit)
 export const MATERIAL_FACTORS = {
   concrete: {
@@ -39,6 +40,37 @@ export const MATERIAL_FACTORS = {
     name: "Asphalt",
     factor: 0.19, // kg CO2e per kg
     unit: "kg"
+  },
+  // Australian specific materials
+  bluesteelRebar: {
+    name: "BlueSteel Rebar (Australian)",
+    factor: 0.95, // kg CO2e per kg (lower carbon Australian rebar)
+    unit: "kg"
+  },
+  recycledConcrete: {
+    name: "Recycled Concrete Aggregate (AUS)",
+    factor: 0.043, // kg CO2e per kg
+    unit: "kg"
+  },
+  ausTimber: {
+    name: "Australian Hardwood",
+    factor: 0.35, // kg CO2e per kg
+    unit: "kg"
+  },
+  ausBrick: {
+    name: "Australian Clay Brick",
+    factor: 0.22, // kg CO2e per kg
+    unit: "kg"
+  },
+  greenConcrete: {
+    name: "Green Concrete (Geopolymer)",
+    factor: 0.062, // kg CO2e per kg
+    unit: "kg"
+  },
+  bambooCladding: {
+    name: "Bamboo Cladding",
+    factor: 0.15, // kg CO2e per kg
+    unit: "kg"
   }
 };
 
@@ -77,6 +109,11 @@ export const ENERGY_FACTORS = {
     name: "Natural Gas",
     factor: 0.18, // kg CO2e per kWh
     unit: "kWh"
+  },
+  solar: {
+    name: "Solar Power",
+    factor: 0.05, // kg CO2e per kWh
+    unit: "kWh"
   }
 };
 
@@ -87,7 +124,7 @@ export type Energy = keyof typeof ENERGY_FACTORS;
 export interface MaterialInput {
   type: Material;
   quantity: number;
-  unit?: string; // Add unit property
+  unit?: string;
 }
 
 export interface TransportInput {
@@ -99,7 +136,7 @@ export interface TransportInput {
 export interface EnergyInput {
   type: Energy;
   amount: number;
-  unit?: string; // Add unit property
+  unit?: string;
 }
 
 export interface CalculationInput {
@@ -196,22 +233,101 @@ export const generateSuggestions = (result: CalculationResult): string[] => {
     const materialPercent = (materialValue / result.materialEmissions) * 100;
     
     if (materialPercent > 30) {
-      suggestions.push(`Consider reducing the use of ${MATERIAL_FACTORS[materialKey as Material].name} or finding alternatives with lower carbon footprints.`);
+      if (materialKey === "concrete") {
+        suggestions.push(`Consider using Green Concrete (Geopolymer) or Recycled Concrete Aggregate which reduces emissions by up to 60%.`);
+      } else if (materialKey === "steel") {
+        suggestions.push(`Consider sourcing BlueSteel Rebar which is manufactured in Australia with a lower carbon footprint than traditional steel.`);
+      } else if (materialKey === "timber") {
+        suggestions.push(`Consider using certified Australian Hardwood from sustainable forests for structural elements.`);
+      } else {
+        suggestions.push(`Consider reducing the use of ${MATERIAL_FACTORS[materialKey as Material].name} or finding alternatives with lower carbon footprints.`);
+      }
     }
   }
 
   // Check transport emissions
-  if (result.transportEmissions > result.totalEmissions * 0.3) {
-    suggestions.push("Look for ways to optimize transportation routes or use more efficient transport methods.");
+  if (result.transportEmissions > result.totalEmissions * 0.25) {
+    suggestions.push("Look for local suppliers to minimize transport distances and emissions. Australian-made materials typically have a lower transport footprint.");
+    
+    // Check if truck is the main transport method
+    if (result.breakdownByTransport.truck && 
+        result.breakdownByTransport.truck > result.transportEmissions * 0.6) {
+      suggestions.push("Consider using rail transport instead of trucks for long-distance material shipping, which can reduce transport emissions by up to 70%.");
+    }
   }
 
   // Suggest renewable energy
-  if (result.breakdownByEnergy.electricity) {
-    suggestions.push("Consider using renewable energy sources for your electricity needs to reduce emissions.");
+  if (result.breakdownByEnergy.electricity && 
+      result.breakdownByEnergy.electricity > result.energyEmissions * 0.4) {
+    suggestions.push("Consider powering your construction site with renewable energy sources. Australian construction sites can benefit from abundant solar resources.");
+  }
+
+  // Material alternatives specific to Australia
+  if (result.materialEmissions > result.totalEmissions * 0.5) {
+    suggestions.push("Australia has excellent access to low-carbon building materials. Consider bamboo cladding or recycled materials in non-structural applications.");
   }
 
   // Always provide a general tip
-  suggestions.push("Regular maintenance of equipment and minimizing idle time can significantly reduce energy consumption and carbon emissions.");
+  suggestions.push("Regular maintenance of equipment and minimizing idle time can significantly reduce energy consumption and carbon emissions on Australian construction sites.");
   
   return suggestions;
+};
+
+// New function to find alternative lower-carbon materials
+export const findLowerCarbonAlternatives = (material: Material): Material[] => {
+  switch(material) {
+    case "concrete":
+      return ["recycledConcrete", "greenConcrete"];
+    case "steel":
+      return ["bluesteelRebar", "ausTimber"];
+    case "timber":
+      return ["ausTimber", "bambooCladding"];
+    case "brick":
+      return ["ausBrick"];
+    default:
+      return [];
+  }
+};
+
+// New function to estimate potential emissions savings
+export const calculatePotentialSavings = (input: CalculationInput): { 
+  material: Material, 
+  alternative: Material, 
+  originalEmissions: number,
+  potentialEmissions: number,
+  savings: number,
+  savingsPercentage: number
+}[] => {
+  const savings: { 
+    material: Material, 
+    alternative: Material, 
+    originalEmissions: number,
+    potentialEmissions: number,
+    savings: number,
+    savingsPercentage: number
+  }[] = [];
+
+  input.materials.forEach(material => {
+    const alternatives = findLowerCarbonAlternatives(material.type);
+    const originalEmission = MATERIAL_FACTORS[material.type].factor * material.quantity;
+    
+    alternatives.forEach(alt => {
+      const alternativeEmission = MATERIAL_FACTORS[alt].factor * material.quantity;
+      const saved = originalEmission - alternativeEmission;
+      const percentage = (saved / originalEmission) * 100;
+      
+      if (saved > 0) {
+        savings.push({
+          material: material.type,
+          alternative: alt,
+          originalEmissions: originalEmission,
+          potentialEmissions: alternativeEmission,
+          savings: saved,
+          savingsPercentage: percentage
+        });
+      }
+    });
+  });
+
+  return savings.sort((a, b) => b.savings - a.savings);
 };
