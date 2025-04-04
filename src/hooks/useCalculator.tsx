@@ -129,6 +129,7 @@ export function useCalculator() {
 
   return {
     calculationInput,
+    setCalculationInput, // Explicitly exposing the setter function
     calculationResult,
     activeTab,
     setActiveTab,
