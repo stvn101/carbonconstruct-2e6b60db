@@ -15,7 +15,8 @@ import {
   AlertTriangle, 
   ThumbsUp,
   ArrowUpRight,
-  BarChart4
+  BarChart4,
+  Info
 } from "lucide-react";
 import { 
   CalculationInput, 
