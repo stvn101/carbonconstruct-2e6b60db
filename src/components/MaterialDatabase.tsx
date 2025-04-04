@@ -1,21 +1,4 @@
-
 import React, { useState } from "react";
-import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { 
   Card, 
   CardContent, 
@@ -23,10 +6,7 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Database, Filter, Search, Info } from "lucide-react";
+import { Database, Filter, Search } from "lucide-react";
 import { MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 
 interface ExtendedMaterialData {
@@ -113,7 +93,6 @@ const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     notes: "Permeable pavement system that allows vegetation to grow through, reducing urban heat island effect.",
     tags: ["permeable", "pavement", "green"]
   },
-  // Australian-specific materials
   bluesteelRebar: {
     name: "BlueSteel Rebar (Australian)",
     factor: 0.95, // kg CO2e per kg
@@ -209,7 +188,6 @@ const MaterialDatabase = () => {
     name: value.name
   }));
   
-  // Extract all unique tags
   const allTags = Array.from(
     new Set(
       Object.values(EXTENDED_MATERIALS)
@@ -229,7 +207,6 @@ const MaterialDatabase = () => {
     return matchesSearch && matchesRegion && matchesAlternative && matchesTag;
   });
   
-  // Count materials by region for the stats display
   const materialsByRegion: Record<string, number> = {};
   Object.values(EXTENDED_MATERIALS).forEach(material => {
     if (material.region) {
@@ -239,6 +216,13 @@ const MaterialDatabase = () => {
       });
     }
   });
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedRegion("all");
+    setSelectedAlternative("none");
+    setSelectedTag("all");
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -254,18 +238,7 @@ const MaterialDatabase = () => {
             Explore our comprehensive database of construction materials with accurate carbon coefficients
           </p>
           
-          {/* Region stats display */}
-          <div className="flex flex-wrap justify-center mt-4 gap-2">
-            {Object.entries(materialsByRegion).map(([region, count]) => (
-              <Badge 
-                key={region} 
-                variant="outline"
-                className={`px-3 py-1 ${region === 'Australia' ? 'bg-carbon-100' : ''}`}
-              >
-                {region}: {count} materials
-              </Badge>
-            ))}
-          </div>
+          <RegionStats materialsByRegion={materialsByRegion} />
         </div>
         
         <Card className="mb-8 border-carbon-100">
@@ -279,90 +252,19 @@ const MaterialDatabase = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="space-y-2">
-                <label htmlFor="search" className="text-sm font-medium">
-                  Search Materials
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    type="text" 
-                    placeholder="Search by name..."
-                    className="pl-8"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="region" className="text-sm font-medium">
-                  Filter by Region
-                </label>
-                <Select
-                  value={selectedRegion}
-                  onValueChange={setSelectedRegion}
-                >
-                  <SelectTrigger id="region">
-                    <SelectValue placeholder="All Regions" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
-                    {REGIONS.map((region) => (
-                      <SelectItem key={region} value={region}>
-                        {region}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="alternative" className="text-sm font-medium">
-                  Show Alternatives For
-                </label>
-                <Select
-                  value={selectedAlternative}
-                  onValueChange={setSelectedAlternative}
-                >
-                  <SelectTrigger id="alternative">
-                    <SelectValue placeholder="All Materials" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">All Materials</SelectItem>
-                    {baseOptions.map((option) => (
-                      <SelectItem key={option.id} value={option.id}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="tag" className="text-sm font-medium">
-                  Filter by Tag
-                </label>
-                <Select
-                  value={selectedTag}
-                  onValueChange={setSelectedTag}
-                >
-                  <SelectTrigger id="tag">
-                    <SelectValue placeholder="All Tags" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Tags</SelectItem>
-                    {allTags.map((tag) => (
-                      <SelectItem key={tag} value={tag}>
-                        {tag}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <MaterialFilters 
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedRegion={selectedRegion}
+              setSelectedRegion={setSelectedRegion}
+              selectedAlternative={selectedAlternative}
+              setSelectedAlternative={setSelectedAlternative}
+              selectedTag={selectedTag}
+              setSelectedTag={setSelectedTag}
+              allTags={allTags}
+              allRegions={REGIONS}
+              baseOptions={baseOptions}
+            />
           </CardContent>
         </Card>
         
@@ -374,69 +276,14 @@ const MaterialDatabase = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableCaption>
-                Comprehensive database of construction materials and their carbon footprints.
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Material</TableHead>
-                  <TableHead className="text-right">Carbon Factor (kg CO2e/{"{unit}"})</TableHead>
-                  <TableHead>Region</TableHead>
-                  <TableHead>Alternative For</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead>Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredMaterials.map(([key, material]) => (
-                  <TableRow key={key} className={material.region?.includes("Australia") ? "bg-carbon-50" : ""}>
-                    <TableCell className="font-medium">{material.name}</TableCell>
-                    <TableCell className="text-right">
-                      {material.factor} ({material.unit})
-                    </TableCell>
-                    <TableCell>
-                      {material.region || "Global"}
-                    </TableCell>
-                    <TableCell>
-                      {material.alternativeTo ? 
-                        MATERIAL_FACTORS[material.alternativeTo as keyof typeof MATERIAL_FACTORS]?.name : 
-                        ""}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {material.tags?.map(tag => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate" title={material.notes}>
-                      {material.notes || ""}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <MaterialTable 
+              filteredMaterials={filteredMaterials} 
+              resetFilters={resetFilters} 
+            />
             
-            {filteredMaterials.length === 0 && (
-              <div className="text-center py-6">
-                <p className="text-muted-foreground">No materials found matching your search criteria.</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-2"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setSelectedRegion("all");
-                    setSelectedAlternative("none");
-                    setSelectedTag("all");
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              </div>
-            )}
+            <p className="text-sm text-muted-foreground mt-2">
+              Showing {filteredMaterials.length} of {Object.keys(EXTENDED_MATERIALS).length} materials
+            </p>
           </CardContent>
         </Card>
       </div>
