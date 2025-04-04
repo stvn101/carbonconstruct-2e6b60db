@@ -8,7 +8,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Info } from "lucide-react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
 
 interface MaterialsCompareTabProps {
   materialComparisonData: Array<{
@@ -19,6 +19,26 @@ interface MaterialsCompareTabProps {
 }
 
 const MaterialsCompareTab: React.FC<MaterialsCompareTabProps> = ({ materialComparisonData }) => {
+  // Sort data by emission factor for better visualization
+  const sortedByEmissionData = [...materialComparisonData].sort((a, b) => a.emissionFactor - b.emissionFactor);
+  const sortedByScoreData = [...materialComparisonData].sort((a, b) => b.sustainabilityScore - a.sustainabilityScore);
+  
+  const customTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-carbon-800 p-3 shadow-lg rounded-md border border-carbon-100 dark:border-carbon-700">
+          <p className="font-medium">{label}</p>
+          {payload.map((item: any, index: number) => (
+            <p key={index} style={{ color: item.fill }}>
+              {item.name}: {item.value.toFixed(2)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -33,11 +53,12 @@ const MaterialsCompareTab: React.FC<MaterialsCompareTabProps> = ({ materialCompa
             <h3 className="text-lg font-medium mb-4">Average Emission Factors</h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={materialComparisonData}>
+                <BarChart data={sortedByEmissionData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis label={{ value: 'kg CO₂e/kg', angle: -90, position: 'insideLeft' }} />
-                  <RechartsTooltip />
+                  <XAxis type="number" label={{ value: 'kg CO₂e/kg', position: 'insideBottom', offset: -5 }} />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <RechartsTooltip content={customTooltip} />
+                  <Legend />
                   <Bar dataKey="emissionFactor" name="Emission Factor" fill="#9b87f5" />
                 </BarChart>
               </ResponsiveContainer>
@@ -51,11 +72,12 @@ const MaterialsCompareTab: React.FC<MaterialsCompareTabProps> = ({ materialCompa
             <h3 className="text-lg font-medium mb-4">Average Sustainability Scores</h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={materialComparisonData}>
+                <BarChart data={sortedByScoreData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 100]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
-                  <RechartsTooltip />
+                  <XAxis type="number" domain={[0, 100]} label={{ value: 'Score', position: 'insideBottom', offset: -5 }} />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <RechartsTooltip content={customTooltip} />
+                  <Legend />
                   <Bar dataKey="sustainabilityScore" name="Sustainability Score" fill="#7E69AB" />
                 </BarChart>
               </ResponsiveContainer>
@@ -75,6 +97,11 @@ const MaterialsCompareTab: React.FC<MaterialsCompareTabProps> = ({ materialCompa
                 Materials with lower emission factors and higher sustainability scores are generally better for the environment. 
                 Consider these metrics alongside material performance, cost, and availability when making selection decisions.
               </p>
+              <ul className="list-disc list-inside text-sm text-muted-foreground mt-2">
+                <li>Look for locally sourced materials to reduce transport emissions</li>
+                <li>Consider recycled alternatives when available</li>
+                <li>Balance embodied carbon with operational performance</li>
+              </ul>
             </div>
           </div>
         </div>
