@@ -6,8 +6,11 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Database, Filter, Search } from "lucide-react";
+import { Database, Filter } from "lucide-react";
 import { MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+import RegionStats from "@/components/materials/RegionStats";
+import MaterialFilters from "@/components/materials/MaterialFilters";
+import MaterialTable from "@/components/materials/MaterialTable";
 
 interface ExtendedMaterialData {
   name: string;
