@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -45,7 +46,7 @@ const ProjectDetail = () => {
   
   // Redirect if project not found
   useEffect(() => {
-    if (!project && !user?.isLoading) {
+    if (!project && !user) {
       toast.error("Project not found");
       navigate("/dashboard");
     }
