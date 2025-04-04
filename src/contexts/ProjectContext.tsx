@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+import { CalculationResult, MaterialInput, TransportInput, EnergyInput, MATERIAL_FACTORS, ENERGY_FACTORS } from "@/lib/carbonCalculations";
 
 export interface SavedProject {
   id: string;
@@ -141,7 +141,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       // Simple CSV generation
       const materialsCSV = project.materials.map(m => 
-        `${m.type},${m.quantity},${m.unit}`
+        `${m.type},${m.quantity},${MATERIAL_FACTORS[m.type].unit}`
       ).join('\n');
       
       const transportCSV = project.transport.map(t => 
@@ -149,7 +149,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ).join('\n');
       
       const energyCSV = project.energy.map(e => 
-        `${e.type},${e.amount},${e.unit}`
+        `${e.type},${e.amount},${ENERGY_FACTORS[e.type].unit}`
       ).join('\n');
       
       const csvContent = `Materials\nType,Quantity,Unit\n${materialsCSV}\n\nTransport\nType,Distance,Weight\n${transportCSV}\n\nEnergy\nType,Amount,Unit\n${energyCSV}`;

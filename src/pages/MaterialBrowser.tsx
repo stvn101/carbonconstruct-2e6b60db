@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -31,7 +30,8 @@ import {
   ArrowDown,
   ArrowUp,
   BarChart3,
-  HelpCircle
+  HelpCircle,
+  ArrowRight
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,7 +41,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MaterialInput, Material, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+import { Material, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 import {
   Tooltip,
   TooltipContent,
@@ -49,8 +49,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from "recharts";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-interface EnrichedMaterial extends Material {
+interface EnrichedMaterial {
+  type: string;
+  factor: number;
   category: string;
   alternativeToStandard: boolean;
   carbonReduction: number;
@@ -59,25 +62,21 @@ interface EnrichedMaterial extends Material {
   recyclability: "High" | "Medium" | "Low";
 }
 
-// Extended database with more information about materials
-const EXTENDED_MATERIAL_DB: EnrichedMaterial[] = [
-  ...Object.entries(MATERIAL_FACTORS).map(([key, value]) => {
-    // Generate enriched data
-    const isAlt = key.toLowerCase().includes('recycled') || key.toLowerCase().includes('low-carbon');
-    const standardName = isAlt ? key.replace(/recycled |low-carbon |sustainable /i, '') : key;
-    
-    return {
-      type: key,
-      factor: value,
-      category: getCategory(key),
-      alternativeToStandard: isAlt,
-      carbonReduction: isAlt ? Math.round(getReductionPercent(key, standardName)) : 0,
-      sustainabilityScore: Math.round(getSustainabilityScore(key, value)),
-      locallySourced: Math.random() > 0.5,
-      recyclability: getRecyclability(key) as "High" | "Medium" | "Low",
-    };
-  })
-];
+const EXTENDED_MATERIAL_DB: EnrichedMaterial[] = Object.entries(MATERIAL_FACTORS).map(([key, value]) => {
+  const isAlt = key.toLowerCase().includes('recycled') || key.toLowerCase().includes('low-carbon');
+  const standardName = isAlt ? key.replace(/recycled |low-carbon |sustainable /i, '') : key;
+  
+  return {
+    type: key,
+    factor: value.factor,
+    category: getCategory(key),
+    alternativeToStandard: isAlt,
+    carbonReduction: isAlt ? Math.round(getReductionPercent(key, standardName)) : 0,
+    sustainabilityScore: Math.round(getSustainabilityScore(key, value.factor)),
+    locallySourced: Math.random() > 0.5,
+    recyclability: getRecyclability(key) as "High" | "Medium" | "Low",
+  };
+});
 
 function getCategory(materialType: string): string {
   const lowerType = materialType.toLowerCase();
@@ -92,25 +91,25 @@ function getCategory(materialType: string): string {
 }
 
 function getReductionPercent(altMaterial: string, standardMaterial: string): number {
-  const altFactor = MATERIAL_FACTORS[altMaterial as keyof typeof MATERIAL_FACTORS] || 0;
-  const standardFactor = MATERIAL_FACTORS[standardMaterial as keyof typeof MATERIAL_FACTORS] || altFactor;
+  const altMaterialKey = altMaterial as Material;
+  const standardMaterialKey = standardMaterial as Material;
+  
+  const altFactor = MATERIAL_FACTORS[altMaterialKey]?.factor || 0;
+  const standardFactor = MATERIAL_FACTORS[standardMaterialKey]?.factor || altFactor;
   
   if (standardFactor === 0) return 0;
   return ((standardFactor - altFactor) / standardFactor) * 100;
 }
 
 function getSustainabilityScore(materialType: string, factor: number): number {
-  // Lower factor means more sustainable (inverse relationship)
-  const baseScore = 100 - (factor * 5); // Adjust multiplier as needed
-  
-  // Bonus for sustainable materials
+  const baseScore = 100 - (factor * 5);
   const lowerType = materialType.toLowerCase();
   let bonus = 0;
   if (lowerType.includes('recycled')) bonus += 20;
   if (lowerType.includes('sustainable')) bonus += 15;
   if (lowerType.includes('low-carbon')) bonus += 25;
   
-  return Math.max(10, Math.min(100, baseScore + bonus)); // Clamp between 10-100
+  return Math.max(10, Math.min(100, baseScore + bonus));
 }
 
 function getRecyclability(materialType: string): string {
@@ -120,7 +119,6 @@ function getRecyclability(materialType: string): string {
   if (lowerType.includes('concrete')) return 'Medium';
   if (lowerType.includes('plastic')) return 'Low';
   
-  // Random for other materials
   const random = Math.random();
   if (random < 0.33) return 'Low';
   if (random < 0.66) return 'Medium';
@@ -136,10 +134,8 @@ const MaterialBrowser = () => {
   const [materialComparisonData, setMaterialComparisonData] = useState<any[]>([]);
   const isMobile = useIsMobile();
 
-  // Get all unique categories
   const allCategories = Array.from(new Set(EXTENDED_MATERIAL_DB.map(m => m.category)));
 
-  // Filter materials based on search term, categories, and alternatives filter
   const filteredMaterials = EXTENDED_MATERIAL_DB.filter(material => {
     const matchesSearch = searchTerm === "" || 
       material.type.toLowerCase().includes(searchTerm.toLowerCase());
@@ -152,14 +148,14 @@ const MaterialBrowser = () => {
     return matchesSearch && matchesCategory && matchesAlternatives;
   });
 
-  // Sort materials
   const sortedMaterials = [...filteredMaterials].sort((a, b) => {
-    if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1;
-    if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1;
+    const fieldA = a[sortField];
+    const fieldB = b[sortField];
+    if (fieldA < fieldB) return sortDirection === "asc" ? -1 : 1;
+    if (fieldA > fieldB) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
 
-  // Handle sort click
   const handleSort = (field: keyof EnrichedMaterial) => {
     if (field === sortField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -169,9 +165,7 @@ const MaterialBrowser = () => {
     }
   };
 
-  // Generate comparison data for charts
   useEffect(() => {
-    // Group materials by category and calculate averages
     const categorizedData: Record<string, { count: number, totalFactor: number, totalScore: number }> = {};
     
     EXTENDED_MATERIAL_DB.forEach(material => {
@@ -184,7 +178,6 @@ const MaterialBrowser = () => {
       categorizedData[material.category].totalScore += material.sustainabilityScore;
     });
     
-    // Convert to chart data format
     const chartData = Object.entries(categorizedData).map(([category, data]) => ({
       name: category,
       emissionFactor: +(data.totalFactor / data.count).toFixed(2),
@@ -234,7 +227,6 @@ const MaterialBrowser = () => {
             </TabsList>
             
             <TabsContent value="browse" className="mt-6">
-              {/* Search and filter container */}
               <div className="flex flex-col md:flex-row gap-4 mb-6">
                 <div className="relative flex-grow">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -313,7 +305,6 @@ const MaterialBrowser = () => {
                 </div>
               </div>
 
-              {/* Materials table */}
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -402,7 +393,6 @@ const MaterialBrowser = () => {
                 </Table>
               </div>
 
-              {/* Results count */}
               <p className="text-sm text-muted-foreground mt-2">
                 Showing {sortedMaterials.length} of {EXTENDED_MATERIAL_DB.length} materials
               </p>
@@ -418,7 +408,6 @@ const MaterialBrowser = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-6">
-                    {/* Emission Factors Chart */}
                     <div>
                       <h3 className="text-lg font-medium mb-4">Average Emission Factors</h3>
                       <div className="h-80">
@@ -437,7 +426,6 @@ const MaterialBrowser = () => {
                       </p>
                     </div>
 
-                    {/* Sustainability Score Chart */}
                     <div>
                       <h3 className="text-lg font-medium mb-4">Average Sustainability Scores</h3>
                       <div className="h-80">
@@ -596,12 +584,10 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
 };
 
 const AlternativesComparisonSection = () => {
-  // Find standard materials and their alternatives
   const materialPairs = [] as {standard: EnrichedMaterial, alternative: EnrichedMaterial}[];
   
   EXTENDED_MATERIAL_DB.forEach(material => {
     if (material.alternativeToStandard) {
-      // Try to find the standard version
       const standardName = material.type.replace(/recycled |low-carbon |sustainable /i, '');
       const standard = EXTENDED_MATERIAL_DB.find(m => 
         m.type.toLowerCase() === standardName.toLowerCase() && !m.alternativeToStandard
@@ -616,7 +602,6 @@ const AlternativesComparisonSection = () => {
     }
   });
 
-  // Prepare comparison data for chart
   const comparisonData = materialPairs.map(pair => ({
     name: pair.standard.type,
     standard: pair.standard.factor,
