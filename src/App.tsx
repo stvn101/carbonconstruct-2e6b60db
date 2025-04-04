@@ -23,6 +23,14 @@ import Careers from "./pages/Careers";
 import Partners from "./pages/Partners";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProjectProvider } from "./contexts/ProjectContext";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
+import PrivateRoute from "./components/auth/PrivateRoute";
+import UserProjects from "./pages/UserProjects";
+import ProjectDetail from "./pages/ProjectDetail";
+import MaterialBrowser from "./pages/MaterialBrowser";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,38 +47,48 @@ const App = () => (
     <ThemeProvider defaultTheme="light">
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/calculator" element={<Calculator />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route path="/cookie-policy" element={<CookiePolicy />} />
-                <Route path="/data-processing" element={<DataProcessing />} />
-                {/* New routes for footer links */}
-                <Route path="/case-studies" element={<CaseStudies />} />
-                <Route path="/resources" element={<Resources />} />
-                <Route path="/demo" element={<Demo />} />
-                <Route path="/careers" element={<Careers />} />
-                <Route path="/partners" element={<Partners />} />
-                {/* Redirect routes for direct feature access */}
-                <Route path="/materials" element={<Calculator />} />
-                <Route path="/reporting" element={<Calculator />} />
-                <Route path="/integration" element={<Calculator />} />
-                <Route path="/benchmarking" element={<Calculator />} />
-                <Route path="/education" element={<Calculator />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+          <AuthProvider>
+            <ProjectProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/calculator" element={<Calculator />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/terms-of-service" element={<TermsOfService />} />
+                    <Route path="/cookie-policy" element={<CookiePolicy />} />
+                    <Route path="/data-processing" element={<DataProcessing />} />
+                    {/* Auth routes */}
+                    <Route path="/auth" element={<Auth />} />
+                    {/* Protected routes */}
+                    <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                    <Route path="/projects" element={<PrivateRoute><UserProjects /></PrivateRoute>} />
+                    <Route path="/project/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
+                    <Route path="/materials" element={<PrivateRoute><MaterialBrowser /></PrivateRoute>} />
+                    {/* New routes for footer links */}
+                    <Route path="/case-studies" element={<CaseStudies />} />
+                    <Route path="/resources" element={<Resources />} />
+                    <Route path="/demo" element={<Demo />} />
+                    <Route path="/careers" element={<Careers />} />
+                    <Route path="/partners" element={<Partners />} />
+                    {/* Redirect routes for direct feature access */}
+                    <Route path="/reporting" element={<Calculator />} />
+                    <Route path="/integration" element={<Calculator />} />
+                    <Route path="/benchmarking" element={<Calculator />} />
+                    <Route path="/education" element={<Calculator />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </ProjectProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </ThemeProvider>
