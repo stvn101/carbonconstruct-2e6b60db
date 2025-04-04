@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -11,9 +12,9 @@ const Pricing = () => {
   const [annual, setAnnual] = useState(true);
   
   const monthlyPrices = {
-    starter: 129,
-    professional: 299,
-    enterprise: 599
+    starter: 199,
+    professional: 449,
+    enterprise: 899
   };
   
   const calculateAnnualPrice = (monthlyPrice: number) => {
@@ -24,10 +25,10 @@ const Pricing = () => {
     {
       name: "Starter",
       price: annual ? calculateAnnualPrice(monthlyPrices.starter) : monthlyPrices.starter,
-      description: "Best for small construction firms just beginning their sustainability journey.",
+      description: "Best for small construction firms just beginning their sustainability journey in Australia.",
       features: [
         "Carbon footprint calculation",
-        "Basic materials library",
+        "Australian materials library",
         "Single user access",
         "PDF report generation",
         "Email support"
@@ -44,11 +45,11 @@ const Pricing = () => {
     {
       name: "Professional",
       price: annual ? calculateAnnualPrice(monthlyPrices.professional) : monthlyPrices.professional,
-      description: "Perfect for growing construction companies ready to measure and reduce their carbon impact.",
+      description: "Perfect for growing Australian construction companies ready to measure and reduce their carbon impact.",
       features: [
         "Everything in Starter",
         "Up to 5 team members",
-        "Extended materials library",
+        "Extended Australian materials library",
         "Project comparison tools",
         "Custom reporting",
         "Priority support"
@@ -63,7 +64,7 @@ const Pricing = () => {
     {
       name: "Enterprise",
       price: annual ? calculateAnnualPrice(monthlyPrices.enterprise) : monthlyPrices.enterprise,
-      description: "Complete solution for large construction firms with complex sustainability needs.",
+      description: "Complete solution for large Australian construction firms with complex sustainability needs.",
       features: [
         "Everything in Professional",
         "Unlimited team members",
@@ -71,7 +72,7 @@ const Pricing = () => {
         "Custom integrations",
         "White labeling",
         "Dedicated support",
-        "Compliance assistance",
+        "Australian compliance assistance",
         "Advanced analytics"
       ],
       notIncluded: [],
@@ -93,7 +94,7 @@ const Pricing = () => {
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">Transparent Pricing</h1>
             <p className="text-lg md:text-xl text-foreground/80 mb-10">
-              Choose the plan that's right for your construction business. All plans include our core carbon calculation engine.
+              Choose the plan that's right for your Australian construction business. All plans include our core carbon calculation engine.
             </p>
             
             <div className="flex items-center justify-center gap-3 mb-12">
@@ -129,7 +130,7 @@ const Pricing = () => {
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold">${plan.price}</span>
+                      <span className="text-4xl font-bold">A${plan.price}</span>
                       <span className="text-foreground/60 ml-2">/ {annual ? 'year' : 'month'}</span>
                     </div>
                     <p className="text-foreground/80 mt-3 text-sm">{plan.description}</p>
@@ -180,9 +181,9 @@ const Pricing = () => {
           >
             <h2 className="text-2xl font-bold mb-4">Need a custom solution?</h2>
             <p className="text-foreground/80 mb-6">
-              We offer tailored packages for large enterprises with specific requirements. Our team will work with you to create a solution that meets your unique needs.
+              We offer tailored packages for Australian enterprises with specific requirements. Our team will work with you to create a solution that meets your unique needs and complies with Australian standards.
             </p>
-            <Button size="lg">Contact Our Sales Team</Button>
+            <Button size="lg">Contact Our Australian Sales Team</Button>
           </motion.div>
         </section>
       </main>

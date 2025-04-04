@@ -12,8 +12,10 @@ const RegionStats: React.FC<RegionStatsProps> = ({ materialsByRegion }) => {
       {Object.entries(materialsByRegion).map(([region, count]) => (
         <Badge 
           key={region} 
-          variant="outline"
-          className={`px-3 py-1 ${region === 'Australia' ? 'bg-carbon-100' : ''}`}
+          variant={region === 'Australia' ? "default" : "outline"}
+          className={region === 'Australia' 
+            ? 'bg-carbon-500 text-white dark:bg-carbon-400 dark:text-carbon-950 font-medium px-3 py-1' 
+            : 'px-3 py-1'}
         >
           {region}: {count} materials
         </Badge>

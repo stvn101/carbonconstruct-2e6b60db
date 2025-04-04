@@ -28,7 +28,7 @@ const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     name: "Recycled Steel",
     factor: 0.63, // kg CO2e per kg (significantly lower than virgin steel)
     unit: "kg",
-    region: "Global",
+    region: "Global, Australia",
     alternativeTo: "steel",
     notes: "Using recycled steel can reduce emissions by up to 60% compared to virgin steel.",
     tags: ["recycled", "metal", "structural"]
@@ -167,6 +167,105 @@ const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     alternativeTo: "insulation",
     notes: "Australian-made prefabricated panels for quick installation and carbon sequestration.",
     tags: ["australian", "prefab", "insulation"]
+  },
+  pvcPipe: {
+    name: "PVC Pipes (AUS)",
+    factor: 0.24, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "",
+    notes: "Common Australian plumbing material with moderate carbon footprint.",
+    tags: ["australian", "plumbing", "pipes"]
+  },
+  pprPipe: {
+    name: "PP-R Pipes (AUS)",
+    factor: 0.18, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "pvcPipe",
+    notes: "Lower carbon alternative to PVC piping systems used in Australian plumbing.",
+    tags: ["australian", "plumbing", "pipes"]
+  },
+  copperPipe: {
+    name: "Copper Pipes (AUS)",
+    factor: 2.1, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "",
+    notes: "Premium Australian plumbing material with higher carbon footprint but excellent durability.",
+    tags: ["australian", "plumbing", "pipes", "durable"]
+  },
+  recycledCopperPipe: {
+    name: "Recycled Copper Pipes (AUS)",
+    factor: 0.87, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "copperPipe",
+    notes: "Recycled copper pipes that significantly reduce embodied carbon compared to virgin copper.",
+    tags: ["australian", "plumbing", "pipes", "recycled"]
+  },
+  hdpePipe: {
+    name: "HDPE Pipes (AUS)",
+    factor: 0.22, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "pvcPipe",
+    notes: "Durable polyethylene pipes often used for Australian water supply systems.",
+    tags: ["australian", "plumbing", "pipes", "durable"]
+  },
+  glasswoolInsulation: {
+    name: "Glass Wool Insulation (AUS)",
+    factor: 0.58, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "",
+    notes: "Common thermal insulation in Australian homes, often containing recycled glass.",
+    tags: ["australian", "insulation", "thermal"]
+  },
+  rockwoolInsulation: {
+    name: "Rockwool Insulation (AUS)",
+    factor: 0.63, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Fire-resistant mineral wool insulation manufactured in Australia.",
+    tags: ["australian", "insulation", "fire-resistant"]
+  },
+  polyesterInsulation: {
+    name: "Polyester Insulation (AUS)",
+    factor: 0.91, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Non-allergenic insulation option made from recycled plastic bottles in Australia.",
+    tags: ["australian", "insulation", "recycled"]
+  },
+  sheepWoolInsulation: {
+    name: "Sheep Wool Insulation (AUS)",
+    factor: 0.22, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Natural insulation from Australian sheep farms with excellent moisture management properties.",
+    tags: ["australian", "insulation", "natural", "renewable"]
+  },
+  cellulose: {
+    name: "Cellulose Insulation (AUS)",
+    factor: 0.12, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Made from recycled paper treated with fire retardants, common in sustainable Australian buildings.",
+    tags: ["australian", "insulation", "recycled"]
+  },
+  expandedCorkInsulation: {
+    name: "Expanded Cork Insulation (AUS)",
+    factor: 0.19, // kg CO2e per kg
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Natural, renewable cork insulation with excellent acoustic properties for Australian homes.",
+    tags: ["australian", "insulation", "natural", "acoustic"]
   }
 };
 

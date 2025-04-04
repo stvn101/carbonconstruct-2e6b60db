@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -77,7 +78,7 @@ const ProjectDetail = () => {
       transition={{ duration: 0.4 }}
     >
       <Helmet>
-        <title>{project.name} | CarbonConstruct</title>
+        <title>{project.name} | CarbonConstruct Australia</title>
         <meta name="description" content={`Details for project: ${project.name}`} />
       </Helmet>
       <Navbar />
