@@ -1,4 +1,3 @@
-
 // Carbon emission factors (kg CO2e per unit)
 export const MATERIAL_FACTORS = {
   concrete: {
@@ -88,6 +87,7 @@ export type Energy = keyof typeof ENERGY_FACTORS;
 export interface MaterialInput {
   type: Material;
   quantity: number;
+  unit?: string; // Add unit property
 }
 
 export interface TransportInput {
@@ -99,6 +99,7 @@ export interface TransportInput {
 export interface EnergyInput {
   type: Energy;
   amount: number;
+  unit?: string; // Add unit property
 }
 
 export interface CalculationInput {

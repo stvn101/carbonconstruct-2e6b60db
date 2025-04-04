@@ -1,94 +1,162 @@
-
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ArrowLeft, Calendar, Tag, Save, FileText, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
 import { useProjects, SavedProject } from "@/contexts/ProjectContext";
 import { useCalculator } from "@/hooks/useCalculator";
-import CalculatorResults from "@/components/CalculatorResults";
 import { toast } from "sonner";
-import { ArrowLeft, Save, FileText, Download } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { MATERIAL_FACTORS, ENERGY_FACTORS } from "@/lib/carbonCalculations";
+
+// Import calculator component sections
+import MaterialsInputSection from "@/components/calculator/MaterialsInputSection";
+import TransportInputSection from "@/components/calculator/TransportInputSection";
+import EnergyInputSection from "@/components/calculator/EnergyInputSection";
+import ResultsSection from "@/components/calculator/ResultsSection";
+import CalculatorResults from "@/components/CalculatorResults";
 
 const ProjectDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { projectId } = useParams();
   const navigate = useNavigate();
-  const { getProject, updateProject, exportProjectPDF, exportProjectCSV } = useProjects();
-  const { setCalculationInput } = useCalculator();
-  const [project, setProject] = useState<SavedProject | null>(null);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const { user } = useAuth();
+  const { getProject, updateProject, deleteProject, exportProjectPDF, exportProjectCSV } = useProjects();
+  
+  // Get the project data
+  const project = getProject(projectId || "");
+  
+  // Add setCalculationInput to calculator hooks
+  const calculator = useCalculator();
+  
   const [isEditing, setIsEditing] = useState(false);
-  const isMobile = useIsMobile();
-
+  const [editData, setEditData] = useState({
+    name: "",
+    description: "",
+    tags: [] as string[]
+  });
+  
+  // Redirect if project not found
   useEffect(() => {
-    if (id) {
-      const foundProject = getProject(id);
-      if (foundProject) {
-        setProject(foundProject);
-        setName(foundProject.name);
-        setDescription(foundProject.description || "");
-        
-        // Load project data into calculator for recalculation
-        setCalculationInput({
-          materials: foundProject.materials,
-          transport: foundProject.transport,
-          energy: foundProject.energy
-        });
-      } else {
-        // Project not found
-        toast.error("Project not found");
-        navigate("/projects");
-      }
+    if (!project && !user?.isLoading) {
+      toast.error("Project not found");
+      navigate("/dashboard");
     }
-  }, [id, getProject, navigate, setCalculationInput]);
-
-  const handleSaveChanges = async () => {
-    if (project && name.trim()) {
-      const updatedProject = {
-        ...project,
-        name,
-        description
-      };
-      
-      await updateProject(updatedProject);
-      setProject(updatedProject);
-      setIsEditing(false);
-      toast.success("Project updated successfully");
-    } else {
-      toast.error("Please provide a project name");
+  }, [project, navigate, user]);
+  
+  // Load project data into calculator
+  useEffect(() => {
+    if (project && calculator.setCalculationInput) {
+      calculator.setCalculationInput({
+        materials: project.materials,
+        transport: project.transport,
+        energy: project.energy
+      });
     }
-  };
-
+  }, [project, calculator.setCalculationInput, project?.materials, project?.transport, project?.energy]);
+  
   if (!project) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-carbon-600"></div>
       </div>
     );
   }
+  
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+  
+  // Handle edit project
+  const handleStartEdit = () => {
+    setEditData({
+      name: project.name,
+      description: project.description || "",
+      tags: project.tags || []
+    });
+    setIsEditing(true);
+  };
+  
+  const handleSaveEdit = async () => {
+    if (!editData.name.trim()) {
+      toast.error("Project name is required");
+      return;
+    }
+    
+    try {
+      await updateProject({
+        ...project,
+        name: editData.name,
+        description: editData.description,
+        tags: editData.tags
+      });
+      setIsEditing(false);
+      toast.success("Project updated successfully");
+    } catch (error) {
+      toast.error("Failed to update project");
+    }
+  };
+  
+  // Handle delete project
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      try {
+        await deleteProject(project.id);
+        toast.success("Project deleted successfully");
+        navigate("/dashboard");
+      } catch (error) {
+        toast.error("Failed to delete project");
+      }
+    }
+  };
+  
+  // Handle tag input
+  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+      const newTag = e.currentTarget.value.trim();
+      if (!editData.tags.includes(newTag)) {
+        setEditData({
+          ...editData,
+          tags: [...editData.tags, newTag]
+        });
+      }
+      e.currentTarget.value = '';
+    }
+  };
+  
+  // Handle remove tag
+  const handleRemoveTag = (tag: string) => {
+    setEditData({
+      ...editData,
+      tags: editData.tags.filter(t => t !== tag)
+    });
+  };
+  
+  // Material, transport, and energy data for display
+  const materialList = project.materials.map(m => ({
+    name: MATERIAL_FACTORS[m.type].name,
+    quantity: m.quantity,
+    unit: MATERIAL_FACTORS[m.type].unit
+  }));
+  
+  const energyList = project.energy.map(e => ({
+    name: ENERGY_FACTORS[e.type].name,
+    amount: e.amount,
+    unit: ENERGY_FACTORS[e.type].unit
+  }));
 
   return (
     <motion.div 
@@ -99,194 +167,241 @@ const ProjectDetail = () => {
     >
       <Helmet>
         <title>{project.name} | CarbonConstruct</title>
-        <meta name="description" content={project.description || `Details for project ${project.name}`} />
+        <meta name="description" content={`Details for project: ${project.name}`} />
       </Helmet>
       <Navbar />
-      <main className="flex-grow py-8 px-4">
+      <main className="flex-grow py-10 px-4">
         <div className="container mx-auto">
-          {/* Back button and project header */}
-          <div className="mb-6">
-            <Button 
-              variant="ghost" 
-              asChild 
-              className="mb-4"
-              size={isMobile ? "sm" : "default"}
-            >
-              <Link to="/projects">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Projects
-              </Link>
-            </Button>
-
-            {isEditing ? (
-              <div className="space-y-4">
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Project Name"
-                  className="text-xl font-bold"
-                />
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Project Description (optional)"
-                  rows={3}
-                />
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleSaveChanges}
-                    className="bg-carbon-600 hover:bg-carbon-700 text-white"
-                  >
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setName(project.name);
-                      setDescription(project.description || "");
-                      setIsEditing(false);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex flex-col md:flex-row md:items-center justify-between">
-                  <div>
-                    <h1 className="text-2xl md:text-3xl font-bold mb-1">{project.name}</h1>
-                    <p className="text-muted-foreground">{project.description || "No description provided"}</p>
-                  </div>
-                  <div className="flex gap-2 mt-4 md:mt-0">
-                    <Button 
-                      variant="outline"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      Edit Details
-                    </Button>
-                    <ExportMenu 
-                      onExportPDF={() => exportProjectPDF(project)}
-                      onExportCSV={() => exportProjectCSV(project)}
+          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          
+          {/* Project Header */}
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  {isEditing ? (
+                    <Input
+                      placeholder="Project Name"
+                      value={editData.name}
+                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      className="text-2xl font-bold"
                     />
+                  ) : (
+                    <CardTitle className="text-2xl font-bold">{project.name}</CardTitle>
+                  )}
+                  <div className="flex items-center text-muted-foreground mt-1">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Created on {formatDate(project.createdAt)}
+                  </div>
+                  {isEditing ? (
+                    <Textarea
+                      placeholder="Project Description"
+                      value={editData.description}
+                      onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                      className="mt-2"
+                    />
+                  ) : (
+                    project.description && (
+                      <CardDescription className="mt-2">{project.description}</CardDescription>
+                    )
+                  )}
+                  
+                  {/* Tags */}
+                  <div className="flex items-center mt-3">
+                    {isEditing ? (
+                      <>
+                        <Input
+                          type="text"
+                          placeholder="Add tags..."
+                          onKeyDown={handleTagInput}
+                          className="mr-2 text-sm"
+                        />
+                        {editData.tags.map(tag => (
+                          <Badge key={tag} className="mr-1.5 rounded-full px-2 py-0.5 text-xs">
+                            {tag}
+                            <button onClick={() => handleRemoveTag(tag)} className="ml-1">
+                              &times;
+                            </button>
+                          </Badge>
+                        ))}
+                      </>
+                    ) : (
+                      project.tags && project.tags.length > 0 && (
+                        <div className="flex items-center">
+                          <Tag className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {project.tags.map(tag => (
+                            <Badge key={tag} className="mr-1.5 rounded-full px-2 py-0.5 text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 mt-4 text-sm text-muted-foreground">
-                  <div>
-                    <strong>Created:</strong> {new Date(project.createdAt).toLocaleDateString()}
-                  </div>
-                  <div>
-                    <strong>Last Updated:</strong> {new Date(project.updatedAt).toLocaleDateString()}
-                  </div>
+                {/* Edit/Save & Delete Buttons */}
+                <div>
+                  {isEditing ? (
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSaveEdit}>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleStartEdit}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Project
+                      </Button>
+                      <Button variant="destructive" onClick={handleDelete}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Project
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-
-          <Tabs defaultValue="results" className="mt-8">
-            <TabsList className="w-full">
-              <TabsTrigger value="results" className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                Results
+            </CardHeader>
+          </Card>
+          
+          {/* Project Tabs */}
+          <Tabs defaultValue="details" className="mb-4">
+            <TabsList>
+              <TabsTrigger value="details" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                Project Details
               </TabsTrigger>
-              <TabsTrigger value="inputs" className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                Inputs
-              </TabsTrigger>
-              <TabsTrigger value="recommendations" className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                Recommendations
+              <TabsTrigger value="calculator" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+                Calculator
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="results" className="mt-6">
-              {project.result ? (
-                <CalculatorResults 
-                  result={project.result} 
-                  materials={project.materials}
-                  transport={project.transport}
-                  energy={project.energy}
-                />
-              ) : (
-                <div className="text-center py-12">
-                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
-                  <h2 className="text-xl font-medium mb-1">No calculation results available</h2>
-                  <p className="text-muted-foreground mb-4">
-                    This project doesn't have any calculation results yet.
-                  </p>
-                  <Button 
-                    asChild
-                    className="bg-carbon-600 hover:bg-carbon-700 text-white"
-                  >
-                    <Link to="/calculator">
-                      Recalculate Now
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="inputs" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <InputSummaryCard 
-                  title="Materials" 
-                  items={project.materials.map(m => ({
-                    name: m.type,
-                    quantity: `${m.quantity} ${m.unit}`
-                  }))} 
-                />
-                <InputSummaryCard 
-                  title="Transport" 
-                  items={project.transport.map(t => ({
-                    name: t.type,
-                    quantity: `${t.distance} km, ${t.weight} tons`
-                  }))} 
-                />
-                <InputSummaryCard 
-                  title="Energy" 
-                  items={project.energy.map(e => ({
-                    name: e.type,
-                    quantity: `${e.amount} ${e.unit}`
-                  }))} 
-                />
-              </div>
+            
+            {/* Project Details Tab */}
+            <TabsContent value="details">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Details</CardTitle>
+                  <CardDescription>
+                    A summary of the materials, transport, and energy used in this project.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Materials</h3>
+                    <ul className="list-disc pl-5">
+                      {materialList.map((material, index) => (
+                        <li key={index}>
+                          {material.name}: {material.quantity} {material.unit}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Transport</h3>
+                    <ul className="list-disc pl-5">
+                      {project.transport.map((transport, index) => (
+                        <li key={index}>
+                          {transport.type}: {transport.distance} km, {transport.weight} kg
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Energy</h3>
+                    <ul className="list-disc pl-5">
+                      {energyList.map((energy, index) => (
+                        <li key={index}>
+                          {energy.name}: {energy.amount} {energy.unit}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
               
-              <div className="mt-6 text-center">
-                <Button 
-                  asChild
-                  className="bg-carbon-600 hover:bg-carbon-700 text-white"
-                >
-                  <Link to="/calculator">
-                    Edit Inputs
-                  </Link>
+              {/* Export Options */}
+              <div className="flex justify-end mt-4 gap-2">
+                <Button variant="outline" onClick={() => exportProjectPDF(project)}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as PDF
+                </Button>
+                <Button variant="outline" onClick={() => exportProjectCSV(project)}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as CSV
                 </Button>
               </div>
             </TabsContent>
-
-            <TabsContent value="recommendations" className="mt-6">
+            
+            {/* Calculator Tab */}
+            <TabsContent value="calculator">
               <Card>
                 <CardHeader>
-                  <CardTitle>Personalized Recommendations</CardTitle>
+                  <CardTitle>Carbon Calculator</CardTitle>
                   <CardDescription>
-                    Based on your project inputs, here are suggestions to reduce carbon emissions
+                    Modify the project details and recalculate the carbon footprint.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-4">
-                    {generateRecommendations(project).map((rec, index) => (
-                      <li key={index} className="bg-carbon-50 p-4 rounded-lg">
-                        <h3 className="font-medium mb-1">{rec.title}</h3>
-                        <p className="text-sm text-muted-foreground">{rec.description}</p>
-                        <div className="mt-2 flex items-center gap-2">
-                          <span className="text-xs bg-carbon-200 px-2 py-1 rounded-full font-medium">
-                            {rec.impact} Impact
-                          </span>
-                          <span className="text-xs bg-carbon-200 px-2 py-1 rounded-full font-medium">
-                            {rec.effort} Effort
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <Tabs defaultValue="materials">
+                    <TabsList className="grid grid-cols-3">
+                      <TabsTrigger value="materials">Materials</TabsTrigger>
+                      <TabsTrigger value="transport">Transport</TabsTrigger>
+                      <TabsTrigger value="energy">Energy</TabsTrigger>
+                      <TabsTrigger value="results">Results</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="materials">
+                      <MaterialsInputSection 
+                        materials={calculator.calculationInput.materials}
+                        onUpdateMaterial={calculator.handleUpdateMaterial}
+                        onAddMaterial={calculator.handleAddMaterial}
+                        onRemoveMaterial={calculator.handleRemoveMaterial}
+                        onNext={calculator.handleNextTab}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="transport">
+                      <TransportInputSection 
+                        transportItems={calculator.calculationInput.transport}
+                        onUpdateTransport={calculator.handleUpdateTransport}
+                        onAddTransport={calculator.handleAddTransport}
+                        onRemoveTransport={calculator.handleRemoveTransport}
+                        onNext={calculator.handleNextTab}
+                        onPrev={calculator.handlePrevTab}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="energy">
+                      <EnergyInputSection 
+                        energyItems={calculator.calculationInput.energy}
+                        onUpdateEnergy={calculator.handleUpdateEnergy}
+                        onAddEnergy={calculator.handleAddEnergy}
+                        onRemoveEnergy={calculator.handleRemoveEnergy}
+                        onCalculate={calculator.handleNextTab}
+                        onPrev={calculator.handlePrevTab}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="results">
+                      <ResultsSection 
+                        calculationResult={calculator.calculationResult}
+                        materials={calculator.calculationInput.materials}
+                        transport={calculator.calculationInput.transport}
+                        energy={calculator.calculationInput.energy}
+                        onCalculate={calculator.handleCalculate}
+                        onPrev={calculator.handlePrevTab}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -296,120 +411,6 @@ const ProjectDetail = () => {
       <Footer />
     </motion.div>
   );
-};
-
-interface InputSummaryCardProps {
-  title: string;
-  items: Array<{ name: string; quantity: string }>;
-}
-
-const InputSummaryCard = ({ title, items }: InputSummaryCardProps) => {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {items.length > 0 ? (
-          <ul className="divide-y">
-            {items.map((item, index) => (
-              <li key={index} className="py-2">
-                <div className="font-medium">{item.name}</div>
-                <div className="text-sm text-muted-foreground">{item.quantity}</div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-center py-6 text-muted-foreground">
-            No {title.toLowerCase()} data available
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
-interface ExportMenuProps {
-  onExportPDF: () => void;
-  onExportCSV: () => void;
-}
-
-const ExportMenu = ({ onExportPDF, onExportCSV }: ExportMenuProps) => {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button className="bg-carbon-600 hover:bg-carbon-700 text-white">
-          <Download className="mr-2 h-4 w-4" />
-          Export
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Export Project</DialogTitle>
-          <DialogDescription>
-            Choose a format to export your project data
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-          <Button 
-            variant="outline" 
-            className="h-24 flex flex-col items-center justify-center"
-            onClick={onExportPDF}
-          >
-            <FileText className="h-8 w-8 mb-2" />
-            <span>Export as PDF</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-24 flex flex-col items-center justify-center"
-            onClick={onExportCSV}
-          >
-            <Download className="h-8 w-8 mb-2" />
-            <span>Export as CSV</span>
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-// Helper function to generate personalized recommendations based on project data
-const generateRecommendations = (project: SavedProject) => {
-  const recommendations = [
-    {
-      title: "Switch to Low-Carbon Concrete",
-      description: "Replace standard concrete with low-carbon alternatives to reduce material emissions by up to 50%.",
-      impact: "High",
-      effort: "Medium"
-    },
-    {
-      title: "Optimize Transportation Routes",
-      description: "Reduce transport emissions by optimizing delivery routes and consolidating shipments.",
-      impact: "Medium",
-      effort: "Low"
-    },
-    {
-      title: "Implement Renewable Energy Sources",
-      description: "Use solar or wind power for construction equipment and site operations.",
-      impact: "High",
-      effort: "Medium"
-    },
-    {
-      title: "Source Materials Locally",
-      description: "Reduce transportation emissions by sourcing materials within a 100km radius when possible.",
-      impact: "Medium",
-      effort: "Low"
-    },
-    {
-      title: "Use Recycled Steel",
-      description: "Incorporate recycled steel to reduce material emissions by approximately 70%.",
-      impact: "High",
-      effort: "Low"
-    }
-  ];
-
-  // In a real application, you would customize these based on actual project data
-  return recommendations;
 };
 
 export default ProjectDetail;
