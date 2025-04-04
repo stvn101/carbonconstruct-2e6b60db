@@ -1,11 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -92,7 +91,10 @@ const ProjectDetail = () => {
           {/* Project Header */}
           <ProjectHeader 
             project={project} 
-            onUpdateProject={updateProject}
+            onUpdateProject={async (updatedProject) => {
+              await updateProject(updatedProject);
+              return;
+            }}
             onDelete={handleDelete}
           />
           
