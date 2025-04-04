@@ -1,21 +1,15 @@
 
 import React from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
 } from "@/components/ui/select";
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 interface MaterialFiltersProps {
   searchTerm: string;
@@ -28,11 +22,11 @@ interface MaterialFiltersProps {
   setSelectedTag: (value: string) => void;
   allTags: string[];
   allRegions: string[];
-  baseOptions: Array<{ id: string; name: string }>;
+  baseOptions: Array<{id: string, name: string}>;
 }
 
-const MaterialFilters: React.FC<MaterialFiltersProps> = ({
-  searchTerm,
+const MaterialFilters: React.FC<MaterialFiltersProps> = ({ 
+  searchTerm, 
   setSearchTerm,
   selectedRegion,
   setSelectedRegion,
@@ -42,91 +36,107 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
   setSelectedTag,
   allTags,
   allRegions,
-  baseOptions,
+  baseOptions
 }) => {
+  // Set Australia as default if no region is selected
+  React.useEffect(() => {
+    if (selectedRegion === "all") {
+      setSelectedRegion("Australia");
+    }
+  }, []);
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <div className="space-y-2">
-        <label htmlFor="search" className="text-sm font-medium">
-          Search Materials
-        </label>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="search"
-            type="text" 
-            placeholder="Search by name..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search materials..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Region</label>
+          <Select
+            value={selectedRegion}
+            onValueChange={setSelectedRegion}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select region" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Regions</SelectItem>
+              {allRegions.map((region) => (
+                <SelectItem 
+                  key={region} 
+                  value={region}
+                  className={region === "Australia" ? "text-carbon-600 font-medium" : ""}
+                >
+                  {region === "Australia" ? "🇦🇺 Australia" : region}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Alternative To</label>
+          <Select
+            value={selectedAlternative}
+            onValueChange={setSelectedAlternative}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select material" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">All Materials</SelectItem>
+              {baseOptions.map((option) => (
+                <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Tag</label>
+          <Select
+            value={selectedTag}
+            onValueChange={setSelectedTag}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tags</SelectItem>
+              {allTags.map((tag) => (
+                <SelectItem 
+                  key={tag} 
+                  value={tag}
+                  className={tag === "australian" ? "text-carbon-600 font-medium" : ""}
+                >
+                  {tag === "australian" ? "🇦🇺 Australian" : tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       
-      <div className="space-y-2">
-        <label htmlFor="region" className="text-sm font-medium">
-          Filter by Region
-        </label>
-        <Select
-          value={selectedRegion}
-          onValueChange={setSelectedRegion}
+      <div className="flex justify-end">
+        <Button 
+          variant="outline" 
+          onClick={() => {
+            setSearchTerm("");
+            setSelectedRegion("all");
+            setSelectedAlternative("none");
+            setSelectedTag("all");
+          }}
         >
-          <SelectTrigger id="region">
-            <SelectValue placeholder="All Regions" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Regions</SelectItem>
-            {allRegions.map((region) => (
-              <SelectItem key={region} value={region}>
-                {region}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="space-y-2">
-        <label htmlFor="alternative" className="text-sm font-medium">
-          Show Alternatives For
-        </label>
-        <Select
-          value={selectedAlternative}
-          onValueChange={setSelectedAlternative}
-        >
-          <SelectTrigger id="alternative">
-            <SelectValue placeholder="All Materials" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">All Materials</SelectItem>
-            {baseOptions.map((option) => (
-              <SelectItem key={option.id} value={option.id}>
-                {option.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="space-y-2">
-        <label htmlFor="tag" className="text-sm font-medium">
-          Filter by Tag
-        </label>
-        <Select
-          value={selectedTag}
-          onValueChange={setSelectedTag}
-        >
-          <SelectTrigger id="tag">
-            <SelectValue placeholder="All Tags" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Tags</SelectItem>
-            {allTags.map((tag) => (
-              <SelectItem key={tag} value={tag}>
-                {tag}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          Clear Filters
+        </Button>
       </div>
     </div>
   );

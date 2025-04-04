@@ -49,13 +49,20 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
         </TableHeader>
         <TableBody>
           {filteredMaterials.map(([key, material]) => (
-            <TableRow key={key} className={material.region?.includes("Australia") ? "bg-carbon-50" : ""}>
+            <TableRow 
+              key={key} 
+              className={material.region?.includes("Australia") 
+                ? "bg-carbon-50 dark:bg-carbon-800/20 data-[state=selected]:bg-carbon-100 dark:data-[state=selected]:bg-carbon-800/40" 
+                : ""}
+            >
               <TableCell className="font-medium">{material.name}</TableCell>
               <TableCell className="text-right">
                 {material.factor} ({material.unit})
               </TableCell>
               <TableCell>
-                {material.region || "Global"}
+                {material.region?.includes("Australia") 
+                  ? <Badge variant="secondary" className="bg-carbon-100 dark:bg-carbon-800 dark:text-carbon-200">Australia</Badge> 
+                  : material.region || "Global"}
               </TableCell>
               <TableCell>
                 {material.alternativeTo ? 
