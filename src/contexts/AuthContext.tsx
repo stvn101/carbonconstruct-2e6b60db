@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  signInWithGitHub: () => Promise<void>; // Added this method to the interface
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,6 +95,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGitHub = async () => {
+    setIsLoading(true);
+    try {
+      // In a real app, this would redirect to GitHub OAuth
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating OAuth flow
+      
+      // Mock successful GitHub login
+      const mockUser = {
+        id: 'github-user-1',
+        name: 'GitHub User',
+        email: 'github-user@example.com'
+      };
+      
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mockUser);
+      toast.success("Successfully logged in with GitHub!");
+    } catch (error) {
+      console.error('GitHub login failed:', error);
+      toast.error("GitHub login failed, please try again.");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('user');
     setUser(null);
@@ -101,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, signInWithGitHub }}>
       {children}
     </AuthContext.Provider>
   );
