@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -353,7 +354,144 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+// New Chart component as a unified interface
+type ChartProps = {
+  type: 'bar' | 'line' | 'pie' | 'area';
+  data: any[];
+  categories: string[];
+  index: string;
+  colors?: string[];
+  valueFormatter?: (value: number) => string;
+  showLegend?: boolean;
+  className?: string;
+}
+
+const Chart = ({
+  type,
+  data,
+  categories,
+  index,
+  colors = ['#3e9847', '#25612d', '#214d28', '#8acd91', '#b8e2bc'],
+  valueFormatter,
+  showLegend = true,
+  className,
+}: ChartProps) => {
+  // Create chart config from categories and colors
+  const chartConfig = categories.reduce((acc, category, i) => {
+    acc[category] = { 
+      color: colors[i % colors.length],
+      label: category
+    };
+    return acc;
+  }, {} as ChartConfig);
+
+  return (
+    <ChartContainer className={className} config={chartConfig}>
+      {type === 'bar' && (
+        <RechartsPrimitive.BarChart data={data}>
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+          <RechartsPrimitive.XAxis dataKey={index} />
+          <RechartsPrimitive.YAxis />
+          {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+          <ChartTooltip 
+            content={
+              <ChartTooltipContent 
+                formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
+              />
+            } 
+          />
+          {categories.map((category, i) => (
+            <RechartsPrimitive.Bar 
+              key={category}
+              dataKey={category} 
+              fill={colors[i % colors.length]} 
+            />
+          ))}
+        </RechartsPrimitive.BarChart>
+      )}
+      
+      {type === 'line' && (
+        <RechartsPrimitive.LineChart data={data}>
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+          <RechartsPrimitive.XAxis dataKey={index} />
+          <RechartsPrimitive.YAxis />
+          {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+          <ChartTooltip 
+            content={
+              <ChartTooltipContent 
+                formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
+              />
+            } 
+          />
+          {categories.map((category, i) => (
+            <RechartsPrimitive.Line
+              key={category}
+              type="monotone"
+              dataKey={category}
+              stroke={colors[i % colors.length]}
+              activeDot={{ r: 8 }}
+            />
+          ))}
+        </RechartsPrimitive.LineChart>
+      )}
+      
+      {type === 'pie' && (
+        <RechartsPrimitive.PieChart>
+          <ChartTooltip 
+            content={
+              <ChartTooltipContent 
+                formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
+              />
+            }
+          />
+          {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+          <RechartsPrimitive.Pie
+            data={data}
+            nameKey={index}
+            dataKey={categories[0]}
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            fill="#8884d8"
+            label
+          >
+            {data.map((entry, i) => (
+              <RechartsPrimitive.Cell key={`cell-${i}`} fill={colors[i % colors.length]} />
+            ))}
+          </RechartsPrimitive.Pie>
+        </RechartsPrimitive.PieChart>
+      )}
+      
+      {type === 'area' && (
+        <RechartsPrimitive.AreaChart data={data}>
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+          <RechartsPrimitive.XAxis dataKey={index} />
+          <RechartsPrimitive.YAxis />
+          {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+          <ChartTooltip 
+            content={
+              <ChartTooltipContent 
+                formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
+              />
+            }
+          />
+          {categories.map((category, i) => (
+            <RechartsPrimitive.Area
+              key={category}
+              type="monotone"
+              dataKey={category}
+              fill={colors[i % colors.length]}
+              stroke={colors[i % colors.length]}
+            />
+          ))}
+        </RechartsPrimitive.AreaChart>
+      )}
+    </ChartContainer>
+  );
+};
+
 export {
+  Chart,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
