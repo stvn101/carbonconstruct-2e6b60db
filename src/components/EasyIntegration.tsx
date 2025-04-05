@@ -1,355 +1,301 @@
 
-import React from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { 
-  FileCheck2, 
-  Upload, 
-  Download, 
-  Link, 
-  ArrowRight,
-  CheckCircle
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Code, Download, Upload, Database, Server } from "lucide-react";
 
 const EasyIntegration = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-carbon-100 dark:bg-carbon-800">
-              <FileCheck2 className="h-6 w-6 text-carbon-700 dark:text-carbon-200" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Easy Integration</h1>
-          <p className="text-lg text-muted-foreground">
-            Seamlessly integrate with your existing construction management tools and processes
-          </p>
-        </div>
-        
-        <Tabs defaultValue="import" className="mb-8">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="import">Data Import</TabsTrigger>
-            <TabsTrigger value="export">Data Export</TabsTrigger>
+    <div className="container mx-auto px-4 md:px-6">
+      <div className="text-center max-w-3xl mx-auto mb-6 md:mb-12">
+        <h1 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4">Seamless Integration</h1>
+        <p className="text-sm md:text-lg text-muted-foreground mb-4 md:mb-8">
+          Connect CarbonConstruct with your existing tools and software to streamline your workflow.
+        </p>
+      </div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Tabs defaultValue="data-import" className="space-y-8">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-8 w-full max-w-3xl mx-auto">
+            <TabsTrigger value="data-import" className="data-[state=active]:bg-carbon-600 data-[state=active]:text-white">
+              <Upload className="h-4 w-4 mr-2" />
+              Data Import
+            </TabsTrigger>
+            <TabsTrigger value="api" className="data-[state=active]:bg-carbon-600 data-[state=active]:text-white">
+              <Code className="h-4 w-4 mr-2" />
+              API Access
+            </TabsTrigger>
+            <TabsTrigger value="export" className="data-[state=active]:bg-carbon-600 data-[state=active]:text-white">
+              <Download className="h-4 w-4 mr-2" />
+              Data Export
+            </TabsTrigger>
+            <TabsTrigger value="software" className="data-[state=active]:bg-carbon-600 data-[state=active]:text-white">
+              <Server className="h-4 w-4 mr-2" />
+              Software
+            </TabsTrigger>
           </TabsList>
           
-          {/* Import Tab */}
-          <TabsContent value="import">
+          <TabsContent value="data-import">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Upload className="h-5 w-5 mr-2" />
-                  Import Your Data
-                </CardTitle>
+                <CardTitle>Import Project Data</CardTitle>
                 <CardDescription>
-                  Bring your existing project data into CarbonConstruct
+                  Import data from various sources to get started with your carbon calculations quickly.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="mb-6 bg-carbon-50 dark:bg-carbon-900 rounded-lg p-4 border border-carbon-100 dark:border-carbon-800">
-                  <h3 className="font-medium mb-2">Supported File Formats</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">CSV</div>
-                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">XLS/XLSX</div>
-                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">JSON</div>
-                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">XML</div>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <Database className="h-10 w-10 text-carbon-600 dark:text-carbon-400 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Excel/CSV Import</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Import your material quantities and specifications from spreadsheets.
+                    </p>
+                    <Button variant="outline" className="w-full">Import Spreadsheet</Button>
+                  </div>
+                  
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <Server className="h-10 w-10 text-carbon-600 dark:text-carbon-400 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">BIM Model Import</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Extract material data directly from your BIM models.
+                    </p>
+                    <Button variant="outline" className="w-full">Import BIM Data</Button>
+                  </div>
+                  
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <Upload className="h-10 w-10 text-carbon-600 dark:text-carbon-400 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Project Templates</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Use pre-built templates for common construction project types.
+                    </p>
+                    <Button variant="outline" className="w-full">Browse Templates</Button>
                   </div>
                 </div>
                 
-                <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg py-8 px-4 mb-6 dark:border-carbon-700">
-                  <Upload className="h-10 w-10 text-muted-foreground mb-4" />
-                  <p className="text-center mb-4">
-                    Drag and drop your files here, or click to browse
-                  </p>
-                  <Button>Select Files</Button>
+                <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                  <h3 className="text-lg font-medium mb-2">Supported File Formats</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="bg-white dark:bg-carbon-900 p-3 rounded-lg border border-carbon-200 dark:border-carbon-700 mb-2">
+                        <p className="font-bold text-carbon-700 dark:text-carbon-300">.xlsx</p>
+                      </div>
+                      <p className="text-xs text-carbon-600 dark:text-carbon-400">Excel</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-white dark:bg-carbon-900 p-3 rounded-lg border border-carbon-200 dark:border-carbon-700 mb-2">
+                        <p className="font-bold text-carbon-700 dark:text-carbon-300">.csv</p>
+                      </div>
+                      <p className="text-xs text-carbon-600 dark:text-carbon-400">CSV</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-white dark:bg-carbon-900 p-3 rounded-lg border border-carbon-200 dark:border-carbon-700 mb-2">
+                        <p className="font-bold text-carbon-700 dark:text-carbon-300">.ifc</p>
+                      </div>
+                      <p className="text-xs text-carbon-600 dark:text-carbon-400">IFC</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-white dark:bg-carbon-900 p-3 rounded-lg border border-carbon-200 dark:border-carbon-700 mb-2">
+                        <p className="font-bold text-carbon-700 dark:text-carbon-300">.json</p>
+                      </div>
+                      <p className="text-xs text-carbon-600 dark:text-carbon-400">JSON</p>
+                    </div>
+                  </div>
                 </div>
-                
-                <h3 className="font-medium mb-3">Integration with Popular Software</h3>
-                <Table>
-                  <TableCaption>
-                    Direct connections to common construction management software
-                  </TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Software</TableHead>
-                      <TableHead>Integration Type</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">BIM 360</TableCell>
-                      <TableCell>Direct API Connection</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Connect</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Procore</TableCell>
-                      <TableCell>Direct API Connection</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Connect</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">PlanGrid</TableCell>
-                      <TableCell>File Import</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Import</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Revit</TableCell>
-                      <TableCell>Plugin Available</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Get Plugin</Button>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
               </CardContent>
             </Card>
           </TabsContent>
           
-          {/* Export Tab */}
-          <TabsContent value="export">
+          <TabsContent value="api">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Download className="h-5 w-5 mr-2" />
-                  Export Your Results
-                </CardTitle>
+                <CardTitle>API Integration</CardTitle>
                 <CardDescription>
-                  Share your carbon footprint data with others
+                  Connect your systems directly to CarbonConstruct using our comprehensive API.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-6">
-                  <h3 className="font-medium mb-3">Export Options</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-carbon-50 dark:bg-carbon-900">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Full Report</CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Complete carbon analysis with charts and recommendations
-                        </p>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" /> PDF
-                          </Button>
-                          <Button size="sm" variant="outline" className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" /> DOCX
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-carbon-50 dark:bg-carbon-900">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Raw Data</CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Numerical data in spreadsheet format
-                        </p>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" /> CSV
-                          </Button>
-                          <Button size="sm" variant="outline" className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" /> XLSX
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-carbon-50 dark:bg-carbon-900">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Charts Only</CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Visual data for presentations
-                        </p>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" /> PNG
-                          </Button>
-                          <Button size="sm" variant="outline" className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" /> SVG
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700 mb-6">
+                  <h3 className="text-lg font-medium mb-4">API Documentation</h3>
+                  <div className="space-y-4">
+                    <div className="bg-white dark:bg-carbon-900 p-4 rounded-lg border border-carbon-200 dark:border-carbon-700">
+                      <h4 className="font-medium mb-2 text-carbon-800 dark:text-carbon-200">Authentication</h4>
+                      <div className="bg-carbon-100 dark:bg-carbon-700 p-3 rounded font-mono text-sm overflow-x-auto">
+                        <code className="text-carbon-800 dark:text-carbon-300">
+                          POST /api/auth/token<br />
+                          {`{ "api_key": "your_api_key" }`}
+                        </code>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-carbon-900 p-4 rounded-lg border border-carbon-200 dark:border-carbon-700">
+                      <h4 className="font-medium mb-2 text-carbon-800 dark:text-carbon-200">Get Materials</h4>
+                      <div className="bg-carbon-100 dark:bg-carbon-700 p-3 rounded font-mono text-sm overflow-x-auto">
+                        <code className="text-carbon-800 dark:text-carbon-300">
+                          GET /api/v1/materials<br />
+                          Authorization: Bearer {`{token}`}
+                        </code>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-carbon-900 p-4 rounded-lg border border-carbon-200 dark:border-carbon-700">
+                      <h4 className="font-medium mb-2 text-carbon-800 dark:text-carbon-200">Calculate Emissions</h4>
+                      <div className="bg-carbon-100 dark:bg-carbon-700 p-3 rounded font-mono text-sm overflow-x-auto">
+                        <code className="text-carbon-800 dark:text-carbon-300">
+                          POST /api/v1/calculate<br />
+                          Authorization: Bearer {`{token}`}<br />
+                          {`{ "materials": [...], "transport": [...], "energy": [...] }`}
+                        </code>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button>Full API Documentation</Button>
                   </div>
                 </div>
                 
-                <h3 className="font-medium mb-3">Direct Integration Options</h3>
-                <Table>
-                  <TableCaption>
-                    Send data directly to other systems
-                  </TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Destination</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">Sustainability Dashboard</TableCell>
-                      <TableCell>Send to organization's ESG reporting platform</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Send Data</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">LEED Submission</TableCell>
-                      <TableCell>Format data for LEED certification</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Prepare</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Client Portal</TableCell>
-                      <TableCell>Share results with project stakeholders</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Share</Button>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                  <h3 className="text-lg font-medium mb-4">API Keys</h3>
+                  <p className="text-carbon-600 dark:text-carbon-300 mb-4">
+                    Generate and manage API keys to connect your systems with CarbonConstruct.
+                  </p>
+                  <Button>Generate API Key</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="export">
+            <Card>
+              <CardHeader>
+                <CardTitle>Export Your Data</CardTitle>
+                <CardDescription>
+                  Export your project data and results in various formats.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <Download className="h-10 w-10 text-carbon-600 dark:text-carbon-400 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Report Generation</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Generate comprehensive reports of your carbon calculations and analysis.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" className="flex items-center">
+                        <Download className="h-4 w-4 mr-1" />
+                        PDF
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex items-center">
+                        <Download className="h-4 w-4 mr-1" />
+                        Excel
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex items-center">
+                        <Download className="h-4 w-4 mr-1" />
+                        CSV
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <Database className="h-10 w-10 text-carbon-600 dark:text-carbon-400 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Data Export</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Export raw data for use in other systems or for backup purposes.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" className="flex items-center">
+                        <Download className="h-4 w-4 mr-1" />
+                        JSON
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex items-center">
+                        <Download className="h-4 w-4 mr-1" />
+                        XML
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex items-center">
+                        <Download className="h-4 w-4 mr-1" />
+                        SQL
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                  <h3 className="text-lg font-medium mb-4">Scheduled Exports</h3>
+                  <p className="text-carbon-600 dark:text-carbon-300 mb-4">
+                    Set up automatic exports of your data on a regular schedule.
+                  </p>
+                  <Button>Configure Scheduled Exports</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="software">
+            <Card>
+              <CardHeader>
+                <CardTitle>Software Integrations</CardTitle>
+                <CardDescription>
+                  Connect CarbonConstruct with other software tools in your workflow.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-3">
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <div className="h-12 w-12 bg-white dark:bg-carbon-700 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-lg font-bold text-carbon-600 dark:text-carbon-400">A</span>
+                    </div>
+                    <h3 className="text-lg font-medium mb-2">Autodesk</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Connect with Revit, AutoCAD, and other Autodesk software.
+                    </p>
+                    <Button variant="outline" size="sm">
+                      Connect
+                    </Button>
+                  </div>
+                  
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <div className="h-12 w-12 bg-white dark:bg-carbon-700 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-lg font-bold text-carbon-600 dark:text-carbon-400">T</span>
+                    </div>
+                    <h3 className="text-lg font-medium mb-2">Trimble</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Integrate with SketchUp, Tekla, and other Trimble products.
+                    </p>
+                    <Button variant="outline" size="sm">
+                      Connect
+                    </Button>
+                  </div>
+                  
+                  <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                    <div className="h-12 w-12 bg-white dark:bg-carbon-700 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-lg font-bold text-carbon-600 dark:text-carbon-400">G</span>
+                    </div>
+                    <h3 className="text-lg font-medium mb-2">Graphisoft</h3>
+                    <p className="text-sm text-carbon-600 dark:text-carbon-300 mb-4">
+                      Connect with ArchiCAD and BIMcloud.
+                    </p>
+                    <Button variant="outline" size="sm">
+                      Connect
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="mt-6 bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg border border-carbon-100 dark:border-carbon-700">
+                  <h3 className="text-lg font-medium mb-4">Custom Integrations</h3>
+                  <p className="text-carbon-600 dark:text-carbon-300 mb-4">
+                    Need to connect with another system? Our team can help build custom integrations.
+                  </p>
+                  <Button>Request Custom Integration</Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-        
-        {/* Integration Workflow */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Integration Workflow</CardTitle>
-            <CardDescription>
-              How CarbonConstruct works with your existing processes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="relative">
-              <div className="absolute top-0 bottom-0 left-[42px] w-0.5 bg-carbon-100 dark:bg-carbon-700"></div>
-              <div className="space-y-6">
-                <div className="flex">
-                  <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700 dark:text-carbon-200">1</span>
-                    </div>
-                  </div>
-                  <div className="ml-2">
-                    <h3 className="font-semibold text-lg mb-1">Import Project Data</h3>
-                    <p className="text-muted-foreground mb-2">
-                      Import material quantities, transportation details, and energy usage from your existing systems.
-                    </p>
-                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
-                      <div className="flex items-center text-sm">
-                        <Upload className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
-                        Automatic data extraction from BIM models, spreadsheets, or project management software
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex">
-                  <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700 dark:text-carbon-200">2</span>
-                    </div>
-                  </div>
-                  <div className="ml-2">
-                    <h3 className="font-semibold text-lg mb-1">Calculate Carbon Footprint</h3>
-                    <p className="text-muted-foreground mb-2">
-                      Our system automatically calculates emissions based on imported data.
-                    </p>
-                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
-                      <div className="flex items-center text-sm">
-                        <ArrowRight className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
-                        No manual data re-entry required, reducing errors and saving time
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex">
-                  <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700 dark:text-carbon-200">3</span>
-                    </div>
-                  </div>
-                  <div className="ml-2">
-                    <h3 className="font-semibold text-lg mb-1">Generate Reports</h3>
-                    <p className="text-muted-foreground mb-2">
-                      Create detailed sustainability reports and visualizations.
-                    </p>
-                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
-                      <div className="flex items-center text-sm">
-                        <FileCheck2 className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
-                        Reports designed to meet regulatory requirements and stakeholder expectations
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex">
-                  <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700 dark:text-carbon-200">4</span>
-                    </div>
-                  </div>
-                  <div className="ml-2">
-                    <h3 className="font-semibold text-lg mb-1">Export or Share Results</h3>
-                    <p className="text-muted-foreground mb-2">
-                      Send results back to your existing systems or share with stakeholders.
-                    </p>
-                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
-                      <div className="flex items-center text-sm">
-                        <Download className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
-                        Export in multiple formats or use direct integrations to update project systems
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Compatibility Statement */}
-        <Alert className="border-carbon-200 bg-carbon-50 dark:bg-carbon-900 dark:border-carbon-700">
-          <CheckCircle className="h-4 w-4 text-carbon-600 dark:text-carbon-300" />
-          <AlertTitle>Zero Workflow Disruption</AlertTitle>
-          <AlertDescription>
-            CarbonConstruct works alongside your existing software without requiring any changes to your established workflows. 
-            Our system adapts to your processes, not the other way around.
-          </AlertDescription>
-        </Alert>
-      </div>
+      </motion.div>
     </div>
   );
 };
