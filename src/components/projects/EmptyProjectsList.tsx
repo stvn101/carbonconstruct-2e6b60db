@@ -9,9 +9,9 @@ interface EmptyProjectsListProps {
 
 export const EmptyProjectsList = ({ hasFilters }: EmptyProjectsListProps) => {
   return (
-    <div className="text-center py-12">
+    <div className="text-center py-12 bg-white dark:bg-card rounded-lg shadow-sm">
       <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
-      <h2 className="text-xl font-medium mb-1">No projects found</h2>
+      <h2 className="text-xl font-medium mb-1 text-foreground">No projects found</h2>
       <p className="text-muted-foreground mb-4">
         {hasFilters 
           ? "Try adjusting your search or filters" 
