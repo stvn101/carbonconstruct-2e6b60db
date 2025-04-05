@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -37,9 +36,7 @@ const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
     config: ChartConfig
-    children: React.ComponentProps<
-      typeof RechartsPrimitive.ResponsiveContainer
-    >["children"]
+    children: React.ReactElement
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
@@ -315,7 +312,6 @@ const ChartLegendContent = React.forwardRef<
 )
 ChartLegendContent.displayName = "ChartLegend"
 
-// Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,
@@ -354,7 +350,6 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
-// New Chart component as a unified interface
 type ChartProps = {
   type: 'bar' | 'line' | 'pie' | 'area';
   data: any[];
@@ -376,7 +371,6 @@ const Chart = ({
   showLegend = true,
   className,
 }: ChartProps) => {
-  // Create chart config from categories and colors
   const chartConfig = categories.reduce((acc, category, i) => {
     acc[category] = { 
       color: colors[i % colors.length],
@@ -385,7 +379,6 @@ const Chart = ({
     return acc;
   }, {} as ChartConfig);
 
-  // Create a single child element based on chart type
   let chartElement: React.ReactElement;
   
   if (type === 'bar') {
