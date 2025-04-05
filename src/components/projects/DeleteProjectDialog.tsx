@@ -21,15 +21,15 @@ export const DeleteProjectDialog = ({ project, onClose, onConfirm }: DeleteProje
   
   return (
     <Dialog open={!!project} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="bg-background text-foreground border-border">
         <DialogHeader>
           <DialogTitle>Delete Project</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Are you sure you want to delete "{project.name}"? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="border-border">
             Cancel
           </Button>
           <Button 

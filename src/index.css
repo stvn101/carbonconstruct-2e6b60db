@@ -132,3 +132,36 @@
 .bg-carbon-50, .bg-carbon-100 {
   @apply text-carbon-900;
 }
+
+/* Fix for charts in dark mode */
+.dark .recharts-cartesian-axis-line,
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.dark .recharts-cartesian-grid line {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  @apply bg-gray-800 border-gray-700 text-white;
+}
+
+.dark .recharts-text {
+  fill: rgba(255, 255, 255, 0.8);
+}
+
+/* Fix for cards in dark mode to ensure proper contrast */
+.dark .bg-white {
+  @apply bg-gray-800 text-gray-100;
+}
+
+/* Green backgrounds for white backgrounds */
+.bg-white.sustainable-bg {
+  @apply bg-carbon-50 dark:bg-carbon-900;
+}
+
+/* Ensure text visibility on all backgrounds */
+.text-black, .text-gray-900, .text-gray-800 {
+  @apply dark:text-gray-100;
+}
