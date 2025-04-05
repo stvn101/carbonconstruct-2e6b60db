@@ -58,6 +58,17 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+    --carbon-50: 130 45% 92%;
+    --carbon-100: 127 42% 82%;
+    --carbon-200: 126 52% 65%;
+    --carbon-300: 125 54% 55%;
+    --carbon-400: 123 47% 48%;
+    --carbon-500: 124 40% 40%;
+    --carbon-600: 125 40% 30%;
+    --carbon-700: 126 43% 20%;
+    --carbon-800: 126 53% 15%;
+    --carbon-900: 127 63% 10%;
+    --carbon-950: 127 63% 5%;
   }
 }
 
@@ -102,4 +113,22 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Dark mode component fixes */
+.dark .dropdown-menu {
+  @apply bg-carbon-900 border-carbon-700;
+}
+
+.dark .alert {
+  @apply bg-carbon-900 border-carbon-700;
+}
+
+.dark .bg-carbon-50, .dark .bg-carbon-100 {
+  @apply text-carbon-50;
+}
+
+/* Fix for light mode text on light backgrounds */
+.bg-carbon-50, .bg-carbon-100 {
+  @apply text-carbon-900;
 }

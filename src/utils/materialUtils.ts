@@ -1,3 +1,4 @@
+
 import { Material, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 
 export function getCategory(materialType: string): string {

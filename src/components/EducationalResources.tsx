@@ -217,28 +217,28 @@ const CategoryBadge = ({ category }: { category: string }) => {
   
   switch(category) {
     case "beginner":
-      color = "bg-green-500 hover:bg-green-600";
+      color = "bg-green-500 hover:bg-green-600 text-white";
       break;
     case "intermediate":
-      color = "bg-yellow-500 hover:bg-yellow-600";
+      color = "bg-yellow-500 hover:bg-yellow-600 text-white";
       break;
     case "advanced":
-      color = "bg-red-500 hover:bg-red-600";
+      color = "bg-red-500 hover:bg-red-600 text-white";
       break;
     case "regulatory":
-      color = "bg-blue-500 hover:bg-blue-600";
+      color = "bg-blue-500 hover:bg-blue-600 text-white";
       break;
     case "materials":
-      color = "bg-purple-500 hover:bg-purple-600";
+      color = "bg-purple-500 hover:bg-purple-600 text-white";
       break;
     case "policy":
-      color = "bg-orange-500 hover:bg-orange-600";
+      color = "bg-orange-500 hover:bg-orange-600 text-white";
       break;
     case "case-studies":
-      color = "bg-cyan-500 hover:bg-cyan-600";
+      color = "bg-cyan-500 hover:bg-cyan-600 text-white";
       break;
     default:
-      color = "bg-carbon-500 hover:bg-carbon-600";
+      color = "bg-carbon-500 hover:bg-carbon-600 text-white";
   }
   
   return (
@@ -277,8 +277,8 @@ const EducationalResources = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-carbon-100">
-              <GraduationCap className="h-6 w-6 text-carbon-700" />
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-carbon-100 dark:bg-carbon-800">
+              <GraduationCap className="h-6 w-6 text-carbon-700 dark:text-carbon-200" />
             </div>
           </div>
           <h1 className="text-3xl font-bold mb-2">Educational Resources</h1>
@@ -302,7 +302,7 @@ const EducationalResources = () => {
         </div>
         
         {/* Learning Path - Fixed at top */}
-        <Card className="mb-8 border-carbon-200 bg-carbon-50">
+        <Card className="mb-8 border-carbon-200 bg-carbon-50 dark:bg-carbon-900 dark:border-carbon-700">
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="h-5 w-5 mr-2" />
@@ -323,7 +323,7 @@ const EducationalResources = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-3 border rounded-lg bg-white">
+                <div className="p-3 border rounded-lg bg-white dark:bg-carbon-800 dark:border-carbon-700">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Fundamentals</span>
                     <Badge className="bg-green-500">75% Complete</Badge>
@@ -332,7 +332,7 @@ const EducationalResources = () => {
                   <span className="text-xs text-muted-foreground">3 of 4 modules completed</span>
                 </div>
                 
-                <div className="p-3 border rounded-lg bg-white">
+                <div className="p-3 border rounded-lg bg-white dark:bg-carbon-800 dark:border-carbon-700">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Advanced Topics</span>
                     <Badge className="bg-yellow-500">30% Complete</Badge>
@@ -341,7 +341,7 @@ const EducationalResources = () => {
                   <span className="text-xs text-muted-foreground">2 of 6 modules completed</span>
                 </div>
                 
-                <div className="p-3 border rounded-lg bg-white">
+                <div className="p-3 border rounded-lg bg-white dark:bg-carbon-800 dark:border-carbon-700">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Certification</span>
                     <Badge className="bg-red-500">0% Complete</Badge>
@@ -385,7 +385,7 @@ const EducationalResources = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVideos.map((video) => (
                 <Card key={video.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="aspect-video overflow-hidden bg-carbon-100 relative">
+                  <div className="aspect-video overflow-hidden bg-carbon-100 dark:bg-carbon-800 relative">
                     <img 
                       src={video.thumbnail} 
                       alt={video.title} 
@@ -444,8 +444,8 @@ const EducationalResources = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredGuides.map((guide) => (
                 <Card key={guide.id} className="flex md:flex-row flex-col hover:shadow-md transition-shadow">
-                  <div className="md:w-1/3 bg-carbon-100 flex items-center justify-center p-6">
-                    <FileText className="h-12 w-12 text-carbon-600" />
+                  <div className="md:w-1/3 bg-carbon-100 dark:bg-carbon-800 flex items-center justify-center p-6">
+                    <FileText className="h-12 w-12 text-carbon-600 dark:text-carbon-300" />
                   </div>
                   <div className="md:w-2/3 flex flex-col">
                     <CardHeader className="pb-2">
@@ -554,7 +554,7 @@ const EducationalResources = () => {
               <CardContent>
                 <div className="space-y-4">
                   {filteredUpdates.map((update) => (
-                    <div key={update.id} className="p-4 border rounded-lg hover:border-carbon-300 transition-colors">
+                    <div key={update.id} className="p-4 border rounded-lg hover:border-carbon-300 dark:hover:border-carbon-600 transition-colors">
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-medium">{update.title}</h3>
                         <CategoryBadge category={update.category} />
