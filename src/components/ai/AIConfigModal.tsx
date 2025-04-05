@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Dialog,
   DialogContent,
@@ -25,6 +25,13 @@ export function AIConfigModal({ open, onOpenChange }: AIConfigModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isConfigured, configureAI } = useAIService();
   
+  // Pre-populate the input field
+  useEffect(() => {
+    if (isConfigured && !apiKey) {
+      setApiKey('170cf47d2b04210ea8c8b68cc390487c');
+    }
+  }, [isConfigured, open]);
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -41,7 +48,7 @@ export function AIConfigModal({ open, onOpenChange }: AIConfigModalProps) {
       toast.success("AI services successfully configured");
       setIsSubmitting(false);
       onOpenChange(false);
-    }, 1000);
+    }, 500);
   };
   
   return (
@@ -68,7 +75,7 @@ export function AIConfigModal({ open, onOpenChange }: AIConfigModalProps) {
             </div>
             
             <p className="text-sm text-muted-foreground text-center">
-              You can reset your configuration or close this dialog.
+              Your API key has been automatically configured.
             </p>
           </div>
         ) : (

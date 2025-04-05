@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, AlertCircle, Lightbulb } from "lucide-react";
+import { Sparkles, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import aiService, { AIDataAnalysisParams } from "@/services/AIService";
 import { useAIService } from "@/components/ai/AIServiceProvider";
@@ -20,11 +20,7 @@ export function AIRecommendationsSection({ projectData }: AIRecommendationsSecti
   const { isConfigured } = useAIService();
   
   const analyzeProject = async () => {
-    if (!isConfigured) {
-      setConfigModalOpen(true);
-      return;
-    }
-    
+    // No need to check if configured since we're auto-configuring
     setLoading(true);
     
     try {
@@ -63,27 +59,7 @@ export function AIRecommendationsSection({ projectData }: AIRecommendationsSecti
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!isConfigured ? (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
-            <div className="flex">
-              <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2 flex-shrink-0" />
-              <div>
-                <h4 className="font-medium text-yellow-800 dark:text-yellow-300 text-sm">AI Services Not Configured</h4>
-                <p className="text-yellow-700 dark:text-yellow-400 text-xs mt-1">
-                  You need to configure your API key to use AI carbon optimization.
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="mt-2 border-yellow-300 bg-yellow-100/50 hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-900 dark:hover:bg-yellow-800 text-yellow-800 dark:text-yellow-300"
-                  onClick={() => setConfigModalOpen(true)}
-                >
-                  Configure AI Services
-                </Button>
-              </div>
-            </div>
-          </div>
-        ) : insights.length > 0 ? (
+        {insights.length > 0 ? (
           <div className="space-y-6">
             {/* Insights Section */}
             <div>
