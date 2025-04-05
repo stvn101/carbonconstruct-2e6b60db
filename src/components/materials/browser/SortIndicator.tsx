@@ -13,8 +13,8 @@ const SortIndicator: React.FC<SortIndicatorProps> = ({ active, direction }) => {
   }
   
   return direction === "asc" 
-    ? <ArrowUp className="ml-1 h-4 w-4 text-carbon-600 animate-pulse" />
-    : <ArrowDown className="ml-1 h-4 w-4 text-carbon-600 animate-pulse" />;
+    ? <ArrowUp className="ml-1 h-4 w-4 text-carbon-600 dark:text-carbon-400 animate-pulse" />
+    : <ArrowDown className="ml-1 h-4 w-4 text-carbon-600 dark:text-carbon-400 animate-pulse" />;
 };
 
 export default SortIndicator;

@@ -34,8 +34,8 @@ const EasyIntegration = () => {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-carbon-100">
-              <FileCheck2 className="h-6 w-6 text-carbon-700" />
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-carbon-100 dark:bg-carbon-800">
+              <FileCheck2 className="h-6 w-6 text-carbon-700 dark:text-carbon-200" />
             </div>
           </div>
           <h1 className="text-3xl font-bold mb-2">Easy Integration</h1>
@@ -63,17 +63,17 @@ const EasyIntegration = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-6 bg-carbon-50 rounded-lg p-4 border border-carbon-100">
+                <div className="mb-6 bg-carbon-50 dark:bg-carbon-900 rounded-lg p-4 border border-carbon-100 dark:border-carbon-800">
                   <h3 className="font-medium mb-2">Supported File Formats</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <div className="py-2 px-3 bg-white rounded border text-center text-sm">CSV</div>
-                    <div className="py-2 px-3 bg-white rounded border text-center text-sm">XLS/XLSX</div>
-                    <div className="py-2 px-3 bg-white rounded border text-center text-sm">JSON</div>
-                    <div className="py-2 px-3 bg-white rounded border text-center text-sm">XML</div>
+                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">CSV</div>
+                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">XLS/XLSX</div>
+                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">JSON</div>
+                    <div className="py-2 px-3 bg-white dark:bg-carbon-800 rounded border text-center text-sm">XML</div>
                   </div>
                 </div>
                 
-                <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg py-8 px-4 mb-6">
+                <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg py-8 px-4 mb-6 dark:border-carbon-700">
                   <Upload className="h-10 w-10 text-muted-foreground mb-4" />
                   <p className="text-center mb-4">
                     Drag and drop your files here, or click to browse
@@ -144,7 +144,7 @@ const EasyIntegration = () => {
                 <div className="mb-6">
                   <h3 className="font-medium mb-3">Export Options</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-carbon-50">
+                    <Card className="bg-carbon-50 dark:bg-carbon-900">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base">Full Report</CardTitle>
                       </CardHeader>
@@ -163,7 +163,7 @@ const EasyIntegration = () => {
                       </CardContent>
                     </Card>
                     
-                    <Card className="bg-carbon-50">
+                    <Card className="bg-carbon-50 dark:bg-carbon-900">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base">Raw Data</CardTitle>
                       </CardHeader>
@@ -182,7 +182,7 @@ const EasyIntegration = () => {
                       </CardContent>
                     </Card>
                     
-                    <Card className="bg-carbon-50">
+                    <Card className="bg-carbon-50 dark:bg-carbon-900">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base">Charts Only</CardTitle>
                       </CardHeader>
@@ -254,12 +254,12 @@ const EasyIntegration = () => {
           </CardHeader>
           <CardContent>
             <div className="relative">
-              <div className="absolute top-0 bottom-0 left-[42px] w-0.5 bg-carbon-100"></div>
+              <div className="absolute top-0 bottom-0 left-[42px] w-0.5 bg-carbon-100 dark:bg-carbon-700"></div>
               <div className="space-y-6">
                 <div className="flex">
                   <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 border-4 border-background flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700">1</span>
+                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
+                      <span className="font-medium text-carbon-700 dark:text-carbon-200">1</span>
                     </div>
                   </div>
                   <div className="ml-2">
@@ -267,9 +267,9 @@ const EasyIntegration = () => {
                     <p className="text-muted-foreground mb-2">
                       Import material quantities, transportation details, and energy usage from your existing systems.
                     </p>
-                    <div className="bg-carbon-50 p-3 rounded-lg border inline-block">
+                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
                       <div className="flex items-center text-sm">
-                        <Upload className="h-4 w-4 mr-2 text-carbon-500" />
+                        <Upload className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
                         Automatic data extraction from BIM models, spreadsheets, or project management software
                       </div>
                     </div>
@@ -278,8 +278,8 @@ const EasyIntegration = () => {
                 
                 <div className="flex">
                   <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 border-4 border-background flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700">2</span>
+                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
+                      <span className="font-medium text-carbon-700 dark:text-carbon-200">2</span>
                     </div>
                   </div>
                   <div className="ml-2">
@@ -287,9 +287,9 @@ const EasyIntegration = () => {
                     <p className="text-muted-foreground mb-2">
                       Our system automatically calculates emissions based on imported data.
                     </p>
-                    <div className="bg-carbon-50 p-3 rounded-lg border inline-block">
+                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
                       <div className="flex items-center text-sm">
-                        <ArrowRight className="h-4 w-4 mr-2 text-carbon-500" />
+                        <ArrowRight className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
                         No manual data re-entry required, reducing errors and saving time
                       </div>
                     </div>
@@ -298,8 +298,8 @@ const EasyIntegration = () => {
                 
                 <div className="flex">
                   <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 border-4 border-background flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700">3</span>
+                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
+                      <span className="font-medium text-carbon-700 dark:text-carbon-200">3</span>
                     </div>
                   </div>
                   <div className="ml-2">
@@ -307,9 +307,9 @@ const EasyIntegration = () => {
                     <p className="text-muted-foreground mb-2">
                       Create detailed sustainability reports and visualizations.
                     </p>
-                    <div className="bg-carbon-50 p-3 rounded-lg border inline-block">
+                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
                       <div className="flex items-center text-sm">
-                        <FileCheck2 className="h-4 w-4 mr-2 text-carbon-500" />
+                        <FileCheck2 className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
                         Reports designed to meet regulatory requirements and stakeholder expectations
                       </div>
                     </div>
@@ -318,8 +318,8 @@ const EasyIntegration = () => {
                 
                 <div className="flex">
                   <div className="w-20 flex-shrink-0 flex items-start justify-center">
-                    <div className="h-8 w-8 rounded-full bg-carbon-100 border-4 border-background flex items-center justify-center z-10">
-                      <span className="font-medium text-carbon-700">4</span>
+                    <div className="h-8 w-8 rounded-full bg-carbon-100 dark:bg-carbon-700 border-4 border-background dark:border-card flex items-center justify-center z-10">
+                      <span className="font-medium text-carbon-700 dark:text-carbon-200">4</span>
                     </div>
                   </div>
                   <div className="ml-2">
@@ -327,9 +327,9 @@ const EasyIntegration = () => {
                     <p className="text-muted-foreground mb-2">
                       Send results back to your existing systems or share with stakeholders.
                     </p>
-                    <div className="bg-carbon-50 p-3 rounded-lg border inline-block">
+                    <div className="bg-carbon-50 dark:bg-carbon-900 p-3 rounded-lg border dark:border-carbon-700 inline-block">
                       <div className="flex items-center text-sm">
-                        <Download className="h-4 w-4 mr-2 text-carbon-500" />
+                        <Download className="h-4 w-4 mr-2 text-carbon-500 dark:text-carbon-400" />
                         Export in multiple formats or use direct integrations to update project systems
                       </div>
                     </div>
@@ -341,8 +341,8 @@ const EasyIntegration = () => {
         </Card>
         
         {/* Compatibility Statement */}
-        <Alert className="border-carbon-200 bg-carbon-50">
-          <CheckCircle className="h-4 w-4 text-carbon-600" />
+        <Alert className="border-carbon-200 bg-carbon-50 dark:bg-carbon-900 dark:border-carbon-700">
+          <CheckCircle className="h-4 w-4 text-carbon-600 dark:text-carbon-300" />
           <AlertTitle>Zero Workflow Disruption</AlertTitle>
           <AlertDescription>
             CarbonConstruct works alongside your existing software without requiring any changes to your established workflows. 
