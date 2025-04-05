@@ -1,15 +1,3 @@
-
-interface EnrichedMaterial {
-  type: string;
-  factor: number;
-  category: string;
-  alternativeToStandard: boolean;
-  carbonReduction: number;
-  sustainabilityScore: number;
-  locallySourced: boolean;
-  recyclability: "High" | "Medium" | "Low";
-}
-
 import { Material, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 
 export function getCategory(materialType: string): string {
