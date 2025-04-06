@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import NavbarLinks from "@/components/NavbarLinks";
 
@@ -10,7 +10,6 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -24,7 +23,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Check for dark mode
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark');
     setIsDarkMode(isDark);
@@ -49,6 +47,7 @@ const Navbar = () => {
     { title: "Calculator", path: "/calculator" },
     { title: "Pricing", path: "/pricing" },
     { title: "About", path: "/about" },
+    { title: "Blog", path: "/blog" },
     { title: "Contact", path: "/contact" },
   ];
 
@@ -80,7 +79,6 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
               <motion.div
@@ -97,11 +95,9 @@ const Navbar = () => {
               </motion.div>
             ))}
             
-            {/* NavbarLinks component for auth buttons */}
             <NavbarLinks />
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <NavbarLinks />
             <Button 
@@ -116,7 +112,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div 
