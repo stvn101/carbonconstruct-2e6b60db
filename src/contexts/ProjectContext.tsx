@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput, MATERIAL_FACTORS, ENERGY_FACTORS } from "@/lib/carbonCalculations";
+import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+import { supabase } from '@/integrations/supabase/client';
 
 export interface SavedProject {
   id: string;
@@ -54,13 +55,34 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [user]);
 
-  const loadProjects = () => {
+  const loadProjects = async () => {
+    if (!user) return;
+    
     setIsLoading(true);
     try {
-      const savedProjects = localStorage.getItem(`projects-${user?.id}`);
-      if (savedProjects) {
-        setProjects(JSON.parse(savedProjects));
-      }
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      // Transform the data to match our SavedProject interface
+      const transformedProjects = data.map(project => ({
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        userId: project.user_id,
+        createdAt: project.created_at,
+        updatedAt: project.updated_at,
+        materials: project.materials || [],
+        transport: project.transport || [],
+        energy: project.energy || [],
+        result: project.result,
+        tags: project.tags
+      }));
+      
+      setProjects(transformedProjects);
     } catch (error) {
       console.error('Error loading projects:', error);
       toast.error("Failed to load your projects");
@@ -69,56 +91,106 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const saveProjects = async (updatedProjects: SavedProject[]) => {
-    if (user) {
-      try {
-        localStorage.setItem(`projects-${user.id}`, JSON.stringify(updatedProjects));
-      } catch (error) {
-        console.error('Error saving projects:', error);
-        toast.error("Failed to save your projects");
-        throw error;
-      }
-    }
-  };
-
   const saveProject = async (project: Omit<SavedProject, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) {
       throw new Error('You must be logged in to save projects');
     }
 
-    const newProject: SavedProject = {
-      ...project,
-      id: uuidv4(),
-      userId: user.id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    try {
+      const newProject = {
+        name: project.name,
+        description: project.description,
+        user_id: user.id,
+        materials: project.materials,
+        transport: project.transport,
+        energy: project.energy,
+        result: project.result,
+        tags: project.tags
+      };
 
-    const updatedProjects = [...projects, newProject];
-    await saveProjects(updatedProjects);
-    setProjects(updatedProjects);
-    toast.success("Project saved successfully");
-    return newProject;
+      const { data, error } = await supabase
+        .from('projects')
+        .insert(newProject)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Transform to our SavedProject interface
+      const savedProject: SavedProject = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        userId: data.user_id,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        materials: data.materials || [],
+        transport: data.transport || [],
+        energy: data.energy || [],
+        result: data.result,
+        tags: data.tags
+      };
+
+      setProjects(prevProjects => [...prevProjects, savedProject]);
+      toast.success("Project saved successfully");
+      
+      return savedProject;
+    } catch (error) {
+      console.error('Error saving project:', error);
+      toast.error("Failed to save project");
+      throw error;
+    }
   };
 
   const updateProject = async (project: SavedProject) => {
-    const updatedProjects = projects.map(p => 
-      p.id === project.id 
-        ? { ...project, updatedAt: new Date().toISOString() } 
-        : p
-    );
-    
-    await saveProjects(updatedProjects);
-    setProjects(updatedProjects);
-    toast.success("Project updated successfully");
-    return project;
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          name: project.name,
+          description: project.description,
+          materials: project.materials,
+          transport: project.transport,
+          energy: project.energy,
+          result: project.result,
+          tags: project.tags,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', project.id);
+
+      if (error) throw error;
+      
+      // Update local state
+      const updatedProject = { ...project, updatedAt: new Date().toISOString() };
+      setProjects(prevProjects => 
+        prevProjects.map(p => p.id === project.id ? updatedProject : p)
+      );
+
+      toast.success("Project updated successfully");
+      return updatedProject;
+    } catch (error) {
+      console.error('Update project error:', error);
+      toast.error("Failed to update project");
+      throw error;
+    }
   };
 
   const deleteProject = async (id: string) => {
-    const updatedProjects = projects.filter(p => p.id !== id);
-    await saveProjects(updatedProjects);
-    setProjects(updatedProjects);
-    toast.success("Project deleted successfully");
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
+      toast.success("Project deleted successfully");
+    } catch (error) {
+      console.error('Delete project error:', error);
+      toast.error("Failed to delete project");
+      throw error;
+    }
   };
 
   const getProject = (id: string) => {
@@ -128,7 +200,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const exportProjectPDF = async (project: SavedProject) => {
     try {
       toast.success("PDF export started");
-      // In a real app, this would call a service to generate a PDF
+      // In a real app, we would call an edge function to generate a PDF
       await new Promise(resolve => setTimeout(resolve, 1500));
       toast.success("PDF exported successfully");
     } catch (error) {
@@ -140,19 +212,21 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const exportProjectCSV = async (project: SavedProject) => {
     try {
       // Simple CSV generation
-      const materialsCSV = project.materials.map(m => 
-        `${m.type},${m.quantity},${MATERIAL_FACTORS[m.type].unit}`
-      ).join('\n');
+      const { materials, transport, energy } = project;
       
-      const transportCSV = project.transport.map(t => 
-        `${t.type},${t.distance},${t.weight}`
-      ).join('\n');
+      const createCSVContent = (data: any[], headers: string[]) => {
+        const headerRow = headers.join(',');
+        const dataRows = data.map(item => 
+          headers.map(header => JSON.stringify(item[header] || '')).join(',')
+        );
+        return [headerRow, ...dataRows].join('\n');
+      };
       
-      const energyCSV = project.energy.map(e => 
-        `${e.type},${e.amount},${ENERGY_FACTORS[e.type].unit}`
-      ).join('\n');
+      const materialsCSV = createCSVContent(materials, ['type', 'quantity']);
+      const transportCSV = createCSVContent(transport, ['type', 'distance', 'weight']);
+      const energyCSV = createCSVContent(energy, ['type', 'amount']);
       
-      const csvContent = `Materials\nType,Quantity,Unit\n${materialsCSV}\n\nTransport\nType,Distance,Weight\n${transportCSV}\n\nEnergy\nType,Amount,Unit\n${energyCSV}`;
+      const csvContent = `Materials\n${materialsCSV}\n\nTransport\n${transportCSV}\n\nEnergy\n${energyCSV}`;
       
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
