@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { Json } from '@/integrations/supabase/types';
 
 export interface SavedProject {
   id: string;
@@ -68,22 +69,25 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       if (error) throw error;
       
-      // Transform the data to match our SavedProject interface
-      const transformedProjects = data?.map(project => ({
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        userId: project.user_id,
-        createdAt: project.created_at,
-        updatedAt: project.updated_at,
-        materials: project.materials || [],
-        transport: project.transport || [],
-        energy: project.energy || [],
-        result: project.result,
-        tags: project.tags
-      })) || [];
-      
-      setProjects(transformedProjects);
+      if (data) {
+        // Transform the data to match our SavedProject interface
+        const transformedProjects: SavedProject[] = data.map(project => ({
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          userId: project.user_id,
+          createdAt: project.created_at,
+          updatedAt: project.updated_at,
+          // Parse JSON data from database with proper type casting
+          materials: (project.materials as unknown as MaterialInput[]) || [],
+          transport: (project.transport as unknown as TransportInput[]) || [],
+          energy: (project.energy as unknown as EnergyInput[]) || [],
+          result: project.result as unknown as CalculationResult,
+          tags: project.tags || []
+        }));
+        
+        setProjects(transformedProjects);
+      }
     } catch (error) {
       console.error('Error loading projects:', error);
       toast.error("Failed to load your projects");
@@ -102,10 +106,11 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         name: project.name,
         description: project.description,
         user_id: user.id,
-        materials: project.materials,
-        transport: project.transport,
-        energy: project.energy,
-        result: project.result,
+        // Convert TypeScript objects to JSON for database storage
+        materials: project.materials as unknown as Json,
+        transport: project.transport as unknown as Json,
+        energy: project.energy as unknown as Json,
+        result: project.result as unknown as Json,
         tags: project.tags
       };
 
@@ -129,11 +134,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         userId: data.user_id,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-        materials: data.materials || [],
-        transport: data.transport || [],
-        energy: data.energy || [],
-        result: data.result,
-        tags: data.tags
+        // Parse JSON data from database
+        materials: (data.materials as unknown as MaterialInput[]) || [],
+        transport: (data.transport as unknown as TransportInput[]) || [],
+        energy: (data.energy as unknown as EnergyInput[]) || [],
+        result: data.result as unknown as CalculationResult,
+        tags: data.tags || []
       };
 
       setProjects(prevProjects => [...prevProjects, savedProject]);
@@ -154,10 +160,11 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .update({
           name: project.name,
           description: project.description,
-          materials: project.materials,
-          transport: project.transport,
-          energy: project.energy,
-          result: project.result,
+          // Convert TypeScript objects to JSON for database storage
+          materials: project.materials as unknown as Json,
+          transport: project.transport as unknown as Json,
+          energy: project.energy as unknown as Json,
+          result: project.result as unknown as Json,
           tags: project.tags,
           updated_at: new Date().toISOString()
         })
