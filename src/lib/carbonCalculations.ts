@@ -16,11 +16,15 @@ import {
   CalculationResult 
 } from './carbonTypes';
 
-// Re-export the factors and types
+// Re-export the factors
 export { 
   MATERIAL_FACTORS, 
   TRANSPORT_FACTORS, 
-  ENERGY_FACTORS,
+  ENERGY_FACTORS
+};
+
+// Re-export the types using export type
+export type { 
   Material, 
   Transport, 
   Energy,

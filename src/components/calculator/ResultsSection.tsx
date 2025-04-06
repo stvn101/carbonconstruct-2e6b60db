@@ -1,15 +1,11 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
-  CalculationInput,
-  CalculationResult, 
+  CalculationResult,
   MaterialInput, 
   TransportInput, 
   EnergyInput,
-  MATERIAL_FACTORS, 
-  TRANSPORT_FACTORS, 
-  ENERGY_FACTORS
+  CalculationInput
 } from "@/lib/carbonCalculations";
 import CalculatorResults from "../CalculatorResults";
 import RecommendationsSection from "../RecommendationsSection";

@@ -19,9 +19,9 @@ import {
 } from "lucide-react";
 import { 
   CalculationInput, 
-  CalculationResult,
-  MATERIAL_FACTORS 
+  CalculationResult
 } from "@/lib/carbonCalculations";
+import { MATERIAL_FACTORS } from '@/lib/carbonData';
 import { calculatePotentialSavings } from "@/lib/sustainabilitySuggestions";
 
 interface RecommendationsSectionProps {
