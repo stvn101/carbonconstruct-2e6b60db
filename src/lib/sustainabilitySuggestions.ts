@@ -3,8 +3,9 @@ import {
   Material, 
   CalculationResult, 
   CalculationInput,
-  MATERIAL_FACTORS 
+  MaterialInput
 } from './carbonCalculations';
+import { MATERIAL_FACTORS } from './carbonData';
 
 // Generates a suggested improvement based on the calculation results
 export const generateSuggestions = (result: CalculationResult): string[] => {
