@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
 export interface SavedProject {
   id: string;
@@ -68,7 +69,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (error) throw error;
       
       // Transform the data to match our SavedProject interface
-      const transformedProjects = data.map(project => ({
+      const transformedProjects = data?.map(project => ({
         id: project.id,
         name: project.name,
         description: project.description,
@@ -80,7 +81,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         energy: project.energy || [],
         result: project.result,
         tags: project.tags
-      }));
+      })) || [];
       
       setProjects(transformedProjects);
     } catch (error) {
@@ -115,6 +116,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .single();
 
       if (error) throw error;
+      
+      if (!data) {
+        throw new Error('No data returned from insert operation');
+      }
       
       // Transform to our SavedProject interface
       const savedProject: SavedProject = {

@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/Navbar";
@@ -22,7 +21,7 @@ import { ReportsTab } from "@/components/dashboard/ReportsTab";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { projects } = useProjects();
   
   // Get the most recent projects
@@ -49,7 +48,7 @@ const Dashboard = () => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Welcome, {user?.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold">Welcome, {profile?.full_name || user?.email?.split('@')[0]}</h1>
               <p className="text-muted-foreground">Manage your carbon footprint calculations</p>
             </div>
             <div className="mt-4 md:mt-0 space-x-2">
