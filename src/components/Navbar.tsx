@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import NavbarLinks from "@/components/NavbarLinks";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -116,24 +117,19 @@ const Navbar = () => {
               </motion.div>
             ))}
             
-            {/* Get Started button */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button asChild>
-                <Link to="/pricing">Get Started</Link>
-              </Button>
-            </motion.div>
+            {/* NavbarLinks component for auth buttons */}
+            <NavbarLinks />
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center">
+            <NavbarLinks />
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
+              className="ml-2"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -161,14 +157,6 @@ const Navbar = () => {
                     {link.title}
                   </Link>
                 ))}
-                <div className="flex space-x-2 pt-2">
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link>
-                  </Button>
-                  <Button asChild className="w-full">
-                    <Link to="/pricing" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
-                  </Button>
-                </div>
               </div>
             </motion.div>
           )}
