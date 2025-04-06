@@ -1,0 +1,46 @@
+
+import { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from './carbonData';
+
+export type Material = keyof typeof MATERIAL_FACTORS;
+export type Transport = keyof typeof TRANSPORT_FACTORS;
+export type Energy = keyof typeof ENERGY_FACTORS;
+
+export interface MaterialInput {
+  type: Material;
+  quantity: number;
+  unit?: string;
+}
+
+export interface TransportInput {
+  type: Transport;
+  distance: number;
+  weight: number;
+}
+
+export interface EnergyInput {
+  type: Energy;
+  amount: number;
+  unit?: string;
+}
+
+export interface CalculationInput {
+  materials: MaterialInput[];
+  transport: TransportInput[];
+  energy: EnergyInput[];
+}
+
+export interface CalculationResult {
+  materialEmissions: number;
+  transportEmissions: number;
+  energyEmissions: number;
+  totalEmissions: number;
+  breakdownByMaterial: {
+    [key in Material]?: number;
+  };
+  breakdownByTransport: {
+    [key in Transport]?: number;
+  };
+  breakdownByEnergy: {
+    [key in Energy]?: number;
+  };
+}
