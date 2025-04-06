@@ -3,28 +3,15 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
-
-interface UserProfile {
-  id: string;
-  full_name: string | null;
-  company_name: string | null;
-  avatar_url: string | null;
-  website: string | null;
-  role: string | null;
-}
-
-interface AuthContextType {
-  user: User | null;
-  profile: UserProfile | null;
-  session: Session | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  signInWithGitHub: () => Promise<void>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-}
+import { UserProfile, AuthContextType } from '@/types/auth';
+import { 
+  fetchUserProfile, 
+  loginWithPassword, 
+  registerUser, 
+  signInWithGitHubOAuth, 
+  logoutUser, 
+  updateUserProfile 
+} from '@/services/authService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -77,33 +64,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-      
-      setProfile(data as UserProfile);
-    } catch (error) {
-      console.error('Profile fetch error:', error);
+    const profileData = await fetchUserProfile(userId);
+    if (profileData) {
+      setProfile(profileData);
     }
   };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
+      await loginWithPassword(email, password);
       toast.success("Successfully logged in!");
     } catch (error: any) {
       console.error('Login failed:', error);
@@ -117,20 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-          },
-        },
-      });
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
+      await registerUser(name, email, password);
       toast.success("Account created! Please check your email for verification.");
     } catch (error: any) {
       console.error('Registration failed:', error);
@@ -144,16 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGitHub = async () => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-      
-      if (error) {
-        throw new Error(error.message);
-      }
+      await signInWithGitHubOAuth();
     } catch (error: any) {
       console.error('GitHub login failed:', error);
       toast.error(error.message || "GitHub login failed, please try again.");
@@ -165,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      await logoutUser();
       toast.success("Logged out successfully");
     } catch (error) {
       console.error('Logout error:', error);
@@ -177,12 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) throw new Error('Not authenticated');
     
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
-        
-      if (error) throw error;
+      await updateUserProfile(user.id, updates);
       
       // Update local state
       setProfile(prev => prev ? { ...prev, ...updates } : null);

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,6 +11,18 @@ import {
 import CalculatorResults from "../CalculatorResults";
 import RecommendationsSection from "../RecommendationsSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from "@/lib/carbonData";
+import { generateSuggestions, calculatePotentialSavings } from "@/lib/sustainabilitySuggestions";
+import { 
+  Material, 
+  Transport, 
+  Energy,
+  MaterialInput, 
+  TransportInput, 
+  EnergyInput, 
+  CalculationInput, 
+  CalculationResult 
+} from "@/lib/carbonTypes";
 
 interface ResultsSectionProps {
   calculationResult: CalculationResult | null;
