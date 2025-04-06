@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -47,10 +46,9 @@ const Navbar = () => {
 
   const navLinks = [
     { title: "Home", path: "/" },
-    { title: "About", path: "/about" },
     { title: "Calculator", path: "/calculator" },
     { title: "Pricing", path: "/pricing" },
-    { title: "Blog", path: "/blog" },
+    { title: "About", path: "/about" },
     { title: "Contact", path: "/contact" },
   ];
 
@@ -84,25 +82,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Home button */}
-            <motion.div
-              whileHover={{ y: -2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-1" 
-                asChild
-              >
-                <Link to="/">
-                  <Home className="h-4 w-4" />
-                  <span>Home</span>
-                </Link>
-              </Button>
-            </motion.div>
-            
-            {navLinks.slice(1).map((link) => (
+            {navLinks.map((link) => (
               <motion.div
                 key={link.path}
                 whileHover={{ y: -2 }}
