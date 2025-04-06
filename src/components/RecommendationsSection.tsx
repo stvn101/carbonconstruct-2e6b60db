@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { 
@@ -20,10 +19,10 @@ import {
 } from "lucide-react";
 import { 
   CalculationInput, 
-  CalculationResult, 
-  calculatePotentialSavings,
-  MATERIAL_FACTORS
+  CalculationResult,
+  MATERIAL_FACTORS 
 } from "@/lib/carbonCalculations";
+import { calculatePotentialSavings } from "@/lib/sustainabilitySuggestions";
 
 interface RecommendationsSectionProps {
   calculationInput: CalculationInput;

@@ -1,6 +1,10 @@
 
-import { Material, CalculationResult } from './carbonTypes';
-import { MATERIAL_FACTORS } from './carbonData';
+import { 
+  Material, 
+  CalculationResult, 
+  CalculationInput,
+  MATERIAL_FACTORS 
+} from './carbonCalculations';
 
 // Generates a suggested improvement based on the calculation results
 export const generateSuggestions = (result: CalculationResult): string[] => {
