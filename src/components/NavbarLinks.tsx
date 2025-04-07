@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -29,6 +29,7 @@ const NavbarLinks = () => {
   const { user, logout } = useAuth();
   const isMobile = useIsMobile();
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const navigate = useNavigate();
   
   useEffect(() => {
     if (user) {
@@ -87,6 +88,8 @@ const NavbarLinks = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      // Redirect to auth page after successful logout
+      navigate('/auth');
     } catch (error) {
       console.error('Logout error:', error);
       toast.error("Failed to log out. Please try again.");
