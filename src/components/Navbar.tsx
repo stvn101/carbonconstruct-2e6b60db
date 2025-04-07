@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,20 +10,49 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   
+  // Handle scrolling behavior and visibility
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
+      const currentScrollY = window.scrollY;
+      
+      // Show navbar at the top of the page
+      if (currentScrollY < 10) {
+        setIsVisible(true);
         setScrolled(false);
+      } 
+      // Hide when scrolling down, show when scrolling up
+      else {
+        if (currentScrollY > lastScrollY) {
+          setIsVisible(false); // Scrolling down
+        } else {
+          setIsVisible(true); // Scrolling up
+        }
+        setScrolled(true);
       }
+      
+      setLastScrollY(currentScrollY);
     };
     
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
+  // Handle mouse movement to show navbar when near top
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (e.clientY < 60) {
+        setIsVisible(true);
+      }
+    };
+    
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  // Dark mode detection
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark');
     setIsDarkMode(isDark);
@@ -61,7 +91,10 @@ const Navbar = () => {
         isDarkMode ? "dark" : ""
       }`}
       initial={{ y: -100 }}
-      animate={{ y: 0 }}
+      animate={{ 
+        y: isVisible ? 0 : -100,
+        opacity: isVisible ? 1 : 0
+      }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
     >
       <div className="container mx-auto px-4 md:px-6">
