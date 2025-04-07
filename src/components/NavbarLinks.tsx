@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -22,6 +23,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const NavbarLinks = () => {
   const { user, logout } = useAuth();
@@ -43,6 +45,7 @@ const NavbarLinks = () => {
         }, () => {
           // Increment the unread count
           setUnreadNotifications(prev => prev + 1);
+          toast.info("You have a new notification");
         })
         .on('postgres_changes', { 
           event: 'UPDATE', 
@@ -78,6 +81,15 @@ const NavbarLinks = () => {
       setUnreadNotifications(count || 0);
     } catch (error) {
       console.error('Error fetching unread notification count:', error);
+    }
+  };
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error("Failed to log out. Please try again.");
     }
   };
   
@@ -139,7 +151,7 @@ const NavbarLinks = () => {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={logout}
+                onClick={handleLogout}
                 className="flex cursor-pointer items-center text-red-600 focus:text-red-600"
               >
                 <LogOut className="mr-2 h-4 w-4" />
