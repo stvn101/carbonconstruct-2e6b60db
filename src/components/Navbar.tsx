@@ -96,6 +96,7 @@ const Navbar = () => {
         opacity: isVisible ? 1 : 0
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
+      data-navbar-height="true"
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">

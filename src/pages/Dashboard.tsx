@@ -45,7 +45,7 @@ const Dashboard = () => {
         />
       </Helmet>
       <Navbar />
-      <main className="flex-grow py-10 px-4">
+      <main className="flex-grow pt-24 md:pt-28 pb-10 px-4">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div>
