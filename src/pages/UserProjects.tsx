@@ -62,7 +62,7 @@ const UserProjects = () => {
         />
       </Helmet>
       <Navbar />
-      <main className="flex-grow py-12 px-4">
+      <main className="flex-grow pt-24 md:pt-28 px-4 pb-12">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div>
