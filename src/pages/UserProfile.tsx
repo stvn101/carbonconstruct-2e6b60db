@@ -57,7 +57,7 @@ const UserProfile = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col bg-carbon-50 dark:bg-carbon-900"
+      className="min-h-screen flex flex-col bg-carbon-50 dark:bg-gray-900"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
@@ -74,45 +74,47 @@ const UserProfile = () => {
       
       <main className="flex-grow py-12 px-4">
         <div className="container mx-auto max-w-3xl">
-          <h1 className="text-2xl md:text-3xl font-bold mb-8">My Profile</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-8 dark:text-carbon-300">My Profile</h1>
           
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center gap-4">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={formData.avatar_url || undefined} alt={formData.full_name || "User"} />
-                <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
+                <AvatarFallback className="text-lg bg-carbon-200 text-carbon-800 dark:bg-carbon-700 dark:text-carbon-300">{getInitials()}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle>{formData.full_name || user?.email}</CardTitle>
-                <CardDescription>{user?.email}</CardDescription>
+                <CardTitle className="dark:text-carbon-300">{formData.full_name || user?.email}</CardTitle>
+                <CardDescription className="dark:text-carbon-400">{user?.email}</CardDescription>
               </div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="full_name">Full Name</Label>
+                  <Label htmlFor="full_name" className="dark:text-carbon-300">Full Name</Label>
                   <Input 
                     id="full_name"
                     name="full_name"
                     value={formData.full_name}
                     onChange={handleChange}
                     placeholder="Your full name"
+                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company_name">Company / Organization</Label>
+                  <Label htmlFor="company_name" className="dark:text-carbon-300">Company / Organization</Label>
                   <Input 
                     id="company_name"
                     name="company_name"
                     value={formData.company_name}
                     onChange={handleChange}
                     placeholder="Your company or organization"
+                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
+                  <Label htmlFor="website" className="dark:text-carbon-300">Website</Label>
                   <Input 
                     id="website"
                     name="website"
@@ -120,11 +122,12 @@ const UserProfile = () => {
                     onChange={handleChange}
                     placeholder="https://example.com"
                     type="url"
+                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="avatar_url">Avatar URL</Label>
+                  <Label htmlFor="avatar_url" className="dark:text-carbon-300">Avatar URL</Label>
                   <Input 
                     id="avatar_url"
                     name="avatar_url"
@@ -132,12 +135,13 @@ const UserProfile = () => {
                     onChange={handleChange}
                     placeholder="https://example.com/avatar.jpg"
                     type="url"
+                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
                   />
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-carbon-600 hover:bg-carbon-700"
+                  className="w-full bg-carbon-600 hover:bg-carbon-700 dark:text-carbon-300"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Updating...' : 'Update Profile'}
