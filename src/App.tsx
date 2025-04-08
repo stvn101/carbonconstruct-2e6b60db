@@ -57,6 +57,14 @@ const App: React.FC = () => {
                       </RequireAuth>
                     } 
                   />
+                  <Route 
+                    path="/projects/new" 
+                    element={
+                      <RequireAuth>
+                        <Calculator />
+                      </RequireAuth>
+                    } 
+                  />
                   <Route path="/materials" element={<MaterialBrowser />} />
                   
                   {/* Auth routes */}

@@ -18,7 +18,8 @@ import {
   FileText, 
   Database,
   Bell,
-  UserCircle
+  UserCircle,
+  FolderPlus
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,6 +139,12 @@ const NavbarLinks = () => {
                 <Link to="/projects" className="flex cursor-pointer items-center">
                   <FileText className="mr-2 h-4 w-4" />
                   My Projects
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/projects/new" className="flex cursor-pointer items-center">
+                  <FolderPlus className="mr-2 h-4 w-4" />
+                  New Project
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

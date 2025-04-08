@@ -7,7 +7,8 @@ import {
   FileText, 
   Calendar, 
   Leaf,
-  Plus
+  Plus,
+  FolderPlus
 } from "lucide-react";
 import { SavedProject } from "@/contexts/ProjectContext";
 
@@ -25,15 +26,26 @@ export const ProjectsTab = ({ projects }: ProjectsTabProps) => {
             Manage and view your recent carbon calculations
           </CardDescription>
         </div>
-        <Button 
-          asChild
-          className="bg-carbon-600 hover:bg-carbon-700 text-white"
-        >
-          <Link to="/projects">
-            <FileText className="h-4 w-4 mr-2" />
-            View All
-          </Link>
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            asChild
+            variant="outline"
+          >
+            <Link to="/projects/new">
+              <FolderPlus className="h-4 w-4 mr-2" />
+              New Project
+            </Link>
+          </Button>
+          <Button 
+            asChild
+            className="bg-carbon-600 hover:bg-carbon-700 text-white"
+          >
+            <Link to="/projects">
+              <FileText className="h-4 w-4 mr-2" />
+              View All
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {projects.length > 0 ? (
@@ -81,15 +93,26 @@ export const ProjectsTab = ({ projects }: ProjectsTabProps) => {
             <p className="text-muted-foreground mb-4">
               Start by creating your first carbon calculation
             </p>
-            <Button 
-              asChild
-              className="bg-carbon-600 hover:bg-carbon-700 text-white"
-            >
-              <Link to="/calculator">
-                <Plus className="h-4 w-4 mr-2" />
-                New Calculation
-              </Link>
-            </Button>
+            <div className="flex justify-center gap-2">
+              <Button 
+                asChild
+                variant="outline"
+              >
+                <Link to="/projects/new">
+                  <FolderPlus className="h-4 w-4 mr-2" />
+                  New Project
+                </Link>
+              </Button>
+              <Button 
+                asChild
+                className="bg-carbon-600 hover:bg-carbon-700 text-white"
+              >
+                <Link to="/calculator">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Calculation
+                </Link>
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

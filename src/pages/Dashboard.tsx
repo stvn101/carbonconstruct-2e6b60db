@@ -12,6 +12,7 @@ import {
   Calculator,
   FileText, 
   Brain,
+  FolderPlus,
 } from "lucide-react";
 import AIFeatures from "@/components/ai/AIFeatures";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
@@ -53,6 +54,15 @@ const Dashboard = () => {
               <p className="text-muted-foreground">Manage your carbon footprint calculations</p>
             </div>
             <div className="mt-4 md:mt-0 space-x-2">
+              <Button 
+                asChild
+                variant="outline"
+              >
+                <Link to="/projects/new">
+                  <FolderPlus className="h-4 w-4 mr-2" />
+                  New Project
+                </Link>
+              </Button>
               <Button 
                 asChild
                 className="bg-carbon-600 hover:bg-carbon-700 text-white"
