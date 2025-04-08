@@ -1,24 +1,24 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from './components/ui/sonner';
 import { RegionProvider } from './contexts/RegionContext';
-import Home from './pages/Home';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProjectProvider } from './contexts/ProjectContext';
+
+// Import existing pages
 import Calculator from './pages/Calculator';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
-import Materials from './pages/Materials';
 import UserProjects from './pages/UserProjects';
-import SignUp from './pages/SignUp';
-import SignIn from './pages/SignIn';
-import { AuthProvider } from './contexts/AuthContext';
-import { ProjectProvider } from './contexts/ProjectContext';
-import { RequireAuth } from './components/RequireAuth';
-import { NoAuth } from './components/NoAuth';
+
+// Create and import missing components
+import PrivateRoute from './components/auth/PrivateRoute';
 
 const App: React.FC = () => {
   return (
@@ -29,7 +29,8 @@ const App: React.FC = () => {
             <ProjectProvider>
               <Router>
                 <Routes>
-                  <Route path="/" element={<Home />} />
+                  {/* Use Index page instead of Home since that's what exists */}
+                  <Route path="/" element={<Index />} />
                   <Route path="/calculator" element={<Calculator />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/about" element={<About />} />
@@ -39,36 +40,28 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard" 
                     element={
-                      <RequireAuth>
+                      <PrivateRoute>
                         <Dashboard />
-                      </RequireAuth>
+                      </PrivateRoute>
                     } 
                   />
                   <Route 
                     path="/projects" 
                     element={
-                      <RequireAuth>
+                      <PrivateRoute>
                         <UserProjects />
-                      </RequireAuth>
+                      </PrivateRoute>
                     } 
                   />
-                  <Route path="/materials" element={<Materials />} />
+                  <Route path="/materials" element={<MaterialBrowser />} />
                   
                   <Route 
                     path="/signup" 
-                    element={
-                      <NoAuth>
-                        <SignUp />
-                      </NoAuth>
-                    } 
+                    element={<Auth />} 
                   />
                   <Route 
                     path="/signin" 
-                    element={
-                      <NoAuth>
-                        <SignIn />
-                      </NoAuth>
-                    } 
+                    element={<Auth />} 
                   />
                 </Routes>
               </Router>
@@ -80,5 +73,10 @@ const App: React.FC = () => {
     </HelmetProvider>
   );
 };
+
+// Import pages that were missing but needed by the Router
+import Index from './pages/Index';
+import MaterialBrowser from './pages/MaterialBrowser';
+import Auth from './pages/Auth';
 
 export default App;
