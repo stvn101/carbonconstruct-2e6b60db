@@ -20,6 +20,7 @@ import Auth from './pages/Auth';
 import AuthCallback from './pages/AuthCallback';
 import MaterialBrowser from './pages/MaterialBrowser';
 import Index from './pages/Index';
+import UserProfile from './pages/UserProfile';
 
 // Import auth components
 import { RequireAuth } from './components/RequireAuth';
@@ -46,6 +47,14 @@ const App: React.FC = () => {
                     element={
                       <RequireAuth>
                         <Dashboard />
+                      </RequireAuth>
+                    } 
+                  />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <RequireAuth>
+                        <UserProfile />
                       </RequireAuth>
                     } 
                   />
