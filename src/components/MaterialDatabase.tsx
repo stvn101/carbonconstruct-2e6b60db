@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { 
   Card, 
   CardContent, 
@@ -11,6 +12,7 @@ import { MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 import RegionStats from "@/components/materials/RegionStats";
 import MaterialFilters from "@/components/materials/MaterialFilters";
 import MaterialTable from "@/components/materials/MaterialTable";
+import { useRegion } from "@/contexts/RegionContext";
 
 interface ExtendedMaterialData {
   name: string;
@@ -284,6 +286,14 @@ const MaterialDatabase = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [selectedAlternative, setSelectedAlternative] = useState<string>("none");
   const [selectedTag, setSelectedTag] = useState<string>("all");
+  const { selectedRegion: globalRegion } = useRegion();
+  
+  // Set the default filter to the global region
+  useEffect(() => {
+    if (globalRegion !== "Global") {
+      setSelectedRegion(globalRegion);
+    }
+  }, [globalRegion]);
   
   const baseOptions = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
     id: key,
@@ -321,7 +331,7 @@ const MaterialDatabase = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion("all");
+    setSelectedRegion(globalRegion !== "Global" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
@@ -335,9 +345,14 @@ const MaterialDatabase = () => {
               <Database className="h-6 w-6 text-carbon-700" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Australian Material Database</h1>
+          <h1 className="text-3xl font-bold mb-2">
+            {globalRegion === "Global" 
+              ? "Material Database" 
+              : `${globalRegion} Material Database`}
+          </h1>
           <p className="text-lg text-muted-foreground">
             Explore our comprehensive database of construction materials with accurate carbon coefficients
+            {globalRegion !== "Global" && ` for ${globalRegion}`}
           </p>
           
           <RegionStats materialsByRegion={materialsByRegion} />

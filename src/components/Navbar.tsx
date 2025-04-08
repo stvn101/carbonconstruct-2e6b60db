@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import NavbarLinks from "@/components/NavbarLinks";
+import RegionSelector from "@/components/RegionSelector";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -129,10 +130,12 @@ const Navbar = () => {
               </motion.div>
             ))}
             
+            <RegionSelector />
             <NavbarLinks />
           </div>
 
           <div className="md:hidden flex items-center">
+            <RegionSelector />
             <NavbarLinks />
             <Button 
               variant="ghost" 
