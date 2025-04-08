@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, Calculator } from "lucide-react";
+import { FileText, Calculator, FolderPlus } from "lucide-react";
 
 interface EmptyProjectsListProps {
   hasFilters: boolean;
@@ -17,15 +17,26 @@ export const EmptyProjectsList = ({ hasFilters }: EmptyProjectsListProps) => {
           ? "Try adjusting your search or filters" 
           : "Start by creating your first carbon calculation"}
       </p>
-      <Button 
-        asChild
-        className="bg-carbon-600 hover:bg-carbon-700 text-white"
-      >
-        <Link to="/calculator">
-          <Calculator className="h-4 w-4 mr-2" />
-          New Calculation
-        </Link>
-      </Button>
+      <div className="flex justify-center gap-2">
+        <Button 
+          asChild
+          variant="outline"
+        >
+          <Link to="/projects/new">
+            <FolderPlus className="h-4 w-4 mr-2" />
+            New Project
+          </Link>
+        </Button>
+        <Button 
+          asChild
+          className="bg-carbon-600 hover:bg-carbon-700 text-white"
+        >
+          <Link to="/calculator">
+            <Calculator className="h-4 w-4 mr-2" />
+            New Calculation
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 };
