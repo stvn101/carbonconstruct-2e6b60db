@@ -16,9 +16,14 @@ import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
 import UserProjects from './pages/UserProjects';
+import Auth from './pages/Auth';
+import AuthCallback from './pages/AuthCallback';
+import MaterialBrowser from './pages/MaterialBrowser';
+import Index from './pages/Index';
 
-// Create and import missing components
-import PrivateRoute from './components/auth/PrivateRoute';
+// Import auth components
+import { RequireAuth } from './components/RequireAuth';
+import { NoAuth } from './components/NoAuth';
 
 const App: React.FC = () => {
   return (
@@ -29,7 +34,6 @@ const App: React.FC = () => {
             <ProjectProvider>
               <Router>
                 <Routes>
-                  {/* Use Index page instead of Home since that's what exists */}
                   <Route path="/" element={<Index />} />
                   <Route path="/calculator" element={<Calculator />} />
                   <Route path="/pricing" element={<Pricing />} />
@@ -40,29 +44,47 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard" 
                     element={
-                      <PrivateRoute>
+                      <RequireAuth>
                         <Dashboard />
-                      </PrivateRoute>
+                      </RequireAuth>
                     } 
                   />
                   <Route 
                     path="/projects" 
                     element={
-                      <PrivateRoute>
+                      <RequireAuth>
                         <UserProjects />
-                      </PrivateRoute>
+                      </RequireAuth>
                     } 
                   />
                   <Route path="/materials" element={<MaterialBrowser />} />
                   
+                  {/* Auth routes */}
                   <Route 
-                    path="/signup" 
-                    element={<Auth />} 
+                    path="/auth" 
+                    element={
+                      <NoAuth>
+                        <Auth />
+                      </NoAuth>
+                    } 
                   />
                   <Route 
                     path="/signin" 
-                    element={<Auth />} 
+                    element={
+                      <NoAuth>
+                        <Auth />
+                      </NoAuth>
+                    } 
                   />
+                  <Route 
+                    path="/signup" 
+                    element={
+                      <NoAuth>
+                        <Auth />
+                      </NoAuth>
+                    } 
+                  />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                 </Routes>
               </Router>
             </ProjectProvider>
@@ -73,10 +95,5 @@ const App: React.FC = () => {
     </HelmetProvider>
   );
 };
-
-// Import pages that were missing but needed by the Router
-import Index from './pages/Index';
-import MaterialBrowser from './pages/MaterialBrowser';
-import Auth from './pages/Auth';
 
 export default App;
