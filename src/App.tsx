@@ -1,104 +1,84 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { ThemeProvider } from './components/ThemeProvider';
+import { Toaster } from './components/ui/sonner';
+import { RegionProvider } from './contexts/RegionContext';
+import Home from './pages/Home';
+import Calculator from './pages/Calculator';
+import Pricing from './pages/Pricing';
+import About from './pages/About';
+import Blog from './pages/Blog';
+import Contact from './pages/Contact';
+import Dashboard from './pages/Dashboard';
+import Materials from './pages/Materials';
+import UserProjects from './pages/UserProjects';
+import SignUp from './pages/SignUp';
+import SignIn from './pages/SignIn';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProjectProvider } from './contexts/ProjectContext';
+import { RequireAuth } from './components/RequireAuth';
+import { NoAuth } from './components/NoAuth';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Pricing from "./pages/Pricing";
-import Blog from "./pages/Blog";
-import Contact from "./pages/Contact";
-import Calculator from "./pages/Calculator";
-import NotFound from "./pages/NotFound";
-import { HelmetProvider } from "react-helmet-async";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import CookiePolicy from "./pages/CookiePolicy";
-import DataProcessing from "./pages/DataProcessing";
-import CaseStudies from "./pages/CaseStudies";
-import Resources from "./pages/Resources";
-import Demo from "./pages/Demo";
-import Careers from "./pages/Careers";
-import Partners from "./pages/Partners";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProjectProvider } from "./contexts/ProjectContext";
-import Auth from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
-import Dashboard from "./pages/Dashboard";
-import PrivateRoute from "./components/auth/PrivateRoute";
-import UserProjects from "./pages/UserProjects";
-import ProjectDetail from "./pages/ProjectDetail";
-import MaterialBrowser from "./pages/MaterialBrowser";
-import UserProfile from "./pages/UserProfile";
-import Notifications from "./pages/Notifications";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
-
-const App = () => (
-  <ErrorBoundary>
-    <ThemeProvider defaultTheme="light">
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
+const App: React.FC = () => {
+  return (
+    <HelmetProvider>
+      <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
+        <RegionProvider>
           <AuthProvider>
             <ProjectProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/pricing" element={<Pricing />} />
-                    <Route path="/blog" element={<Blog />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/calculator" element={<Calculator />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                    <Route path="/terms-of-service" element={<TermsOfService />} />
-                    <Route path="/cookie-policy" element={<CookiePolicy />} />
-                    <Route path="/data-processing" element={<DataProcessing />} />
-                    {/* Auth routes */}
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    {/* Protected routes */}
-                    <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                    <Route path="/projects" element={<PrivateRoute><UserProjects /></PrivateRoute>} />
-                    <Route path="/project/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
-                    <Route path="/materials" element={<PrivateRoute><MaterialBrowser /></PrivateRoute>} />
-                    <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
-                    <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
-                    {/* New routes for footer links */}
-                    <Route path="/case-studies" element={<CaseStudies />} />
-                    <Route path="/resources" element={<Resources />} />
-                    <Route path="/demo" element={<Demo />} />
-                    <Route path="/careers" element={<Careers />} />
-                    <Route path="/partners" element={<Partners />} />
-                    {/* Redirect routes for direct feature access */}
-                    <Route path="/reporting" element={<Calculator />} />
-                    <Route path="/integration" element={<Calculator />} />
-                    <Route path="/benchmarking" element={<Calculator />} />
-                    <Route path="/education" element={<Calculator />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-              </TooltipProvider>
+              <Router>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/calculator" element={<Calculator />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/contact" element={<Contact />} />
+                  
+                  <Route 
+                    path="/dashboard" 
+                    element={
+                      <RequireAuth>
+                        <Dashboard />
+                      </RequireAuth>
+                    } 
+                  />
+                  <Route 
+                    path="/projects" 
+                    element={
+                      <RequireAuth>
+                        <UserProjects />
+                      </RequireAuth>
+                    } 
+                  />
+                  <Route path="/materials" element={<Materials />} />
+                  
+                  <Route 
+                    path="/signup" 
+                    element={
+                      <NoAuth>
+                        <SignUp />
+                      </NoAuth>
+                    } 
+                  />
+                  <Route 
+                    path="/signin" 
+                    element={
+                      <NoAuth>
+                        <SignIn />
+                      </NoAuth>
+                    } 
+                  />
+                </Routes>
+              </Router>
             </ProjectProvider>
           </AuthProvider>
-        </QueryClientProvider>
-      </HelmetProvider>
-    </ThemeProvider>
-  </ErrorBoundary>
-);
+          <Toaster />
+        </RegionProvider>
+      </ThemeProvider>
+    </HelmetProvider>
+  );
+};
 
 export default App;
