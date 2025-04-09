@@ -1,0 +1,29 @@
+
+/* Ensure charts stay within their containers */
+.recharts-responsive-container {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure pie charts stay properly centered */
+.recharts-pie {
+  transform-origin: center;
+}
+
+.recharts-legend-wrapper {
+  max-width: 100%;
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Fix for recharts containers in dark mode */
+.recharts-wrapper {
+  max-width: 100%;
+  height: auto !important;
+}
+
+.recharts-surface {
+  overflow: visible;
+}
