@@ -44,6 +44,9 @@ class ErrorBoundary extends Component<Props, State> {
       error: null,
       errorInfo: null
     });
+    
+    // Reload the page to clear any potential JS issues
+    window.location.reload();
   };
 
   public render() {
