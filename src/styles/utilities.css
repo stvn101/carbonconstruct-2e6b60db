@@ -1,2 +1,47 @@
 
 /* This file contains utility classes that don't fit in other categories */
+
+.helper-tip {
+  @apply bg-carbon-50 border-l-4 border-carbon-500 p-4 mb-4 rounded-sm shadow-sm;
+}
+
+.helper-tip-title {
+  @apply font-bold text-carbon-700 text-lg mb-2;
+}
+
+.helper-tip-content {
+  @apply text-carbon-600;
+}
+
+.tutorial-step {
+  @apply flex items-start gap-3 mb-6;
+}
+
+.tutorial-step-number {
+  @apply w-8 h-8 rounded-full bg-carbon-600 text-white flex items-center justify-center font-bold flex-shrink-0;
+}
+
+.tutorial-step-content {
+  @apply flex-1;
+}
+
+.tutorial-step-title {
+  @apply font-bold mb-1 text-lg;
+}
+
+.tutorial-step-description {
+  @apply text-muted-foreground;
+}
+
+/* Dark mode variants */
+.dark .helper-tip {
+  @apply bg-carbon-900 border-carbon-400 text-carbon-100;
+}
+
+.dark .helper-tip-title {
+  @apply text-carbon-200;
+}
+
+.dark .helper-tip-content {
+  @apply text-carbon-300;
+}

@@ -24,6 +24,11 @@ const MaterialsInputSection = ({
 }: MaterialsInputSectionProps) => {
   const isMobile = useIsMobile();
   
+  // Handle focus to select all text when clicking on input
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    event.target.select();
+  };
+  
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="text-md md:text-lg font-medium flex items-center gap-2">
@@ -57,9 +62,10 @@ const MaterialsInputSection = ({
             <Input
               id={`material-quantity-${index}`}
               type="number"
-              value={material.quantity}
-              onChange={(e) => onUpdateMaterial(index, "quantity", e.target.value)}
+              value={material.quantity === 0 ? '' : material.quantity}
+              onChange={(e) => onUpdateMaterial(index, "quantity", e.target.value === '' ? 0 : e.target.value)}
               min={0}
+              onFocus={handleFocus}
               className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
             />
           </div>
