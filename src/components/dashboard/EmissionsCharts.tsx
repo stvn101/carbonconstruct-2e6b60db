@@ -32,6 +32,7 @@ export const EmissionsCharts = () => {
         colors={["#16a34a"]}
         valueFormatter={(value) => `${value} kg CO₂e`}
         showLegend={false}
+        height="h-[220px]"
       />
       <ChartCard
         title="Emissions by Category"
@@ -43,6 +44,7 @@ export const EmissionsCharts = () => {
         index="name"
         colors={["#16a34a", "#2563eb", "#ea580c"]}
         valueFormatter={(value) => `${value}%`}
+        height="h-[220px]"
       />
     </div>
   );

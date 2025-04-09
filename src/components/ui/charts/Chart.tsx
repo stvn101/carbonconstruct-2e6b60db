@@ -41,11 +41,11 @@ const Chart = ({
   
   if (type === 'bar') {
     chartElement = (
-      <RechartsPrimitive.BarChart data={data}>
+      <RechartsPrimitive.BarChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-        <RechartsPrimitive.XAxis dataKey={index} />
-        <RechartsPrimitive.YAxis className="text-foreground" />
-        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+        <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
+        <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
+        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
           content={
             <ChartTooltipContent 
@@ -64,11 +64,11 @@ const Chart = ({
     );
   } else if (type === 'line') {
     chartElement = (
-      <RechartsPrimitive.LineChart data={data}>
+      <RechartsPrimitive.LineChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-        <RechartsPrimitive.XAxis dataKey={index} />
-        <RechartsPrimitive.YAxis className="text-foreground" />
-        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+        <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
+        <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
+        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
           content={
             <ChartTooltipContent 
@@ -82,14 +82,14 @@ const Chart = ({
             type="monotone"
             dataKey={category}
             stroke={colors[i % colors.length]}
-            activeDot={{ r: 8 }}
+            activeDot={{ r: 6 }}
           />
         ))}
       </RechartsPrimitive.LineChart>
     );
   } else if (type === 'pie') {
     chartElement = (
-      <RechartsPrimitive.PieChart>
+      <RechartsPrimitive.PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
         <ChartTooltip 
           content={
             <ChartTooltipContent 
@@ -97,16 +97,21 @@ const Chart = ({
             />
           }
         />
-        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+        {showLegend && <RechartsPrimitive.Legend 
+          content={<ChartLegendContent />} 
+          wrapperStyle={{ fontSize: '10px' }} 
+          verticalAlign="bottom" 
+        />}
         <RechartsPrimitive.Pie
           data={data}
           nameKey={index}
           dataKey={categories[0]}
           cx="50%"
-          cy="50%"
-          outerRadius={80}
+          cy="45%"
+          outerRadius={70}
           fill="#8884d8"
-          label
+          label={(entry) => `${entry.name}: ${entry[categories[0]]}`}
+          labelLine={false}
         >
           {data.map((entry, i) => (
             <RechartsPrimitive.Cell key={`cell-${i}`} fill={colors[i % colors.length]} />
@@ -116,11 +121,11 @@ const Chart = ({
     );
   } else { // area chart
     chartElement = (
-      <RechartsPrimitive.AreaChart data={data}>
+      <RechartsPrimitive.AreaChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-        <RechartsPrimitive.XAxis dataKey={index} />
-        <RechartsPrimitive.YAxis className="text-foreground" />
-        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} />}
+        <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
+        <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
+        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
           content={
             <ChartTooltipContent 
@@ -142,7 +147,7 @@ const Chart = ({
   }
 
   return (
-    <ChartContainer className={className} config={chartConfig}>
+    <ChartContainer className={`w-full h-full ${className}`} config={chartConfig}>
       {chartElement}
     </ChartContainer>
   );
