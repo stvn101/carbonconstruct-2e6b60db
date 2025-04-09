@@ -48,9 +48,11 @@ const UserProjects = () => {
     }
   };
 
+  console.log("Rendering UserProjects component", { projectsCount: projects.length });
+
   return (
     <motion.div 
-      className="min-h-screen flex flex-col bg-carbon-50"
+      className="min-h-screen flex flex-col bg-carbon-50 dark:bg-carbon-900"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}

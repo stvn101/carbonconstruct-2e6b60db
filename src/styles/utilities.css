@@ -45,3 +45,23 @@
 .dark .helper-tip-content {
   @apply text-carbon-300;
 }
+
+.dark .tutorial-step-number {
+  @apply bg-carbon-500 text-carbon-50;
+}
+
+/* Fix for button interaction issues */
+button, a {
+  @apply select-none touch-manipulation;
+}
+
+/* Fix for inputs in calculator */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}

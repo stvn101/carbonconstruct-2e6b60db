@@ -1,4 +1,3 @@
-
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +26,13 @@ const MaterialsInputSection = ({
   // Handle focus to select all text when clicking on input
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.select();
+  };
+  
+  // Handle input change with empty string check to clear the 0
+  const handleQuantityChange = (index: number, value: string) => {
+    // If the field is empty or just "0", set it to empty string (which will be converted to 0 in the state)
+    // Otherwise, pass the value through
+    onUpdateMaterial(index, "quantity", value === "" || value === "0" ? "" : value);
   };
   
   return (
@@ -63,7 +69,7 @@ const MaterialsInputSection = ({
               id={`material-quantity-${index}`}
               type="number"
               value={material.quantity === 0 ? '' : material.quantity}
-              onChange={(e) => onUpdateMaterial(index, "quantity", e.target.value === '' ? 0 : e.target.value)}
+              onChange={(e) => handleQuantityChange(index, e.target.value)}
               min={0}
               onFocus={handleFocus}
               className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
