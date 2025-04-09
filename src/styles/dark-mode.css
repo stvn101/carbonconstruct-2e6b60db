@@ -1,0 +1,81 @@
+
+/* Dark mode component fixes */
+.dark .dropdown-menu {
+  @apply bg-carbon-900 border-carbon-700;
+}
+
+.dark .alert {
+  @apply bg-carbon-900 border-carbon-700;
+}
+
+.dark .bg-carbon-50, .dark .bg-carbon-100 {
+  @apply text-carbon-50;
+}
+
+/* Fix for charts in dark mode */
+.dark .recharts-cartesian-axis-line,
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: rgba(130, 200, 130, 0.4);
+}
+
+.dark .recharts-cartesian-grid line {
+  stroke: rgba(130, 200, 130, 0.2);
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  @apply bg-gray-800 border-gray-700 text-carbon-300;
+}
+
+.dark .recharts-text {
+  fill: rgba(130, 200, 130, 0.8);
+}
+
+/* Fix for cards in dark mode to ensure proper contrast */
+.dark .bg-white {
+  @apply bg-gray-800 text-carbon-300;
+}
+
+/* Ensure text visibility on all backgrounds */
+.dark .text-black, 
+.dark .text-gray-900, 
+.dark .text-gray-800, 
+.dark .text-white,
+.dark .text-gray-100,
+.dark .text-gray-200 {
+  @apply text-carbon-300;
+}
+
+/* Fix buttons in dark mode */
+.dark .text-white {
+  @apply text-carbon-300;
+}
+
+/* Fix dropdown menus in dark mode to ensure proper visibility */
+.dark .bg-background {
+  @apply bg-gray-900;
+}
+
+.dark .text-foreground {
+  @apply text-carbon-300;
+}
+
+/* Fix for ThemeToggle dropdown in dark mode */
+.dark .DropdownMenuContent {
+  @apply bg-gray-800 border-gray-700 text-carbon-300;
+}
+
+/* Add more contrast to the cards in dark mode */
+.dark .card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Ensure popup content is visible in dark mode */
+.dark [role="dialog"],
+.dark [data-state="open"] {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Fix for profile page UI in dark mode */
+.dark .bg-carbon-50 {
+  @apply bg-gray-900;
+}

@@ -1,0 +1,29 @@
+
+/* Gradient and headings */
+.gradient-heading {
+  @apply bg-gradient-to-r from-carbon-800 via-carbon-700 to-carbon-600 bg-clip-text text-transparent dark:from-carbon-200 dark:via-carbon-300 dark:to-carbon-400;
+}
+
+/* Make gradients more vibrant */
+.gradient-heading strong,
+.gradient-heading b {
+  @apply bg-gradient-to-r from-carbon-700 to-carbon-500 bg-clip-text text-transparent dark:from-carbon-100 dark:via-carbon-200 dark:to-carbon-300;
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Fix for light mode text on light backgrounds */
+.bg-carbon-50, .bg-carbon-100 {
+  @apply text-carbon-900;
+}
+
+/* Green backgrounds for white backgrounds */
+.bg-white.sustainable-bg {
+  @apply bg-carbon-50 dark:bg-carbon-900;
+}
