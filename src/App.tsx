@@ -21,6 +21,7 @@ import AuthCallback from './pages/AuthCallback';
 import MaterialBrowser from './pages/MaterialBrowser';
 import Index from './pages/Index';
 import UserProfile from './pages/UserProfile';
+import Notifications from './pages/Notifications';
 
 // Import auth components
 import { RequireAuth } from './components/RequireAuth';
@@ -75,6 +76,16 @@ const App: React.FC = () => {
                     } 
                   />
                   <Route path="/materials" element={<MaterialBrowser />} />
+                  
+                  {/* Add Notifications route */}
+                  <Route 
+                    path="/notifications" 
+                    element={
+                      <RequireAuth>
+                        <Notifications />
+                      </RequireAuth>
+                    } 
+                  />
                   
                   {/* Auth routes */}
                   <Route 
