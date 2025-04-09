@@ -22,6 +22,8 @@ import MaterialBrowser from './pages/MaterialBrowser';
 import Index from './pages/Index';
 import UserProfile from './pages/UserProfile';
 import Notifications from './pages/Notifications';
+import Help from './pages/Help';
+import ProjectDetail from './pages/ProjectDetail';
 
 // Import auth components
 import { RequireAuth } from './components/RequireAuth';
@@ -42,6 +44,7 @@ const App: React.FC = () => {
                   <Route path="/about" element={<About />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/help" element={<Help />} />
                   
                   <Route 
                     path="/dashboard" 
@@ -72,6 +75,14 @@ const App: React.FC = () => {
                     element={
                       <RequireAuth>
                         <Calculator />
+                      </RequireAuth>
+                    } 
+                  />
+                  <Route 
+                    path="/projects/:projectId" 
+                    element={
+                      <RequireAuth>
+                        <ProjectDetail />
                       </RequireAuth>
                     } 
                   />

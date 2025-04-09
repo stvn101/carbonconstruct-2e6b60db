@@ -1,10 +1,18 @@
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calculator } from "lucide-react";
+import { Calculator, BookmarkCheck } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useCalculator } from "@/hooks/useCalculator";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useProjects } from "@/contexts/ProjectContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 // Import the component sections
 import MaterialsInputSection from "./calculator/MaterialsInputSection";
@@ -14,6 +22,11 @@ import ResultsSection from "./calculator/ResultsSection";
 
 const CarbonCalculator = () => {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { saveProject } = useProjects();
+  const [projectName, setProjectName] = useState("New Carbon Project");
+  
   const {
     calculationInput,
     calculationResult,
@@ -33,6 +46,35 @@ const CarbonCalculator = () => {
     handlePrevTab
   } = useCalculator();
 
+  // Save project function
+  const handleSaveProject = async () => {
+    if (!user) {
+      toast.error("Please log in to save your project");
+      navigate("/auth");
+      return;
+    }
+    
+    try {
+      const project = await saveProject({
+        name: projectName,
+        description: "Carbon calculation project",
+        materials: calculationInput.materials,
+        transport: calculationInput.transport,
+        energy: calculationInput.energy,
+        result: calculationResult,
+        tags: ["carbon", "calculation"],
+      });
+      
+      toast.success("Project saved successfully!");
+      
+      // Navigate to the project detail page
+      navigate(`/projects`);
+    } catch (error) {
+      console.error("Error saving project:", error);
+      toast.error("Failed to save project");
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 md:px-6">
       <div className="text-center max-w-3xl mx-auto mb-6 md:mb-12">
@@ -47,8 +89,38 @@ const CarbonCalculator = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
+        className="mb-6"
       >
-        <Card className="mb-8 border-border bg-card">
+        {/* Project naming section */}
+        <Card className="mb-4">
+          <CardContent className="pt-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div className="flex-grow w-full md:w-auto">
+                <Label htmlFor="project-name" className="text-sm font-medium mb-1 block">
+                  Project Name
+                </Label>
+                <Input
+                  id="project-name"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  className="w-full"
+                  placeholder="Enter project name"
+                />
+              </div>
+              <div className="w-full md:w-auto flex justify-end mt-2 md:mt-6">
+                <Button 
+                  onClick={handleSaveProject}
+                  className="bg-carbon-600 hover:bg-carbon-700 text-white"
+                >
+                  <BookmarkCheck className="h-4 w-4 mr-2" />
+                  Save Project
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      
+        <Card className="border-border bg-card">
           <CardHeader className="pb-2 md:pb-6">
             <div className="flex items-center gap-2 md:gap-3">
               <Calculator className="h-5 w-5 md:h-6 md:w-6 text-carbon-600 dark:text-carbon-400" />
