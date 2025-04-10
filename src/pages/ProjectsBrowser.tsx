@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FolderPlus, Calculator } from "lucide-react";
+import { FolderPlus, Calculator, ArrowLeft } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
 import ProjectsList from "@/components/projects/ProjectsList";
 
@@ -27,6 +27,15 @@ const ProjectsBrowser: React.FC = () => {
       <Navbar />
       <main className="flex-grow pt-24 md:pt-28 px-4 pb-12">
         <div className="container mx-auto">
+          <div className="mb-6">
+            <Button variant="ghost" asChild className="mb-4">
+              <Link to="/dashboard">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
+          
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Projects Browser</h1>

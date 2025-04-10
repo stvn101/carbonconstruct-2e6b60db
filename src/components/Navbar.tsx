@@ -76,6 +76,7 @@ const Navbar = () => {
   const navLinks = [
     { title: "Home", path: "/" },
     { title: "Calculator", path: "/calculator" },
+    { title: "Projects", path: "/projects/browse" },
     { title: "Pricing", path: "/pricing" },
     { title: "About", path: "/about" },
     { title: "Blog", path: "/blog" },
@@ -97,6 +98,7 @@ const Navbar = () => {
         opacity: isVisible ? 1 : 0
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
+      style={{ height: "64px" }}
       data-navbar-height="true"
     >
       <div className="container mx-auto px-4 md:px-6">
@@ -152,13 +154,13 @@ const Navbar = () => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div 
-              className="md:hidden pt-4 pb-2"
+              className="md:hidden pt-4 pb-2 absolute bg-background/95 backdrop-blur-sm left-0 right-0 border-b border-border/50 shadow-sm"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-4 px-4">
                 {navLinks.map((link) => (
                   <Link 
                     key={link.path}

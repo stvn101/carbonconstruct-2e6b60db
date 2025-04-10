@@ -65,3 +65,34 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* Navbar spacing fix */
+.navbar-spacer {
+  height: var(--navbar-height, 64px);
+}
+
+/* Content top spacing - add this to parent container of main content */
+.content-top-spacing {
+  padding-top: calc(var(--navbar-height, 64px) + 1rem);
+}
+
+/* Fix for overflow issues on mobile */
+.mobile-friendly-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  button, 
+  a.button,
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.5rem;
+  }
+  
+  input, select, textarea {
+    padding: 0.5rem;
+  }
+}
