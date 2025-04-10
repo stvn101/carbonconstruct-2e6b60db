@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
 import { m as motion } from "framer-motion";
 import { staggerContainer, fadeInUp } from "@/utils/animationVariants";
+import { Link } from "react-router-dom";
 
 interface HeroContentProps {
   handleLearnMore: (e: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -50,24 +51,28 @@ const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
         variants={fadeInUp}
       >
         <motion.div 
-          className="flex items-center"
+          className="flex items-center cursor-pointer"
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
-          <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-2 mr-3">
-            <Building2 className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
-          </div>
-          <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">For Construction Companies</p>
+          <Link to="/construction-companies" className="flex items-center">
+            <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-2 mr-3">
+              <Building2 className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
+            </div>
+            <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">For Construction Companies</p>
+          </Link>
         </motion.div>
         <motion.div 
-          className="flex items-center"
+          className="flex items-center cursor-pointer"
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
-          <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-2 mr-3">
-            <LeafyGreen className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
-          </div>
-          <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">Sustainable Building</p>
+          <Link to="/sustainable-building" className="flex items-center">
+            <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-2 mr-3">
+              <LeafyGreen className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
+            </div>
+            <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">Sustainable Building</p>
+          </Link>
         </motion.div>
       </motion.div>
     </motion.div>

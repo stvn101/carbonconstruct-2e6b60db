@@ -91,6 +91,8 @@ const Navbar = () => {
     { title: "Pricing", path: "/pricing" },
     { title: "About", path: "/about" },
     { title: "Contact", path: "/contact" },
+    { title: "Blog", path: "/blog" },
+    { title: "Case Studies", path: "/case-studies" },
   ];
   
   const premiumUserNavLinks: NavLink[] = [
@@ -101,6 +103,8 @@ const Navbar = () => {
     { title: "Material DB", path: "/materials", premium: true },
     { title: "Analytics", path: "/analytics", premium: true },
     { title: "About", path: "/about" },
+    { title: "Blog", path: "/blog" },
+    { title: "Case Studies", path: "/case-studies" },
   ];
   
   const navLinks = isPremiumUser ? premiumUserNavLinks : freeUserNavLinks;
