@@ -21,8 +21,9 @@ import ProjectCalculatorTab from "@/components/project/ProjectCalculatorTab";
 const ProjectDetail = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { getProject, updateProject, deleteProject, exportProjectPDF, exportProjectCSV } = useProjects();
+  const isPremiumUser = user && profile?.subscription_tier === 'premium';
   
   // Get the project data
   const project = getProject(projectId || "");
@@ -72,7 +73,7 @@ const ProjectDetail = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col"
+      className={`min-h-screen flex flex-col ${isPremiumUser ? 'premium-user' : ''}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
@@ -82,7 +83,7 @@ const ProjectDetail = () => {
         <meta name="description" content={`Details for project: ${project.name}`} />
       </Helmet>
       <Navbar />
-      <main className="flex-grow pt-24 md:pt-28 px-4 pb-10">
+      <main className="flex-grow content-top-spacing px-4 pb-10">
         <div className="container mx-auto">
           <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-4 mt-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -101,12 +102,17 @@ const ProjectDetail = () => {
           
           {/* Project Tabs */}
           <Tabs defaultValue="details" className="mb-4">
-            <TabsList>
-              <TabsTrigger value="details" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+            <TabsList className="w-full sm:w-auto flex">
+              <TabsTrigger value="details" className="flex-1 sm:flex-initial data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
                 Project Details
               </TabsTrigger>
-              <TabsTrigger value="calculator" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
+              <TabsTrigger value="calculator" className="flex-1 sm:flex-initial data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
                 Calculator
+              </TabsTrigger>
+              
+              {/* Premium-only tab example */}
+              <TabsTrigger value="advanced" className="flex-1 sm:flex-initial data-[state=active]:bg-carbon-500 data-[state=active]:text-white premium-feature">
+                Advanced Analysis
               </TabsTrigger>
             </TabsList>
             
@@ -137,6 +143,16 @@ const ProjectDetail = () => {
                 onNextTab={calculator.handleNextTab}
                 onPrevTab={calculator.handlePrevTab}
               />
+            </TabsContent>
+            
+            {/* Premium-only tab content example */}
+            <TabsContent value="advanced" className="premium-feature">
+              <div className="bg-carbon-50 dark:bg-carbon-800 p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-4">Advanced Analysis (Premium Feature)</h3>
+                <p className="text-muted-foreground mb-4">
+                  This section contains advanced analytics and insights for your project.
+                </p>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
