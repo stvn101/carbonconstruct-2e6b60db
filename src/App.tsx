@@ -16,6 +16,7 @@ import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
 import UserProjects from './pages/UserProjects';
+import ProjectsBrowser from './pages/ProjectsBrowser';
 import Auth from './pages/Auth';
 import AuthCallback from './pages/AuthCallback';
 import MaterialBrowser from './pages/MaterialBrowser';
@@ -67,6 +68,14 @@ const App: React.FC = () => {
                     element={
                       <RequireAuth>
                         <UserProjects />
+                      </RequireAuth>
+                    } 
+                  />
+                  <Route 
+                    path="/projects/browse" 
+                    element={
+                      <RequireAuth>
+                        <ProjectsBrowser />
                       </RequireAuth>
                     } 
                   />
