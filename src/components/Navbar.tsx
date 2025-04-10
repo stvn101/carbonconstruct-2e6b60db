@@ -8,6 +8,12 @@ import NavbarLinks from "@/components/NavbarLinks";
 import RegionSelector from "@/components/RegionSelector";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface NavLink {
+  title: string;
+  path: string;
+  premium?: boolean;
+}
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -78,7 +84,7 @@ const Navbar = () => {
   }, []);
 
   // Different nav links for free vs premium users
-  const freeUserNavLinks = [
+  const freeUserNavLinks: NavLink[] = [
     { title: "Home", path: "/" },
     { title: "Calculator", path: "/calculator" },
     { title: "Projects", path: "/projects" },
@@ -87,7 +93,7 @@ const Navbar = () => {
     { title: "Contact", path: "/contact" },
   ];
   
-  const premiumUserNavLinks = [
+  const premiumUserNavLinks: NavLink[] = [
     { title: "Home", path: "/" },
     { title: "Dashboard", path: "/dashboard" },
     { title: "Calculator", path: "/calculator" },
