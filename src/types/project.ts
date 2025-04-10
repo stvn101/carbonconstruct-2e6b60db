@@ -1,28 +1,25 @@
 
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+// Import required types if not already imported
+import { UserProfile } from '@/types/auth';
 
 export interface SavedProject {
   id: string;
   name: string;
   description?: string;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-  materials: MaterialInput[];
-  transport: TransportInput[];
-  energy: EnergyInput[];
-  result?: CalculationResult;
-  tags?: string[];
+  created_at: string;
+  updated_at?: string;
+  user_id: string;
+  data: any;
+  region?: string;
+  total_emissions?: number;
   premium_only?: boolean;
+  status?: 'draft' | 'completed' | 'archived';
+  // Add any other properties based on your application's needs
 }
 
-export interface ProjectContextType {
-  projects: SavedProject[];
-  isLoading: boolean;
-  saveProject: (project: Omit<SavedProject, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<SavedProject>;
-  updateProject: (project: SavedProject) => Promise<SavedProject>;
-  deleteProject: (id: string) => Promise<void>;
-  getProject: (id: string) => SavedProject | undefined;
-  exportProjectPDF: (project: SavedProject) => Promise<void>;
-  exportProjectCSV: (project: SavedProject) => Promise<void>;
+export interface ProjectFormData {
+  name: string;
+  description?: string;
 }
+
+// Add other types as needed for your project

@@ -3,13 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
 import { m as motion } from "framer-motion";
 import { staggerContainer, fadeInUp } from "@/utils/animationVariants";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeroContentProps {
   handleLearnMore: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Handler for the try calculator button
+  const handleTryCalculator = () => {
+    // If user is not logged in, redirect to the calculator with demo mode
+    navigate('/calculator', { state: { demoMode: true } });
+  };
+
   return (
     <motion.div 
       className="md:w-1/2 mb-8 md:mb-0 md:pr-8"
@@ -38,8 +48,12 @@ const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
         className="flex flex-col sm:flex-row gap-4"
         variants={fadeInUp}
       >
-        <Button size="lg" asChild className="bg-carbon-600 hover:bg-carbon-700 text-white transition-transform duration-200 hover:scale-105">
-          <a href="#demo">Get Started</a>
+        <Button 
+          size="lg" 
+          onClick={handleTryCalculator}
+          className="bg-carbon-600 hover:bg-carbon-700 text-white transition-transform duration-200 hover:scale-105"
+        >
+          Try Calculator
         </Button>
         <Button size="lg" variant="outline" asChild className="border-carbon-500 text-carbon-800 hover:bg-carbon-100 dark:text-carbon-200 dark:hover:bg-carbon-800/50 transition-transform duration-200 hover:scale-105">
           <a href="#learn-more" onClick={handleLearnMore}>Learn More</a>
