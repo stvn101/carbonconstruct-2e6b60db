@@ -24,14 +24,40 @@ const UserProfile = () => {
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+  
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (formData.website && !formData.website.match(/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/)) {
+      newErrors.website = "Please enter a valid website URL";
+    }
+    
+    if (formData.avatar_url && !formData.avatar_url.match(/^(https?:\/\/)/)) {
+      newErrors.avatar_url = "Avatar URL must start with http:// or https://";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
     try {
       await updateProfile(formData);
@@ -72,49 +98,55 @@ const UserProfile = () => {
       
       <Navbar />
       
-      <main className="flex-grow py-12 px-4">
+      <main className="flex-grow content-top-spacing px-4">
         <div className="container mx-auto max-w-3xl">
           <h1 className="text-2xl md:text-3xl font-bold mb-8 dark:text-carbon-300">My Profile</h1>
           
           <Card className="dark:bg-gray-800 dark:border-gray-700">
-            <CardHeader className="flex flex-row items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={formData.avatar_url || undefined} alt={formData.full_name || "User"} />
-                <AvatarFallback className="text-lg bg-carbon-200 text-carbon-800 dark:bg-carbon-700 dark:text-carbon-300">{getInitials()}</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="dark:text-carbon-300">{formData.full_name || user?.email}</CardTitle>
-                <CardDescription className="dark:text-carbon-400">{user?.email}</CardDescription>
+            <CardHeader className="pb-2 md:pb-6">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={formData.avatar_url || undefined} alt={formData.full_name || "User"} />
+                  <AvatarFallback className="text-lg bg-carbon-200 text-carbon-800 dark:bg-carbon-700 dark:text-carbon-300">{getInitials()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <CardTitle className="dark:text-carbon-300">{formData.full_name || user?.email}</CardTitle>
+                  <CardDescription className="dark:text-carbon-400">{user?.email}</CardDescription>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="full_name" className="dark:text-carbon-300">Full Name</Label>
+                <div className="form-field">
+                  <Label htmlFor="full_name" className="form-label">Full Name</Label>
                   <Input 
                     id="full_name"
                     name="full_name"
                     value={formData.full_name}
                     onChange={handleChange}
                     placeholder="Your full name"
-                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    tabIndex={1}
                   />
+                  <div className="form-error">{errors.full_name || ''}</div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="company_name" className="dark:text-carbon-300">Company / Organization</Label>
+                <div className="form-field">
+                  <Label htmlFor="company_name" className="form-label">Company / Organization</Label>
                   <Input 
                     id="company_name"
                     name="company_name"
                     value={formData.company_name}
                     onChange={handleChange}
                     placeholder="Your company or organization"
-                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    tabIndex={2}
                   />
+                  <div className="form-error">{errors.company_name || ''}</div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="website" className="dark:text-carbon-300">Website</Label>
+                <div className="form-field">
+                  <Label htmlFor="website" className="form-label">Website</Label>
                   <Input 
                     id="website"
                     name="website"
@@ -122,12 +154,14 @@ const UserProfile = () => {
                     onChange={handleChange}
                     placeholder="https://example.com"
                     type="url"
-                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    tabIndex={3}
                   />
+                  <div className="form-error">{errors.website || ''}</div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="avatar_url" className="dark:text-carbon-300">Avatar URL</Label>
+                <div className="form-field">
+                  <Label htmlFor="avatar_url" className="form-label">Avatar URL</Label>
                   <Input 
                     id="avatar_url"
                     name="avatar_url"
@@ -135,14 +169,17 @@ const UserProfile = () => {
                     onChange={handleChange}
                     placeholder="https://example.com/avatar.jpg"
                     type="url"
-                    className="dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
+                    tabIndex={4}
                   />
+                  <div className="form-error">{errors.avatar_url || ''}</div>
                 </div>
                 
                 <Button 
                   type="submit" 
                   className="w-full bg-carbon-600 hover:bg-carbon-700 dark:text-carbon-300"
                   disabled={isLoading}
+                  tabIndex={5}
                 >
                   {isLoading ? 'Updating...' : 'Update Profile'}
                 </Button>
