@@ -82,9 +82,9 @@ const ProjectDetail = () => {
         <meta name="description" content={`Details for project: ${project.name}`} />
       </Helmet>
       <Navbar />
-      <main className="flex-grow py-10 px-4">
+      <main className="flex-grow pt-24 md:pt-28 px-4 pb-10">
         <div className="container mx-auto">
-          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-4">
+          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-4 mt-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>

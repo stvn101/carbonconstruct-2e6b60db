@@ -42,9 +42,10 @@ export const ProjectCard = ({ project, onExportPDF, onExportCSV, onDelete }: Pro
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-[200px]">
               <DropdownMenuItem asChild>
                 <Link to={`/projects/${project.id}`} className="flex items-center">
                   <Edit className="mr-2 h-4 w-4" />
@@ -79,7 +80,7 @@ export const ProjectCard = ({ project, onExportPDF, onExportCSV, onDelete }: Pro
         </div>
 
         {project.result && (
-          <div className="bg-carbon-50 p-2 rounded-md flex justify-between items-center mb-3">
+          <div className="bg-carbon-50 dark:bg-carbon-800 p-2 rounded-md flex justify-between items-center mb-3">
             <span className="text-sm">Total Emissions:</span>
             <span className="font-medium">{Math.round(project.result.totalEmissions)} kg CO₂e</span>
           </div>
