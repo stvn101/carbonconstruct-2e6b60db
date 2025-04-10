@@ -25,6 +25,8 @@ import UserProfile from './pages/UserProfile';
 import Notifications from './pages/Notifications';
 import Help from './pages/Help';
 import ProjectDetail from './pages/ProjectDetail';
+import ConstructionCompanies from './pages/ConstructionCompanies';
+import SustainableBuilding from './pages/SustainableBuilding';
 
 // Import auth components
 import { RequireAuth } from './components/RequireAuth';
@@ -46,6 +48,8 @@ const App: React.FC = () => {
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/help" element={<Help />} />
+                  <Route path="/construction-companies" element={<ConstructionCompanies />} />
+                  <Route path="/sustainable-building" element={<SustainableBuilding />} />
                   
                   <Route 
                     path="/dashboard" 
@@ -97,7 +101,6 @@ const App: React.FC = () => {
                   />
                   <Route path="/materials" element={<MaterialBrowser />} />
                   
-                  {/* Add Notifications route */}
                   <Route 
                     path="/notifications" 
                     element={
@@ -107,7 +110,6 @@ const App: React.FC = () => {
                     } 
                   />
                   
-                  {/* Auth routes */}
                   <Route 
                     path="/auth" 
                     element={

@@ -1,175 +1,57 @@
 
-import { motion } from "framer-motion";
-import { Helmet } from "react-helmet-async";
-import Navbar from "@/components/Navbar";
+import React, { useEffect, useState } from "react";
+import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
-import CarbonCalculator from "@/components/CarbonCalculator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MaterialDatabase from "@/components/MaterialDatabase";
-import ProjectReporting from "@/components/ProjectReporting";
-import EasyIntegration from "@/components/EasyIntegration";
-import Benchmarking from "@/components/Benchmarking";
-import EducationalResources from "@/components/EducationalResources";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { FileText, ArrowRight, Zap, Calculator as CalculatorIcon, BarChart3 } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import CarbonCalculator from "@/components/CarbonCalculator";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
-const Calculator = () => {
+function Calculator() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("calculator");
-  const isMobile = useIsMobile();
-  
-  // Set active tab based on URL hash or query parameter
+  const { user } = useAuth();
+  const [demoMode, setDemoMode] = useState(false);
+
   useEffect(() => {
-    const hash = location.hash.replace('#', '');
-    const params = new URLSearchParams(location.search);
-    const tab = params.get('tab');
-    
-    if (hash && ["calculator", "materials", "reporting", "integration", "benchmarking", "education"].includes(hash)) {
-      setActiveTab(hash);
-    } else if (tab && ["calculator", "materials", "reporting", "integration", "benchmarking", "education"].includes(tab)) {
-      setActiveTab(tab);
+    // Check if we're in demo mode from navigation state
+    if (location.state?.demoMode) {
+      setDemoMode(true);
     }
   }, [location]);
-  
-  // Update URL when tab changes
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    navigate(`/calculator#${value}`, { replace: true });
+
+  const handleSignUp = () => {
+    navigate("/auth", { state: { returnTo: "/calculator" } });
   };
-  
+
   return (
-    <motion.div 
-      className="min-h-screen flex flex-col"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Helmet>
-        <title>Carbon Footprint Calculator | CarbonConstruct</title>
-        <meta 
-          name="description" 
-          content="Calculate the carbon footprint of your construction projects with our precise calculator that accounts for materials, transportation, and energy use."
-        />
-      </Helmet>
+    <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-grow pt-16 md:pt-24 pb-8 md:pb-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-4 md:mb-8">
-            <h1 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 text-carbon-900 dark:text-carbon-50">Sustainable Construction Tools</h1>
-            <p className="text-sm md:text-lg text-muted-foreground max-w-3xl mx-auto">
-              Our comprehensive suite of tools helps you measure, analyze, and reduce the carbon footprint of your construction projects.
-            </p>
-          </div>
-          
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6 md:mb-8">
-            <div className="flex justify-center">
-              <TabsList className={`grid ${isMobile ? 'grid-cols-3 gap-1' : 'grid-cols-6'} w-full md:w-auto bg-carbon-100 dark:bg-carbon-800`}>
-                <TabsTrigger 
-                  value="calculator" 
-                  className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
-                >
-                  <CalculatorIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Calculator</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="materials" 
-                  className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Materials</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="reporting" 
-                  className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
-                >
-                  <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">Reporting</span>
-                </TabsTrigger>
-                {isMobile ? (
-                  <>
-                    {/* Second row for mobile */}
-                    <TabsTrigger 
-                      value="integration" 
-                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm mt-1"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                      <span className="hidden sm:inline">Integration</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="benchmarking" 
-                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm mt-1"
-                    >
-                      <BarChart3 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Benchmarking</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="education" 
-                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm mt-1"
-                    >
-                      <Zap className="h-4 w-4" />
-                      <span className="hidden sm:inline">Education</span>
-                    </TabsTrigger>
-                  </>
-                ) : (
-                  <>
-                    <TabsTrigger 
-                      value="integration" 
-                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                      <span className="hidden sm:inline">Integration</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="benchmarking" 
-                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
-                    >
-                      <BarChart3 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Benchmarking</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="education" 
-                      className="flex items-center gap-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm"
-                    >
-                      <Zap className="h-4 w-4" />
-                      <span className="hidden sm:inline">Education</span>
-                    </TabsTrigger>
-                  </>
-                )}
-              </TabsList>
-            </div>
-            
-            <TabsContent value="calculator">
-              <CarbonCalculator />
-            </TabsContent>
-            
-            <TabsContent value="materials">
-              <MaterialDatabase />
-            </TabsContent>
-            
-            <TabsContent value="reporting">
-              <ProjectReporting />
-            </TabsContent>
-            
-            <TabsContent value="integration">
-              <EasyIntegration />
-            </TabsContent>
-            
-            <TabsContent value="benchmarking">
-              <Benchmarking />
-            </TabsContent>
-            
-            <TabsContent value="education">
-              <EducationalResources />
-            </TabsContent>
-          </Tabs>
-        </div>
+      <main className="flex-grow py-6 md:py-12 container mx-auto px-4 pt-24">
+        <h1 className="text-3xl font-bold mb-6">Carbon Calculator</h1>
+        
+        {demoMode && !user && (
+          <Alert className="mb-6 bg-yellow-50 border-yellow-200">
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Demo Mode</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              You're using the calculator in demo mode. Your calculations won't be saved.
+              <div className="mt-2">
+                <Button onClick={handleSignUp} className="mr-2">Sign Up</Button>
+                <Button variant="outline" onClick={() => setDemoMode(false)}>Exit Demo</Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        <CarbonCalculator demoMode={demoMode} />
       </main>
       <Footer />
-    </motion.div>
+    </div>
   );
-};
+}
 
 export default Calculator;

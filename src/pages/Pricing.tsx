@@ -1,16 +1,23 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Pricing = () => {
   const [annual, setAnnual] = useState(true);
-  
+  const [processing, setProcessing] = useState<string | null>(null);
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+
   const monthlyPrices = {
     starter: 199,
     professional: 449,
@@ -23,6 +30,7 @@ const Pricing = () => {
   
   const plans = [
     {
+      id: "starter",
       name: "Starter",
       price: annual ? calculateAnnualPrice(monthlyPrices.starter) : monthlyPrices.starter,
       description: "Best for small construction firms just beginning their sustainability journey in Australia.",
@@ -43,6 +51,7 @@ const Pricing = () => {
       popular: false
     },
     {
+      id: "professional",
       name: "Professional",
       price: annual ? calculateAnnualPrice(monthlyPrices.professional) : monthlyPrices.professional,
       description: "Perfect for growing Australian construction companies ready to measure and reduce their carbon impact.",
@@ -62,6 +71,7 @@ const Pricing = () => {
       popular: true
     },
     {
+      id: "enterprise",
       name: "Enterprise",
       price: annual ? calculateAnnualPrice(monthlyPrices.enterprise) : monthlyPrices.enterprise,
       description: "Complete solution for large Australian construction firms with complex sustainability needs.",
@@ -80,6 +90,77 @@ const Pricing = () => {
       popular: false
     }
   ];
+
+  const handlePlanAction = async (planId: string) => {
+    if (!user) {
+      // Redirect to auth if not logged in
+      navigate('/auth', { state: { returnTo: '/pricing' } });
+      return;
+    }
+
+    if (profile?.subscription_tier === 'premium') {
+      toast.info("You already have a premium subscription.");
+      return;
+    }
+
+    setProcessing(planId);
+    
+    try {
+      // For enterprise, direct to contact form
+      if (planId === 'enterprise') {
+        navigate('/contact', { state: { subject: 'Enterprise Plan Inquiry' } });
+        return;
+      }
+      
+      // For the professional plan, offer a free trial first
+      if (planId === 'professional') {
+        const { data, error } = await supabase.functions.invoke('create-payment-session', {
+          body: {
+            planName: planId,
+            action: 'trial'
+          }
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        if (data.success) {
+          toast.success("Your 3-day free trial has been activated!");
+          navigate('/dashboard');
+          return;
+        }
+        
+        // If the trial activation failed because they already had one, continue to payment
+        if (data.error && data.error.includes("already used your free trial")) {
+          toast.info("You've already used your trial. Processing payment...");
+        }
+      }
+
+      // Process regular payment
+      const { data, error } = await supabase.functions.invoke('create-payment-session', {
+        body: {
+          planName: planId,
+          purchaseType: annual ? 'annual' : 'monthly',
+          action: 'subscribe'
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data.success) {
+        toast.success("Payment processed successfully!");
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("There was an issue processing your request. Please try again.");
+    } finally {
+      setProcessing(null);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -116,7 +197,7 @@ const Pricing = () => {
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan, index) => (
               <motion.div
-                key={plan.name}
+                key={plan.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -130,7 +211,7 @@ const Pricing = () => {
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold">A${plan.price}</span>
+                      <span className="text-4xl font-bold">A${(plan.price/100).toFixed(2)}</span>
                       <span className="text-foreground/60 ml-2">/ {annual ? 'year' : 'month'}</span>
                     </div>
                     <p className="text-foreground/80 mt-3 text-sm">{plan.description}</p>
@@ -164,9 +245,21 @@ const Pricing = () => {
                     <Button 
                       className="w-full" 
                       variant={plan.popular ? "default" : "outline"}
+                      onClick={() => handlePlanAction(plan.id)}
+                      disabled={!!processing}
                     >
-                      {plan.cta}
+                      {processing === plan.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        plan.cta
+                      )}
                     </Button>
+                    {plan.popular && !profile?.had_trial && (
+                      <p className="w-full text-xs text-center mt-2 text-green-600">Includes 3-day free trial</p>
+                    )}
                   </CardFooter>
                 </Card>
               </motion.div>
@@ -183,7 +276,9 @@ const Pricing = () => {
             <p className="text-foreground/80 mb-6">
               We offer tailored packages for Australian enterprises with specific requirements. Our team will work with you to create a solution that meets your unique needs and complies with Australian standards.
             </p>
-            <Button size="lg">Contact Our Australian Sales Team</Button>
+            <Button size="lg" asChild>
+              <a href="/contact">Contact Our Australian Sales Team</a>
+            </Button>
           </motion.div>
         </section>
       </main>
