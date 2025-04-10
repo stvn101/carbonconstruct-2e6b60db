@@ -18,16 +18,16 @@ const Footer = () => {
               Track, manage, and reduce your construction project's carbon footprint with our innovative SaaS platform.
             </p>
             <div className="flex space-x-4">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://twitter.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://linkedin.com/company/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://facebook.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://instagram.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Instagram className="h-5 w-5" />
               </a>
             </div>
