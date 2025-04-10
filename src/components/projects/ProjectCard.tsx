@@ -32,7 +32,7 @@ interface ProjectCardProps {
 export const ProjectCard = ({ project, onExportPDF, onExportCSV, onDelete }: ProjectCardProps) => {
   const { profile } = useAuth();
   const isPremiumUser = profile?.subscription_tier === 'premium';
-  const isPremiumFeature = project.premium_only;
+  const isPremiumFeature = project.premium_only || false;
   
   // Determine if this project should be accessible
   const isAccessible = !isPremiumFeature || (isPremiumFeature && isPremiumUser);

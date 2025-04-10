@@ -13,6 +13,7 @@ export interface SavedProject {
   energy: EnergyInput[];
   result?: CalculationResult;
   tags?: string[];
+  premium_only?: boolean;
 }
 
 export interface ProjectContextType {
