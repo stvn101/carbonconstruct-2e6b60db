@@ -79,7 +79,7 @@ export const ProjectsTab = ({ projects }: ProjectsTabProps) => {
                     </div>
                   </div>
                   <Button asChild variant="outline" size="sm">
-                    <Link to={`/project/${project.id}`}>
+                    <Link to={`/projects/${project.id}`}>
                       View Details
                     </Link>
                   </Button>

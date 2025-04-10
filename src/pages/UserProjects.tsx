@@ -10,7 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { 
   Calculator, 
   FileText,
-  FolderPlus
+  FolderPlus,
+  Grid3X3
 } from "lucide-react";
 import { useProjects, SavedProject } from "@/contexts/ProjectContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -73,6 +74,15 @@ const UserProjects = () => {
               <p className="text-muted-foreground">Manage your carbon footprint calculations</p>
             </div>
             <div className="mt-4 md:mt-0 space-x-2">
+              <Button 
+                asChild
+                variant="outline"
+              >
+                <Link to="/projects/browse">
+                  <Grid3X3 className="h-4 w-4 mr-2" />
+                  Browse All
+                </Link>
+              </Button>
               <Button 
                 asChild
                 variant="outline"

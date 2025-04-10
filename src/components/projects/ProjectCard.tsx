@@ -33,7 +33,7 @@ export const ProjectCard = ({ project, onExportPDF, onExportCSV, onDelete }: Pro
       <CardContent className="p-6 flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">
           <Link 
-            to={`/project/${project.id}`}
+            to={`/projects/${project.id}`}
             className="font-medium text-lg hover:text-carbon-600 transition-colors line-clamp-1"
           >
             {project.name}
@@ -46,7 +46,7 @@ export const ProjectCard = ({ project, onExportPDF, onExportCSV, onDelete }: Pro
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link to={`/project/${project.id}`} className="flex items-center">
+                <Link to={`/projects/${project.id}`} className="flex items-center">
                   <Edit className="mr-2 h-4 w-4" />
                   <span>View & Edit</span>
                 </Link>
