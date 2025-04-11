@@ -17,8 +17,15 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     
     // Convert database profile to UserProfile type with subscription_tier default
     return {
-      ...(data as any),
-      subscription_tier: data.subscription_tier || 'free'
+      id: data.id,
+      full_name: data.full_name,
+      company_name: data.company_name,
+      avatar_url: data.avatar_url,
+      website: data.website,
+      role: data.role,
+      // If the profile data doesn't have subscription_tier, default to 'free'
+      subscription_tier: (data as any).subscription_tier || 'free',
+      had_trial: (data as any).had_trial
     } as UserProfile;
   } catch (error) {
     console.error('Profile fetch error:', error);
