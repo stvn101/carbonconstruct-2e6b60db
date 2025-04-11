@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calculator, BookmarkCheck } from "lucide-react";
@@ -20,7 +19,11 @@ import TransportInputSection from "./calculator/TransportInputSection";
 import EnergyInputSection from "./calculator/EnergyInputSection";
 import ResultsSection from "./calculator/ResultsSection";
 
-const CarbonCalculator = () => {
+export interface CarbonCalculatorProps {
+  demoMode?: boolean;
+}
+
+const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const navigate = useNavigate();

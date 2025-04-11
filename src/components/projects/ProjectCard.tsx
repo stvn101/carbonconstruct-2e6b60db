@@ -98,7 +98,7 @@ export const ProjectCard = ({ project, onExportPDF, onExportCSV, onDelete }: Pro
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <Calendar className="h-4 w-4 mr-1.5 flex-shrink-0" />
           <span>
-            {new Date(project.updatedAt).toLocaleDateString()}
+            {new Date(project.updated_at).toLocaleDateString()}
           </span>
         </div>
 

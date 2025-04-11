@@ -8,7 +8,8 @@ export interface UserProfile {
   avatar_url: string | null;
   website: string | null;
   role: string | null;
-  subscription_tier?: 'free' | 'premium' | 'enterprise' | null;
+  subscription_tier: 'free' | 'premium' | 'enterprise' | null;
+  had_trial?: boolean;
 }
 
 export interface AuthContextType {

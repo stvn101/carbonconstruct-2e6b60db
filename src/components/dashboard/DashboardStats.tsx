@@ -50,7 +50,7 @@ export const DashboardStats = ({ projectsCount, recentProjects }: DashboardStats
           <div className="text-xs text-muted-foreground flex items-center">
             <Calendar className="h-3 w-3 mr-1" />
             {recentProjects[0] 
-              ? new Date(recentProjects[0].updatedAt).toLocaleDateString() 
+              ? new Date(recentProjects[0].updated_at).toLocaleDateString() 
               : "N/A"}
           </div>
         </CardContent>

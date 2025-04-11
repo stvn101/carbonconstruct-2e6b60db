@@ -41,7 +41,7 @@ export const SustainabilityInsights = ({ recentProjects }: SustainabilityInsight
                     <div>
                       <h3 className="font-medium">{project.name}</h3>
                       <p className="text-xs text-muted-foreground">
-                        Updated: {new Date(project.updatedAt).toLocaleDateString()}
+                        Updated: {new Date(project.updated_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>

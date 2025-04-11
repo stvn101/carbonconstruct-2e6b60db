@@ -51,7 +51,7 @@ export const ProjectsTab = ({ projects }: ProjectsTabProps) => {
         {projects.length > 0 ? (
           <div className="space-y-4">
             {projects
-              .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+              .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
               .slice(0, 5)
               .map((project) => (
                 <div 
@@ -67,7 +67,7 @@ export const ProjectsTab = ({ projects }: ProjectsTabProps) => {
                       <div className="flex flex-wrap items-center text-xs text-muted-foreground gap-2 mt-1">
                         <span className="flex items-center">
                           <Calendar className="h-3 w-3 mr-1" />
-                          {new Date(project.updatedAt).toLocaleDateString()}
+                          {new Date(project.updated_at).toLocaleDateString()}
                         </span>
                         {project.result && (
                           <span className="flex items-center">
