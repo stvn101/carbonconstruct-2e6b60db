@@ -15,7 +15,11 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       return null;
     }
     
-    return data as UserProfile;
+    // Convert database profile to UserProfile type with subscription_tier default
+    return {
+      ...(data as any),
+      subscription_tier: data.subscription_tier || 'free'
+    } as UserProfile;
   } catch (error) {
     console.error('Profile fetch error:', error);
     return null;

@@ -28,7 +28,6 @@ export async function fetchUserProjects(userId: string): Promise<SavedProject[]>
     energy: (project.energy as unknown as EnergyInput[]) || [],
     result: project.result as unknown as CalculationResult,
     tags: project.tags || [],
-    data: project.data || {}
   }));
 }
 
@@ -82,7 +81,6 @@ export async function createProject(
     energy: (data.energy as unknown as EnergyInput[]) || [],
     result: data.result as unknown as CalculationResult,
     tags: data.tags || [],
-    data: data.data || {}
   };
 }
 

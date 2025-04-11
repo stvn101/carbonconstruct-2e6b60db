@@ -19,11 +19,10 @@ export interface SavedProject {
   tags?: string[];
   
   // Additional properties
-  data?: any;
+  status?: 'draft' | 'completed' | 'archived';
   region?: string;
   total_emissions?: number;
   premium_only?: boolean;
-  status?: 'draft' | 'completed' | 'archived';
 }
 
 export interface ProjectFormData {
