@@ -19,15 +19,16 @@ export async function fetchUserProjects(userId: string): Promise<SavedProject[]>
     id: project.id,
     name: project.name,
     description: project.description,
-    userId: project.user_id,
-    createdAt: project.created_at,
-    updatedAt: project.updated_at,
+    user_id: project.user_id,
+    created_at: project.created_at,
+    updated_at: project.updated_at,
     // Parse JSON data from database with proper type casting
     materials: (project.materials as unknown as MaterialInput[]) || [],
     transport: (project.transport as unknown as TransportInput[]) || [],
     energy: (project.energy as unknown as EnergyInput[]) || [],
     result: project.result as unknown as CalculationResult,
-    tags: project.tags || []
+    tags: project.tags || [],
+    data: project.data || {}
   }));
 }
 
@@ -72,15 +73,16 @@ export async function createProject(
     id: data.id,
     name: data.name,
     description: data.description,
-    userId: data.user_id,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    user_id: data.user_id,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
     // Parse JSON data from database
     materials: (data.materials as unknown as MaterialInput[]) || [],
     transport: (data.transport as unknown as TransportInput[]) || [],
     energy: (data.energy as unknown as EnergyInput[]) || [],
     result: data.result as unknown as CalculationResult,
-    tags: data.tags || []
+    tags: data.tags || [],
+    data: data.data || {}
   };
 }
 
@@ -102,8 +104,11 @@ export async function updateProject(project: SavedProject): Promise<SavedProject
 
   if (error) throw error;
   
-  // Update local state
-  return { ...project, updatedAt: new Date().toISOString() };
+  // Update local state with the new updated_at
+  return { 
+    ...project, 
+    updated_at: new Date().toISOString() 
+  };
 }
 
 export async function deleteProject(id: string): Promise<void> {

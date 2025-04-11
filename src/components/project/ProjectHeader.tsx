@@ -106,7 +106,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
             )}
             <div className="flex items-center text-muted-foreground mt-1">
               <Calendar className="h-4 w-4 mr-2" />
-              Created on {formatDate(project.createdAt)}
+              Created on {formatDate(project.created_at)}
             </div>
             {isEditing ? (
               <Textarea

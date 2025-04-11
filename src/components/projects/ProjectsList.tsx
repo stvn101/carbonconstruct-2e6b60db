@@ -48,7 +48,7 @@ const ProjectsList: React.FC<ProjectsListProps> = ({
         {filteredProjects.length > 0 ? (
           <div className="space-y-2">
             {filteredProjects
-              .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+              .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
               .map((project) => (
                 <Link 
                   to={`/projects/${project.id}`} 
@@ -66,7 +66,7 @@ const ProjectsList: React.FC<ProjectsListProps> = ({
                           <div className="flex items-center text-xs text-muted-foreground mt-1">
                             <Calendar className="h-3 w-3 mr-1" />
                             <span>
-                              {new Date(project.updatedAt).toLocaleDateString()}
+                              {new Date(project.updated_at).toLocaleDateString()}
                             </span>
                             {project.result && (
                               <span className="ml-2 flex items-center">

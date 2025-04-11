@@ -28,7 +28,7 @@ const UserProjects = () => {
   const isMobile = useIsMobile();
 
   // Get all unique tags
-  const allTags = Array.from(new Set(projects.flatMap(p => p.tags || [])));
+  const allTags = Array.from(new Set(projects.flatMap(p => p.tags || []))) as string[];
 
   // Filter projects based on search and selected tag
   const filteredProjects = projects.filter(project => {
@@ -117,7 +117,7 @@ const UserProjects = () => {
           {filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredProjects
-                .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
                 .map((project) => (
                   <ProjectCard 
                     key={project.id} 
