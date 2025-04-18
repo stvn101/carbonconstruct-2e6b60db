@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { SavedProject, ProjectContextType } from '@/types/project';
 import { fetchUserProjects, createProject, updateProject as updateProjectInDB, deleteProject as deleteProjectInDB } from '@/services/projectService';
 import { exportProjectToPDF, exportProjectToCSV } from '@/utils/exportUtils';

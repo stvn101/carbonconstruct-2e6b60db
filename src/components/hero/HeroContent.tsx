@@ -1,10 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
 import { m as motion } from "framer-motion";
 import { staggerContainer, fadeInUp } from "@/utils/animationVariants";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/auth';
 
 interface HeroContentProps {
   handleLearnMore: (e: React.MouseEvent<HTMLAnchorElement>) => void;

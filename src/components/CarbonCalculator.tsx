@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useCalculator } from "@/hooks/useCalculator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useProjects } from "@/contexts/ProjectContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 

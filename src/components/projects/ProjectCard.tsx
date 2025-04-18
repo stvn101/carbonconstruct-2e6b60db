@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { SavedProject } from "@/contexts/ProjectContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +19,7 @@ import {
   MoreHorizontal,
   Star,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/auth';
 
 interface ProjectCardProps {
   project: SavedProject;
