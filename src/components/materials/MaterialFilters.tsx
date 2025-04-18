@@ -21,7 +21,7 @@ interface MaterialFiltersProps {
   selectedTag: string;
   setSelectedTag: (value: string) => void;
   allTags: string[];
-  allRegions: string[];
+  allRegions: readonly string[] | string[];
   baseOptions: Array<{id: string, name: string}>;
 }
 
@@ -69,7 +69,7 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Regions</SelectItem>
-              {allRegions.map((region) => (
+              {Array.from(allRegions).map((region) => (
                 <SelectItem 
                   key={region} 
                   value={region}
