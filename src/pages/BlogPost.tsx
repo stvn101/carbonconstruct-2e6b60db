@@ -1,14 +1,16 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, User } from "lucide-react";
+import { CalendarDays, User, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import { blogPosts } from "@/data/blogPosts";
 import type { BlogPost as BlogPostType } from "@/data/blogPosts";
+import BlogBreadcrumbs from "@/components/blog/BlogBreadcrumbs";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -36,6 +38,12 @@ const BlogPost = () => {
         <main className="flex-1 pt-24">
           <div className="container mx-auto px-4 py-16">
             <h1 className="text-2xl font-bold">Blog post not found</h1>
+            <Button variant="ghost" asChild className="mt-4">
+              <Link to="/blog">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Blog
+              </Link>
+            </Button>
           </div>
         </main>
         <Footer />
@@ -55,6 +63,8 @@ const BlogPost = () => {
       <Navbar />
       <main className="flex-1 pt-24">
         <article className="container mx-auto px-4 py-16 max-w-4xl">
+          <BlogBreadcrumbs title={post.title} />
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
