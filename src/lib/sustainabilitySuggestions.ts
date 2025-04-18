@@ -1,11 +1,16 @@
 
 import { 
-  Material, 
   CalculationResult, 
   CalculationInput,
-  MaterialInput
+  Material
 } from './carbonCalculations';
 import { MATERIAL_FACTORS } from './carbonData';
+import { ALL_MATERIAL_FACTORS } from './carbonFactors';
+
+// Combines standard Material type with Australian specific alternatives
+type ExtendedMaterial = Material | 
+  'recycledConcrete' | 'greenConcrete' | 'bluesteelRebar' | 
+  'ausTimber' | 'ausBrick' | 'bambooCladding';
 
 // Generates a suggested improvement based on the calculation results
 export const generateSuggestions = (result: CalculationResult): string[] => {
@@ -61,7 +66,7 @@ export const generateSuggestions = (result: CalculationResult): string[] => {
 };
 
 // Function to find alternative lower-carbon materials
-export const findLowerCarbonAlternatives = (material: Material): Material[] => {
+export const findLowerCarbonAlternatives = (material: Material): ExtendedMaterial[] => {
   switch(material) {
     case "concrete":
       return ["recycledConcrete", "greenConcrete"];
@@ -79,7 +84,7 @@ export const findLowerCarbonAlternatives = (material: Material): Material[] => {
 // Function to estimate potential emissions savings
 export const calculatePotentialSavings = (input: CalculationInput): { 
   material: Material, 
-  alternative: Material, 
+  alternative: ExtendedMaterial, 
   originalEmissions: number,
   potentialEmissions: number,
   savings: number,
@@ -87,7 +92,7 @@ export const calculatePotentialSavings = (input: CalculationInput): {
 }[] => {
   const savings: { 
     material: Material, 
-    alternative: Material, 
+    alternative: ExtendedMaterial, 
     originalEmissions: number,
     potentialEmissions: number,
     savings: number,
@@ -99,7 +104,9 @@ export const calculatePotentialSavings = (input: CalculationInput): {
     const originalEmission = MATERIAL_FACTORS[material.type].factor * material.quantity;
     
     alternatives.forEach(alt => {
-      const alternativeEmission = MATERIAL_FACTORS[alt].factor * material.quantity;
+      // Use ALL_MATERIAL_FACTORS which contains both standard and Australian specific materials
+      const altFactor = ALL_MATERIAL_FACTORS[alt].factor;
+      const alternativeEmission = altFactor * material.quantity;
       const saved = originalEmission - alternativeEmission;
       const percentage = (saved / originalEmission) * 100;
       
