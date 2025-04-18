@@ -8,7 +8,7 @@ import { MATERIAL_FACTORS } from './carbonData';
 import { ALL_MATERIAL_FACTORS } from './carbonFactors';
 
 // Combines standard Material type with Australian specific alternatives
-type ExtendedMaterial = Material | 
+export type ExtendedMaterial = Material | 
   'recycledConcrete' | 'greenConcrete' | 'bluesteelRebar' | 
   'ausTimber' | 'ausBrick' | 'bambooCladding';
 
@@ -69,13 +69,13 @@ export const generateSuggestions = (result: CalculationResult): string[] => {
 export const findLowerCarbonAlternatives = (material: Material): ExtendedMaterial[] => {
   switch(material) {
     case "concrete":
-      return ["recycledConcrete", "greenConcrete"];
+      return ["recycledConcrete", "greenConcrete"] as ExtendedMaterial[];
     case "steel":
-      return ["bluesteelRebar", "ausTimber"];
+      return ["bluesteelRebar", "ausTimber"] as ExtendedMaterial[];
     case "timber":
-      return ["ausTimber", "bambooCladding"];
+      return ["ausTimber", "bambooCladding"] as ExtendedMaterial[];
     case "brick":
-      return ["ausBrick"];
+      return ["ausBrick"] as ExtendedMaterial[];
     default:
       return [];
   }
