@@ -21,7 +21,7 @@ const BillingToggle = ({ annual, onChange }: BillingToggleProps) => {
         Monthly
       </span>
       {annual && (
-        <span className="ml-2 inline-block bg-carbon-100 text-carbon-800 text-xs font-medium py-1 px-2 rounded-full">
+        <span className="ml-2 inline-block bg-carbon-100 text-black text-xs font-medium py-1 px-2 rounded-full">
           Save 15%
         </span>
       )}
