@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useCalculator } from "@/contexts/CalculatorContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -22,103 +22,103 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const navigate = useNavigate();
   const { saveProject } = useProjects();
   const [projectName, setProjectName] = useState("New Carbon Project");
+  const [isCalculating, setIsCalculating] = useState(false);
   
   // Wrap context usage in try/catch for better error handling
-  try {
-    const {
-      calculationInput,
-      calculationResult,
-      activeTab,
-      setActiveTab,
-      handleCalculate
-    } = useCalculator();
+  const calculatorContextValues = (() => {
+    try {
+      return useCalculator();
+    } catch (error) {
+      console.error("Failed to load calculator context:", error);
+      return null;
+    }
+  })();
 
-    // Ensure we have the calculator context
-    console.log("Calculator context loaded successfully");
+  const {
+    calculationInput,
+    calculationResult,
+    activeTab,
+    setActiveTab,
+    handleCalculate
+  } = calculatorContextValues || {};
 
-    const handleSaveProject = async () => {
-      if (!user) {
-        toast.error("Please log in to save your project");
-        navigate("/auth");
-        return;
-      }
-      
-      try {
-        await saveProject({
-          name: projectName,
-          description: "Carbon calculation project",
-          materials: calculationInput.materials,
-          transport: calculationInput.transport,
-          energy: calculationInput.energy,
-          result: calculationResult,
-          tags: ["carbon", "calculation"],
-        });
-        
-        toast.success("Project saved successfully!");
-        navigate(`/projects`);
-      } catch (error) {
-        console.error("Error saving project:", error);
-        toast.error("Failed to save project");
-      }
-    };
-
-    const recordCalculatorUsage = async () => {
-      try {
-        if (user && !demoMode) {
-          const { error } = await supabase
-            .from('calculator_usage')
-            .insert({ 
-              user_id: user.id,
-              ip_address: null
-            });
-
-          if (error) {
-            console.error('Failed to record calculator usage:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error recording calculator usage:', error);
-      }
-    };
-
-    const handleCalculateWithTracking = () => {
-      handleCalculate();
-      recordCalculatorUsage();
-    };
-
-    return (
-      <div className="container mx-auto px-4 md:px-6">
-        <CalculatorHeader />
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-6"
-        >
-          <ProjectNameCard
-            projectName={projectName}
-            onProjectNameChange={setProjectName}
-            onSave={handleSaveProject}
-          />
-        
-          <CalculatorTabs 
-            isMobile={isMobile}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            onCalculate={handleCalculateWithTracking}
-          />
-        </motion.div>
-      </div>
-    );
-  } catch (error) {
-    console.error("Error in CarbonCalculator:", error);
+  const handleSaveProject = async () => {
+    if (!user) {
+      toast.error("Please log in to save your project");
+      navigate("/auth");
+      return;
+    }
     
-    // Fallback UI if context fails
+    if (!calculationInput || !calculationResult) {
+      toast.error("Please complete your calculation before saving");
+      return;
+    }
+    
+    try {
+      await saveProject({
+        name: projectName,
+        description: "Carbon calculation project",
+        materials: calculationInput.materials,
+        transport: calculationInput.transport,
+        energy: calculationInput.energy,
+        result: calculationResult,
+        tags: ["carbon", "calculation"],
+      });
+      
+      toast.success("Project saved successfully!");
+      navigate(`/projects`);
+    } catch (error) {
+      console.error("Error saving project:", error);
+      toast.error("Failed to save project");
+    }
+  };
+
+  const recordCalculatorUsage = useCallback(async () => {
+    // Don't create a timeout or repeated attempts here
+    try {
+      if (user && !demoMode) {
+        const { error } = await supabase
+          .from('calculator_usage')
+          .insert({ 
+            user_id: user.id,
+            ip_address: null
+          });
+
+        if (error) {
+          console.error('Failed to record calculator usage:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error recording calculator usage:', error);
+    }
+  }, [user, demoMode]);
+
+  const handleCalculateWithTracking = useCallback(() => {
+    if (isCalculating) return;
+    
+    setIsCalculating(true);
+    try {
+      if (handleCalculate) {
+        handleCalculate();
+      }
+      // Use a short timeout to avoid performance issues
+      setTimeout(() => {
+        recordCalculatorUsage().finally(() => {
+          setIsCalculating(false);
+        });
+      }, 100);
+    } catch (error) {
+      console.error("Error during calculation:", error);
+      setIsCalculating(false);
+      toast.error("Calculation failed. Please try again.");
+    }
+  }, [handleCalculate, recordCalculatorUsage, isCalculating]);
+
+  // If we don't have the calculator context, display an error
+  if (!calculatorContextValues) {
     return (
       <div className="container mx-auto px-4 md:px-6">
         <CalculatorHeader />
-        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -141,6 +141,32 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       </div>
     );
   }
+
+  return (
+    <div className="container mx-auto px-4 md:px-6">
+      <CalculatorHeader />
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="mb-6"
+      >
+        <ProjectNameCard
+          projectName={projectName}
+          onProjectNameChange={setProjectName}
+          onSave={handleSaveProject}
+        />
+      
+        <CalculatorTabs 
+          isMobile={isMobile}
+          activeTab={activeTab || "materials"}
+          setActiveTab={setActiveTab || (() => {})}
+          onCalculate={handleCalculateWithTracking}
+        />
+      </motion.div>
+    </div>
+  );
 };
 
 export default CarbonCalculator;
