@@ -11,10 +11,12 @@ import SEO from "@/components/SEO";
 import { blogPosts } from "@/data/blogPosts";
 import type { BlogPost as BlogPostType } from "@/data/blogPosts";
 import BlogBreadcrumbs from "@/components/blog/BlogBreadcrumbs";
+import RelatedPosts from "@/components/blog/RelatedPosts";
 
 const BlogPost = () => {
   const { slug } = useParams();
   const [post, setPost] = useState<BlogPostType | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPostType[]>([]);
   
   useEffect(() => {
     if (slug) {
@@ -25,6 +27,14 @@ const BlogPost = () => {
       if (postId) {
         const foundPost = blogPosts.find(p => p.id === postId);
         setPost(foundPost || null);
+        
+        // Find related posts based on category
+        if (foundPost) {
+          const related = blogPosts
+            .filter(p => p.category === foundPost.category && p.id !== foundPost.id)
+            .slice(0, 3); // Limit to 3 related posts
+          setRelatedPosts(related);
+        }
       } else {
         setPost(null);
       }
@@ -63,6 +73,15 @@ const BlogPost = () => {
       <Navbar />
       <main className="flex-1 pt-24">
         <article className="container mx-auto px-4 py-16 max-w-4xl">
+          <div className="flex items-center mb-8">
+            <Button variant="ghost" asChild className="mr-auto">
+              <Link to="/blog" className="flex items-center text-muted-foreground hover:text-foreground">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Blog
+              </Link>
+            </Button>
+          </div>
+          
           <BlogBreadcrumbs title={post.title} />
           
           <motion.div
@@ -109,6 +128,12 @@ const BlogPost = () => {
                 </div>
               </CardContent>
             </Card>
+            
+            {relatedPosts.length > 0 && (
+              <div className="mt-12">
+                <RelatedPosts posts={relatedPosts} />
+              </div>
+            )}
           </motion.div>
         </article>
       </main>
