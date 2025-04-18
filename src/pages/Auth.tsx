@@ -1,7 +1,10 @@
+
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 // Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +39,17 @@ const Auth = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
+          <Button
+            variant="ghost"
+            asChild
+            className="mb-8 text-muted-foreground hover:text-foreground"
+          >
+            <Link to="/" className="flex items-center">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Link>
+          </Button>
+
           <div className="text-center mb-8">
             <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-tr from-carbon-600 to-carbon-400 flex items-center justify-center mb-4">
               <div className="h-4 w-4 bg-white rounded-full"></div>
