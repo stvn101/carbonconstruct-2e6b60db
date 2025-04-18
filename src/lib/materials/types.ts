@@ -1,0 +1,50 @@
+
+export interface ExtendedMaterialData {
+  name: string;
+  factor: number;
+  unit: string;
+  region?: string;
+  alternativeTo?: string;
+  notes?: string;
+  tags?: string[];
+}
+
+// Material types for organization
+export const MATERIAL_TYPES = {
+  STRUCTURAL: "structural",
+  RECYCLED: "recycled",
+  SUSTAINABLE: "sustainable",
+  CONCRETE: "concrete",
+  METAL: "metal",
+  WOOD: "wood",
+  INSULATION: "insulation",
+  PLUMBING: "plumbing",
+  ELECTRICAL: "electrical",
+  FINISHES: "finishes",
+  HANDOVER: "handover",
+  ENERGY: "energy",
+  FUEL: "fuel",
+  CLADDING: "cladding",
+  ROOFING: "roofing",
+  NATURAL: "natural",
+  STEEL: "steel",
+  THERMAL: "thermal",
+  DURABLE: "durable",
+  RENEWABLE: "renewable"
+} as const;
+
+export type MaterialType = keyof typeof MATERIAL_TYPES;
+
+// Define regions used in materials
+export const REGIONS = [
+  "Global",
+  "Australia",
+  "North America",
+  "Europe",
+  "Asia",
+  "South America",
+  "Africa"
+] as const;
+
+export type Region = typeof REGIONS[number];
+
