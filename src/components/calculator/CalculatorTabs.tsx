@@ -1,12 +1,10 @@
 
 import { Calculator } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MaterialsInputSection from "./MaterialsInputSection";
-import TransportInputSection from "./TransportInputSection";
-import EnergyInputSection from "./EnergyInputSection";
-import ResultsSection from "./ResultsSection";
+import { Tabs, TabsList } from "@/components/ui/tabs";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
+import CalculatorTabTriggers from "./tabs/CalculatorTabTriggers";
+import CalculatorTabContents from "./tabs/CalculatorTabContents";
 
 interface CalculatorTabsProps {
   isMobile: boolean;
@@ -61,109 +59,25 @@ const CalculatorTabs = ({
       <CardContent className="pt-2 pb-4 md:pt-0 md:pb-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className={`grid ${isMobile ? 'grid-cols-2 gap-1 mb-4' : 'grid-cols-4 mb-6'} w-full bg-muted`}>
-            {isMobile ? (
-              <>
-                <div className="col-span-2 flex space-x-1">
-                  <TabsTrigger 
-                    value="materials" 
-                    className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
-                  >
-                    Materials
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="transport" 
-                    className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
-                  >
-                    Transport
-                  </TabsTrigger>
-                </div>
-                <div className="col-span-2 flex space-x-1 mt-1">
-                  <TabsTrigger 
-                    value="energy" 
-                    className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
-                  >
-                    Energy
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="results" 
-                    className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
-                  >
-                    Results
-                  </TabsTrigger>
-                </div>
-              </>
-            ) : (
-              <>
-                <TabsTrigger 
-                  value="materials" 
-                  className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-                >
-                  Materials
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="transport" 
-                  className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-                >
-                  Transport
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="energy" 
-                  className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-                >
-                  Energy
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="results" 
-                  className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-                >
-                  Results
-                </TabsTrigger>
-              </>
-            )}
+            <CalculatorTabTriggers isMobile={isMobile} />
           </TabsList>
           
-          <TabsContent value="materials">
-            <MaterialsInputSection 
-              materials={calculationInput.materials}
-              onUpdateMaterial={onUpdateMaterial}
-              onAddMaterial={onAddMaterial}
-              onRemoveMaterial={onRemoveMaterial}
-              onNext={onNextTab}
-            />
-          </TabsContent>
-          
-          <TabsContent value="transport">
-            <TransportInputSection 
-              transportItems={calculationInput.transport}
-              onUpdateTransport={onUpdateTransport}
-              onAddTransport={onAddTransport}
-              onRemoveTransport={onRemoveTransport}
-              onNext={onNextTab}
-              onPrev={onPrevTab}
-            />
-          </TabsContent>
-          
-          <TabsContent value="energy">
-            <EnergyInputSection 
-              energyItems={calculationInput.energy}
-              onUpdateEnergy={onUpdateEnergy}
-              onAddEnergy={onAddEnergy}
-              onRemoveEnergy={onRemoveEnergy}
-              onCalculate={onNextTab}
-              onPrev={onPrevTab}
-            />
-          </TabsContent>
-          
-          <TabsContent value="results">
-            <ResultsSection 
-              calculationResult={calculationResult}
-              materials={calculationInput.materials}
-              transport={calculationInput.transport}
-              energy={calculationInput.energy}
-              onCalculate={onCalculate}
-              onPrev={onPrevTab}
-            />
-          </TabsContent>
+          <CalculatorTabContents 
+            calculationInput={calculationInput}
+            calculationResult={calculationResult}
+            onUpdateMaterial={onUpdateMaterial}
+            onAddMaterial={onAddMaterial}
+            onRemoveMaterial={onRemoveMaterial}
+            onUpdateTransport={onUpdateTransport}
+            onAddTransport={onAddTransport}
+            onRemoveTransport={onRemoveTransport}
+            onUpdateEnergy={onUpdateEnergy}
+            onAddEnergy={onAddEnergy}
+            onRemoveEnergy={onRemoveEnergy}
+            onCalculate={onCalculate}
+            onPrevTab={onPrevTab}
+            onNextTab={onNextTab}
+          />
         </Tabs>
       </CardContent>
     </Card>
