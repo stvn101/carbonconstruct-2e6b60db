@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -8,8 +7,6 @@ import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/auth';
 import { ProjectProvider } from './contexts/ProjectContext';
 import ErrorBoundary from './components/ErrorBoundary';
-
-// Import existing pages
 import Calculator from './pages/Calculator';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
@@ -29,8 +26,8 @@ import ProjectDetail from './pages/ProjectDetail';
 import ConstructionCompanies from './pages/ConstructionCompanies';
 import SustainableBuilding from './pages/SustainableBuilding';
 import NotFound from './pages/NotFound';
+import BlogPost from './pages/BlogPost';
 
-// Import auth components
 import { RequireAuth } from './components/RequireAuth';
 import { NoAuth } from './components/NoAuth';
 
@@ -49,6 +46,7 @@ const App: React.FC = () => {
                     <Route path="/pricing" element={<Pricing />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/posts/:slug" element={<BlogPost />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/help" element={<Help />} />
                     <Route path="/construction-companies" element={<ConstructionCompanies />} />
@@ -139,7 +137,6 @@ const App: React.FC = () => {
                     />
                     <Route path="/auth/callback" element={<AuthCallback />} />
                     
-                    {/* Redirect case-studies to home */}
                     <Route path="/case-studies" element={<Navigate to="/" />} />
                     
                     <Route path="*" element={<NotFound />} />
