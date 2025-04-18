@@ -14,9 +14,8 @@ import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { calculateTotalEmissions } from "@/lib/carbonCalculations";
 
-// Import the component sections
+// Import the calculator sections
 import MaterialsInputSection from "./calculator/MaterialsInputSection";
 import TransportInputSection from "./calculator/TransportInputSection";
 import EnergyInputSection from "./calculator/EnergyInputSection";
