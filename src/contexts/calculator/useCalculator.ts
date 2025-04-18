@@ -1,0 +1,14 @@
+
+import { useContext } from 'react';
+import { CalculatorContext } from './CalculatorContext';
+
+export const useCalculator = () => {
+  const context = useContext(CalculatorContext);
+  
+  if (context === undefined) {
+    console.warn('useCalculator hook called outside of CalculatorProvider');
+    throw new Error("useCalculator must be used within a CalculatorProvider");
+  }
+  
+  return context;
+};
