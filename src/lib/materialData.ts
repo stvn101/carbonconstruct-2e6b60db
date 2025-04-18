@@ -1,3 +1,4 @@
+
 import { MATERIAL_FACTORS as BASE_MATERIAL_FACTORS } from '@/lib/carbonCalculations';
 
 export interface ExtendedMaterialData {
@@ -41,7 +42,12 @@ const MATERIAL_TYPES = {
   FUEL: "fuel",
   CLADDING: "cladding",
   ROOFING: "roofing",
-  NATURAL: "natural"
+  NATURAL: "natural",
+  // Adding missing types that are used in the code
+  STEEL: "steel",
+  THERMAL: "thermal",
+  DURABLE: "durable",
+  RENEWABLE: "renewable"
 };
 
 // Define standard materials
