@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -105,10 +104,10 @@ const Blog = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-3xl mx-auto mb-20"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">CarbonConstruct Blog</h1>
-            <p className="text-lg text-foreground/80 mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold mb-8 gradient-heading">CarbonConstruct Blog</h1>
+            <p className="text-lg text-foreground/80 mb-10">
               Insights, guides, and industry trends to help you build more sustainably.
             </p>
             
@@ -130,7 +129,7 @@ const Blog = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
           >
             {filteredPosts.map((post) => (
               <motion.div key={post.id} variants={itemVariants}>
@@ -157,7 +156,7 @@ const Blog = () => {
                       </div>
                     </div>
                     <CardTitle className="mt-2 hover:text-carbon-500 transition-colors">
-                      <a href={`/blog/${post.id}`} className="hover:underline">
+                      <a href={`/blog/posts/${post.id}-${post.title.toLowerCase().replace(/\s+/g, '-')}`} className="hover:underline">
                         {post.title}
                       </a>
                     </CardTitle>
@@ -167,7 +166,10 @@ const Blog = () => {
                   </CardContent>
                   <div className="p-6 pt-0">
                     <Button variant="ghost" className="group text-carbon-500 hover:text-carbon-600" asChild>
-                      <a href={`/blog/${post.id}`} className="flex items-center">
+                      <a 
+                        href={`/blog/posts/${post.id}-${post.title.toLowerCase().replace(/\s+/g, '-')}`}
+                        className="flex items-center"
+                      >
                         Read More 
                         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </a>
