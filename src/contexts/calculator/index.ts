@@ -1,4 +1,4 @@
 
-export { CalculatorContext, CalculatorProvider } from './CalculatorContext';
+export { default as CalculatorContext, CalculatorProvider } from './CalculatorContext';
 export { useCalculator } from './useCalculator';
-export type { CalculatorContextType } from './types';
+export * from './types';

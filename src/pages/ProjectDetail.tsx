@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -27,13 +27,22 @@ const ProjectDetail = () => {
   
   // Get the project data
   const project = getProject(projectId || "");
+  const [calculatorContextError, setCalculatorContextError] = useState(false);
   
-  // Use calculator context
-  const { setCalculationInput, calculationInput, calculationResult, handleCalculate } = useCalculator();
+  // Use calculator context safely
+  let calculatorData = {};
+  try {
+    calculatorData = useCalculator();
+  } catch (error) {
+    console.error("Failed to load calculator context:", error);
+    setCalculatorContextError(true);
+  }
+  
+  const { setCalculationInput, calculationInput, calculationResult, handleCalculate } = calculatorData as any;
   
   // Redirect if project not found
   useEffect(() => {
-    if (!project && !user) {
+    if (!project && user) {
       toast.error("Project not found");
       navigate("/dashboard");
     }
@@ -41,14 +50,31 @@ const ProjectDetail = () => {
   
   // Load project data into calculator
   useEffect(() => {
-    if (project && setCalculationInput) {
-      setCalculationInput({
-        materials: project.materials,
-        transport: project.transport,
-        energy: project.energy
-      });
+    if (project && setCalculationInput && !calculatorContextError) {
+      try {
+        setCalculationInput({
+          materials: project.materials || [],
+          transport: project.transport || [],
+          energy: project.energy || []
+        });
+      } catch (error) {
+        console.error("Error setting calculator input:", error);
+        setCalculatorContextError(true);
+      }
     }
-  }, [project, setCalculationInput]);
+  }, [project, setCalculationInput, calculatorContextError]);
+  
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+          <p className="text-muted-foreground mb-4">Please log in to view this project</p>
+          <Button onClick={() => navigate("/auth")}>Log In</Button>
+        </div>
+      </div>
+    );
+  }
   
   if (!project) {
     return (
@@ -66,14 +92,23 @@ const ProjectDetail = () => {
         toast.success("Project deleted successfully");
         navigate("/dashboard");
       } catch (error) {
-        console.error("Error saving project:", error);
+        console.error("Error deleting project:", error);
         toast.error("Failed to delete project");
       }
     }
   };
 
   const recordCalculatorUsage = async () => {
-    handleCalculate();
+    if (handleCalculate) {
+      try {
+        handleCalculate();
+      } catch (error) {
+        console.error("Error during calculation:", error);
+        toast.error("Calculation failed. Please try again.");
+      }
+    } else {
+      toast.error("Calculator is not available");
+    }
   };
 
   return (
@@ -125,18 +160,34 @@ const ProjectDetail = () => {
             <TabsContent value="details">
               <ProjectDetailsTab 
                 project={project}
-                onExportPDF={exportProjectPDF}
-                onExportCSV={exportProjectCSV}
+                onExportPDF={() => exportProjectPDF(project)}
+                onExportCSV={() => exportProjectCSV(project)}
               />
             </TabsContent>
             
             {/* Calculator Tab */}
             <TabsContent value="calculator">
-              <ProjectCalculatorTab 
-                calculationInput={calculationInput}
-                calculationResult={calculationResult}
-                onCalculate={recordCalculatorUsage}
-              />
+              {calculatorContextError ? (
+                <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-800">
+                  <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Calculator Error</h3>
+                  <p className="mt-2 text-red-700 dark:text-red-400">
+                    There was a problem loading the calculator. Please refresh the page or try again later.
+                  </p>
+                  <Button 
+                    onClick={() => window.location.reload()}
+                    variant="destructive"
+                    className="mt-4"
+                  >
+                    Refresh Page
+                  </Button>
+                </div>
+              ) : (
+                <ProjectCalculatorTab 
+                  calculationInput={calculationInput}
+                  calculationResult={calculationResult}
+                  onCalculate={recordCalculatorUsage}
+                />
+              )}
             </TabsContent>
             
             {/* Premium-only tab content example */}
