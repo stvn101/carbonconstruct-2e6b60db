@@ -18,9 +18,9 @@ const Pricing = () => {
   const navigate = useNavigate();
 
   const monthlyPrices = {
-    starter: 49,
-    professional: 99,
-    enterprise: 249
+    starter: 29,
+    professional: 79,
+    enterprise: 199
   };
   
   const calculateAnnualPrice = (monthlyPrice: number) => {
@@ -37,14 +37,15 @@ const Pricing = () => {
         "Carbon footprint calculation",
         "Australian materials library",
         "Single user access",
-        "PDF report generation",
-        "Email support"
+        "Basic PDF reports",
+        "Email support response within 48h"
       ],
       notIncluded: [
         "Team collaboration",
         "API access",
         "Custom reporting",
-        "Advanced analytics"
+        "Advanced analytics",
+        "Priority support"
       ],
       cta: "Get Started",
       popular: false
@@ -57,14 +58,16 @@ const Pricing = () => {
       features: [
         "Everything in Starter",
         "Up to 5 team members",
-        "Extended Australian materials library",
+        "Extended materials library",
         "Project comparison tools",
         "Custom reporting",
-        "Priority support"
+        "Priority support (24h)",
+        "Monthly sustainability insights"
       ],
       notIncluded: [
         "Enterprise integrations",
-        "White labeling"
+        "White labeling",
+        "Dedicated account manager"
       ],
       cta: "Start Free Trial",
       popular: true
@@ -79,10 +82,12 @@ const Pricing = () => {
         "Unlimited team members",
         "Full API access",
         "Custom integrations",
-        "White labeling",
-        "Dedicated support",
+        "White labeling options",
+        "Dedicated account manager",
+        "24/7 priority support",
         "Australian compliance assistance",
-        "Advanced analytics"
+        "Advanced analytics dashboard",
+        "Custom training sessions"
       ],
       notIncluded: [],
       cta: "Contact Sales",
@@ -92,7 +97,6 @@ const Pricing = () => {
 
   const handlePlanAction = async (planId: string) => {
     if (!user) {
-      // Redirect to auth if not logged in
       navigate('/auth', { state: { returnTo: '/pricing' } });
       return;
     }
@@ -105,13 +109,11 @@ const Pricing = () => {
     setProcessing(planId);
     
     try {
-      // For enterprise, direct to contact form
       if (planId === 'enterprise') {
         navigate('/contact', { state: { subject: 'Enterprise Plan Inquiry' } });
         return;
       }
       
-      // For the professional plan, offer a free trial first
       if (planId === 'professional') {
         const { data, error } = await supabase.functions.invoke('create-payment-session', {
           body: {
@@ -130,13 +132,11 @@ const Pricing = () => {
           return;
         }
         
-        // If the trial activation failed because they already had one, continue to payment
         if (data.error && data.error.includes("already used your free trial")) {
           toast.info("You've already used your trial. Processing payment...");
         }
       }
 
-      // Process regular payment
       const { data, error } = await supabase.functions.invoke('create-payment-session', {
         body: {
           planName: planId,
