@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from './components/ui/sonner';
@@ -138,6 +138,10 @@ const App: React.FC = () => {
                       } 
                     />
                     <Route path="/auth/callback" element={<AuthCallback />} />
+                    
+                    {/* Redirect case-studies to home */}
+                    <Route path="/case-studies" element={<Navigate to="/" />} />
+                    
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Toaster />
