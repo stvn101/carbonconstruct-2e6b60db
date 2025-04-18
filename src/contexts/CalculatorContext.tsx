@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { createContext, useState, useContext } from "react";
 import {
   CalculationInput,
   CalculationResult,
@@ -18,7 +18,30 @@ const DEFAULT_CALCULATION_INPUT: CalculationInput = {
   energy: [{ type: "electricity", amount: 500 }]
 };
 
-export function useCalculator() {
+type CalculatorContextType = {
+  calculationInput: CalculationInput;
+  calculationResult: CalculationResult | null;
+  activeTab: string;
+  setActiveTab: (value: string) => void;
+  handleAddMaterial: () => void;
+  handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: string | number) => void;
+  handleRemoveMaterial: (index: number) => void;
+  handleAddTransport: () => void;
+  handleUpdateTransport: (index: number, field: keyof TransportInput, value: string | number) => void;
+  handleRemoveTransport: (index: number) => void;
+  handleAddEnergy: () => void;
+  handleUpdateEnergy: (index: number, field: keyof EnergyInput, value: string | number) => void;
+  handleRemoveEnergy: (index: number) => void;
+  handleCalculate: () => void;
+  handleNextTab: () => void;
+  handlePrevTab: () => void;
+  setCalculationInput: (input: CalculationInput) => void;
+  setCalculationResult: (result: CalculationResult | null) => void;
+};
+
+const CalculatorContext = createContext<CalculatorContextType | undefined>(undefined);
+
+export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<string>("materials");
@@ -127,24 +150,36 @@ export function useCalculator() {
     }
   };
 
-  return {
-    calculationInput,
-    setCalculationInput,
-    calculationResult,
-    setCalculationResult, // Added this missing property
-    activeTab,
-    setActiveTab,
-    handleAddMaterial,
-    handleUpdateMaterial,
-    handleRemoveMaterial,
-    handleAddTransport,
-    handleUpdateTransport,
-    handleRemoveTransport,
-    handleAddEnergy,
-    handleUpdateEnergy,
-    handleRemoveEnergy,
-    handleCalculate,
-    handleNextTab,
-    handlePrevTab
-  };
-}
+  return (
+    <CalculatorContext.Provider value={{
+      calculationInput,
+      setCalculationInput,
+      calculationResult,
+      setCalculationResult,
+      activeTab,
+      setActiveTab,
+      handleAddMaterial,
+      handleUpdateMaterial,
+      handleRemoveMaterial,
+      handleAddTransport,
+      handleUpdateTransport,
+      handleRemoveTransport,
+      handleAddEnergy,
+      handleUpdateEnergy,
+      handleRemoveEnergy,
+      handleCalculate,
+      handleNextTab,
+      handlePrevTab
+    }}>
+      {children}
+    </CalculatorContext.Provider>
+  );
+};
+
+export const useCalculator = () => {
+  const context = useContext(CalculatorContext);
+  if (context === undefined) {
+    throw new Error("useCalculator must be used within a CalculatorProvider");
+  }
+  return context;
+};

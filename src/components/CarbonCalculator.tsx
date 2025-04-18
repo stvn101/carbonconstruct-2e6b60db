@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useCalculator } from "@/hooks/useCalculator";
+import { useCalculator } from "@/contexts/CalculatorContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useProjects } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/auth";
@@ -26,20 +26,8 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const {
     calculationInput,
     calculationResult,
-    setCalculationResult,
     activeTab,
-    setActiveTab,
-    handleAddMaterial,
-    handleUpdateMaterial,
-    handleRemoveMaterial,
-    handleAddTransport,
-    handleUpdateTransport,
-    handleRemoveTransport,
-    handleAddEnergy,
-    handleUpdateEnergy,
-    handleRemoveEnergy,
-    handleNextTab,
-    handlePrevTab
+    setActiveTab
   } = useCalculator();
 
   const handleSaveProject = async () => {
@@ -111,20 +99,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
           isMobile={isMobile}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          calculationInput={calculationInput}
-          calculationResult={calculationResult}
-          onUpdateMaterial={handleUpdateMaterial}
-          onAddMaterial={handleAddMaterial}
-          onRemoveMaterial={handleRemoveMaterial}
-          onUpdateTransport={handleUpdateTransport}
-          onAddTransport={handleAddTransport}
-          onRemoveTransport={handleRemoveTransport}
-          onUpdateEnergy={handleUpdateEnergy}
-          onAddEnergy={handleAddEnergy}
-          onRemoveEnergy={handleRemoveEnergy}
           onCalculate={handleCalculateWithTracking}
-          onPrevTab={handlePrevTab}
-          onNextTab={handleNextTab}
         />
       </motion.div>
     </div>
