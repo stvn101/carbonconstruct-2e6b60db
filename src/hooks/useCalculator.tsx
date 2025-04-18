@@ -129,8 +129,9 @@ export function useCalculator() {
 
   return {
     calculationInput,
-    setCalculationInput, // Explicitly exposing the setter function
+    setCalculationInput,
     calculationResult,
+    setCalculationResult, // Added this missing property
     activeTab,
     setActiveTab,
     handleAddMaterial,
