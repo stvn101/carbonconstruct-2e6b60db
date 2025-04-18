@@ -7,9 +7,9 @@ import { useAuth } from '@/contexts/auth';
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
-import BillingToggle from "@/components/pricing/BillingToggle";
+import PricingHeader from "@/components/pricing/PricingHeader";
 import PricingPlans from "@/components/pricing/PricingPlans";
-import { PlanPrices, PricingPlan } from "@/types/pricing";
+import { generatePricingPlans } from "@/utils/pricingUtils";
 
 const Pricing = () => {
   const [annual, setAnnual] = useState(true);
@@ -17,91 +17,7 @@ const Pricing = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
-  // Define monthly prices in cents
-  const monthlyPrices: PlanPrices = {
-    starter: 20000, // $200.00
-    professional: 50000, // $500.00
-    enterprise: 100000 // $1,000.00
-  };
-  
-  // Calculate annual prices with correct discounting logic
-  const calculateAnnualPrice = (monthlyPrice: number, planId: string) => {
-    const annualBase = monthlyPrice * 12;
-    // Starter plan gets no discount
-    if (planId === 'starter') {
-      return annualBase; // $2,400.00 annually
-    }
-    // Professional and Enterprise get 15% discount
-    return Math.round(annualBase * 0.85); // 15% discount
-  };
-  
-  const plans: PricingPlan[] = [
-    {
-      id: "starter",
-      name: "Starter",
-      price: annual ? calculateAnnualPrice(monthlyPrices.starter, 'starter') : monthlyPrices.starter,
-      description: "Best for small construction firms just beginning their sustainability journey in Australia.",
-      features: [
-        "Carbon footprint calculation",
-        "Australian materials library",
-        "Single user access",
-        "Basic PDF reports",
-        "Email support response within 48h"
-      ],
-      notIncluded: [
-        "Team collaboration",
-        "API access",
-        "Custom reporting",
-        "Advanced analytics",
-        "Priority support"
-      ],
-      cta: "Get Started",
-      popular: false
-    },
-    {
-      id: "professional",
-      name: "Professional",
-      price: annual ? calculateAnnualPrice(monthlyPrices.professional, 'professional') : monthlyPrices.professional,
-      description: "Perfect for growing Australian construction companies ready to measure and reduce their carbon impact.",
-      features: [
-        "Everything in Starter",
-        "Up to 5 team members",
-        "Extended materials library",
-        "Project comparison tools",
-        "Custom reporting",
-        "Priority support (24h)",
-        "Monthly sustainability insights"
-      ],
-      notIncluded: [
-        "Enterprise integrations",
-        "White labeling",
-        "Dedicated account manager"
-      ],
-      cta: "Start Free Trial",
-      popular: true
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise",
-      price: annual ? calculateAnnualPrice(monthlyPrices.enterprise, 'enterprise') : monthlyPrices.enterprise,
-      description: "Complete solution for large Australian construction firms with complex sustainability needs.",
-      features: [
-        "Everything in Professional",
-        "Unlimited team members",
-        "Full API access",
-        "Custom integrations",
-        "White labeling options",
-        "Dedicated account manager",
-        "24/7 priority support",
-        "Australian compliance assistance",
-        "Advanced analytics dashboard",
-        "Custom training sessions"
-      ],
-      notIncluded: [],
-      cta: "Contact Sales",
-      popular: false
-    }
-  ];
+  const plans = generatePricingPlans(annual);
 
   const handlePlanAction = async (planId: string) => {
     if (!user) {
@@ -174,21 +90,7 @@ const Pricing = () => {
       <Navbar />
       <main className="flex-1 pt-24">
         <section className="py-16 md:py-24 container mx-auto px-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-16"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">
-              Transparent Pricing
-            </h1>
-            <p className="text-lg md:text-xl text-foreground/80 mb-10">
-              Choose the plan that's right for your Australian construction business. All plans include our core carbon calculation engine.
-            </p>
-            
-            <BillingToggle annual={annual} onChange={setAnnual} />
-          </motion.div>
+          <PricingHeader annual={annual} onBillingChange={setAnnual} />
 
           <PricingPlans 
             plans={plans}
