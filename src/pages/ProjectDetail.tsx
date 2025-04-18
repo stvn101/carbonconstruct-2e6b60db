@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/auth";
 import { useProjects } from "@/contexts/ProjectContext";
 import { useCalculator } from "@/contexts/calculator";
 import { toast } from "sonner";
+import { SavedProject } from "@/types/project";
 
 // Import refactored components
 import ProjectHeader from "@/components/project/ProjectHeader";
