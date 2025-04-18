@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
@@ -29,7 +30,7 @@ function Calculator() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-grow py-6 md:py-12 container mx-auto px-4 pt-24">
+      <main className="flex-grow container mx-auto px-4 content-top-spacing pb-12">
         <h1 className="text-3xl font-bold mb-6">Carbon Calculator</h1>
         
         {demoMode && !user && (

@@ -1,3 +1,4 @@
+
 import NavbarLogo from "./navbar/NavbarLogo";
 import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
@@ -9,6 +10,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+
+// Define navbar height for consistent spacing
+const NAVBAR_HEIGHT = 64; // pixels
 
 const Navbar = () => {
   const { user, profile } = useAuth();
@@ -26,6 +30,11 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Set CSS variable for navbar height to use throughout the app
+  useEffect(() => {
+    document.documentElement.style.setProperty('--navbar-height', `${NAVBAR_HEIGHT}px`);
+  }, []);
+
   return (
     <motion.nav 
       className={`fixed top-0 w-full z-50 bg-background/95 backdrop-blur-sm transition-all duration-300 ${
@@ -34,6 +43,7 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.3 }}
+      style={{ height: `${NAVBAR_HEIGHT}px` }}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">

@@ -1,5 +1,4 @@
 
-
 /* This file contains utility classes that don't fit in other categories */
 
 /* Form field consistency */
@@ -151,4 +150,3 @@ input[type="number"] {
 .premium-user .navbar-item-premium {
   @apply block;
 }
-

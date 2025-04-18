@@ -29,20 +29,20 @@ const MaterialDatabase = () => {
   
   // Set the default filter to the global region
   useEffect(() => {
-    if (globalRegion !== "Global") {
+    if (globalRegion !== "National") {
       setSelectedRegion(globalRegion);
     }
   }, [globalRegion]);
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion(globalRegion !== "Global" ? globalRegion : "all");
+    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 content-top-spacing">
       <div className="max-w-5xl mx-auto">
         <DatabaseHeader 
           globalRegion={globalRegion}
