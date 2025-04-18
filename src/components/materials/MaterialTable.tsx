@@ -99,8 +99,12 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
                 {material.sustainabilityScore && (
                   <Badge 
                     variant={
-                      material.sustainabilityScore >= 80 ? "success" :
-                      material.sustainabilityScore >= 60 ? "warning" : "destructive"
+                      material.sustainabilityScore >= 80 ? "default" :
+                      material.sustainabilityScore >= 60 ? "secondary" : "destructive"
+                    }
+                    className={
+                      material.sustainabilityScore >= 80 ? "bg-green-500 hover:bg-green-600" :
+                      material.sustainabilityScore >= 60 ? "bg-amber-500 hover:bg-amber-600" : ""
                     }
                   >
                     {material.sustainabilityScore}/100
