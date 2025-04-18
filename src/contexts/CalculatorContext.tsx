@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 import {
   CalculationInput,
   CalculationResult,
@@ -44,6 +44,11 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<string>("materials");
+
+  useEffect(() => {
+    console.log("CalculatorProvider initialized");
+    return () => console.log("CalculatorProvider unmounted");
+  }, []);
 
   const handleAddMaterial = () => {
     setCalculationInput(prev => ({
@@ -124,8 +129,14 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const handleCalculate = () => {
-    const result = calculateTotalEmissions(calculationInput);
-    setCalculationResult(result);
+    try {
+      console.log("Calculating emissions with input:", calculationInput);
+      const result = calculateTotalEmissions(calculationInput);
+      console.log("Calculation result:", result);
+      setCalculationResult(result);
+    } catch (error) {
+      console.error("Error calculating emissions:", error);
+    }
   };
 
   const handleNextTab = () => {
@@ -180,15 +191,10 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 export const useCalculator = () => {
   const context = useContext(CalculatorContext);
   
-  console.log('CalculatorContext value:', context);
-  
   if (context === undefined) {
     console.warn('useCalculator hook called outside of CalculatorProvider');
     throw new Error("useCalculator must be used within a CalculatorProvider");
   }
-  
-  console.log('Calculation Input:', context.calculationInput);
-  console.log('Active Tab:', context.activeTab);
   
   return context;
 };
