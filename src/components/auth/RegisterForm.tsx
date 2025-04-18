@@ -29,7 +29,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const RegisterForm = () => {
-  const { register, isLoading } = useAuth();
+  const { register, loading } = useAuth();
   const [serverError, setServerError] = useState("");
 
   const form = useForm<FormValues>({
@@ -120,9 +120,9 @@ const RegisterForm = () => {
           <Button
             type="submit"
             className="w-full bg-carbon-600 hover:bg-carbon-700"
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? (
+            {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account
               </>
