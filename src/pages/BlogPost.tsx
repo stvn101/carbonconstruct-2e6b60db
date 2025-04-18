@@ -1,0 +1,104 @@
+
+import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Card, CardContent } from "@/components/ui/card";
+import { CalendarDays, User } from "lucide-react";
+import SEO from "@/components/SEO";
+
+// Import blog posts data (we'll move this to a separate file in a future refactor)
+import { blogPosts } from "@/pages/Blog";
+
+const BlogPost = () => {
+  const { slug } = useParams();
+  const [post, setPost] = useState<typeof blogPosts[0] | null>(null);
+  
+  useEffect(() => {
+    // Extract the post ID from the slug (format: "1-post-title")
+    const postId = Number(slug?.split('-')[0]);
+    const foundPost = blogPosts.find(p => p.id === postId);
+    setPost(foundPost || null);
+  }, [slug]);
+
+  if (!post) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24">
+          <div className="container mx-auto px-4 py-16">
+            <h1 className="text-2xl font-bold">Blog post not found</h1>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <SEO 
+        title={post.title}
+        description={post.excerpt}
+        type="article"
+        image={post.imageUrl}
+        author={post.author}
+      />
+      <Navbar />
+      <main className="flex-1 pt-24">
+        <article className="container mx-auto px-4 py-16 max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="mb-8">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">
+                {post.title}
+              </h1>
+              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                <div className="flex items-center">
+                  <CalendarDays className="h-4 w-4 mr-1" />
+                  {post.date}
+                </div>
+                <div className="flex items-center">
+                  <User className="h-4 w-4 mr-1" />
+                  {post.author}
+                </div>
+                <span className="text-carbon-500">{post.category}</span>
+              </div>
+            </div>
+
+            <Card className="overflow-hidden mb-8">
+              <div className="aspect-video relative">
+                <img 
+                  src={post.imageUrl} 
+                  alt={post.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
+            </Card>
+
+            <Card>
+              <CardContent className="p-8">
+                <div className="prose prose-lg dark:prose-invert max-w-none">
+                  <p className="text-lg leading-relaxed mb-6">{post.excerpt}</p>
+                  {/* Placeholder content - in a real app, this would be the full blog post content */}
+                  <p className="text-muted-foreground">
+                    This is a placeholder for the full blog post content. In a real application, 
+                    this would contain the complete article text, possibly fetched from a CMS or 
+                    database. The excerpt above gives you a preview of what this article covers.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </article>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default BlogPost;
