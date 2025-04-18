@@ -13,6 +13,11 @@ interface PricingPlansProps {
 }
 
 const PricingPlans = ({ plans, processing, hadTrial, onPlanAction }: PricingPlansProps) => {
+  // Function to format price display
+  const formatPrice = (price: number): string => {
+    return `$${(price/100).toFixed(2)}`;
+  };
+
   return (
     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
       {plans.map((plan, index) => (
@@ -31,8 +36,8 @@ const PricingPlans = ({ plans, processing, hadTrial, onPlanAction }: PricingPlan
             <CardHeader>
               <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
               <div className="mt-4">
-                <span className="text-4xl font-bold">A${(plan.price/100).toFixed(2)}</span>
-                <span className="text-foreground/60 ml-2">/ {plan.price > 100 ? 'year' : 'month'}</span>
+                <span className="text-4xl font-bold">{formatPrice(plan.price)}</span>
+                <span className="text-foreground/60 ml-2">/ {plan.price % 12 === 0 && plan.price > 100000 ? 'year' : 'month'}</span>
               </div>
               <p className="text-foreground/80 mt-3 text-sm">{plan.description}</p>
             </CardHeader>

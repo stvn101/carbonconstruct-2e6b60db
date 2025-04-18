@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -16,17 +17,21 @@ const Pricing = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
+  // Define monthly prices in cents
   const monthlyPrices: PlanPrices = {
-    starter: 200,
-    professional: 500,
-    enterprise: 1000
+    starter: 20000, // $200.00
+    professional: 50000, // $500.00
+    enterprise: 100000 // $1,000.00
   };
   
+  // Calculate annual prices with correct discounting logic
   const calculateAnnualPrice = (monthlyPrice: number, planId: string) => {
     const annualBase = monthlyPrice * 12;
+    // Starter plan gets no discount
     if (planId === 'starter') {
-      return annualBase;
+      return annualBase; // $2,400.00 annually
     }
+    // Professional and Enterprise get 15% discount
     return Math.round(annualBase * 0.85); // 15% discount
   };
   
