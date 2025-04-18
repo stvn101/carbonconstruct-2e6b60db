@@ -97,8 +97,8 @@ const Contact = () => {
                   <Mail className="h-6 w-6 text-carbon-500 mr-4 mt-1" />
                   <div>
                     <h3 className="font-medium">Email Us</h3>
-                    <p className="text-foreground/70">info@carbonconstruct.com</p>
-                    <p className="text-foreground/70">support@carbonconstruct.com</p>
+                    <p className="text-foreground/70">contact@carbonconstruct.net</p>
+                    <p className="text-foreground/70">info@carbonconstruct.net</p>
                   </div>
                 </div>
                 
@@ -106,8 +106,8 @@ const Contact = () => {
                   <Phone className="h-6 w-6 text-carbon-500 mr-4 mt-1" />
                   <div>
                     <h3 className="font-medium">Call Us</h3>
-                    <p className="text-foreground/70">+1 (555) 123-4567</p>
-                    <p className="text-sm text-foreground/60">Monday-Friday, 9am-5pm PST</p>
+                    <p className="text-foreground/70">(07) 3746 8765</p>
+                    <p className="text-sm text-foreground/60">Monday-Friday, 9am-5pm AEST</p>
                   </div>
                 </div>
                 
@@ -116,9 +116,9 @@ const Contact = () => {
                   <div>
                     <h3 className="font-medium">Visit Us</h3>
                     <p className="text-foreground/70">
-                      123 Sustainability Street<br />
-                      San Francisco, CA 94105<br />
-                      United States
+                      Level 5, 410 Queen Street<br />
+                      Brisbane, QLD 4000<br />
+                      Australia
                     </p>
                   </div>
                 </div>
@@ -238,3 +238,4 @@ const Contact = () => {
 };
 
 export default Contact;
+
