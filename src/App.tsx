@@ -6,7 +6,7 @@ import { Toaster } from './components/ui/sonner';
 import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/auth';
 import { ProjectProvider } from './contexts/ProjectContext';
-import { CalculatorProvider } from './contexts/CalculatorContext';
+import { CalculatorProvider } from './contexts/calculator';
 import ErrorBoundary from './components/ErrorBoundary';
 import Calculator from './pages/Calculator';
 import Pricing from './pages/Pricing';

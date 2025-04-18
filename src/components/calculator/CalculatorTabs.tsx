@@ -2,7 +2,7 @@
 import { Calculator } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList } from "@/components/ui/tabs";
-import { useCalculator } from "@/contexts/CalculatorContext";
+import { useCalculator } from "@/contexts/calculator";
 import CalculatorTabTriggers from "./tabs/CalculatorTabTriggers";
 import CalculatorTabContents from "./tabs/CalculatorTabContents";
 
