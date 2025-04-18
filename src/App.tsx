@@ -7,6 +7,7 @@ import { Toaster } from './components/ui/sonner';
 import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProjectProvider } from './contexts/ProjectContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import existing pages
 import Calculator from './pages/Calculator';
@@ -27,6 +28,7 @@ import Help from './pages/Help';
 import ProjectDetail from './pages/ProjectDetail';
 import ConstructionCompanies from './pages/ConstructionCompanies';
 import SustainableBuilding from './pages/SustainableBuilding';
+import NotFound from './pages/NotFound';
 
 // Import auth components
 import { RequireAuth } from './components/RequireAuth';
@@ -34,115 +36,118 @@ import { NoAuth } from './components/NoAuth';
 
 const App: React.FC = () => {
   return (
-    <HelmetProvider>
-      <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
-        <RegionProvider>
-          <AuthProvider>
-            <ProjectProvider>
-              <Router>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/calculator" element={<Calculator />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/construction-companies" element={<ConstructionCompanies />} />
-                  <Route path="/sustainable-building" element={<SustainableBuilding />} />
-                  
-                  <Route 
-                    path="/dashboard" 
-                    element={
-                      <RequireAuth>
-                        <Dashboard />
-                      </RequireAuth>
-                    } 
-                  />
-                  <Route 
-                    path="/profile" 
-                    element={
-                      <RequireAuth>
-                        <UserProfile />
-                      </RequireAuth>
-                    } 
-                  />
-                  <Route 
-                    path="/projects" 
-                    element={
-                      <RequireAuth>
-                        <UserProjects />
-                      </RequireAuth>
-                    } 
-                  />
-                  <Route 
-                    path="/projects/browse" 
-                    element={
-                      <RequireAuth>
-                        <ProjectsBrowser />
-                      </RequireAuth>
-                    } 
-                  />
-                  <Route 
-                    path="/projects/new" 
-                    element={
-                      <RequireAuth>
-                        <Calculator />
-                      </RequireAuth>
-                    } 
-                  />
-                  <Route 
-                    path="/projects/:projectId" 
-                    element={
-                      <RequireAuth>
-                        <ProjectDetail />
-                      </RequireAuth>
-                    } 
-                  />
-                  <Route path="/materials" element={<MaterialBrowser />} />
-                  
-                  <Route 
-                    path="/notifications" 
-                    element={
-                      <RequireAuth>
-                        <Notifications />
-                      </RequireAuth>
-                    } 
-                  />
-                  
-                  <Route 
-                    path="/auth" 
-                    element={
-                      <NoAuth>
-                        <Auth />
-                      </NoAuth>
-                    } 
-                  />
-                  <Route 
-                    path="/signin" 
-                    element={
-                      <NoAuth>
-                        <Auth />
-                      </NoAuth>
-                    } 
-                  />
-                  <Route 
-                    path="/signup" 
-                    element={
-                      <NoAuth>
-                        <Auth />
-                      </NoAuth>
-                    } 
-                  />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                </Routes>
-              </Router>
-            </ProjectProvider>
-          </AuthProvider>
-          <Toaster />
-        </RegionProvider>
-      </ThemeProvider>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
+          <RegionProvider>
+            <Router>
+              <AuthProvider>
+                <ProjectProvider>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/calculator" element={<Calculator />} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/help" element={<Help />} />
+                    <Route path="/construction-companies" element={<ConstructionCompanies />} />
+                    <Route path="/sustainable-building" element={<SustainableBuilding />} />
+                    
+                    <Route 
+                      path="/dashboard" 
+                      element={
+                        <RequireAuth>
+                          <Dashboard />
+                        </RequireAuth>
+                      } 
+                    />
+                    <Route 
+                      path="/profile" 
+                      element={
+                        <RequireAuth>
+                          <UserProfile />
+                        </RequireAuth>
+                      } 
+                    />
+                    <Route 
+                      path="/projects" 
+                      element={
+                        <RequireAuth>
+                          <UserProjects />
+                        </RequireAuth>
+                      } 
+                    />
+                    <Route 
+                      path="/projects/browse" 
+                      element={
+                        <RequireAuth>
+                          <ProjectsBrowser />
+                        </RequireAuth>
+                      } 
+                    />
+                    <Route 
+                      path="/projects/new" 
+                      element={
+                        <RequireAuth>
+                          <Calculator />
+                        </RequireAuth>
+                      } 
+                    />
+                    <Route 
+                      path="/projects/:projectId" 
+                      element={
+                        <RequireAuth>
+                          <ProjectDetail />
+                        </RequireAuth>
+                      } 
+                    />
+                    <Route path="/materials" element={<MaterialBrowser />} />
+                    
+                    <Route 
+                      path="/notifications" 
+                      element={
+                        <RequireAuth>
+                          <Notifications />
+                        </RequireAuth>
+                      } 
+                    />
+                    
+                    <Route 
+                      path="/auth" 
+                      element={
+                        <NoAuth>
+                          <Auth />
+                        </NoAuth>
+                      } 
+                    />
+                    <Route 
+                      path="/signin" 
+                      element={
+                        <NoAuth>
+                          <Auth />
+                        </NoAuth>
+                      } 
+                    />
+                    <Route 
+                      path="/signup" 
+                      element={
+                        <NoAuth>
+                          <Auth />
+                        </NoAuth>
+                      } 
+                    />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Toaster />
+                </ProjectProvider>
+              </AuthProvider>
+            </Router>
+          </RegionProvider>
+        </ThemeProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 };
 
