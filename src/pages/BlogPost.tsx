@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -14,9 +15,18 @@ const BlogPost = () => {
   const [post, setPost] = useState<BlogPostType | null>(null);
   
   useEffect(() => {
-    const postId = Number(slug?.split('-')[0]);
-    const foundPost = blogPosts.find(p => p.id === postId);
-    setPost(foundPost || null);
+    if (slug) {
+      // Extract post ID from the beginning of the slug
+      const idMatch = slug.match(/^(\d+)/);
+      const postId = idMatch ? Number(idMatch[1]) : null;
+      
+      if (postId) {
+        const foundPost = blogPosts.find(p => p.id === postId);
+        setPost(foundPost || null);
+      } else {
+        setPost(null);
+      }
+    }
   }, [slug]);
 
   if (!post) {

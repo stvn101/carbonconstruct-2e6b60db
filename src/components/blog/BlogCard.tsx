@@ -10,7 +10,12 @@ interface BlogCardProps {
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
-  const postUrl = `/blog/posts/${post.id}-${post.title.toLowerCase().replace(/\s+/g, '-')}`;
+  // Create a properly formatted slug by replacing spaces with dashes and removing special characters
+  const formattedTitle = post.title.toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-');   // Replace spaces with dashes
+    
+  const postUrl = `/blog/posts/${post.id}-${formattedTitle}`;
 
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
@@ -57,3 +62,4 @@ const BlogCard = ({ post }: BlogCardProps) => {
 };
 
 export default BlogCard;
+
