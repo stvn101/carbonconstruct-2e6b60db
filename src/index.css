@@ -1,9 +1,12 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ======== ROOT VARIABLES ======== */
 @layer base {
   :root {
+    /* Light mode colors */
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -24,6 +27,8 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
+    
+    /* Carbon theme colors */
     --carbon-50: 127 63% 95%;
     --carbon-100: 126 53% 90%;
     --carbon-200: 126 43% 80%;
@@ -38,6 +43,7 @@
   }
 
   .dark {
+    /* Dark mode colors */
     --background: 240 10% 3.9%;
     --foreground: 123 47% 70%;
     --card: 240 10% 3.9%;
@@ -57,6 +63,8 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+    
+    /* Carbon theme dark mode colors */
     --carbon-50: 130 45% 92%;
     --carbon-100: 127 42% 82%;
     --carbon-200: 126 52% 65%;
@@ -71,16 +79,18 @@
   }
 }
 
+/* ======== BASE STYLES ======== */
 @layer base {
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
-  /* Improve selection text visibility */
+  /* Selection styling */
   ::selection {
     @apply bg-carbon-500 text-carbon-950;
   }
@@ -90,31 +100,34 @@
   }
 }
 
+/* ======== LAYOUT & SPACING ======== */
+#root {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Content spacing to avoid navbar overlap */
+.content-top-spacing {
+  padding-top: calc(var(--navbar-height) + 1.5rem);
+}
+
+/* ======== TYPOGRAPHY ======== */
 .gradient-heading {
   @apply bg-gradient-to-r from-carbon-800 via-carbon-700 to-carbon-600 bg-clip-text text-transparent dark:from-carbon-200 dark:via-carbon-300 dark:to-carbon-400;
 }
 
-/* Make gradients more vibrant */
 .gradient-heading strong,
 .gradient-heading b {
   @apply bg-gradient-to-r from-carbon-700 to-carbon-500 bg-clip-text text-transparent dark:from-carbon-100 dark:via-carbon-200 dark:to-carbon-300;
 }
 
-#root {
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-}
-
+/* ======== CARD STYLING ======== */
 .card {
   padding: 2em;
 }
 
-.read-the-docs {
-  color: #888;
-}
-
-/* Dark mode component fixes */
+/* ======== DARK MODE FIXES ======== */
+/* Components in dark mode */
 .dark .dropdown-menu {
   @apply bg-carbon-900 border-carbon-700;
 }
@@ -123,16 +136,17 @@
   @apply bg-carbon-900 border-carbon-700;
 }
 
+/* Text contrast fixes */
 .dark .bg-carbon-50, .dark .bg-carbon-100 {
   @apply text-carbon-50;
 }
 
-/* Fix for light mode text on light backgrounds */
 .bg-carbon-50, .bg-carbon-100 {
   @apply text-carbon-900;
 }
 
-/* Fix for charts in dark mode */
+/* ======== CHART STYLING ======== */
+/* Charts in dark mode */
 .dark .recharts-cartesian-axis-line,
 .dark .recharts-cartesian-axis-tick-line {
   stroke: rgba(130, 200, 130, 0.4);
@@ -150,7 +164,7 @@
   fill: rgba(130, 200, 130, 0.8);
 }
 
-/* Fix for recharts containers in dark mode */
+/* Chart container sizing */
 .recharts-wrapper {
   max-width: 100%;
   height: auto !important;
@@ -160,7 +174,6 @@
   overflow: visible;
 }
 
-/* Ensure charts stay within their containers */
 .recharts-responsive-container {
   max-width: 100% !important;
   min-width: 0 !important;
@@ -168,7 +181,6 @@
   height: 100% !important;
 }
 
-/* Ensure pie charts stay properly centered */
 .recharts-pie {
   transform-origin: center;
 }
@@ -179,17 +191,17 @@
   height: auto !important;
 }
 
-/* Fix for cards in dark mode to ensure proper contrast */
+/* ======== UI COMPONENT FIXES ======== */
+/* Cards and backgrounds */
 .dark .bg-white {
   @apply bg-gray-800 text-carbon-300;
 }
 
-/* Green backgrounds for white backgrounds */
 .bg-white.sustainable-bg {
   @apply bg-carbon-50 dark:bg-carbon-900;
 }
 
-/* Ensure text visibility on all backgrounds */
+/* Text visibility */
 .dark .text-black, 
 .dark .text-gray-900, 
 .dark .text-gray-800, 
@@ -199,12 +211,11 @@
   @apply text-carbon-300;
 }
 
-/* Fix buttons in dark mode */
 .dark .text-white {
   @apply text-carbon-300;
 }
 
-/* Fix dropdown menus in dark mode to ensure proper visibility */
+/* Dropdown styling */
 .dark .bg-background {
   @apply bg-gray-900;
 }
@@ -213,23 +224,20 @@
   @apply text-carbon-300;
 }
 
-/* Fix for ThemeToggle dropdown in dark mode */
 .dark .DropdownMenuContent {
   @apply bg-gray-800 border-gray-700 text-carbon-300;
 }
 
-/* Add more contrast to the cards in dark mode */
+/* Cards and dialogs */
 .dark .card {
   @apply bg-gray-800 border-gray-700;
 }
 
-/* Ensure popup content is visible in dark mode */
 .dark [role="dialog"],
 .dark [data-state="open"] {
   @apply bg-gray-800 border-gray-700;
 }
 
-/* Fix for profile page UI in dark mode */
 .dark .bg-carbon-50 {
   @apply bg-gray-900;
 }
