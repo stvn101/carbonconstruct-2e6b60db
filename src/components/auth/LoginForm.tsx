@@ -15,6 +15,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { useRef } from "react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -26,6 +29,8 @@ type FormValues = z.infer<typeof formSchema>;
 const LoginForm = () => {
   const { login, loading } = useAuth();
   const [serverError, setServerError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -38,10 +43,25 @@ const LoginForm = () => {
   const onSubmit = async (data: FormValues) => {
     try {
       setServerError("");
+      
+      if (!captchaToken) {
+        toast.error("Please complete the captcha verification");
+        return;
+      }
+
       await login(data.email, data.password);
     } catch (error) {
       setServerError("Invalid email or password");
+      // Reset captcha on error
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+        setCaptchaToken(null);
+      }
     }
+  };
+
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
   };
 
   return (
@@ -82,10 +102,18 @@ const LoginForm = () => {
             )}
           />
 
+          <div className="flex justify-center py-2">
+            <HCaptcha
+              ref={captchaRef}
+              sitekey="9f524944-cf4e-4a23-a874-e1bb98f07f23"
+              onVerify={handleCaptchaVerify}
+            />
+          </div>
+
           <Button
             type="submit"
             className="w-full bg-carbon-600 hover:bg-carbon-700"
-            disabled={loading}
+            disabled={loading || !captchaToken}
           >
             {loading ? (
               <>
