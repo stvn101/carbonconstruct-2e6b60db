@@ -62,7 +62,7 @@ export const useMaterialData = ({
     materialsByRegion,
     allTags,
     baseOptions,
-    allRegions: REGIONS,
+    allRegions: Array.from(REGIONS),
     materialCount
   };
 };

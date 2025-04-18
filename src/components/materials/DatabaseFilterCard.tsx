@@ -15,7 +15,7 @@ interface DatabaseFilterCardProps {
   selectedTag: string;
   setSelectedTag: (tag: string) => void;
   allTags: string[];
-  allRegions: string[];
+  allRegions: readonly string[] | string[];
   baseOptions: MaterialOption[];
 }
 

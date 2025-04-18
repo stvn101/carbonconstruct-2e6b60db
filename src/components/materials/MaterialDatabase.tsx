@@ -59,7 +59,7 @@ const MaterialDatabase = () => {
           selectedTag={selectedTag}
           setSelectedTag={setSelectedTag}
           allTags={allTags}
-          allRegions={allRegions}
+          allRegions={allRegions as string[]} 
           baseOptions={baseOptions}
         />
         
