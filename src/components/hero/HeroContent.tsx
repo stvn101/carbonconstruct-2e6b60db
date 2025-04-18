@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
 
 interface HeroContentProps {
-  handleLearnMore: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  handleLearnMore: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
