@@ -8,6 +8,8 @@ import MaterialsInputSection from "@/components/calculator/MaterialsInputSection
 import TransportInputSection from "@/components/calculator/TransportInputSection";
 import EnergyInputSection from "@/components/calculator/EnergyInputSection";
 import ResultsSection from "@/components/calculator/ResultsSection";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface ProjectCalculatorTabProps {
   calculationInput: CalculationInput;
@@ -20,6 +22,32 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
   calculationResult,
   onCalculate
 }) => {
+  let calculatorContext;
+  
+  try {
+    calculatorContext = useCalculator();
+  } catch (error) {
+    console.error("Error accessing calculator context:", error);
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Calculator Error</CardTitle>
+          <CardDescription>
+            There was an error loading the calculator. Please try refreshing the page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load calculator context. This may be due to a configuration issue.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const {
     setCalculationInput,
     setCalculationResult,
@@ -34,7 +62,7 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
     handleRemoveEnergy,
     handleNextTab,
     handlePrevTab
-  } = useCalculator();
+  } = calculatorContext;
 
   // Initialize the calculator with the project data
   useEffect(() => {
