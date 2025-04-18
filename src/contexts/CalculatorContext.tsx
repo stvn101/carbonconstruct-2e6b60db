@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext } from "react";
 import {
   CalculationInput,
@@ -39,10 +38,8 @@ type CalculatorContextType = {
   setCalculationResult: (result: CalculationResult | null) => void;
 };
 
-// Create the context with a default undefined value
 const CalculatorContext = createContext<CalculatorContextType | undefined>(undefined);
 
-// Export the provider component
 export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
@@ -152,7 +149,6 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Create the context value
   const contextValue: CalculatorContextType = {
     calculationInput,
     setCalculationInput,
@@ -181,14 +177,20 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   );
 };
 
-// Export the useCalculator hook
 export const useCalculator = () => {
   const context = useContext(CalculatorContext);
+  
+  console.log('CalculatorContext value:', context);
+  
   if (context === undefined) {
+    console.warn('useCalculator hook called outside of CalculatorProvider');
     throw new Error("useCalculator must be used within a CalculatorProvider");
   }
+  
+  console.log('Calculation Input:', context.calculationInput);
+  console.log('Active Tab:', context.activeTab);
+  
   return context;
 };
 
-// Export the context for direct usage
 export default CalculatorContext;
