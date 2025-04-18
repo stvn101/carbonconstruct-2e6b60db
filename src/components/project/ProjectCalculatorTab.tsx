@@ -1,20 +1,13 @@
 
-import React, { useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
-import { useCalculator } from "@/contexts/calculator";
-import MaterialsInputSection from "@/components/calculator/MaterialsInputSection";
-import TransportInputSection from "@/components/calculator/TransportInputSection";
-import EnergyInputSection from "@/components/calculator/EnergyInputSection";
-import ResultsSection from "@/components/calculator/ResultsSection";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calculator } from "lucide-react";
 
 interface ProjectCalculatorTabProps {
-  calculationInput: CalculationInput;
-  calculationResult: CalculationResult;
-  onCalculate: () => void;
+  calculationInput?: any;
+  calculationResult?: any;
+  onCalculate?: () => void;
 }
 
 const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
@@ -22,114 +15,126 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
   calculationResult,
   onCalculate
 }) => {
-  let calculatorContext;
-  
-  try {
-    calculatorContext = useCalculator();
-  } catch (error) {
-    console.error("Error accessing calculator context:", error);
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Calculator Error</CardTitle>
-          <CardDescription>
-            There was an error loading the calculator. Please try refreshing the page.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load calculator context. This may be due to a configuration issue.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const {
-    setCalculationInput,
-    setCalculationResult,
-    handleUpdateMaterial,
-    handleAddMaterial,
-    handleRemoveMaterial,
-    handleUpdateTransport,
-    handleAddTransport,
-    handleRemoveTransport,
-    handleUpdateEnergy,
-    handleAddEnergy,
-    handleRemoveEnergy,
-    handleNextTab,
-    handlePrevTab
-  } = calculatorContext;
-
-  // Initialize the calculator with the project data
-  useEffect(() => {
-    setCalculationInput(calculationInput);
-    setCalculationResult(calculationResult);
-  }, [calculationInput, calculationResult, setCalculationInput, setCalculationResult]);
+  // Check if we have valid calculation data
+  const hasInputData = calculationInput && 
+    (calculationInput.materials?.length > 0 || 
+     calculationInput.transport?.length > 0 || 
+     calculationInput.energy?.length > 0);
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Carbon Calculator</CardTitle>
-        <CardDescription>
-          Modify the project details and recalculate the carbon footprint.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="materials">
-          <TabsList className="grid grid-cols-4">
-            <TabsTrigger value="materials">Materials</TabsTrigger>
-            <TabsTrigger value="transport">Transport</TabsTrigger>
-            <TabsTrigger value="energy">Energy</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="materials">
-            <MaterialsInputSection 
-              materials={calculationInput.materials}
-              onUpdateMaterial={handleUpdateMaterial}
-              onAddMaterial={handleAddMaterial}
-              onRemoveMaterial={handleRemoveMaterial}
-              onNext={handleNextTab}
-            />
-          </TabsContent>
-          
-          <TabsContent value="transport">
-            <TransportInputSection 
-              transportItems={calculationInput.transport}
-              onUpdateTransport={handleUpdateTransport}
-              onAddTransport={handleAddTransport}
-              onRemoveTransport={handleRemoveTransport}
-              onNext={handleNextTab}
-              onPrev={handlePrevTab}
-            />
-          </TabsContent>
-          
-          <TabsContent value="energy">
-            <EnergyInputSection 
-              energyItems={calculationInput.energy}
-              onUpdateEnergy={handleUpdateEnergy}
-              onAddEnergy={handleAddEnergy}
-              onRemoveEnergy={handleRemoveEnergy}
-              onCalculate={handleNextTab}
-              onPrev={handlePrevTab}
-            />
-          </TabsContent>
-          
-          <TabsContent value="results">
-            <ResultsSection 
-              calculationResult={calculationResult}
-              materials={calculationInput.materials}
-              transport={calculationInput.transport}
-              energy={calculationInput.energy}
-              onCalculate={onCalculate}
-              onPrev={handlePrevTab}
-            />
-          </TabsContent>
-        </Tabs>
+      <CardContent className="pt-6">
+        {hasInputData ? (
+          <>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Project Calculation Data</h3>
+              <p className="text-muted-foreground">
+                Review and recalculate the carbon footprint for this project.
+              </p>
+            </div>
+            
+            {/* Materials Section */}
+            {calculationInput.materials && calculationInput.materials.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">Materials</h4>
+                <ul className="list-disc pl-5">
+                  {calculationInput.materials.map((material: any, index: number) => (
+                    <li key={index}>
+                      {material.type}: {material.quantity} {material.unit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Transport Section */}
+            {calculationInput.transport && calculationInput.transport.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">Transport</h4>
+                <ul className="list-disc pl-5">
+                  {calculationInput.transport.map((transport: any, index: number) => (
+                    <li key={index}>
+                      {transport.type}: {transport.distance} km, {transport.weight} kg
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Energy Section */}
+            {calculationInput.energy && calculationInput.energy.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">Energy</h4>
+                <ul className="list-disc pl-5">
+                  {calculationInput.energy.map((energy: any, index: number) => (
+                    <li key={index}>
+                      {energy.type}: {energy.amount} {energy.unit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Result Section */}
+            {calculationResult && (
+              <div className="mt-6 p-4 bg-carbon-50 dark:bg-carbon-800 rounded-md">
+                <h4 className="font-medium mb-2">Calculation Results</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Emissions:</p>
+                    <p className="text-lg font-semibold">{Math.round(calculationResult.totalEmissions)} kg CO₂e</p>
+                  </div>
+                  {calculationResult.materialsEmissions !== undefined && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Materials Emissions:</p>
+                      <p className="text-lg font-semibold">{Math.round(calculationResult.materialsEmissions)} kg CO₂e</p>
+                    </div>
+                  )}
+                  {calculationResult.transportEmissions !== undefined && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Transport Emissions:</p>
+                      <p className="text-lg font-semibold">{Math.round(calculationResult.transportEmissions)} kg CO₂e</p>
+                    </div>
+                  )}
+                  {calculationResult.energyEmissions !== undefined && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Energy Emissions:</p>
+                      <p className="text-lg font-semibold">{Math.round(calculationResult.energyEmissions)} kg CO₂e</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-6">
+              <Button 
+                onClick={onCalculate}
+                className="bg-carbon-600 hover:bg-carbon-700 text-white"
+                disabled={!onCalculate}
+              >
+                <Calculator className="h-4 w-4 mr-2" />
+                Recalculate Emissions
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8">
+            <Calculator className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+            <h3 className="font-medium mb-1">No calculation data</h3>
+            <p className="text-muted-foreground mb-4">
+              This project doesn't have calculation data or the calculator isn't available.
+            </p>
+            {onCalculate && (
+              <Button 
+                onClick={onCalculate}
+                className="bg-carbon-600 hover:bg-carbon-700 text-white"
+              >
+                <Calculator className="h-4 w-4 mr-2" />
+                Initialize Calculator
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
