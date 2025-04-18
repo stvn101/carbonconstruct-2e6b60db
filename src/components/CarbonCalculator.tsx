@@ -12,12 +12,7 @@ import { useProjects } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-
-// Import the component sections
-import MaterialsInputSection from "./calculator/MaterialsInputSection";
-import TransportInputSection from "./calculator/TransportInputSection";
-import EnergyInputSection from "./calculator/EnergyInputSection";
-import ResultsSection from "./calculator/ResultsSection";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -49,7 +44,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     handlePrevTab
   } = useCalculator();
 
-  // Save project function
   const handleSaveProject = async () => {
     if (!user) {
       toast.error("Please log in to save your project");
@@ -70,12 +64,37 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       
       toast.success("Project saved successfully!");
       
-      // Navigate to the project detail page
       navigate(`/projects`);
     } catch (error) {
       console.error("Error saving project:", error);
       toast.error("Failed to save project");
     }
+  };
+
+  const recordCalculatorUsage = async () => {
+    try {
+      if (user && !demoMode) {
+        const { error } = await supabase
+          .from('calculator_usage')
+          .insert({ 
+            user_id: user.id,
+            ip_address: null
+          });
+
+        if (error) {
+          console.error('Failed to record calculator usage:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error recording calculator usage:', error);
+    }
+  };
+
+  const handleCalculate = () => {
+    const result = calculateTotalEmissions(calculationInput);
+    setCalculationResult(result);
+    
+    recordCalculatorUsage();
   };
 
   return (
@@ -94,7 +113,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         transition={{ duration: 0.4 }}
         className="mb-6"
       >
-        {/* Project naming section */}
         <Card className="mb-4">
           <CardContent className="pt-4">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
