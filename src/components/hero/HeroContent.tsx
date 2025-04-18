@@ -5,14 +5,18 @@ import { m as motion } from "framer-motion";
 import { staggerContainer, fadeInUp } from "@/utils/animationVariants";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
+import { useScrollTo } from "@/hooks/useScrollTo"; // Ensure this import is correct
 
 interface HeroContentProps {
   handleLearnMore: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
+const HeroContent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { scrollToElement } = useScrollTo(); // Use the useScrollTo hook
+
+  const handleLearnMore = scrollToElement('features'); // Scroll to features section
 
   const handleTryCalculator = () => {
     navigate('/calculator', { state: { demoMode: true } });
@@ -97,3 +101,4 @@ const HeroContent = ({ handleLearnMore }: HeroContentProps) => {
 };
 
 export default HeroContent;
+
