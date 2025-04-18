@@ -11,9 +11,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Database } from "lucide-react";
+import { Database, Info } from "lucide-react";
 import MaterialDetails from "./MaterialDetails";
 import { MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ExtendedMaterialData {
   name: string;
@@ -23,6 +29,8 @@ interface ExtendedMaterialData {
   alternativeTo?: string;
   notes?: string;
   tags?: string[];
+  sustainabilityScore?: number;
+  recyclability?: "High" | "Medium" | "Low";
 }
 
 interface MaterialTableProps {
@@ -35,16 +43,17 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
     <>
       <Table>
         <TableCaption>
-          Comprehensive database of construction materials and their carbon footprints.
+          Comprehensive database of construction materials and their carbon footprints
         </TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Material</TableHead>
-            <TableHead className="text-right">Carbon Factor (kg CO2e/{"{unit}"})</TableHead>
+            <TableHead className="text-right">Carbon Factor</TableHead>
             <TableHead>Region</TableHead>
             <TableHead>Alternative For</TableHead>
+            <TableHead>Sustainability</TableHead>
             <TableHead>Tags</TableHead>
-            <TableHead>Notes</TableHead>
+            <TableHead>Details</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -52,22 +61,56 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
             <TableRow 
               key={key} 
               className={material.region?.includes("Australia") 
-                ? "bg-carbon-50 dark:bg-carbon-800/20 data-[state=selected]:bg-carbon-100 dark:data-[state=selected]:bg-carbon-800/40" 
+                ? "bg-carbon-50 dark:bg-carbon-800/20" 
                 : ""}
             >
               <TableCell className="font-medium">{material.name}</TableCell>
               <TableCell className="text-right">
-                {material.factor} ({material.unit})
+                {material.factor} kg CO₂e/{material.unit}
               </TableCell>
               <TableCell>
-                {material.region?.includes("Australia") 
-                  ? <Badge variant="secondary" className="bg-carbon-100 dark:bg-carbon-800 dark:text-carbon-200">Australia</Badge> 
-                  : material.region || "Global"}
+                {material.region?.split(", ").map((region) => (
+                  <Badge 
+                    key={region}
+                    variant={region === "Australia" ? "secondary" : "outline"} 
+                    className="mr-1"
+                  >
+                    {region}
+                  </Badge>
+                ))}
               </TableCell>
               <TableCell>
                 {material.alternativeTo ? 
-                  MATERIAL_FACTORS[material.alternativeTo as keyof typeof MATERIAL_FACTORS]?.name : 
-                  ""}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge variant="outline" className="cursor-help">
+                          {MATERIAL_FACTORS[material.alternativeTo as keyof typeof MATERIAL_FACTORS]?.name}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Alternative to standard material</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  : "-"}
+              </TableCell>
+              <TableCell>
+                {material.sustainabilityScore && (
+                  <Badge 
+                    variant={
+                      material.sustainabilityScore >= 80 ? "success" :
+                      material.sustainabilityScore >= 60 ? "warning" : "destructive"
+                    }
+                  >
+                    {material.sustainabilityScore}/100
+                  </Badge>
+                )}
+                {material.recyclability && (
+                  <Badge variant="outline" className="ml-1">
+                    {material.recyclability} Recyclability
+                  </Badge>
+                )}
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
@@ -78,11 +121,8 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
                   ))}
                 </div>
               </TableCell>
-              <TableCell className="max-w-xs truncate" title={material.notes}>
-                <div className="flex items-center justify-between">
-                  <span className="truncate mr-2">{material.notes || ""}</span>
-                  <MaterialDetails material={material} />
-                </div>
+              <TableCell>
+                <MaterialDetails material={material} />
               </TableCell>
             </TableRow>
           ))}
@@ -91,13 +131,14 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
       
       {filteredMaterials.length === 0 && (
         <div className="text-center py-6">
-          <p className="text-muted-foreground">No materials found matching your search criteria.</p>
+          <Database className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+          <p className="text-muted-foreground mt-2">No materials found matching your criteria.</p>
           <Button 
             variant="outline" 
-            className="mt-2"
+            className="mt-4"
             onClick={resetFilters}
           >
-            Clear Filters
+            Reset Filters
           </Button>
         </div>
       )}
