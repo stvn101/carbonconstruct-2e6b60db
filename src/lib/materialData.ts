@@ -10,6 +10,7 @@ export interface ExtendedMaterialData {
   tags?: string[];
 }
 
+// Define regions used in materials
 export const REGIONS = [
   "Global",
   "Australia",
@@ -20,11 +21,37 @@ export const REGIONS = [
   "Africa"
 ];
 
+// Base material factors from carbonCalculations
 export const MATERIAL_FACTORS = BASE_MATERIAL_FACTORS;
 
-export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
+// Material types for organization
+const MATERIAL_TYPES = {
+  STRUCTURAL: "structural",
+  RECYCLED: "recycled",
+  SUSTAINABLE: "sustainable",
+  CONCRETE: "concrete",
+  METAL: "metal",
+  WOOD: "wood",
+  INSULATION: "insulation",
+  PLUMBING: "plumbing",
+  ELECTRICAL: "electrical",
+  FINISHES: "finishes",
+  HANDOVER: "handover",
+  ENERGY: "energy",
+  FUEL: "fuel",
+  CLADDING: "cladding",
+  ROOFING: "roofing",
+  NATURAL: "natural"
+};
+
+// Define standard materials
+const STANDARD_MATERIALS = {
+  // Base materials from carbonCalculations
   ...BASE_MATERIAL_FACTORS as Record<string, ExtendedMaterialData>,
-  
+};
+
+// Define alternative materials
+const ALTERNATIVE_MATERIALS = {
   // Recycled alternatives
   recycledSteel: {
     name: "Recycled Steel",
@@ -33,10 +60,10 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Global, Australia",
     alternativeTo: "steel",
     notes: "Using recycled steel can reduce emissions by up to 60% compared to virgin steel.",
-    tags: ["recycled", "metal", "structural"]
+    tags: [MATERIAL_TYPES.RECYCLED, MATERIAL_TYPES.METAL, MATERIAL_TYPES.STRUCTURAL]
   },
   
-  // Renamed materials (removing "Australian")
+  // Regional materials
   bluesteelRebar: {
     name: "BlueSteel Rebar",
     factor: 0.95,
@@ -44,25 +71,25 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "steel",
     notes: "Lower carbon reinforcement steel produced using clean energy sources.",
-    tags: ["steel", "structural"]
+    tags: [MATERIAL_TYPES.STEEL, MATERIAL_TYPES.STRUCTURAL]
   },
-  ausTimber: {
+  hardwood: {
     name: "Hardwood",
     factor: 0.35,
     unit: "kg",
     region: "Australia",
     alternativeTo: "timber",
     notes: "Sustainably sourced from forests with strong carbon storage properties.",
-    tags: ["sustainable", "hardwood"]
+    tags: [MATERIAL_TYPES.SUSTAINABLE, MATERIAL_TYPES.WOOD]
   },
-  ausBrick: {
+  clayBrick: {
     name: "Clay Brick",
     factor: 0.22,
     unit: "kg",
     region: "Australia",
     alternativeTo: "brick",
     notes: "Locally produced bricks with lower transport emissions and improved thermal properties.",
-    tags: ["thermal", "durable"]
+    tags: [MATERIAL_TYPES.THERMAL, MATERIAL_TYPES.DURABLE]
   },
   
   // Sustainable alternatives
@@ -73,7 +100,7 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Asia, Australia",
     alternativeTo: "timber",
     notes: "Fast-growing, renewable material with excellent carbon sequestration properties.",
-    tags: ["renewable", "sustainable", "fast-growing"]
+    tags: [MATERIAL_TYPES.RENEWABLE, MATERIAL_TYPES.SUSTAINABLE, "fast-growing"]
   },
   hempcrete: {
     name: "Hempcrete",
@@ -82,10 +109,10 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Europe, North America, Australia",
     alternativeTo: "concrete",
     notes: "Carbon-negative building material that actually sequesters carbon during its lifetime.",
-    tags: ["carbon-negative", "insulation", "walls"]
+    tags: ["carbon-negative", MATERIAL_TYPES.INSULATION, "walls"]
   },
   
-  // More materials (renamed to remove "Australian")
+  // More materials
   recycledConcrete: {
     name: "Recycled Concrete Aggregate",
     factor: 0.043,
@@ -93,7 +120,7 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "concrete",
     notes: "Made from crushed construction waste, reducing landfill and lowering carbon footprint.",
-    tags: ["recycled", "concrete"]
+    tags: [MATERIAL_TYPES.RECYCLED, MATERIAL_TYPES.CONCRETE]
   },
   greenConcrete: {
     name: "Green Concrete (Geopolymer)",
@@ -104,15 +131,17 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     notes: "Geopolymer concrete using industrial waste materials instead of Portland cement.",
     tags: ["low-carbon", "innovative"]
   },
-  
-  // Construction fuels
+};
+
+// Construction fuels
+const FUEL_MATERIALS = {
   diesel: {
     name: "Construction Diesel Fuel",
     factor: 2.68, // kg CO2e per liter
     unit: "L",
     region: "Australia",
     notes: "Standard diesel fuel used in construction machinery and generators in Australia.",
-    tags: ["fuel", "equipment", "construction"]
+    tags: [MATERIAL_TYPES.FUEL, "equipment", "construction"]
   },
   biodiesel: {
     name: "Biodiesel B20",
@@ -121,17 +150,19 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "diesel",
     notes: "20% biodiesel blend available for construction equipment in Australia, reducing carbon footprint.",
-    tags: ["fuel", "equipment", "sustainable"]
+    tags: [MATERIAL_TYPES.FUEL, "equipment", MATERIAL_TYPES.SUSTAINABLE]
   },
-  
-  // Plumbing materials (renamed)
+};
+
+// Plumbing materials
+const PLUMBING_MATERIALS = {
   pvcPipe: {
     name: "PVC Pipes",
     factor: 0.24,
     unit: "kg",
     region: "Australia",
     notes: "Common plumbing material with moderate carbon footprint.",
-    tags: ["plumbing", "pipes"]
+    tags: [MATERIAL_TYPES.PLUMBING, "pipes"]
   },
   pprPipe: {
     name: "PP-R Pipes",
@@ -140,7 +171,7 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "pvcPipe",
     notes: "Lower carbon alternative to PVC piping systems used in plumbing.",
-    tags: ["plumbing", "pipes"]
+    tags: [MATERIAL_TYPES.PLUMBING, "pipes"]
   },
   copperPipe: {
     name: "Copper Pipes",
@@ -148,7 +179,7 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     unit: "kg",
     region: "Australia",
     notes: "Premium plumbing material with higher carbon footprint but excellent durability.",
-    tags: ["plumbing", "pipes", "durable"]
+    tags: [MATERIAL_TYPES.PLUMBING, "pipes", "durable"]
   },
   recycledCopperPipe: {
     name: "Recycled Copper Pipes",
@@ -157,17 +188,19 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "copperPipe",
     notes: "Recycled copper pipes that significantly reduce embodied carbon compared to virgin copper.",
-    tags: ["plumbing", "pipes", "recycled"]
+    tags: [MATERIAL_TYPES.PLUMBING, "pipes", MATERIAL_TYPES.RECYCLED]
   },
-  
-  // Insulation materials (renamed)
+};
+
+// Insulation materials
+const INSULATION_MATERIALS = {
   glasswoolInsulation: {
     name: "Glass Wool Insulation",
     factor: 0.58,
     unit: "kg",
     region: "Australia",
     notes: "Common thermal insulation in homes, often containing recycled glass.",
-    tags: ["insulation", "thermal"]
+    tags: [MATERIAL_TYPES.INSULATION, "thermal"]
   },
   rockwoolInsulation: {
     name: "Rockwool Insulation",
@@ -176,7 +209,7 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "glasswoolInsulation",
     notes: "Fire-resistant mineral wool insulation.",
-    tags: ["insulation", "fire-resistant"]
+    tags: [MATERIAL_TYPES.INSULATION, "fire-resistant"]
   },
   sheepWoolInsulation: {
     name: "Sheep Wool Insulation",
@@ -185,17 +218,19 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "glasswoolInsulation",
     notes: "Natural insulation from sheep farms with excellent moisture management properties.",
-    tags: ["insulation", "natural", "renewable"]
+    tags: [MATERIAL_TYPES.INSULATION, MATERIAL_TYPES.NATURAL, MATERIAL_TYPES.RENEWABLE]
   },
-  
-  // Electrical materials (renamed)
+};
+
+// Electrical materials
+const ELECTRICAL_MATERIALS = {
   copperWire: {
     name: "Copper Wiring",
     factor: 1.8,
     unit: "kg",
     region: "Australia",
     notes: "Standard electrical wiring for buildings.",
-    tags: ["electrical", "wiring"]
+    tags: [MATERIAL_TYPES.ELECTRICAL, "wiring"]
   },
   aluminumWire: {
     name: "Aluminum Wiring",
@@ -204,10 +239,12 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "copperWire",
     notes: "Alternative wiring material with lower embodied carbon but different conductivity characteristics.",
-    tags: ["electrical", "wiring"]
+    tags: [MATERIAL_TYPES.ELECTRICAL, "wiring"]
   },
-  
-  // Finishes (renamed)
+};
+
+// Finishes
+const FINISH_MATERIALS = {
   lowVocPaint: {
     name: "Low VOC Paint",
     factor: 1.6,
@@ -223,17 +260,19 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     alternativeTo: "lowVocPaint",
     notes: "Traditional natural finish with very low embodied carbon and breathable properties.",
-    tags: ["finishes", "paint", "natural"]
+    tags: ["finishes", "paint", MATERIAL_TYPES.NATURAL]
   },
-  
-  // Handover materials (renamed)
+};
+
+// Handover materials
+const HANDOVER_MATERIALS = {
   lowFlowFixtures: {
     name: "Low-Flow Water Fixtures",
     factor: 2.5, // kg CO2e per fixture
     unit: "item",
     region: "Australia",
     notes: "Water-efficient taps and showerheads that reduce water consumption and related carbon.",
-    tags: ["fixtures", "water-saving", "handover"]
+    tags: ["fixtures", "water-saving", MATERIAL_TYPES.HANDOVER]
   },
   smartMeters: {
     name: "Smart Energy Meters",
@@ -241,17 +280,19 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     unit: "item",
     region: "Australia",
     notes: "Digital meters that help occupants monitor and reduce energy consumption.",
-    tags: ["electrical", "monitoring", "handover"]
+    tags: [MATERIAL_TYPES.ELECTRICAL, "monitoring", MATERIAL_TYPES.HANDOVER]
   },
-  
-  // Energy sources for building operations (renamed)
+};
+
+// Energy sources for building operations
+const ENERGY_SYSTEMS = {
   solarPVSystem: {
     name: "Solar PV System",
     factor: 30, // kg CO2e per m²
     unit: "m²",
     region: "Australia",
     notes: "Photovoltaic system for on-site renewable energy generation. Factor represents embodied carbon per m² of panel area.",
-    tags: ["renewable", "energy", "rooftop"]
+    tags: [MATERIAL_TYPES.RENEWABLE, MATERIAL_TYPES.ENERGY, "rooftop"]
   },
   batteryStorage: {
     name: "Battery Storage System",
@@ -259,10 +300,12 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     unit: "kWh",
     region: "Australia",
     notes: "Lithium-ion battery storage for solar energy. High embodied carbon but enables renewable energy use.",
-    tags: ["energy", "storage", "battery"]
+    tags: [MATERIAL_TYPES.ENERGY, "storage", "battery"]
   },
-  
-  // Other common materials (renamed)
+};
+
+// Other common materials
+const OTHER_MATERIALS = {
   blueboard: {
     name: "Blueboard Cladding",
     factor: 0.47,
@@ -278,5 +321,19 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     region: "Australia",
     notes: "Popular roofing material with good durability and solar reflectance.",
     tags: ["roofing", "metal"]
-  }
+  },
+};
+
+// Combine all material categories into one export
+export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
+  ...STANDARD_MATERIALS,
+  ...ALTERNATIVE_MATERIALS,
+  ...FUEL_MATERIALS,
+  ...PLUMBING_MATERIALS,
+  ...INSULATION_MATERIALS,
+  ...ELECTRICAL_MATERIALS,
+  ...FINISH_MATERIALS,
+  ...HANDOVER_MATERIALS,
+  ...ENERGY_SYSTEMS,
+  ...OTHER_MATERIALS
 };
