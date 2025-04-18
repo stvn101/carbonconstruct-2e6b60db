@@ -1,7 +1,9 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
+import { AuthContextType, AuthState } from './types';
 import { 
   fetchUserProfile,
   loginWithPassword,
@@ -11,22 +13,6 @@ import {
   logoutUser
 } from '@/services/authService';
 import { toast } from 'sonner';
-
-interface AuthContextType {
-  user: User | null;
-  profile: UserProfile | null;
-  session: Session | null;
-  isLoading: boolean;
-  signUp: (email: string, password: string, captchaToken: string | null) => Promise<any>;
-  signIn: (email: string, password: string, captchaToken: string | null) => Promise<any>;
-  signOut: () => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  signInWithGitHub: () => Promise<void>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  loading: boolean;
-}
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -51,44 +37,53 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    profile: null,
+    session: null,
+    loading: true,
+    isLoading: true
+  });
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+        setState(prev => ({
+          ...prev,
+          session: session,
+          user: session?.user ?? null
+        }));
         
         if (session?.user) {
           setTimeout(() => {
             fetchUserProfile(session.user.id).then((profile) => {
-              setProfile(profile);
+              setState(prev => ({ ...prev, profile }));
             });
           }, 0);
-        } else {
-          setProfile(null);
-        }
-        
-        if (event === 'SIGNED_OUT') {
-          setProfile(null);
+        } else if (event === 'SIGNED_OUT') {
+          setState(prev => ({ ...prev, profile: null }));
         }
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      setState(prev => ({
+        ...prev,
+        session,
+        user: session?.user ?? null
+      }));
       
       if (session?.user) {
         fetchUserProfile(session.user.id).then((profile) => {
-          setProfile(profile);
-          setLoading(false);
+          setState(prev => ({ 
+            ...prev, 
+            profile,
+            loading: false,
+            isLoading: false
+          }));
         });
       } else {
-        setLoading(false);
+        setState(prev => ({ ...prev, loading: false, isLoading: false }));
       }
     });
 
@@ -121,7 +116,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
-      setLoading(true);
+      setState(prev => ({ ...prev, loading: true }));
       const { error } = await supabase.auth.signInWithPassword({ 
         email, 
         password
@@ -137,7 +132,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.error("Login error:", error.message);
       throw error;
     } finally {
-      setLoading(false);
+      setState(prev => ({ ...prev, loading: false }));
     }
   };
 
@@ -182,10 +177,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     try {
-      if (!user) throw new Error("User not authenticated");
-      await updateUserProfile(user.id, updates);
+      if (!state.user) throw new Error("User not authenticated");
+      await updateUserProfile(state.user.id, updates);
       
-      setProfile(prev => prev ? {...prev, ...updates} : null);
+      setState(prev => ({
+        ...prev,
+        profile: prev.profile ? {...prev.profile, ...updates} : null
+      }));
       
       toast.success("Profile updated successfully!");
     } catch (error: any) {
@@ -195,22 +193,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const contextValue: AuthContextType = {
+    ...state,
+    signUp,
+    signIn,
+    signOut,
+    login,
+    logout,
+    register,
+    signInWithGitHub,
+    updateProfile
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      profile, 
-      session, 
-      signUp, 
-      signIn, 
-      signOut, 
-      loading, 
-      login, 
-      logout, 
-      register, 
-      signInWithGitHub, 
-      updateProfile,
-      isLoading: loading
-    }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

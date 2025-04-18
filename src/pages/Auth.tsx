@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
 
 // Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,13 +10,12 @@ import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
 
 // Auth
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("signin");
-  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     // If user is already logged in, redirect to dashboard
@@ -26,10 +23,6 @@ const Auth = () => {
       navigate('/dashboard');
     }
   }, [user, navigate]);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
 
   return (
     <>
