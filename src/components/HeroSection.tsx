@@ -7,8 +7,6 @@ import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation } from "framer-motion";
 
 const HeroSection = () => {
-  const { scrollToElement } = useScrollTo();
-  const handleLearnMore = scrollToElement('learn-more');
   const [isLoading, setIsLoading] = useState(true);
   const [resourcesLoaded, setResourcesLoaded] = useState(0);
   const totalResources = 1; // Increase this number if loading more assets
@@ -42,7 +40,7 @@ const HeroSection = () => {
         ) : (
           <LazyMotion features={domAnimation}>
             <div className="flex flex-col md:flex-row items-center">
-              <HeroContent handleLearnMore={handleLearnMore} />
+              <HeroContent />
               <DashboardPreview onLoad={handleResourceLoad} />
             </div>
           </LazyMotion>
