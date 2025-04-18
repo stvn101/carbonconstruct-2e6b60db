@@ -13,7 +13,8 @@ const FeaturesSection = () => {
         "Material-specific emissions data",
         "Transportation distance calculations",
         "Energy consumption analysis"
-      ]
+      ],
+      explanationContent: "Our carbon footprint calculator helps you precisely measure the environmental impact of your construction projects by breaking down emissions across different categories like materials, transportation, and energy use."
     },
     {
       icon: Database,
@@ -23,7 +24,8 @@ const FeaturesSection = () => {
         "Thousands of materials cataloged",
         "Region-specific carbon data",
         "Alternative material suggestions"
-      ]
+      ],
+      explanationContent: "Access a comprehensive database of construction materials with detailed carbon coefficients, helping you make informed decisions about material selection to minimize environmental impact."
     },
     {
       icon: FileText,
@@ -33,7 +35,8 @@ const FeaturesSection = () => {
         "Sustainability score metrics",
         "Regulatory compliance tracking",
         "Exportable PDF reports"
-      ]
+      ],
+      explanationContent: "Generate detailed, professional reports that provide clear insights into your project's carbon footprint, helping you track progress and demonstrate sustainability efforts to stakeholders."
     },
     {
       icon: FileCheck2,
@@ -43,7 +46,8 @@ const FeaturesSection = () => {
         "Simple data import/export",
         "Works alongside existing software",
         "No workflow disruption"
-      ]
+      ],
+      explanationContent: "Seamlessly integrate our carbon tracking tools into your existing project management workflows without disrupting your current processes."
     },
     {
       icon: BarChart3,
@@ -53,7 +57,8 @@ const FeaturesSection = () => {
         "Industry-wide comparisons",
         "Project-to-project analysis",
         "Improvement recommendations"
-      ]
+      ],
+      explanationContent: "Compare your project's carbon performance against industry benchmarks and receive actionable recommendations for reducing your environmental impact."
     },
     {
       icon: GraduationCap,
@@ -63,7 +68,8 @@ const FeaturesSection = () => {
         "Video tutorials and guides",
         "Best practice documentation",
         "Regular sustainability updates"
-      ]
+      ],
+      explanationContent: "Access a comprehensive library of educational resources to help your team understand and implement sustainable construction practices."
     }
   ];
 
@@ -113,6 +119,7 @@ const FeaturesSection = () => {
                 title={feature.title} 
                 description={feature.description}
                 items={feature.items}
+                explanationContent={feature.explanationContent}
               />
             </motion.div>
           ))}
