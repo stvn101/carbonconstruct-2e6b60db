@@ -1,104 +1,348 @@
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Helmet } from "react-helmet-async";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import LoginForm from "@/components/auth/LoginForm";
-import RegisterForm from "@/components/auth/RegisterForm";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { useAuth } from "@/contexts/AuthContext";
+import { Helmet } from "react-helmet-async";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
+
+// Components
 import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+
+// Auth
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+
+// Captcha
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+
+type FormData = {
+  email: string;
+  password: string;
+  remember: boolean;
+};
 
 const Auth = () => {
-  const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
-  const { user, signInWithGitHub } = useAuth();
+  const { user, signIn, signUp } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("signin");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  
+  const captchaRef = React.useRef<HCaptcha>(null);
+  
+  const { register, handleSubmit, formState: { errors }, getValues, reset } = useForm<FormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+      remember: false
+    }
+  });
 
   useEffect(() => {
-    // Redirect to dashboard if user is already logged in
+    // If user is already logged in, redirect to dashboard
     if (user) {
-      navigate("/dashboard");
+      navigate('/dashboard');
     }
   }, [user, navigate]);
-  
-  const handleGitHubSignIn = async () => {
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const onCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    if (captchaRef.current) {
+      captchaRef.current.resetCaptcha();
+    }
+  };
+
+  const handleSignIn = async (data: FormData) => {
+    setIsSubmitting(true);
+    setAuthError(null);
+    
     try {
-      await signInWithGitHub();
-      // Navigation will happen via the useEffect above
-    } catch (error) {
-      console.error("GitHub sign in failed:", error);
+      const result = await signIn(data.email, data.password, captchaToken);
+      if (result.error) {
+        toast.error(result.error.message);
+        setAuthError(result.error.message);
+        resetCaptcha();
+      } else {
+        toast.success("Signed in successfully!");
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      toast.error(error.message || "Failed to sign in");
+      setAuthError(error.message || "Failed to sign in");
+      resetCaptcha();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSignUp = async (data: FormData) => {
+    setIsSubmitting(true);
+    setAuthError(null);
+    
+    try {
+      const result = await signUp(data.email, data.password, captchaToken);
+      if (result.error) {
+        toast.error(result.error.message);
+        setAuthError(result.error.message);
+        resetCaptcha();
+      } else {
+        toast.success("Check your email for confirmation!");
+        setActiveTab("signin");
+        reset();
+      }
+    } catch (error: any) {
+      console.error("Signup failed:", error);
+      toast.error(error.message || "Failed to sign up");
+      setAuthError(error.message || "Failed to sign up");
+      resetCaptcha();
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <motion.div 
-      className="min-h-screen flex flex-col"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
+    <>
       <Helmet>
         <title>Sign In | CarbonConstruct</title>
-        <meta 
-          name="description" 
-          content="Sign in or create an account with CarbonConstruct to save and track your construction project's carbon footprint."
-        />
       </Helmet>
-      <Navbar />
-      <main className="flex-grow flex items-center justify-center py-16 px-4 bg-gray-50 dark:bg-gray-900">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Welcome to CarbonConstruct</CardTitle>
-            <CardDescription>
-              Sign in or create an account to save your carbon calculations
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-2 mb-8">
-                <TabsTrigger value="login" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                  Sign In
-                </TabsTrigger>
-                <TabsTrigger value="register" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                  Register
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="login">
-                <LoginForm />
-              </TabsContent>
-              <TabsContent value="register">
-                <RegisterForm />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4 border-t pt-6">
-            <div className="relative w-full">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-300 dark:border-gray-700" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
+      <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <div className="text-center mb-8">
+            <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-tr from-carbon-600 to-carbon-400 flex items-center justify-center mb-4">
+              <div className="h-4 w-4 bg-white rounded-full"></div>
             </div>
-            
-            <Button 
-              variant="outline" 
-              type="button" 
-              className="w-full"
-              onClick={handleGitHubSignIn}
-            >
-              <Github className="mr-2 h-4 w-4" />
-              GitHub
-            </Button>
-          </CardFooter>
-        </Card>
-      </main>
-      <Footer />
-    </motion.div>
+            <h1 className="text-2xl font-bold">Welcome to CarbonConstruct</h1>
+            <p className="text-muted-foreground mt-2">Sign in to measure and reduce your construction carbon footprint</p>
+          </div>
+          
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl">Authentication</CardTitle>
+              <CardDescription>
+                Enter your credentials to access your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs 
+                value={activeTab} 
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Create Account</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin">
+                  <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        placeholder="your.email@example.com"
+                        type="email"
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        autoCorrect="off"
+                        {...register("email", { 
+                          required: "Email is required",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address"
+                          }
+                        })}
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-destructive">{errors.email.message}</p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label htmlFor="password">Password</Label>
+                        <a href="#" className="text-sm text-carbon-600 hover:underline">
+                          Forgot password?
+                        </a>
+                      </div>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          placeholder="••••••••"
+                          type={showPassword ? "text" : "password"}
+                          autoCapitalize="none"
+                          autoComplete="current-password"
+                          {...register("password", { required: "Password is required" })}
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                        >
+                          {showPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <p className="text-sm text-destructive">{errors.password.message}</p>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="remember" {...register("remember")} />
+                      <Label htmlFor="remember">Remember me</Label>
+                    </div>
+                    
+                    {/* Captcha for sign in */}
+                    <div className="flex justify-center py-2">
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey="9f524944-cf4e-4a23-a874-e1bb98f07f23"
+                        onVerify={onCaptchaVerify}
+                      />
+                    </div>
+                    
+                    {authError && (
+                      <div className="bg-destructive/10 text-destructive text-sm p-2 rounded">
+                        {authError}
+                      </div>
+                    )}
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={isSubmitting || !captchaToken}
+                    >
+                      {isSubmitting ? "Signing in..." : "Sign In"}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <form onSubmit={handleSubmit(handleSignUp)} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        placeholder="your.email@example.com"
+                        type="email"
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        autoCorrect="off"
+                        {...register("email", { 
+                          required: "Email is required",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address"
+                          }
+                        })}
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-destructive">{errors.email.message}</p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          placeholder="••••••••"
+                          type={showPassword ? "text" : "password"}
+                          autoCapitalize="none"
+                          autoComplete="new-password"
+                          {...register("password", { 
+                            required: "Password is required",
+                            minLength: {
+                              value: 6,
+                              message: "Password must be at least 6 characters"
+                            }
+                          })}
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                        >
+                          {showPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <p className="text-sm text-destructive">{errors.password.message}</p>
+                      )}
+                    </div>
+                    
+                    {/* Captcha for sign up */}
+                    <div className="flex justify-center py-2">
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey="9f524944-cf4e-4a23-a874-e1bb98f07f23"
+                        onVerify={onCaptchaVerify}
+                      />
+                    </div>
+                    
+                    {authError && (
+                      <div className="bg-destructive/10 text-destructive text-sm p-2 rounded">
+                        {authError}
+                      </div>
+                    )}
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={isSubmitting || !captchaToken}
+                    >
+                      {isSubmitting ? "Creating Account..." : "Create Account"}
+                    </Button>
+                    
+                    <p className="text-center text-xs text-muted-foreground">
+                      By signing up, you agree to our{" "}
+                      <a href="#" className="underline underline-offset-4 hover:text-primary">
+                        Terms of Service
+                      </a>{" "}
+                      and{" "}
+                      <a href="#" className="underline underline-offset-4 hover:text-primary">
+                        Privacy Policy
+                      </a>
+                      .
+                    </p>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </>
   );
 };
 

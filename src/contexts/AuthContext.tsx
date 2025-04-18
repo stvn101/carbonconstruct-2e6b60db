@@ -1,154 +1,84 @@
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { toast } from 'sonner';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { UserProfile, AuthContextType } from '@/types/auth';
-import { 
-  fetchUserProfile, 
-  loginWithPassword, 
-  registerUser, 
-  signInWithGitHubOAuth, 
-  logoutUser, 
-  updateUserProfile 
-} from '@/services/authService';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  signUp: (email: string, password: string, captchaToken: string | null) => Promise<any>;
+  signIn: (email: string, password: string, captchaToken: string | null) => Promise<any>;
+  signOut: () => Promise<void>;
+  loading: boolean;
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  session: null,
+  signUp: async () => ({}),
+  signIn: async () => ({}),
+  signOut: async () => {},
+  loading: true
+});
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useAuth = () => useContext(AuthContext);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (currentSession?.user) {
-          // Fetch user profile when auth state changes
-          setTimeout(() => {
-            fetchProfile(currentSession.user.id);
-          }, 0);
-        } else {
-          setProfile(null);
-        }
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      if (currentSession?.user) {
-        fetchProfile(currentSession.user.id);
-      }
-      setIsLoading(false);
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
-    const profileData = await fetchUserProfile(userId);
-    if (profileData) {
-      setProfile(profileData);
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      await loginWithPassword(email, password);
-      toast.success("Successfully logged in!");
-    } catch (error: any) {
-      console.error('Login failed:', error);
-      toast.error(error.message || "Login failed, please try again.");
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (name: string, email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      await registerUser(name, email, password);
-      toast.success("Account created! Please check your email for verification.");
-    } catch (error: any) {
-      console.error('Registration failed:', error);
-      toast.error(error.message || "Registration failed, please try again.");
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInWithGitHub = async () => {
-    setIsLoading(true);
-    try {
-      await signInWithGitHubOAuth();
-    } catch (error: any) {
-      console.error('GitHub login failed:', error);
-      toast.error(error.message || "GitHub login failed, please try again.");
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await logoutUser();
-      toast.success("Logged out successfully");
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error("Failed to log out");
-    }
-  };
-
-  const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) throw new Error('Not authenticated');
+  const signUp = async (email: string, password: string, captchaToken: string | null) => {
+    // Add the captcha token to the options if provided
+    const options = captchaToken ? { captchaToken } : undefined;
     
-    try {
-      await updateUserProfile(user.id, updates);
-      
-      // Update local state
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
-      toast.success('Profile updated successfully');
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      toast.error(error.message || 'Failed to update profile');
-      throw error;
-    }
+    return await supabase.auth.signUp({
+      email,
+      password,
+      options
+    });
+  };
+
+  const signIn = async (email: string, password: string, captchaToken: string | null) => {
+    // Add the captcha token to the options if provided
+    const options = captchaToken ? { captchaToken } : undefined;
+    
+    return await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options
+    });
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      profile,
-      session,
-      isLoading, 
-      login, 
-      register, 
-      logout, 
-      signInWithGitHub,
-      updateProfile
-    }}>
+    <AuthContext.Provider value={{ user, session, signUp, signIn, signOut, loading }}>
       {children}
     </AuthContext.Provider>
   );

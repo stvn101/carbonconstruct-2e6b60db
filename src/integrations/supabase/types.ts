@@ -118,6 +118,7 @@ export type Database = {
           name: string
           result: Json | null
           tags: string[] | null
+          total: number | null
           transport: Json | null
           updated_at: string
           user_id: string
@@ -131,6 +132,7 @@ export type Database = {
           name: string
           result?: Json | null
           tags?: string[] | null
+          total?: number | null
           transport?: Json | null
           updated_at?: string
           user_id: string
@@ -144,6 +146,7 @@ export type Database = {
           name?: string
           result?: Json | null
           tags?: string[] | null
+          total?: number | null
           transport?: Json | null
           updated_at?: string
           user_id?: string

@@ -1,29 +1,29 @@
 
-import React from 'react';
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface NoAuthProps {
-  children: React.ReactNode;
-}
+export const NoAuth = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
-export const NoAuth = ({ children }: NoAuthProps) => {
-  const { user, isLoading } = useAuth();
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
 
-  // Show loading spinner while checking authentication status
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-carbon-600"></div>
       </div>
     );
   }
 
-  // If already logged in, redirect to dashboard
-  if (user) {
-    return <Navigate to="/dashboard" />;
+  if (!user) {
+    return <>{children}</>;
   }
 
-  // If not logged in, render the auth component
-  return <>{children}</>;
+  return null;
 };
