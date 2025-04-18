@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -7,16 +6,14 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, User } from "lucide-react";
 import SEO from "@/components/SEO";
-
-// Import blog posts data (we'll move this to a separate file in a future refactor)
-import { blogPosts } from "@/pages/Blog";
+import { blogPosts } from "@/data/blogPosts";
+import type { BlogPost as BlogPostType } from "@/data/blogPosts";
 
 const BlogPost = () => {
   const { slug } = useParams();
-  const [post, setPost] = useState<typeof blogPosts[0] | null>(null);
+  const [post, setPost] = useState<BlogPostType | null>(null);
   
   useEffect(() => {
-    // Extract the post ID from the slug (format: "1-post-title")
     const postId = Number(slug?.split('-')[0]);
     const foundPost = blogPosts.find(p => p.id === postId);
     setPost(foundPost || null);
@@ -84,7 +81,6 @@ const BlogPost = () => {
               <CardContent className="p-8">
                 <div className="prose prose-lg dark:prose-invert max-w-none">
                   <p className="text-lg leading-relaxed mb-6">{post.excerpt}</p>
-                  {/* Placeholder content - in a real app, this would be the full blog post content */}
                   <p className="text-muted-foreground">
                     This is a placeholder for the full blog post content. In a real application, 
                     this would contain the complete article text, possibly fetched from a CMS or 
