@@ -1,7 +1,6 @@
-
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useCalculator } from "@/contexts/CalculatorContext";
+import { useCalculator } from "@/contexts/calculator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useProjects } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/auth";
@@ -24,7 +23,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const [projectName, setProjectName] = useState("New Carbon Project");
   const [isCalculating, setIsCalculating] = useState(false);
   
-  // Wrap context usage in try/catch for better error handling
   const calculatorContextValues = (() => {
     try {
       return useCalculator();
@@ -74,7 +72,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   };
 
   const recordCalculatorUsage = useCallback(async () => {
-    // Don't create a timeout or repeated attempts here
     try {
       if (user && !demoMode) {
         const { error } = await supabase
@@ -101,7 +98,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       if (handleCalculate) {
         handleCalculate();
       }
-      // Use a short timeout to avoid performance issues
       setTimeout(() => {
         recordCalculatorUsage().finally(() => {
           setIsCalculating(false);
@@ -114,7 +110,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     }
   }, [handleCalculate, recordCalculatorUsage, isCalculating]);
 
-  // If we don't have the calculator context, display an error
   if (!calculatorContextValues) {
     return (
       <div className="container mx-auto px-4 md:px-6">

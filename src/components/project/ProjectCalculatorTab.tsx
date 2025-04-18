@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
-import { useCalculator } from "@/contexts/CalculatorContext";
+import { useCalculator } from "@/contexts/calculator";
 import MaterialsInputSection from "@/components/calculator/MaterialsInputSection";
 import TransportInputSection from "@/components/calculator/TransportInputSection";
 import EnergyInputSection from "@/components/calculator/EnergyInputSection";

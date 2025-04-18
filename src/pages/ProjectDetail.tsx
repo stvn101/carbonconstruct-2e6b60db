@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
 import { useProjects } from "@/contexts/ProjectContext";
-import { useCalculator } from "@/contexts/CalculatorContext";
+import { useCalculator } from "@/contexts/calculator";
 import { toast } from "sonner";
 
 // Import refactored components
