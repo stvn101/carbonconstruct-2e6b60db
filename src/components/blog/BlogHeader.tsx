@@ -13,12 +13,12 @@ const BlogHeader = ({ searchQuery, onSearchChange }: BlogHeaderProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="text-center max-w-3xl mx-auto mb-10 pt-8" // Reduced mb and added pt-8 to move content up
+      className="text-center max-w-4xl mx-auto mb-10 pt-16 px-4" 
     >
-      <h1 className="text-4xl md:text-5xl font-bold mb-8 gradient-heading tracking-tight leading-tight">
+      <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-heading tracking-tighter leading-[1.2] break-words">
         CarbonConstruct Blog
       </h1>
-      <p className="text-lg text-foreground/80 mb-10 px-4">
+      <p className="text-xl text-foreground/80 mb-10 max-w-2xl mx-auto">
         Insights, guides, and industry trends to help you build more sustainably.
       </p>
       <SearchBar value={searchQuery} onChange={onSearchChange} />
