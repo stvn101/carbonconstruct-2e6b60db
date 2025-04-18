@@ -2,7 +2,7 @@
 import { Calculator } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList } from "@/components/ui/tabs";
-import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
+import { useCalculator } from "@/contexts/CalculatorContext";
 import CalculatorTabTriggers from "./tabs/CalculatorTabTriggers";
 import CalculatorTabContents from "./tabs/CalculatorTabContents";
 
@@ -10,41 +10,31 @@ interface CalculatorTabsProps {
   isMobile: boolean;
   activeTab: string;
   setActiveTab: (value: string) => void;
-  calculationInput: CalculationInput;
-  calculationResult: CalculationResult | null;
-  onUpdateMaterial: (index: number, field: string, value: string | number) => void;
-  onAddMaterial: () => void;
-  onRemoveMaterial: (index: number) => void;
-  onUpdateTransport: (index: number, field: string, value: string | number) => void;
-  onAddTransport: () => void;
-  onRemoveTransport: (index: number) => void;
-  onUpdateEnergy: (index: number, field: string, value: string | number) => void;
-  onAddEnergy: () => void;
-  onRemoveEnergy: (index: number) => void;
   onCalculate: () => void;
-  onPrevTab: () => void;
-  onNextTab: () => void;
 }
 
 const CalculatorTabs = ({
   isMobile,
   activeTab,
   setActiveTab,
-  calculationInput,
-  calculationResult,
-  onUpdateMaterial,
-  onAddMaterial,
-  onRemoveMaterial,
-  onUpdateTransport,
-  onAddTransport,
-  onRemoveTransport,
-  onUpdateEnergy,
-  onAddEnergy,
-  onRemoveEnergy,
-  onCalculate,
-  onPrevTab,
-  onNextTab
+  onCalculate
 }: CalculatorTabsProps) => {
+  const {
+    calculationInput,
+    calculationResult,
+    handleAddMaterial,
+    handleUpdateMaterial,
+    handleRemoveMaterial,
+    handleAddTransport,
+    handleUpdateTransport,
+    handleRemoveTransport,
+    handleAddEnergy,
+    handleUpdateEnergy,
+    handleRemoveEnergy,
+    handleNextTab,
+    handlePrevTab
+  } = useCalculator();
+  
   return (
     <Card className="border-border bg-card">
       <CardHeader className="pb-2 md:pb-6">
@@ -65,18 +55,18 @@ const CalculatorTabs = ({
           <CalculatorTabContents 
             calculationInput={calculationInput}
             calculationResult={calculationResult}
-            onUpdateMaterial={onUpdateMaterial}
-            onAddMaterial={onAddMaterial}
-            onRemoveMaterial={onRemoveMaterial}
-            onUpdateTransport={onUpdateTransport}
-            onAddTransport={onAddTransport}
-            onRemoveTransport={onRemoveTransport}
-            onUpdateEnergy={onUpdateEnergy}
-            onAddEnergy={onAddEnergy}
-            onRemoveEnergy={onRemoveEnergy}
+            onUpdateMaterial={handleUpdateMaterial}
+            onAddMaterial={handleAddMaterial}
+            onRemoveMaterial={handleRemoveMaterial}
+            onUpdateTransport={handleUpdateTransport}
+            onAddTransport={handleAddTransport}
+            onRemoveTransport={handleRemoveTransport}
+            onUpdateEnergy={handleUpdateEnergy}
+            onAddEnergy={handleAddEnergy}
+            onRemoveEnergy={handleRemoveEnergy}
             onCalculate={onCalculate}
-            onPrevTab={onPrevTab}
-            onNextTab={onNextTab}
+            onPrevTab={handlePrevTab}
+            onNextTab={handleNextTab}
           />
         </Tabs>
       </CardContent>

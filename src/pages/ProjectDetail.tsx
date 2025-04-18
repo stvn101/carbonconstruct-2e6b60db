@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
 import { useProjects } from "@/contexts/ProjectContext";
-import { useCalculator } from "@/hooks/useCalculator";
+import { useCalculator } from "@/contexts/CalculatorContext";
 import { toast } from "sonner";
 
 // Import refactored components
@@ -27,8 +27,8 @@ const ProjectDetail = () => {
   // Get the project data
   const project = getProject(projectId || "");
   
-  // Add setCalculationInput to calculator hooks
-  const calculator = useCalculator();
+  // Use calculator context
+  const { setCalculationInput, calculationInput, calculationResult, handleCalculate } = useCalculator();
   
   // Redirect if project not found
   useEffect(() => {
@@ -40,14 +40,14 @@ const ProjectDetail = () => {
   
   // Load project data into calculator
   useEffect(() => {
-    if (project && calculator.setCalculationInput) {
-      calculator.setCalculationInput({
+    if (project && setCalculationInput) {
+      setCalculationInput({
         materials: project.materials,
         transport: project.transport,
         energy: project.energy
       });
     }
-  }, [project, calculator.setCalculationInput, project?.materials, project?.transport, project?.energy]);
+  }, [project, setCalculationInput]);
   
   if (!project) {
     return (
@@ -65,9 +65,14 @@ const ProjectDetail = () => {
         toast.success("Project deleted successfully");
         navigate("/dashboard");
       } catch (error) {
+        console.error("Error saving project:", error);
         toast.error("Failed to delete project");
       }
     }
+  };
+
+  const recordCalculatorUsage = async () => {
+    handleCalculate();
   };
 
   return (
@@ -127,20 +132,9 @@ const ProjectDetail = () => {
             {/* Calculator Tab */}
             <TabsContent value="calculator">
               <ProjectCalculatorTab 
-                calculationInput={calculator.calculationInput}
-                calculationResult={calculator.calculationResult}
-                onUpdateMaterial={calculator.handleUpdateMaterial}
-                onAddMaterial={calculator.handleAddMaterial}
-                onRemoveMaterial={calculator.handleRemoveMaterial}
-                onUpdateTransport={calculator.handleUpdateTransport}
-                onAddTransport={calculator.handleAddTransport}
-                onRemoveTransport={calculator.handleRemoveTransport}
-                onUpdateEnergy={calculator.handleUpdateEnergy}
-                onAddEnergy={calculator.handleAddEnergy}
-                onRemoveEnergy={calculator.handleRemoveEnergy}
-                onCalculate={calculator.handleCalculate}
-                onNextTab={calculator.handleNextTab}
-                onPrevTab={calculator.handlePrevTab}
+                calculationInput={calculationInput}
+                calculationResult={calculationResult}
+                onCalculate={recordCalculatorUsage}
               />
             </TabsContent>
             
