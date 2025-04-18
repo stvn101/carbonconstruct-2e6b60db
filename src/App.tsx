@@ -5,7 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Toaster } from './components/ui/sonner';
 import { RegionProvider } from './contexts/RegionContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/auth';
 import { ProjectProvider } from './contexts/ProjectContext';
 import ErrorBoundary from './components/ErrorBoundary';
 

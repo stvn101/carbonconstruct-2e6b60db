@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -9,7 +8,7 @@ import { Link } from "react-router-dom";
 import { FolderPlus, Calculator, ArrowLeft } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
 import ProjectsList from "@/components/projects/ProjectsList";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/auth';
 
 const ProjectsBrowser: React.FC = () => {
   const { projects, isLoading } = useProjects();

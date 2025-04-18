@@ -1,7 +1,6 @@
-
 import NavbarLogo from "./navbar/NavbarLogo";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/auth';
 import NavbarLinks from "@/components/navbar/NavbarLinks";
 import NavbarMenu from "@/components/navbar/NavbarMenu";
 import { useUserNavLinks } from "@/hooks/useUserNavLinks";

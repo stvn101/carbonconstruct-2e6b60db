@@ -1,5 +1,4 @@
-
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/auth';
 import { NavLink } from "@/types/navigation";
 
 export const useUserNavLinks = () => {

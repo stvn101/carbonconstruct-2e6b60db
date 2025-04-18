@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import NavbarLinks from "@/components/navbar/NavbarLinks";
 import RegionSelector from "@/components/RegionSelector";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/auth';
 import NavbarLogo from "@/components/navbar/NavbarLogo";
 import NavbarMenu from "@/components/navbar/NavbarMenu";
 import { useUserNavLinks } from "@/hooks/useUserNavLinks";
