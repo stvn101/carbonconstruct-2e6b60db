@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useCalculator } from "@/contexts/calculator";
@@ -23,14 +24,39 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const [projectName, setProjectName] = useState("New Carbon Project");
   const [isCalculating, setIsCalculating] = useState(false);
   
-  const calculatorContextValues = (() => {
-    try {
-      return useCalculator();
-    } catch (error) {
-      console.error("Failed to load calculator context:", error);
-      return null;
-    }
-  })();
+  // Try to access calculator context, handle errors gracefully
+  let calculatorContext = null;
+  try {
+    calculatorContext = useCalculator();
+  } catch (error) {
+    console.error("Error accessing calculator context:", error);
+    
+    // Return error UI
+    return (
+      <div className="container mx-auto px-4 md:px-6">
+        <CalculatorHeader />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-6"
+        >
+          <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-800 mt-6">
+            <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Calculator Error</h3>
+            <p className="mt-2 text-red-700 dark:text-red-400">
+              There was a problem loading the calculator. Please refresh the page or contact support if the issue persists.
+            </p>
+            <button 
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   const {
     calculationInput,
@@ -38,7 +64,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     activeTab,
     setActiveTab,
     handleCalculate
-  } = calculatorContextValues || {};
+  } = calculatorContext;
 
   const handleSaveProject = async () => {
     if (!user) {
@@ -95,9 +121,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     
     setIsCalculating(true);
     try {
-      if (handleCalculate) {
-        handleCalculate();
-      }
+      handleCalculate();
       setTimeout(() => {
         recordCalculatorUsage().finally(() => {
           setIsCalculating(false);
@@ -109,33 +133,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       toast.error("Calculation failed. Please try again.");
     }
   }, [handleCalculate, recordCalculatorUsage, isCalculating]);
-
-  if (!calculatorContextValues) {
-    return (
-      <div className="container mx-auto px-4 md:px-6">
-        <CalculatorHeader />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-6"
-        >
-          <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-800 mt-6">
-            <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Calculator Error</h3>
-            <p className="mt-2 text-red-700 dark:text-red-400">
-              There was a problem loading the calculator. Please refresh the page or contact support if the issue persists.
-            </p>
-            <button 
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-              onClick={() => window.location.reload()}
-            >
-              Refresh Page
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 md:px-6">
@@ -156,7 +153,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         <CalculatorTabs 
           isMobile={isMobile}
           activeTab={activeTab || "materials"}
-          setActiveTab={setActiveTab || (() => {})}
+          setActiveTab={setActiveTab}
           onCalculate={handleCalculateWithTracking}
         />
       </motion.div>
