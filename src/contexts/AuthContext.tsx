@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,15 +57,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // If user logged in, fetch their profile
         if (session?.user) {
-          // Use setTimeout to prevent potential deadlocks with Supabase auth
           setTimeout(() => {
             fetchUserProfile(session.user.id).then((profile) => {
               setProfile(profile);
@@ -82,7 +78,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -101,7 +96,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const signUp = async (email: string, password: string, captchaToken: string | null) => {
-    // Add the captcha token to the options if provided
     const options = captchaToken ? { captchaToken } : undefined;
     
     return await supabase.auth.signUp({
@@ -112,7 +106,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signIn = async (email: string, password: string, captchaToken: string | null) => {
-    // Add the captcha token to the options if provided
     const options = captchaToken ? { captchaToken } : undefined;
     
     return await supabase.auth.signInWithPassword({
@@ -125,22 +118,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     await supabase.auth.signOut();
   };
-  
-  // Add these methods to match the expected interface
+
   const login = async (email: string, password: string) => {
     try {
+      setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({ 
         email, 
         password
       });
       
-      if (error) throw error;
+      if (error) {
+        toast.error(error.message || "Login failed");
+        throw error;
+      }
+      
+      toast.success("Signed in successfully!");
     } catch (error: any) {
       console.error("Login error:", error.message);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   const logout = async () => {
     try {
       await logoutUser();
@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw error;
     }
   };
-  
+
   const register = async (name: string, email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signUp({
@@ -170,7 +170,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw error;
     }
   };
-  
+
   const signInWithGitHub = async () => {
     try {
       await signInWithGitHubOAuth();
@@ -179,13 +179,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw error;
     }
   };
-  
+
   const updateProfile = async (updates: Partial<UserProfile>) => {
     try {
       if (!user) throw new Error("User not authenticated");
       await updateUserProfile(user.id, updates);
       
-      // Update the local profile state
       setProfile(prev => prev ? {...prev, ...updates} : null);
       
       toast.success("Profile updated successfully!");
