@@ -2,7 +2,7 @@
 export * from './auth';
 export * from './ProjectContext';
 export * from './RegionContext';
-export * from './CalculatorContext';
+export * from './calculator';
 
 // Also export the default export from CalculatorContext
-export { default as CalculatorContext } from './CalculatorContext';
+export { CalculatorContext } from './calculator';
