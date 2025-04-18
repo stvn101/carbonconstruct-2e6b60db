@@ -39,8 +39,10 @@ type CalculatorContextType = {
   setCalculationResult: (result: CalculationResult | null) => void;
 };
 
+// Create the context with a default undefined value
 const CalculatorContext = createContext<CalculatorContextType | undefined>(undefined);
 
+// Export the provider component
 export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
@@ -150,32 +152,36 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
+  // Create the context value
+  const contextValue: CalculatorContextType = {
+    calculationInput,
+    setCalculationInput,
+    calculationResult,
+    setCalculationResult,
+    activeTab,
+    setActiveTab,
+    handleAddMaterial,
+    handleUpdateMaterial,
+    handleRemoveMaterial,
+    handleAddTransport,
+    handleUpdateTransport,
+    handleRemoveTransport,
+    handleAddEnergy,
+    handleUpdateEnergy,
+    handleRemoveEnergy,
+    handleCalculate,
+    handleNextTab,
+    handlePrevTab
+  };
+
   return (
-    <CalculatorContext.Provider value={{
-      calculationInput,
-      setCalculationInput,
-      calculationResult,
-      setCalculationResult,
-      activeTab,
-      setActiveTab,
-      handleAddMaterial,
-      handleUpdateMaterial,
-      handleRemoveMaterial,
-      handleAddTransport,
-      handleUpdateTransport,
-      handleRemoveTransport,
-      handleAddEnergy,
-      handleUpdateEnergy,
-      handleRemoveEnergy,
-      handleCalculate,
-      handleNextTab,
-      handlePrevTab
-    }}>
+    <CalculatorContext.Provider value={contextValue}>
       {children}
     </CalculatorContext.Provider>
   );
 };
 
+// Export the useCalculator hook
 export const useCalculator = () => {
   const context = useContext(CalculatorContext);
   if (context === undefined) {
@@ -183,3 +189,6 @@ export const useCalculator = () => {
   }
   return context;
 };
+
+// Export the context for direct usage
+export default CalculatorContext;
