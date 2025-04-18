@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useAuth } from '@/contexts/auth';
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Check, X, Loader2 } from "lucide-react";
-import { useAuth } from '@/contexts/auth';
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import BillingToggle from "@/components/pricing/BillingToggle";
+import PricingPlans from "@/components/pricing/PricingPlans";
+import { PlanPrices, PricingPlan } from "@/types/pricing";
 
 const Pricing = () => {
   const [annual, setAnnual] = useState(true);
@@ -17,7 +16,7 @@ const Pricing = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
-  const monthlyPrices = {
+  const monthlyPrices: PlanPrices = {
     starter: 29,
     professional: 79,
     enterprise: 199
@@ -27,7 +26,7 @@ const Pricing = () => {
     return Math.round(monthlyPrice * 12 * 0.8);
   };
   
-  const plans = [
+  const plans: PricingPlan[] = [
     {
       id: "starter",
       name: "Starter",
@@ -172,98 +171,22 @@ const Pricing = () => {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">Transparent Pricing</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">
+              Transparent Pricing
+            </h1>
             <p className="text-lg md:text-xl text-foreground/80 mb-10">
               Choose the plan that's right for your Australian construction business. All plans include our core carbon calculation engine.
             </p>
             
-            <div className="flex items-center justify-center gap-3 mb-12">
-              <span className={`text-sm font-medium ${annual ? 'text-foreground' : 'text-foreground/60'}`}>Annual</span>
-              <Switch
-                checked={!annual}
-                onCheckedChange={() => setAnnual(!annual)}
-                aria-label="Toggle billing cycle"
-              />
-              <span className={`text-sm font-medium ${!annual ? 'text-foreground' : 'text-foreground/60'}`}>Monthly</span>
-              {annual && (
-                <span className="ml-2 inline-block bg-carbon-100 text-carbon-800 text-xs font-medium py-1 px-2 rounded-full">
-                  Save 20%
-                </span>
-              )}
-            </div>
+            <BillingToggle annual={annual} onChange={setAnnual} />
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {plans.map((plan, index) => (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Card className={`h-full flex flex-col ${plan.popular ? 'border-carbon-500 shadow-lg shadow-carbon-100/20' : ''}`}>
-                  {plan.popular && (
-                    <div className="bg-carbon-500 text-white text-center py-1 text-sm font-medium">
-                      Most Popular
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">A${(plan.price/100).toFixed(2)}</span>
-                      <span className="text-foreground/60 ml-2">/ {annual ? 'year' : 'month'}</span>
-                    </div>
-                    <p className="text-foreground/80 mt-3 text-sm">{plan.description}</p>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <h3 className="font-medium mb-3">Includes:</h3>
-                    <ul className="space-y-2">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-start">
-                          <Check className="h-5 w-5 text-carbon-500 mr-2 shrink-0" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    {plan.notIncluded.length > 0 && (
-                      <>
-                        <h3 className="font-medium mb-3 mt-6">Not included:</h3>
-                        <ul className="space-y-2">
-                          {plan.notIncluded.map((feature) => (
-                            <li key={feature} className="flex items-start">
-                              <X className="h-5 w-5 text-foreground/30 mr-2 shrink-0" />
-                              <span className="text-sm text-foreground/60">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    )}
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      className="w-full" 
-                      variant={plan.popular ? "default" : "outline"}
-                      onClick={() => handlePlanAction(plan.id)}
-                      disabled={!!processing}
-                    >
-                      {processing === plan.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        plan.cta
-                      )}
-                    </Button>
-                    {plan.popular && !profile?.had_trial && (
-                      <p className="w-full text-xs text-center mt-2 text-green-600">Includes 3-day free trial</p>
-                    )}
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+          <PricingPlans 
+            plans={plans}
+            processing={processing}
+            hadTrial={!!profile?.had_trial}
+            onPlanAction={handlePlanAction}
+          />
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -275,9 +198,6 @@ const Pricing = () => {
             <p className="text-foreground/80 mb-6">
               We offer tailored packages for Australian enterprises with specific requirements. Our team will work with you to create a solution that meets your unique needs and complies with Australian standards.
             </p>
-            <Button size="lg" asChild>
-              <a href="/contact">Contact Our Australian Sales Team</a>
-            </Button>
           </motion.div>
         </section>
       </main>
