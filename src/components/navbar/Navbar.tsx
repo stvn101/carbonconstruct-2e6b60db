@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,9 @@ import { useAuth } from '@/contexts/auth';
 import NavbarLogo from "@/components/navbar/NavbarLogo";
 import NavbarMenu from "@/components/navbar/NavbarMenu";
 import { useUserNavLinks } from "@/hooks/useUserNavLinks";
+
+// Define navbar height for consistent spacing
+const NAVBAR_HEIGHT = 64; // pixels
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -79,6 +83,11 @@ const Navbar = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Set CSS variable for navbar height to use throughout the app
+  useEffect(() => {
+    document.documentElement.style.setProperty('--navbar-height', `${NAVBAR_HEIGHT}px`);
+  }, []);
+
   return (
     <motion.nav 
       className={`py-4 border-b backdrop-blur-sm fixed top-0 w-full z-50 transition-all duration-300 ${
@@ -94,7 +103,7 @@ const Navbar = () => {
         opacity: isVisible ? 1 : 0
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
-      style={{ height: "var(--navbar-height, 64px)" }}
+      style={{ height: `${NAVBAR_HEIGHT}px` }}
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">

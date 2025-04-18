@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from "react";
+import { Database, Filter } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -7,12 +7,11 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Database, Filter } from "lucide-react";
 import { MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+import { useRegion } from "@/contexts/RegionContext";
 import RegionStats from "@/components/materials/RegionStats";
 import MaterialFilters from "@/components/materials/MaterialFilters";
 import MaterialTable from "@/components/materials/MaterialTable";
-import { useRegion } from "@/contexts/RegionContext";
 
 interface ExtendedMaterialData {
   name: string;
@@ -272,13 +271,15 @@ const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
 };
 
 const REGIONS = [
-  "Global",
-  "Australia",
-  "North America",
-  "Europe",
-  "Asia",
-  "South America",
-  "Africa"
+  "National",
+  "New South Wales", 
+  "Victoria", 
+  "Queensland", 
+  "Western Australia", 
+  "South Australia", 
+  "Tasmania", 
+  "Northern Territory", 
+  "Australian Capital Territory"
 ];
 
 const MaterialDatabase = () => {
@@ -290,7 +291,7 @@ const MaterialDatabase = () => {
   
   // Set the default filter to the global region
   useEffect(() => {
-    if (globalRegion !== "Global") {
+    if (globalRegion !== "National") {
       setSelectedRegion(globalRegion);
     }
   }, [globalRegion]);
@@ -331,13 +332,13 @@ const MaterialDatabase = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion(globalRegion !== "Global" ? globalRegion : "all");
+    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 content-top-spacing">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -346,13 +347,13 @@ const MaterialDatabase = () => {
             </div>
           </div>
           <h1 className="text-3xl font-bold mb-2">
-            {globalRegion === "Global" 
+            {globalRegion === "National" 
               ? "Material Database" 
               : `${globalRegion} Material Database`}
           </h1>
           <p className="text-lg text-muted-foreground">
             Explore our comprehensive database of construction materials with accurate carbon coefficients
-            {globalRegion !== "Global" && ` for ${globalRegion}`}
+            {globalRegion !== "National" && ` for ${globalRegion}`}
           </p>
           
           <RegionStats materialsByRegion={materialsByRegion} />

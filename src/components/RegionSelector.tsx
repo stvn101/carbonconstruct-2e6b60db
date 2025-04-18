@@ -14,19 +14,6 @@ import { Badge } from "@/components/ui/badge";
 const RegionSelector = () => {
   const { selectedRegion, setSelectedRegion, regions } = useRegion();
   
-  // Mapping of regions to their emoji flags (where applicable)
-  const regionFlags: Record<string, string> = {
-    "National": "🇦🇺",
-    "New South Wales": "🇦🇺",
-    "Victoria": "🇦🇺",
-    "Queensland": "🇦🇺",
-    "Western Australia": "🇦🇺",
-    "South Australia": "🇦🇺",
-    "Tasmania": "🇦🇺",
-    "Northern Territory": "🇦🇺",
-    "Australian Capital Territory": "🇦🇺"
-  };
-
   return (
     <div className="flex items-center space-x-2">
       <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -45,7 +32,7 @@ const RegionSelector = () => {
               value={region}
               className={region === "National" ? "font-medium text-carbon-600" : ""}
             >
-              {regionFlags[region]} {region}
+              🇦🇺 {region}
             </SelectItem>
           ))}
         </SelectContent>
