@@ -36,33 +36,33 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     tags: ["recycled", "metal", "structural"]
   },
   
-  // Australian specific materials
+  // Renamed materials (removing "Australian")
   bluesteelRebar: {
-    name: "BlueSteel Rebar (Australian)",
+    name: "BlueSteel Rebar",
     factor: 0.95,
     unit: "kg",
     region: "Australia",
     alternativeTo: "steel",
-    notes: "Lower carbon Australian reinforcement steel produced using clean energy sources.",
-    tags: ["australian", "steel", "structural"]
+    notes: "Lower carbon reinforcement steel produced using clean energy sources.",
+    tags: ["steel", "structural"]
   },
   ausTimber: {
-    name: "Australian Hardwood",
+    name: "Hardwood",
     factor: 0.35,
     unit: "kg",
     region: "Australia",
     alternativeTo: "timber",
-    notes: "Sustainably sourced from Australian forests with strong carbon storage properties.",
-    tags: ["australian", "sustainable", "hardwood"]
+    notes: "Sustainably sourced from forests with strong carbon storage properties.",
+    tags: ["sustainable", "hardwood"]
   },
   ausBrick: {
-    name: "Australian Clay Brick",
+    name: "Clay Brick",
     factor: 0.22,
     unit: "kg",
     region: "Australia",
     alternativeTo: "brick",
     notes: "Locally produced bricks with lower transport emissions and improved thermal properties.",
-    tags: ["australian", "thermal", "durable"]
+    tags: ["thermal", "durable"]
   },
   
   // Sustainable alternatives
@@ -85,15 +85,15 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     tags: ["carbon-negative", "insulation", "walls"]
   },
   
-  // More Australian materials
+  // More materials (renamed to remove "Australian")
   recycledConcrete: {
-    name: "Recycled Concrete Aggregate (AUS)",
+    name: "Recycled Concrete Aggregate",
     factor: 0.043,
     unit: "kg",
     region: "Australia",
     alternativeTo: "concrete",
     notes: "Made from crushed construction waste, reducing landfill and lowering carbon footprint.",
-    tags: ["australian", "recycled", "concrete"]
+    tags: ["recycled", "concrete"]
   },
   greenConcrete: {
     name: "Green Concrete (Geopolymer)",
@@ -101,8 +101,8 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     unit: "kg",
     region: "Australia",
     alternativeTo: "concrete",
-    notes: "Australian-developed geopolymer concrete using industrial waste materials instead of Portland cement.",
-    tags: ["australian", "low-carbon", "innovative"]
+    notes: "Geopolymer concrete using industrial waste materials instead of Portland cement.",
+    tags: ["low-carbon", "innovative"]
   },
   
   // Construction fuels
@@ -124,159 +124,159 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
     tags: ["fuel", "equipment", "sustainable"]
   },
   
-  // Plumbing materials
+  // Plumbing materials (renamed)
   pvcPipe: {
-    name: "PVC Pipes (AUS)",
+    name: "PVC Pipes",
     factor: 0.24,
     unit: "kg",
     region: "Australia",
-    notes: "Common Australian plumbing material with moderate carbon footprint.",
-    tags: ["australian", "plumbing", "pipes"]
+    notes: "Common plumbing material with moderate carbon footprint.",
+    tags: ["plumbing", "pipes"]
   },
   pprPipe: {
-    name: "PP-R Pipes (AUS)",
+    name: "PP-R Pipes",
     factor: 0.18,
     unit: "kg",
     region: "Australia",
     alternativeTo: "pvcPipe",
-    notes: "Lower carbon alternative to PVC piping systems used in Australian plumbing.",
-    tags: ["australian", "plumbing", "pipes"]
+    notes: "Lower carbon alternative to PVC piping systems used in plumbing.",
+    tags: ["plumbing", "pipes"]
   },
   copperPipe: {
-    name: "Copper Pipes (AUS)",
+    name: "Copper Pipes",
     factor: 2.1,
     unit: "kg",
     region: "Australia",
-    notes: "Premium Australian plumbing material with higher carbon footprint but excellent durability.",
-    tags: ["australian", "plumbing", "pipes", "durable"]
+    notes: "Premium plumbing material with higher carbon footprint but excellent durability.",
+    tags: ["plumbing", "pipes", "durable"]
   },
   recycledCopperPipe: {
-    name: "Recycled Copper Pipes (AUS)",
+    name: "Recycled Copper Pipes",
     factor: 0.87,
     unit: "kg",
     region: "Australia",
     alternativeTo: "copperPipe",
     notes: "Recycled copper pipes that significantly reduce embodied carbon compared to virgin copper.",
-    tags: ["australian", "plumbing", "pipes", "recycled"]
+    tags: ["plumbing", "pipes", "recycled"]
   },
   
-  // Insulation materials
+  // Insulation materials (renamed)
   glasswoolInsulation: {
-    name: "Glass Wool Insulation (AUS)",
+    name: "Glass Wool Insulation",
     factor: 0.58,
     unit: "kg",
     region: "Australia",
-    notes: "Common thermal insulation in Australian homes, often containing recycled glass.",
-    tags: ["australian", "insulation", "thermal"]
+    notes: "Common thermal insulation in homes, often containing recycled glass.",
+    tags: ["insulation", "thermal"]
   },
   rockwoolInsulation: {
-    name: "Rockwool Insulation (AUS)",
+    name: "Rockwool Insulation",
     factor: 0.63,
     unit: "kg",
     region: "Australia",
     alternativeTo: "glasswoolInsulation",
-    notes: "Fire-resistant mineral wool insulation manufactured in Australia.",
-    tags: ["australian", "insulation", "fire-resistant"]
+    notes: "Fire-resistant mineral wool insulation.",
+    tags: ["insulation", "fire-resistant"]
   },
   sheepWoolInsulation: {
-    name: "Sheep Wool Insulation (AUS)",
+    name: "Sheep Wool Insulation",
     factor: 0.22,
     unit: "kg",
     region: "Australia",
     alternativeTo: "glasswoolInsulation",
-    notes: "Natural insulation from Australian sheep farms with excellent moisture management properties.",
-    tags: ["australian", "insulation", "natural", "renewable"]
+    notes: "Natural insulation from sheep farms with excellent moisture management properties.",
+    tags: ["insulation", "natural", "renewable"]
   },
   
-  // Electrical materials
+  // Electrical materials (renamed)
   copperWire: {
-    name: "Copper Wiring (AUS)",
+    name: "Copper Wiring",
     factor: 1.8,
     unit: "kg",
     region: "Australia",
-    notes: "Standard electrical wiring for Australian buildings.",
-    tags: ["australian", "electrical", "wiring"]
+    notes: "Standard electrical wiring for buildings.",
+    tags: ["electrical", "wiring"]
   },
   aluminumWire: {
-    name: "Aluminum Wiring (AUS)",
+    name: "Aluminum Wiring",
     factor: 1.2,
     unit: "kg",
     region: "Australia",
     alternativeTo: "copperWire",
     notes: "Alternative wiring material with lower embodied carbon but different conductivity characteristics.",
-    tags: ["australian", "electrical", "wiring"]
+    tags: ["electrical", "wiring"]
   },
   
-  // Finishes
+  // Finishes (renamed)
   lowVocPaint: {
-    name: "Low VOC Paint (AUS)",
+    name: "Low VOC Paint",
     factor: 1.6,
     unit: "kg",
     region: "Australia",
     notes: "Environmentally friendly paint with low volatile organic compounds, suitable for sustainable buildings.",
-    tags: ["australian", "finishes", "paint", "low-emission"]
+    tags: ["finishes", "paint", "low-emission"]
   },
   limewashPaint: {
-    name: "Natural Limewash (AUS)",
+    name: "Natural Limewash",
     factor: 0.7,
     unit: "kg",
     region: "Australia",
     alternativeTo: "lowVocPaint",
     notes: "Traditional natural finish with very low embodied carbon and breathable properties.",
-    tags: ["australian", "finishes", "paint", "natural"]
+    tags: ["finishes", "paint", "natural"]
   },
   
-  // Handover materials
+  // Handover materials (renamed)
   lowFlowFixtures: {
-    name: "Low-Flow Water Fixtures (AUS)",
+    name: "Low-Flow Water Fixtures",
     factor: 2.5, // kg CO2e per fixture
     unit: "item",
     region: "Australia",
     notes: "Water-efficient taps and showerheads that reduce water consumption and related carbon.",
-    tags: ["australian", "fixtures", "water-saving", "handover"]
+    tags: ["fixtures", "water-saving", "handover"]
   },
   smartMeters: {
-    name: "Smart Energy Meters (AUS)",
+    name: "Smart Energy Meters",
     factor: 8.3, // kg CO2e per meter
     unit: "item",
     region: "Australia",
     notes: "Digital meters that help occupants monitor and reduce energy consumption.",
-    tags: ["australian", "electrical", "monitoring", "handover"]
+    tags: ["electrical", "monitoring", "handover"]
   },
   
-  // Australian energy sources for building operations
+  // Energy sources for building operations (renamed)
   solarPVSystem: {
-    name: "Solar PV System (AUS)",
+    name: "Solar PV System",
     factor: 30, // kg CO2e per m²
     unit: "m²",
     region: "Australia",
     notes: "Photovoltaic system for on-site renewable energy generation. Factor represents embodied carbon per m² of panel area.",
-    tags: ["australian", "renewable", "energy", "rooftop"]
+    tags: ["renewable", "energy", "rooftop"]
   },
   batteryStorage: {
-    name: "Battery Storage System (AUS)",
+    name: "Battery Storage System",
     factor: 120, // kg CO2e per kWh capacity
     unit: "kWh",
     region: "Australia",
     notes: "Lithium-ion battery storage for solar energy. High embodied carbon but enables renewable energy use.",
-    tags: ["australian", "energy", "storage", "battery"]
+    tags: ["energy", "storage", "battery"]
   },
   
-  // Other common Australian materials
+  // Other common materials (renamed)
   blueboard: {
-    name: "Blueboard Cladding (AUS)",
+    name: "Blueboard Cladding",
     factor: 0.47,
     unit: "kg",
     region: "Australia",
-    notes: "Fiber cement sheet commonly used in Australian construction as external cladding.",
-    tags: ["australian", "cladding", "exterior"]
+    notes: "Fiber cement sheet commonly used in construction as external cladding.",
+    tags: ["cladding", "exterior"]
   },
   colourbond: {
-    name: "Colourbond Steel Roofing (AUS)",
+    name: "Colourbond Steel Roofing",
     factor: 2.7,
     unit: "kg",
     region: "Australia",
-    notes: "Popular Australian roofing material with good durability and solar reflectance.",
-    tags: ["australian", "roofing", "metal"]
+    notes: "Popular roofing material with good durability and solar reflectance.",
+    tags: ["roofing", "metal"]
   }
 };

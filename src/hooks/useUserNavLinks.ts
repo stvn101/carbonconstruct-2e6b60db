@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/contexts/auth';
 import { NavLink } from "@/types/navigation";
 
@@ -13,7 +14,6 @@ export const useUserNavLinks = () => {
     { title: "About", path: "/about" },
     { title: "Contact", path: "/contact" },
     { title: "Blog", path: "/blog" },
-    { title: "Case Studies", path: "/case-studies" },
   ];
   
   const premiumUserNavLinks: NavLink[] = [
@@ -25,7 +25,6 @@ export const useUserNavLinks = () => {
     { title: "Analytics", path: "/analytics", premium: true },
     { title: "About", path: "/about" },
     { title: "Blog", path: "/blog" },
-    { title: "Case Studies", path: "/case-studies" },
   ];
   
   const isPremiumUser = profile?.subscription_tier === 'premium';
