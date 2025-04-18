@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calculator, BookmarkCheck } from "lucide-react";
@@ -13,6 +14,13 @@ import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { calculateTotalEmissions } from "@/lib/carbonCalculations";
+
+// Import the component sections
+import MaterialsInputSection from "./calculator/MaterialsInputSection";
+import TransportInputSection from "./calculator/TransportInputSection";
+import EnergyInputSection from "./calculator/EnergyInputSection";
+import ResultsSection from "./calculator/ResultsSection";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -28,6 +36,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const {
     calculationInput,
     calculationResult,
+    setCalculationResult,
     activeTab,
     setActiveTab,
     handleAddMaterial,
@@ -39,7 +48,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     handleAddEnergy,
     handleUpdateEnergy,
     handleRemoveEnergy,
-    handleCalculate,
+    handleCalculate: originalCalculate,
     handleNextTab,
     handlePrevTab
   } = useCalculator();
@@ -90,10 +99,12 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     }
   };
 
-  const handleCalculate = () => {
-    const result = calculateTotalEmissions(calculationInput);
-    setCalculationResult(result);
+  // Enhanced handleCalculate that records usage
+  const handleCalculateWithUsageTracking = () => {
+    // Use the original calculate function
+    originalCalculate();
     
+    // Record usage after calculation
     recordCalculatorUsage();
   };
 
@@ -253,7 +264,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
                   materials={calculationInput.materials}
                   transport={calculationInput.transport}
                   energy={calculationInput.energy}
-                  onCalculate={handleCalculate}
+                  onCalculate={handleCalculateWithUsageTracking}
                   onPrev={handlePrevTab}
                 />
               </TabsContent>
