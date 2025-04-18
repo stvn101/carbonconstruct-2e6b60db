@@ -22,15 +22,19 @@ const Pricing = () => {
     enterprise: 1000
   };
   
-  const calculateAnnualPrice = (monthlyPrice: number) => {
-    return Math.round(monthlyPrice * 12 * 0.8);
+  const calculateAnnualPrice = (monthlyPrice: number, planId: string) => {
+    const annualBase = monthlyPrice * 12;
+    if (planId === 'starter') {
+      return annualBase;
+    }
+    return Math.round(annualBase * 0.85); // 15% discount
   };
   
   const plans: PricingPlan[] = [
     {
       id: "starter",
       name: "Starter",
-      price: annual ? calculateAnnualPrice(monthlyPrices.starter) : monthlyPrices.starter,
+      price: annual ? calculateAnnualPrice(monthlyPrices.starter, 'starter') : monthlyPrices.starter,
       description: "Best for small construction firms just beginning their sustainability journey in Australia.",
       features: [
         "Carbon footprint calculation",
@@ -52,7 +56,7 @@ const Pricing = () => {
     {
       id: "professional",
       name: "Professional",
-      price: annual ? calculateAnnualPrice(monthlyPrices.professional) : monthlyPrices.professional,
+      price: annual ? calculateAnnualPrice(monthlyPrices.professional, 'professional') : monthlyPrices.professional,
       description: "Perfect for growing Australian construction companies ready to measure and reduce their carbon impact.",
       features: [
         "Everything in Starter",
@@ -74,7 +78,7 @@ const Pricing = () => {
     {
       id: "enterprise",
       name: "Enterprise",
-      price: annual ? calculateAnnualPrice(monthlyPrices.enterprise) : monthlyPrices.enterprise,
+      price: annual ? calculateAnnualPrice(monthlyPrices.enterprise, 'enterprise') : monthlyPrices.enterprise,
       description: "Complete solution for large Australian construction firms with complex sustainability needs.",
       features: [
         "Everything in Professional",
