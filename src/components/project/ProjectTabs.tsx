@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProjectDetailsTab from "./ProjectDetailsTab";
 import ProjectCalculatorTab from "./ProjectCalculatorTab";
 import { SavedProject } from "@/types/project";
+import { toast } from "sonner";
 
 interface ProjectTabsProps {
   project: SavedProject;

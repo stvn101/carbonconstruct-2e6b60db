@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -19,6 +19,7 @@ import AuthenticationRequired from "@/components/project/AuthenticationRequired"
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { getProject, updateProject, deleteProject, exportProjectPDF, exportProjectCSV } = useProjects();
   const isPremiumUser = user && profile?.subscription_tier === 'premium';
@@ -44,7 +45,7 @@ const ProjectDetail = () => {
       toast.error("Project not found");
       navigate("/dashboard");
     }
-  }, [project, user]);
+  }, [project, user, navigate]);
   
   // Load project data into calculator
   useEffect(() => {
@@ -84,6 +85,17 @@ const ProjectDetail = () => {
     }
   };
 
+  // Handle update project (fix type mismatch)
+  const handleUpdateProject = async (updatedProject: SavedProject) => {
+    try {
+      await updateProject(updatedProject);
+      return;
+    } catch (error) {
+      console.error("Error updating project:", error);
+      throw error;
+    }
+  };
+
   return (
     <motion.div 
       className={`min-h-screen flex flex-col ${isPremiumUser ? 'premium-user' : ''}`}
@@ -102,7 +114,7 @@ const ProjectDetail = () => {
           
           <ProjectHeader 
             project={project} 
-            onUpdateProject={updateProject}
+            onUpdateProject={handleUpdateProject}
             onDelete={handleDelete}
           />
           
