@@ -74,12 +74,6 @@ const BlogList = ({ posts, searchQuery, totalPosts, onClearSearch }: BlogListPro
           </Button>
         </div>
       )}
-
-      {searchQuery === "" && (
-        <div className="text-center mt-12">
-          <Button>Load More Articles</Button>
-        </div>
-      )}
     </>
   );
 };
