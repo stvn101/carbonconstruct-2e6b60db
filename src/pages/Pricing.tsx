@@ -17,9 +17,9 @@ const Pricing = () => {
   const navigate = useNavigate();
 
   const monthlyPrices: PlanPrices = {
-    starter: 29,
-    professional: 79,
-    enterprise: 199
+    starter: 200,
+    professional: 500,
+    enterprise: 1000
   };
   
   const calculateAnnualPrice = (monthlyPrice: number) => {
