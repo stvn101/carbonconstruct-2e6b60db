@@ -1,7 +1,8 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type Region = "Australia" | "North America" | "Asia" | "Europe" | "Global";
+// Modify the type to be more specific to Australian regions
+type Region = "National" | "New South Wales" | "Victoria" | "Queensland" | "Western Australia" | "South Australia" | "Tasmania" | "Northern Territory" | "Australian Capital Territory";
 
 interface RegionContextType {
   selectedRegion: Region;
@@ -11,11 +12,22 @@ interface RegionContextType {
 
 const RegionContext = createContext<RegionContextType | undefined>(undefined);
 
-export const regions: Region[] = ["Australia", "North America", "Asia", "Europe", "Global"];
+// Updated regions list to include specific Australian states and territories
+export const regions: Region[] = [
+  "National", 
+  "New South Wales", 
+  "Victoria", 
+  "Queensland", 
+  "Western Australia", 
+  "South Australia", 
+  "Tasmania", 
+  "Northern Territory", 
+  "Australian Capital Territory"
+];
 
 export function RegionProvider({ children }: { children: ReactNode }) {
-  // Default to Australia as per your request
-  const [selectedRegion, setSelectedRegion] = useState<Region>("Australia");
+  // Default to National as the initial region
+  const [selectedRegion, setSelectedRegion] = useState<Region>("National");
 
   return (
     <RegionContext.Provider
