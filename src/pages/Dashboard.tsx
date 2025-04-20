@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/Navbar";
@@ -25,7 +26,7 @@ import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton";
 
 const Dashboard = () => {
   const { user, profile, loading: authLoading } = useAuth();
-  const { projects, loading: projectsLoading } = useProjects();
+  const { projects, isLoading: projectsLoading } = useProjects();
   
   // Get the most recent projects
   const recentProjects = projects
