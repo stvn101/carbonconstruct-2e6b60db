@@ -4,8 +4,8 @@ import { CalculationInput, CalculationResult, MaterialInput, TransportInput, Ene
 export type CalculatorContextType = {
   calculationInput: CalculationInput;
   calculationResult: CalculationResult | null;
-  activeTab: string;
-  setActiveTab: (value: string) => void;
+  activeTab: 'materials' | 'transport' | 'energy' | 'results';
+  setActiveTab: (value: 'materials' | 'transport' | 'energy' | 'results') => void;
   handleAddMaterial: () => void;
   handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: string | number) => void;
   handleRemoveMaterial: (index: number) => void;
