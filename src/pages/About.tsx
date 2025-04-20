@@ -3,36 +3,27 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Award, Building, Clock, BarChart } from "lucide-react";
 import NavbarLogo from "@/components/navbar/NavbarLogo";
 
 const About = () => {
-  const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 pt-24">
         <section className="py-16 md:py-24 container mx-auto px-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col md:flex-row items-center justify-center max-w-3xl mx-auto mb-16 gap-6"
+            className="flex flex-col items-center max-w-3xl mx-auto mb-16 gap-6"
           >
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">Our Mission</h1>
-              <p className="text-lg md:text-xl text-foreground/80 max-w-xl mx-auto md:mx-0">
-                At CarbonConstruct, we're committed to transforming the construction industry by providing innovative solutions that measure, reduce, and report carbon emissions throughout the building lifecycle.
-              </p>
-            </div>
-            <div className="flex-shrink-0">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading flex items-center gap-3">
               <NavbarLogo />
-            </div>
+              Our Mission
+            </h1>
+            <p className="text-lg md:text-xl text-foreground/80 max-w-xl text-center">
+              At CarbonConstruct, we're committed to transforming the construction industry by providing innovative solutions that measure, reduce, and report carbon emissions throughout the building lifecycle.
+            </p>
           </motion.div>
 
           <motion.div 
