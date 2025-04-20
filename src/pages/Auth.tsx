@@ -1,19 +1,17 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-
-// Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LoginForm from "@/components/auth/LoginForm";
-import RegisterForm from "@/components/auth/RegisterForm";
-
-// Auth
 import { useAuth } from "@/contexts/auth";
+
+// Lazy load the auth forms
+const LoginForm = lazy(() => import("@/components/auth/LoginForm"));
+const RegisterForm = lazy(() => import("@/components/auth/RegisterForm"));
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -76,13 +74,19 @@ const Auth = () => {
                   <TabsTrigger value="signup">Create Account</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="signin">
-                  <LoginForm />
-                </TabsContent>
-                
-                <TabsContent value="signup">
-                  <RegisterForm />
-                </TabsContent>
+                <Suspense fallback={
+                  <div className="flex justify-center p-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-carbon-600"></div>
+                  </div>
+                }>
+                  <TabsContent value="signin">
+                    <LoginForm />
+                  </TabsContent>
+                  
+                  <TabsContent value="signup">
+                    <RegisterForm />
+                  </TabsContent>
+                </Suspense>
               </Tabs>
             </CardContent>
           </Card>

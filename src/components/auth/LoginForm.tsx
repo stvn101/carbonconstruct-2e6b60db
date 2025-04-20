@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,10 +23,15 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const LoginForm = () => {
-  const { login, loading } = useAuth();
-  const [serverError, setServerError] = useState("");
-
+const LoginFormContent = ({ 
+  onSubmit, 
+  loading, 
+  serverError 
+}: { 
+  onSubmit: (data: FormValues) => Promise<void>;
+  loading: boolean;
+  serverError: string;
+}) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,7 +40,66 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {serverError && (
+          <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {serverError}
+          </div>
+        )}
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="you@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="submit"
+          className="w-full bg-carbon-600 hover:bg-carbon-700"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing In
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
+const LoginForm = () => {
+  const { login, loading } = useAuth();
+  const [serverError, setServerError] = useState("");
+
+  const handleSubmit = async (data: FormValues) => {
     try {
       setServerError("");
       await login(data.email, data.password);
@@ -47,59 +110,13 @@ const LoginForm = () => {
 
   return (
     <div className="w-full">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {serverError && (
-            <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {serverError}
-            </div>
-          )}
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="you@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button
-            type="submit"
-            className="w-full bg-carbon-600 hover:bg-carbon-700"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing In
-              </>
-            ) : (
-              "Sign In"
-            )}
-          </Button>
-        </form>
-      </Form>
+      <LoginFormContent
+        onSubmit={handleSubmit}
+        loading={loading}
+        serverError={serverError}
+      />
     </div>
   );
 };
 
-export default LoginForm;
+export default memo(LoginForm);
