@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -127,7 +128,7 @@ const App: React.FC = () => {
                       } />
                       
                       {/* Protected routes with error boundary */}
-                      <Route element={
+                      <Route path="/dashboard" element={
                         <ErrorBoundary feature="Dashboard">
                           <RequireAuth>
                             <Suspense fallback={<PageLoading isLoading={true} text="Loading dashboard..." />}>
@@ -138,14 +139,38 @@ const App: React.FC = () => {
                       } />
                       
                       {/* Project routes with error boundary */}
-                      <Route element={
+                      <Route path="/projects" element={
+                        <ErrorBoundary feature="Projects">
+                          <RequireAuth>
+                            <Suspense fallback={<PageLoading isLoading={true} text="Loading projects..." />}>
+                              <UserProjects />
+                            </Suspense>
+                          </RequireAuth>
+                        </ErrorBoundary>
+                      } />
+                      <Route path="/projects/browse" element={
                         <ErrorBoundary feature="Projects">
                           <RequireAuth>
                             <Suspense fallback={<PageLoading isLoading={true} />}>
-                              <Route path="/projects" element={<UserProjects />} />
-                              <Route path="/projects/browse" element={<ProjectsBrowser />} />
-                              <Route path="/projects/new" element={<Calculator />} />
-                              <Route path="/projects/:projectId" element={<ProjectDetail />} />
+                              <ProjectsBrowser />
+                            </Suspense>
+                          </RequireAuth>
+                        </ErrorBoundary>
+                      } />
+                      <Route path="/projects/new" element={
+                        <ErrorBoundary feature="Projects">
+                          <RequireAuth>
+                            <Suspense fallback={<PageLoading isLoading={true} />}>
+                              <Calculator />
+                            </Suspense>
+                          </RequireAuth>
+                        </ErrorBoundary>
+                      } />
+                      <Route path="/projects/:projectId" element={
+                        <ErrorBoundary feature="Projects">
+                          <RequireAuth>
+                            <Suspense fallback={<PageLoading isLoading={true} />}>
+                              <ProjectDetail />
                             </Suspense>
                           </RequireAuth>
                         </ErrorBoundary>
