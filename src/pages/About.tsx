@@ -51,10 +51,16 @@ const About = () => {
               <CardContent className="p-8">
                 <h2 className="text-2xl font-semibold mb-4">Our Vision</h2>
                 <p className="text-foreground/80 mb-4">
-                  We envision a future where every construction project is designed, built, and operated with its carbon impact as a primary consideration.
+                  We envision a future where every construction project—from small residential builds to large commercial developments—is meticulously designed, built, and operated with its carbon impact as a primary consideration, ensuring sustainability is at the heart of every decision.
+                </p>
+                <p className="text-foreground/80 mb-4">
+                  By making carbon data accessible, actionable, and seamlessly integrated into standard workflows, we aim to empower the industry to significantly reduce its environmental impact while maintaining profitability and achieving project goals.
+                </p>
+                <p className="text-foreground/80 mb-4">
+                  Our platform provides builders with the tools to track, analyze, and optimize their carbon footprint in real time, fostering a balance between ecological responsibility and economic success.
                 </p>
                 <p className="text-foreground/80">
-                  By making carbon data accessible, actionable, and integrated into standard workflows, we aim to help the industry reduce its environmental impact while maintaining profitability and meeting project goals.
+                  Through partnerships with industry leaders like Master Builders Queensland, we are committed to scaling this vision across Australia, targeting over 50 projects to drive meaningful change.
                 </p>
               </CardContent>
             </Card>
@@ -100,3 +106,4 @@ const About = () => {
 };
 
 export default About;
+
