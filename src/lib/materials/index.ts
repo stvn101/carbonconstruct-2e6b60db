@@ -1,6 +1,7 @@
 
 import { MATERIAL_FACTORS as BASE_MATERIAL_FACTORS } from '@/lib/carbonFactors';
-import { ExtendedMaterialData, MATERIAL_TYPES, REGIONS } from './types';
+import { MATERIAL_TYPES, REGIONS } from './types';
+import { ExtendedMaterialData } from './materialTypes';
 import { ALTERNATIVE_MATERIALS } from './alternative';
 import { PLUMBING_MATERIALS } from './plumbing';
 import { INSULATION_MATERIALS } from './insulation';
@@ -16,7 +17,7 @@ import { RESIDENTIAL_MATERIALS } from './residential';
 import { LANDSCAPING_MATERIALS } from './landscaping';
 
 // Re-export types and constants
-export * from './types';
+export { MATERIAL_TYPES, REGIONS } from './types';
 export * from './materialTypes';
 
 // Create a memoized materials registry
@@ -62,4 +63,3 @@ export const filterMaterials = (predicate: (material: ExtendedMaterialData) => b
 // Export constants
 export const MATERIAL_FACTORS = BASE_MATERIAL_FACTORS;
 export const EXTENDED_MATERIALS = Object.fromEntries(materialsRegistry);
-

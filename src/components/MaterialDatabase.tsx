@@ -13,6 +13,7 @@ import RegionStats from "@/components/materials/RegionStats";
 import MaterialFilters from "@/components/materials/MaterialFilters";
 import MaterialTable from "@/components/materials/MaterialTable";
 import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
+import { ExtendedMaterialData } from "@/lib/materials";
 
 const MaterialDatabase = () => {
   const { selectedRegion: globalRegion } = useRegion();
@@ -37,6 +38,11 @@ const MaterialDatabase = () => {
     materialCount,
     totalMaterials
   } = useMaterialFiltering();
+
+  // Transform the filteredMaterials to match the expected format for MaterialTable
+  const materialTableData: [string, ExtendedMaterialData][] = filteredMaterials.map(
+    (material, index) => [`material-${index}`, material]
+  );
 
   return (
     <div className="container mx-auto px-4 py-8 content-top-spacing">
@@ -99,7 +105,7 @@ const MaterialDatabase = () => {
           </CardHeader>
           <CardContent>
             <MaterialTable 
-              filteredMaterials={filteredMaterials} 
+              filteredMaterials={materialTableData} 
               resetFilters={resetFilters} 
             />
             
