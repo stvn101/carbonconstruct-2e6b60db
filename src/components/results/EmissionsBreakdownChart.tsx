@@ -4,40 +4,49 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { CalculationResult } from "@/lib/carbonCalculations";
+import { useMemo } from "react";
 
 interface EmissionsBreakdownChartProps {
   result: CalculationResult;
 }
 
 const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
-  // Main emissions breakdown chart
-  const mainBreakdownData = [
-    { 
-      name: 'Materials', 
-      value: Number(result.materialEmissions.toFixed(2)) 
-    },
-    { 
-      name: 'Transport', 
-      value: Number(result.transportEmissions.toFixed(2)) 
-    },
-    { 
-      name: 'Energy', 
-      value: Number(result.energyEmissions.toFixed(2)) 
-    }
-  ];
+  // Memoize the data processing to avoid recalculation on every render
+  const { dataWithPercentage, filteredData } = useMemo(() => {
+    // Main emissions breakdown chart
+    const mainBreakdownData = [
+      { 
+        name: 'Materials', 
+        value: Number(result.materialEmissions.toFixed(2)) 
+      },
+      { 
+        name: 'Transport', 
+        value: Number(result.transportEmissions.toFixed(2)) 
+      },
+      { 
+        name: 'Energy', 
+        value: Number(result.energyEmissions.toFixed(2)) 
+      }
+    ];
 
-  // Filter out zero values to prevent rendering issues
-  const filteredData = mainBreakdownData.filter(item => item.value > 0);
+    // Filter out zero values to prevent rendering issues
+    const filtered = mainBreakdownData.filter(item => item.value > 0);
 
-  // Calculate percentages for labels
-  const total = filteredData.reduce((acc, item) => acc + item.value, 0);
-  const dataWithPercentage = filteredData.map(item => ({
-    ...item,
-    percentage: ((item.value / total) * 100).toFixed(1)
-  }));
+    // Calculate percentages for labels
+    const total = filtered.reduce((acc, item) => acc + item.value, 0);
+    const withPercentage = filtered.map(item => ({
+      ...item,
+      percentage: ((item.value / total) * 100).toFixed(1)
+    }));
 
-  // Color palette for the charts
-  const COLORS = ['#3e9847', '#25612d', '#214d28', '#8acd91', '#b8e2bc'];
+    return { dataWithPercentage: withPercentage, filteredData: filtered };
+  }, [result.materialEmissions, result.transportEmissions, result.energyEmissions]);
+
+  // Color palette for the charts - memoized to avoid recreation
+  const COLORS = useMemo(() => 
+    ['#3e9847', '#25612d', '#214d28', '#8acd91', '#b8e2bc'],
+    []
+  );
 
   // Animation variants
   const chartVariants = {
