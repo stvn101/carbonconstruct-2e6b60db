@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -43,7 +42,7 @@ import { NoAuth } from './components/NoAuth';
 
 const App: React.FC = () => {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary feature="Application">
       <HelmetProvider>
         <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
           <RegionProvider>
@@ -55,29 +54,32 @@ const App: React.FC = () => {
                     <RouteChangeTracker />
                     <Routes>
                       <Route path="/" element={<Index />} />
-                      <Route path="/auth" element={
-                        <NoAuth>
-                          <Auth />
-                        </NoAuth>
-                      } />
-                      <Route path="/signin" element={
-                        <NoAuth>
-                          <Auth />
-                        </NoAuth>
-                      } />
-                      <Route path="/signup" element={
-                        <NoAuth>
-                          <Auth />
-                        </NoAuth>
-                      } />
+                      
+                      {/* Auth routes with error boundary */}
+                      <Route element={
+                        <ErrorBoundary feature="Authentication">
+                          <NoAuth>
+                            <Auth />
+                          </NoAuth>
+                        </ErrorBoundary>
+                      }>
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/signin" element={<Auth />} />
+                        <Route path="/signup" element={<Auth />} />
+                      </Route>
+                      
                       <Route path="/auth/callback" element={<AuthCallback />} />
                       
-                      {/* Lazy loaded routes */}
+                      {/* Calculator routes with error boundary */}
                       <Route path="/calculator" element={
-                        <Suspense fallback={<PageLoading isLoading={true} text="Loading calculator..." />}>
-                          <Calculator />
-                        </Suspense>
+                        <ErrorBoundary feature="Calculator">
+                          <Suspense fallback={<PageLoading isLoading={true} text="Loading calculator..." />}>
+                            <Calculator />
+                          </Suspense>
+                        </ErrorBoundary>
                       } />
+                      
+                      {/* Marketing routes */}
                       <Route path="/pricing" element={
                         <Suspense fallback={<PageLoading isLoading={true} />}>
                           <Pricing />
@@ -124,54 +126,41 @@ const App: React.FC = () => {
                         </Suspense>
                       } />
                       
-                      {/* Protected routes */}
-                      <Route path="/dashboard" element={
-                        <RequireAuth>
-                          <Suspense fallback={<PageLoading isLoading={true} text="Loading dashboard..." />}>
-                            <Dashboard />
-                          </Suspense>
-                        </RequireAuth>
+                      {/* Protected routes with error boundary */}
+                      <Route element={
+                        <ErrorBoundary feature="Dashboard">
+                          <RequireAuth>
+                            <Suspense fallback={<PageLoading isLoading={true} text="Loading dashboard..." />}>
+                              <Dashboard />
+                            </Suspense>
+                          </RequireAuth>
+                        </ErrorBoundary>
                       } />
-                      <Route path="/profile" element={
-                        <RequireAuth>
-                          <Suspense fallback={<PageLoading isLoading={true} />}>
-                            <UserProfile />
-                          </Suspense>
-                        </RequireAuth>
+                      
+                      {/* Project routes with error boundary */}
+                      <Route element={
+                        <ErrorBoundary feature="Projects">
+                          <RequireAuth>
+                            <Suspense fallback={<PageLoading isLoading={true} />}>
+                              <Route path="/projects" element={<UserProjects />} />
+                              <Route path="/projects/browse" element={<ProjectsBrowser />} />
+                              <Route path="/projects/new" element={<Calculator />} />
+                              <Route path="/projects/:projectId" element={<ProjectDetail />} />
+                            </Suspense>
+                          </RequireAuth>
+                        </ErrorBoundary>
                       } />
-                      <Route path="/projects" element={
-                        <RequireAuth>
-                          <Suspense fallback={<PageLoading isLoading={true} />}>
-                            <UserProjects />
-                          </Suspense>
-                        </RequireAuth>
-                      } />
-                      <Route path="/projects/browse" element={
-                        <RequireAuth>
-                          <Suspense fallback={<PageLoading isLoading={true} />}>
-                            <ProjectsBrowser />
-                          </Suspense>
-                        </RequireAuth>
-                      } />
-                      <Route path="/projects/new" element={
-                        <RequireAuth>
-                          <Suspense fallback={<PageLoading isLoading={true} />}>
-                            <Calculator />
-                          </Suspense>
-                        </RequireAuth>
-                      } />
-                      <Route path="/projects/:projectId" element={
-                        <RequireAuth>
-                          <Suspense fallback={<PageLoading isLoading={true} />}>
-                            <ProjectDetail />
-                          </Suspense>
-                        </RequireAuth>
-                      } />
+                      
+                      {/* Materials routes with error boundary */}
                       <Route path="/materials" element={
-                        <Suspense fallback={<PageLoading isLoading={true} />}>
-                          <MaterialBrowser />
-                        </Suspense>
+                        <ErrorBoundary feature="Materials">
+                          <Suspense fallback={<PageLoading isLoading={true} />}>
+                            <MaterialBrowser />
+                          </Suspense>
+                        </ErrorBoundary>
                       } />
+                      
+                      {/* Notifications route */}
                       <Route path="/notifications" element={
                         <RequireAuth>
                           <Suspense fallback={<PageLoading isLoading={true} />}>
