@@ -17,9 +17,13 @@ export function lazyLoad<T extends ComponentType<any>>(
     return importFunc().catch(error => {
       console.error("Failed to load component:", error);
       // Retry once after a short delay
-      return new Promise(resolve => {
+      return new Promise<{ default: T }>((resolve) => {
         setTimeout(() => {
-          resolve(importFunc());
+          importFunc().then(resolve).catch(innerError => {
+            console.error("Retry failed:", innerError);
+            // Return a placeholder component when all attempts fail
+            throw new Error(`Failed to load component after retry: ${innerError}`);
+          });
         }, 500);
       });
     });
