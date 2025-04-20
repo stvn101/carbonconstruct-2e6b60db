@@ -1,99 +1,41 @@
-import React, { Suspense } from 'react';
-import { Route } from 'react-router-dom';
-import PageLoading from '@/components/ui/page-loading';
 
-const Pricing = React.lazy(() => import('@/pages/Pricing'));
-const About = React.lazy(() => import('@/pages/About'));
-const Blog = React.lazy(() => import('@/pages/Blog'));
-const BlogPost = React.lazy(() => import('@/pages/BlogPost'));
-const Contact = React.lazy(() => import('@/pages/Contact'));
-const Help = React.lazy(() => import('@/pages/Help'));
-const TermsOfService = React.lazy(() => import('@/pages/TermsOfService'));
-const ConstructionCompanies = React.lazy(() => import('@/pages/ConstructionCompanies'));
-const SustainableBuilding = React.lazy(() => import('@/pages/SustainableBuilding'));
-const Resources = React.lazy(() => import('@/pages/Resources'));
-const Demo = React.lazy(() => import('@/pages/Demo'));
-const Partners = React.lazy(() => import('@/pages/Partners'));
-const PrivacyPolicy = React.lazy(() => import('@/pages/PrivacyPolicy'));
-const CookiePolicy = React.lazy(() => import('@/pages/CookiePolicy'));
-const DataProcessing = React.lazy(() => import('@/pages/DataProcessing'));
+import React from 'react';
+import { Route } from 'react-router-dom';
+import { lazyLoad } from '@/utils/lazyLoad';
+
+// Use the lazyLoad utility for consistent code splitting
+const Pricing = lazyLoad(() => import('@/pages/Pricing'));
+const About = lazyLoad(() => import('@/pages/About'));
+const Blog = lazyLoad(() => import('@/pages/Blog'));
+const BlogPost = lazyLoad(() => import('@/pages/BlogPost'));
+const Contact = lazyLoad(() => import('@/pages/Contact'));
+const Help = lazyLoad(() => import('@/pages/Help'));
+const TermsOfService = lazyLoad(() => import('@/pages/TermsOfService'));
+const ConstructionCompanies = lazyLoad(() => import('@/pages/ConstructionCompanies'));
+const SustainableBuilding = lazyLoad(() => import('@/pages/SustainableBuilding'));
+const Resources = lazyLoad(() => import('@/pages/Resources'));
+const Demo = lazyLoad(() => import('@/pages/Demo'));
+const Partners = lazyLoad(() => import('@/pages/Partners'));
+const PrivacyPolicy = lazyLoad(() => import('@/pages/PrivacyPolicy'));
+const CookiePolicy = lazyLoad(() => import('@/pages/CookiePolicy'));
+const DataProcessing = lazyLoad(() => import('@/pages/DataProcessing'));
 
 export const marketingRoutes = (
   <>
-    <Route path="/pricing" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <Pricing />
-      </Suspense>
-    } />
-    <Route path="/about" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <About />
-      </Suspense>
-    } />
-    <Route path="/blog" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <Blog />
-      </Suspense>
-    } />
-    <Route path="/blog/posts/:slug" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <BlogPost />
-      </Suspense>
-    } />
-    <Route path="/contact" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <Contact />
-      </Suspense>
-    } />
-    <Route path="/help" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <Help />
-      </Suspense>
-    } />
-    <Route path="/terms-of-service" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <TermsOfService />
-      </Suspense>
-    } />
-    <Route path="/construction-companies" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <ConstructionCompanies />
-      </Suspense>
-    } />
-    <Route path="/sustainable-building" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <SustainableBuilding />
-      </Suspense>
-    } />
-    <Route path="/resources" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <Resources />
-      </Suspense>
-    } />
-    <Route path="/demo" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <Demo />
-      </Suspense>
-    } />
-    <Route path="/partners" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <Partners />
-      </Suspense>
-    } />
-    <Route path="/privacy-policy" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <PrivacyPolicy />
-      </Suspense>
-    } />
-    <Route path="/cookie-policy" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <CookiePolicy />
-      </Suspense>
-    } />
-    <Route path="/data-processing" element={
-      <Suspense fallback={<PageLoading isLoading={true} />}>
-        <DataProcessing />
-      </Suspense>
-    } />
+    <Route path="/pricing" element={<Pricing />} />
+    <Route path="/about" element={<About />} />
+    <Route path="/blog" element={<Blog />} />
+    <Route path="/blog/posts/:slug" element={<BlogPost />} />
+    <Route path="/contact" element={<Contact />} />
+    <Route path="/help" element={<Help />} />
+    <Route path="/terms-of-service" element={<TermsOfService />} />
+    <Route path="/construction-companies" element={<ConstructionCompanies />} />
+    <Route path="/sustainable-building" element={<SustainableBuilding />} />
+    <Route path="/resources" element={<Resources />} />
+    <Route path="/demo" element={<Demo />} />
+    <Route path="/partners" element={<Partners />} />
+    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+    <Route path="/cookie-policy" element={<CookiePolicy />} />
+    <Route path="/data-processing" element={<DataProcessing />} />
   </>
 );

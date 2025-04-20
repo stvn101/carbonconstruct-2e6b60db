@@ -1,37 +1,35 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { RequireAuth } from '@/components/RequireAuth';
-import PageLoading from '@/components/ui/page-loading';
+import { lazyLoad } from '@/utils/lazyLoad';
 
-const Dashboard = React.lazy(() => import('@/pages/Dashboard'));
-const MaterialBrowser = React.lazy(() => import('@/pages/MaterialBrowser'));
-const Notifications = React.lazy(() => import('@/pages/Notifications'));
+const Dashboard = lazyLoad(() => import('@/pages/Dashboard'), 
+  <div className="flex items-center justify-center h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-carbon-600"></div>
+  </div>
+);
+const MaterialBrowser = lazyLoad(() => import('@/pages/MaterialBrowser'));
+const Notifications = lazyLoad(() => import('@/pages/Notifications'));
 
 export const protectedRoutes = (
   <>
     <Route path="/dashboard" element={
       <ErrorBoundary feature="Dashboard">
         <RequireAuth>
-          <Suspense fallback={<PageLoading isLoading={true} text="Loading dashboard..." />}>
-            <Dashboard />
-          </Suspense>
+          <Dashboard />
         </RequireAuth>
       </ErrorBoundary>
     } />
     <Route path="/materials" element={
       <ErrorBoundary feature="Materials">
-        <Suspense fallback={<PageLoading isLoading={true} />}>
-          <MaterialBrowser />
-        </Suspense>
+        <MaterialBrowser />
       </ErrorBoundary>
     } />
     <Route path="/notifications" element={
       <RequireAuth>
-        <Suspense fallback={<PageLoading isLoading={true} />}>
-          <Notifications />
-        </Suspense>
+        <Notifications />
       </RequireAuth>
     } />
   </>

@@ -1,50 +1,46 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { RequireAuth } from '@/components/RequireAuth';
-import PageLoading from '@/components/ui/page-loading';
+import { lazyLoad } from '@/utils/lazyLoad';
 
-const UserProjects = React.lazy(() => import('@/pages/UserProjects'));
-const ProjectsBrowser = React.lazy(() => import('@/pages/ProjectsBrowser'));
-const Calculator = React.lazy(() => import('@/pages/Calculator'));
-const ProjectDetail = React.lazy(() => import('@/pages/ProjectDetail'));
+const UserProjects = lazyLoad(() => import('@/pages/UserProjects'), 
+  <div className="flex items-center justify-center h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-carbon-600"></div>
+  </div>
+);
+const ProjectsBrowser = lazyLoad(() => import('@/pages/ProjectsBrowser'));
+const Calculator = lazyLoad(() => import('@/pages/Calculator'));
+const ProjectDetail = lazyLoad(() => import('@/pages/ProjectDetail'));
 
 export const projectRoutes = (
   <>
     <Route path="/projects" element={
       <ErrorBoundary feature="Projects">
         <RequireAuth>
-          <Suspense fallback={<PageLoading isLoading={true} text="Loading projects..." />}>
-            <UserProjects />
-          </Suspense>
+          <UserProjects />
         </RequireAuth>
       </ErrorBoundary>
     } />
     <Route path="/projects/browse" element={
       <ErrorBoundary feature="Projects">
         <RequireAuth>
-          <Suspense fallback={<PageLoading isLoading={true} />}>
-            <ProjectsBrowser />
-          </Suspense>
+          <ProjectsBrowser />
         </RequireAuth>
       </ErrorBoundary>
     } />
     <Route path="/projects/new" element={
       <ErrorBoundary feature="Projects">
         <RequireAuth>
-          <Suspense fallback={<PageLoading isLoading={true} />}>
-            <Calculator />
-          </Suspense>
+          <Calculator />
         </RequireAuth>
       </ErrorBoundary>
     } />
     <Route path="/projects/:projectId" element={
       <ErrorBoundary feature="Projects">
         <RequireAuth>
-          <Suspense fallback={<PageLoading isLoading={true} />}>
-            <ProjectDetail />
-          </Suspense>
+          <ProjectDetail />
         </RequireAuth>
       </ErrorBoundary>
     } />

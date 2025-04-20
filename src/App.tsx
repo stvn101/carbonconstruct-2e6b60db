@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -12,14 +12,15 @@ import ErrorBoundary from './components/ErrorBoundary';
 import PageLoading from './components/ui/page-loading';
 import RouteChangeTracker from './components/RouteChangeTracker';
 import SkipToContent from './components/SkipToContent';
-import Index from './pages/Index';
-import NotFound from './pages/NotFound';
+import { lazyLoad } from './utils/lazyLoad';
 import { authRoutes } from './routes/authRoutes';
 import { marketingRoutes } from './routes/marketingRoutes';
 import { projectRoutes } from './routes/projectRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 
-const Calculator = React.lazy(() => import('./pages/Calculator'));
+const Index = lazyLoad(() => import('./pages/Index'));
+const NotFound = lazyLoad(() => import('./pages/NotFound'));
+const Calculator = lazyLoad(() => import('./pages/Calculator'));
 
 const App: React.FC = () => {
   return (
@@ -39,9 +40,7 @@ const App: React.FC = () => {
                       {/* Calculator route with error boundary */}
                       <Route path="/calculator" element={
                         <ErrorBoundary feature="Calculator">
-                          <Suspense fallback={<PageLoading isLoading={true} text="Loading calculator..." />}>
-                            <Calculator />
-                          </Suspense>
+                          <Calculator />
                         </ErrorBoundary>
                       } />
 
