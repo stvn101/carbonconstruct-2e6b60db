@@ -18,8 +18,8 @@ const About = () => {
             className="flex flex-col items-center max-w-3xl mx-auto mb-16 gap-6"
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading flex items-center gap-3">
-              <NavbarLogo />
               Our Mission
+              <NavbarLogo />
             </h1>
             <p className="text-lg md:text-xl text-foreground/80 max-w-xl text-center">
               At CarbonConstruct, we're committed to transforming the construction industry by providing innovative solutions that measure, reduce, and report carbon emissions throughout the building lifecycle.
