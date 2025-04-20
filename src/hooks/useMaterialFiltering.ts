@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
 import { filterMaterials, ExtendedMaterialData, MATERIAL_TYPES } from '@/lib/materials';
 
@@ -46,6 +46,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
   // Memoized statistics
   const stats = useMemo(() => {
     const materialsByRegion: Record<string, number> = {};
+    const allRegions = new Set<string>();
     const allTags = new Set<string>();
     
     filteredMaterials.forEach(material => {
@@ -53,6 +54,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
         const regions = material.region.split(", ");
         regions.forEach(region => {
           materialsByRegion[region] = (materialsByRegion[region] || 0) + 1;
+          allRegions.add(region);
         });
       }
       material.tags?.forEach(tag => allTags.add(tag));
@@ -60,6 +62,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
 
     return {
       materialsByRegion,
+      allRegions: Array.from(allRegions).sort(),
       allTags: Array.from(allTags).sort(),
       totalCount: filteredMaterials.length
     };
@@ -71,6 +74,30 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     setSelectedAlternative("none");
     setSelectedTag("all");
   }, [globalRegion]);
+
+  // Extract base material options for the dropdown
+  const baseOptions = useMemo(() => {
+    const options = new Set<string>();
+    filteredMaterials.forEach(material => {
+      if (material.alternativeTo) {
+        options.add(material.alternativeTo);
+      }
+    });
+    
+    return Array.from(options).map(id => {
+      const material = filteredMaterials.find(m => m.name.toLowerCase() === id.toLowerCase());
+      return {
+        id,
+        name: material ? material.name : id
+      };
+    });
+  }, [filteredMaterials]);
+
+  // Get total materials count for displaying stats
+  const totalMaterials = useMemo(() => 
+    filterMaterials(() => true).length,
+    []
+  );
 
   return {
     // Filter states
@@ -87,8 +114,10 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     filteredMaterials,
     materialsByRegion: stats.materialsByRegion,
     allTags: stats.allTags,
+    allRegions: stats.allRegions,
+    baseOptions,
     resetFilters,
     materialCount: stats.totalCount,
+    totalMaterials,
   };
 };
-
