@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -17,11 +16,13 @@ import BackButton from "@/components/project/BackButton";
 import ProjectTabs from "@/components/project/ProjectTabs";
 import LoadingState from "@/components/project/LoadingState";
 import AuthenticationRequired from "@/components/project/AuthenticationRequired";
+import { SkeletonContent } from "@/components/ui/skeleton-content";
+import { Card, CardContent } from "@/components/ui/card";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const { getProject, updateProject, deleteProject, exportProjectPDF, exportProjectCSV } = useProjects();
   const isPremiumUser = user && profile?.subscription_tier === 'premium';
   
@@ -68,8 +69,25 @@ const ProjectDetail = () => {
     return <AuthenticationRequired />;
   }
   
-  if (!project) {
-    return <LoadingState />;
+  if (loading || !project) {
+    return (
+      <>
+        <Navbar />
+        <main className="flex-grow content-top-spacing px-4 pb-10">
+          <div className="container mx-auto">
+            <div className="mb-8">
+              <SkeletonContent lines={2} className="max-w-lg" />
+            </div>
+            <Card>
+              <CardContent className="p-6">
+                <SkeletonContent lines={4} />
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   // Handle delete project

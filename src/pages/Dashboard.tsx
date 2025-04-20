@@ -20,15 +20,36 @@ import { SustainabilityInsights } from "@/components/dashboard/SustainabilityIns
 import { ProjectsTab } from "@/components/dashboard/ProjectsTab";
 import { ReportsTab } from "@/components/dashboard/ReportsTab";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { SkeletonContent } from "@/components/ui/skeleton-content";
+import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton";
 
 const Dashboard = () => {
-  const { user, profile } = useAuth();
-  const { projects } = useProjects();
+  const { user, profile, loading: authLoading } = useAuth();
+  const { projects, loading: projectsLoading } = useProjects();
   
   // Get the most recent projects
   const recentProjects = projects
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 3);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <main className="flex-grow pt-24 md:pt-28 pb-10 px-4">
+          <div className="container mx-auto">
+            <SkeletonContent lines={2} className="max-w-lg" />
+            <div className="grid gap-6 mt-8">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <ProjectCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <motion.div 
