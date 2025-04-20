@@ -39,7 +39,7 @@ const About = () => {
               <CardContent className="p-8">
                 <h2 className="text-2xl font-semibold mb-4">Our Story</h2>
                 <p className="text-foreground/80 mb-4">
-                  Founded in 2020 by construction and sustainability experts, CarbonConstruct emerged from a simple observation: the construction industry lacked accessible tools to measure and reduce its carbon footprint.
+                  Founded in 2025 by construction and sustainability experts, CarbonConstruct emerged from a simple observation: the construction industry lacked accessible tools to measure and reduce its carbon footprint.
                 </p>
                 <p className="text-foreground/80">
                   What began as a carbon calculator has evolved into a comprehensive platform trusted by contractors, developers, and architecture firms worldwide to meet their sustainability goals and regulatory requirements.
