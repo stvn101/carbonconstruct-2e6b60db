@@ -7,9 +7,8 @@ import performanceMonitoringService from './services/performanceMonitoringServic
 import { CachedCalculationsProvider } from './contexts/CachedCalculationsContext';
 import './index.css';
 
-// Initialize services
+// Initialize services - defer performance monitoring to not block initial render
 errorTrackingService.initialize();
-performanceMonitoringService.initialize();
 
 // Mount React app
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -19,3 +18,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </CachedCalculationsProvider>
   </React.StrictMode>
 );
+
+// Initialize performance monitoring after the app has loaded
+setTimeout(() => {
+  performanceMonitoringService.initialize();
+}, 0);

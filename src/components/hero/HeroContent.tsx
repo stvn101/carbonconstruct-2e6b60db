@@ -1,22 +1,20 @@
 
 import { Button } from "@/components/ui/button";
-import { Building2, LeafyGreen, Info } from "lucide-react";
+import { Building2, LeafyGreen } from "lucide-react";
 import { m as motion } from "framer-motion";
 import { staggerContainer, fadeInUp } from "@/utils/animationVariants";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
-import { useScrollTo } from "@/hooks/useScrollTo"; // Ensure this import is correct
-
-interface HeroContentProps {
-  handleLearnMore: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
+import { useScrollTo } from "@/hooks/useScrollTo";
 
 const HeroContent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { scrollToElement } = useScrollTo(); // Use the useScrollTo hook
+  const { scrollToElement } = useScrollTo();
 
-  const handleLearnMore = scrollToElement('features'); // Scroll to features section
+  const handleLearnMore = () => {
+    scrollToElement('features');
+  };
 
   const handleTryCalculator = () => {
     navigate('/calculator', { state: { demoMode: true } });
@@ -101,4 +99,3 @@ const HeroContent = () => {
 };
 
 export default HeroContent;
-
