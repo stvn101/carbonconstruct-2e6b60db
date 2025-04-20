@@ -26,7 +26,7 @@ export const CalculatorContext = createContext<CalculatorContextType | undefined
 export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("materials");
+  const [activeTab, setActiveTab] = useState<'materials' | 'transport' | 'energy' | 'results'>('materials');
   const [error, setError] = useState<Error | null>(null);
 
   const handleCalculate = useCallback(() => {
