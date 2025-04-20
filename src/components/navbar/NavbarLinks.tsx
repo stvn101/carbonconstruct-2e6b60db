@@ -1,29 +1,12 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNotifications } from "@/hooks/useNotifications";
-import { 
-  User, 
-  LogOut, 
-  Calculator, 
-  Bell,
-  UserCircle,
-  FolderPlus,
-  Star
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import UserMenu from "@/components/navbar/UserMenu";
+import NotificationBell from "@/components/navbar/NotificationBell";
 
 const NavbarLinks = () => {
   const { user, profile, logout } = useAuth();
@@ -47,21 +30,7 @@ const NavbarLinks = () => {
     <div className="flex items-center space-x-2">
       {user ? (
         <div className="flex items-center gap-2">
-          {/* Notification icon */}
-          <Link to="/notifications" className="relative">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-              {unreadNotifications > 0 && (
-                <Badge 
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0 bg-red-500 text-white"
-                >
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </Badge>
-              )}
-            </Button>
-          </Link>
-          
-          {/* User menu dropdown */}
+          <NotificationBell unreadCount={unreadNotifications} />
           <UserMenu 
             profile={profile}
             isPremiumUser={isPremiumUser}
