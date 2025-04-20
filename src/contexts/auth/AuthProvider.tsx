@@ -43,7 +43,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const options = captchaToken ? { captchaToken } : undefined;
       return supabase.auth.signInWithPassword({ email, password, options });
     },
-    signOut: async () => await supabase.auth.signOut(),
+    signOut: async () => {
+      await supabase.auth.signOut();
+    },
     ...authHandlers
   };
 
