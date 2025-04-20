@@ -1,17 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
-import { EXTENDED_MATERIALS } from '@/lib/materialData';
-
-export interface ExtendedMaterialData {
-  name: string;
-  factor: number;
-  unit: string;
-  region?: string;
-  alternativeTo?: string;
-  notes?: string;
-  tags?: string[];
-}
+import { filterMaterials, ExtendedMaterialData, MATERIAL_TYPES } from '@/lib/materials';
 
 export interface MaterialFilterOptions {
   searchTerm: string;
@@ -34,32 +24,8 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     }
   }, [globalRegion]);
 
-  // Extract all unique tags from materials
-  const allTags = Array.from(
-    new Set(
-      Object.values(EXTENDED_MATERIALS)
-        .flatMap(material => material.tags || [])
-    )
-  ).sort();
-
-  // Extract all unique regions from materials
-  const allRegions = Array.from(
-    new Set(
-      Object.values(EXTENDED_MATERIALS)
-        .flatMap(material => material.region ? material.region.split(", ") : [])
-    )
-  ).sort();
-
-  // Get base materials for alternative dropdown
-  const baseOptions = Object.entries(EXTENDED_MATERIALS)
-    .filter(([, material]) => !material.alternativeTo)
-    .map(([key, value]) => ({
-      id: key,
-      name: value.name
-    }));
-
-  // Apply filters to materials
-  const filteredMaterials = Object.entries(EXTENDED_MATERIALS).filter(([key, material]) => {
+  // Memoized filter function
+  const filterPredicate = useCallback((material: ExtendedMaterialData) => {
     const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRegion = selectedRegion === "all" || 
       (material.region && material.region.includes(selectedRegion));
@@ -69,25 +35,42 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
       (material.tags && material.tags.includes(selectedTag));
     
     return matchesSearch && matchesRegion && matchesAlternative && matchesTag;
-  });
+  }, [searchTerm, selectedRegion, selectedAlternative, selectedTag]);
 
-  // Count materials by region
-  const materialsByRegion: Record<string, number> = {};
-  Object.values(EXTENDED_MATERIALS).forEach(material => {
-    if (material.region) {
-      const regions = material.region.split(", ");
-      regions.forEach(region => {
-        materialsByRegion[region] = (materialsByRegion[region] || 0) + 1;
-      });
-    }
-  });
+  // Memoized filtered materials
+  const filteredMaterials = useMemo(() => 
+    filterMaterials(filterPredicate),
+    [filterPredicate]
+  );
 
-  const resetFilters = () => {
+  // Memoized statistics
+  const stats = useMemo(() => {
+    const materialsByRegion: Record<string, number> = {};
+    const allTags = new Set<string>();
+    
+    filteredMaterials.forEach(material => {
+      if (material.region) {
+        const regions = material.region.split(", ");
+        regions.forEach(region => {
+          materialsByRegion[region] = (materialsByRegion[region] || 0) + 1;
+        });
+      }
+      material.tags?.forEach(tag => allTags.add(tag));
+    });
+
+    return {
+      materialsByRegion,
+      allTags: Array.from(allTags).sort(),
+      totalCount: filteredMaterials.length
+    };
+  }, [filteredMaterials]);
+
+  const resetFilters = useCallback(() => {
     setSearchTerm("");
     setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
-  };
+  }, [globalRegion]);
 
   return {
     // Filter states
@@ -100,14 +83,12 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     selectedTag,
     setSelectedTag,
     
-    // Results
+    // Results and stats
     filteredMaterials,
-    materialsByRegion,
-    allTags,
-    allRegions,
-    baseOptions,
+    materialsByRegion: stats.materialsByRegion,
+    allTags: stats.allTags,
     resetFilters,
-    materialCount: filteredMaterials.length,
-    totalMaterials: Object.keys(EXTENDED_MATERIALS).length
+    materialCount: stats.totalCount,
   };
 };
+
