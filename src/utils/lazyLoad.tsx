@@ -1,11 +1,11 @@
 
 import { Suspense, lazy, ComponentType } from 'react';
-import { PageLoading } from '@/components/ui/page-loading';
+import PageLoading from '@/components/ui/page-loading';
 
 // Helper function to lazy load components with a loading fallback
 export function lazyLoad<T extends ComponentType<any>>(
   importFunc: () => Promise<{ default: T }>,
-  fallback: React.ReactNode = <PageLoading />
+  fallback: React.ReactNode = <PageLoading isLoading={true} />
 ) {
   const LazyComponent = lazy(importFunc);
   
