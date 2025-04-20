@@ -7,11 +7,12 @@ import performanceMonitoringService from './services/performanceMonitoringServic
 import { CachedCalculationsProvider } from './contexts/CachedCalculationsContext';
 import './index.css';
 
-// Initialize services - defer performance monitoring to not block initial render
+// Initialize error tracking service - this is critical and should run immediately
 errorTrackingService.initialize();
 
-// Mount React app
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Mount React app with priority
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(
   <React.StrictMode>
     <CachedCalculationsProvider>
       <App />
@@ -19,7 +20,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>
 );
 
-// Initialize performance monitoring after the app has loaded
-setTimeout(() => {
-  performanceMonitoringService.initialize();
-}, 0);
+// Initialize non-critical services after main render using requestIdleCallback
+if ('requestIdleCallback' in window) {
+  (window as any).requestIdleCallback(() => {
+    performanceMonitoringService.initialize();
+  });
+} else {
+  // Fallback for browsers without requestIdleCallback
+  setTimeout(() => {
+    performanceMonitoringService.initialize();
+  }, 0);
+}
