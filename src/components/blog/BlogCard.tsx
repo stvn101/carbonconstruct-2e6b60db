@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { ArrowRight, CalendarDays, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +9,19 @@ interface BlogCardProps {
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
-  // Create a properly formatted slug by replacing spaces with dashes and removing special characters
-  const formattedTitle = post.title.toLowerCase()
-    .replace(/[^\w\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-');   // Replace spaces with dashes
-    
-  const postUrl = `/blog/posts/${post.id}-${formattedTitle}`;
+  // If the post has an external URL, link directly to it; otherwise, use existing logic (internal link)
+  const isExternal = !!post.url;
+
+  // Fallback for legacy/internal post URL logic, keep in for future extensibility
+  let postUrl: string;
+  if (isExternal) {
+    postUrl = post.url;
+  } else {
+    const formattedTitle = post.title.toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-');   // Replace spaces with dashes
+    postUrl = `/blog/posts/${post.id}-${formattedTitle}`;
+  }
 
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
@@ -41,7 +47,11 @@ const BlogCard = ({ post }: BlogCardProps) => {
           </div>
         </div>
         <CardTitle className="mt-2 hover:text-carbon-500 transition-colors">
-          <a href={postUrl} className="hover:underline">
+          <a
+            href={postUrl}
+            className="hover:underline"
+            {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
             {post.title}
           </a>
         </CardTitle>
@@ -51,7 +61,11 @@ const BlogCard = ({ post }: BlogCardProps) => {
       </CardContent>
       <div className="p-6 pt-0">
         <Button variant="ghost" className="group text-carbon-500 hover:text-carbon-600" asChild>
-          <a href={postUrl} className="flex items-center">
+          <a
+            href={postUrl}
+            className="flex items-center"
+            {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
             Read More 
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </a>
@@ -62,4 +76,3 @@ const BlogCard = ({ post }: BlogCardProps) => {
 };
 
 export default BlogCard;
-
