@@ -15,7 +15,7 @@ export interface AuthActions {
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   signInWithGitHub: () => Promise<void>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  updateProfile: (userId: string, updates: Partial<UserProfile>) => Promise<void>;
   signUp: (email: string, password: string, captchaToken: string | null) => Promise<any>;
   signIn: (email: string, password: string, captchaToken: string | null) => Promise<any>;
   signOut: () => Promise<void>;
