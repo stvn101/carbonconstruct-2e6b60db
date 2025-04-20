@@ -39,10 +39,10 @@ const About = () => {
               <CardContent className="p-8">
                 <h2 className="text-2xl font-semibold mb-4">Our Story</h2>
                 <p className="text-foreground/80 mb-4">
-                  Founded in 2025 by construction and sustainability experts, CarbonConstruct emerged from a simple observation: the construction industry lacked accessible tools to measure and reduce its carbon footprint.
+                  Founded in 2025 by Steven Jenkins, a carpenter with over 17 years in construction, CarbonConstruct was born from a clear need: the industry lacked simple tools to track and reduce its carbon footprint, making sustainability accessible for builders.
                 </p>
-                <p className="text-foreground/80">
-                  What began as a carbon calculator has evolved into a comprehensive platform trusted by contractors, developers, and architecture firms worldwide to meet their sustainability goals and regulatory requirements.
+                <p className="text-foreground/80 mb-4">
+                  Starting as a carbon calculator, it has grown into a robust platform to help builders meet sustainability goals and regulatory demands. Led by its founder, CarbonConstruct is scaling, engaging leaders like Master Builders Queensland, with builders and suppliers soon testing, aiming for 50+ projects in Australia to shape a sustainable future.
                 </p>
               </CardContent>
             </Card>
