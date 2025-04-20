@@ -13,7 +13,7 @@ import { EmptyProjectsList } from "@/components/projects/EmptyProjectsList";
 import ProjectsHeader from "@/components/projects/ProjectsHeader";
 
 const UserProjects = () => {
-  const { projects, deleteProject } = useProjects();
+  const { projects, deleteProject, exportProjectPDF, exportProjectCSV } = useProjects();
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<SavedProject | null>(null);
@@ -77,6 +77,8 @@ const UserProjects = () => {
                     key={project.id} 
                     project={project}
                     onDelete={() => setProjectToDelete(project)}
+                    onExportPDF={() => exportProjectPDF(project)}
+                    onExportCSV={() => exportProjectCSV(project)}
                   />
                 ))}
             </div>
