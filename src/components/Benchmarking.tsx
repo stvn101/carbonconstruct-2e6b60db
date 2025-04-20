@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Card, 
@@ -110,21 +109,19 @@ const Benchmarking = () => {
               How your project compares to industry standards
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <PerformanceMetrics 
-                currentProject={currentProject} 
-                benchmark={benchmark} 
-              />
-              
-              <ProjectComparison 
-                chartData={chartData} 
-                benchmark={benchmark} 
-                selectedProjects={selectedProjects} 
-                onToggleProject={toggleProject}
-                availableProjects={SAMPLE_PROJECTS}
-              />
-            </div>
+          <CardContent className="grid md:grid-cols-2 gap-6">
+            <PerformanceMetrics 
+              currentProject={currentProject} 
+              benchmark={benchmark} 
+            />
+            
+            <ProjectComparison 
+              chartData={chartData} 
+              benchmark={benchmark} 
+              selectedProjects={selectedProjects} 
+              onToggleProject={toggleProject}
+              availableProjects={SAMPLE_PROJECTS}
+            />
           </CardContent>
         </Card>
         
