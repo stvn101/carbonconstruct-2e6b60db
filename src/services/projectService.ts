@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
@@ -28,9 +29,9 @@ export async function fetchUserProjects(userId: string): Promise<SavedProject[]>
     result: project.result as unknown as CalculationResult,
     tags: project.tags || [],
     // Add required properties with default values if not present
-    status: project.status || 'draft',
+    status: 'draft', // Default to 'draft' as the database doesn't have this field yet
     total_emissions: project.total || 0,
-    premium_only: project.premium_only || false
+    premium_only: false // Default to false as the database doesn't have this field yet
   }));
 }
 
@@ -59,9 +60,8 @@ export async function createProject(
     energy: project.energy as unknown as Json,
     result: project.result as unknown as Json,
     tags: project.tags || [],
-    status: project.status || 'draft',
     total: project.total_emissions || 0,
-    premium_only: project.premium_only || false
+    // These fields don't exist in the database schema yet, so we don't include them
   };
 
   const { data, error } = await supabase
@@ -91,9 +91,9 @@ export async function createProject(
     result: data.result as unknown as CalculationResult,
     tags: data.tags || [],
     // Add required properties with default values
-    status: data.status || 'draft',
+    status: 'draft', // Default to 'draft' as the database doesn't have this field yet
     total_emissions: data.total || 0,
-    premium_only: data.premium_only || false
+    premium_only: false // Default to false as the database doesn't have this field yet
   };
 }
 
@@ -109,6 +109,7 @@ export async function updateProject(project: SavedProject): Promise<SavedProject
       energy: project.energy as unknown as Json,
       result: project.result as unknown as Json,
       tags: project.tags,
+      total: project.total_emissions,
       updated_at: new Date().toISOString()
     })
     .eq('id', project.id);
