@@ -1,5 +1,5 @@
 
-// Simple performance monitoring service that can be expanded or integrated with third-party services
+// Optimized performance monitoring service that uses more efficient techniques
 
 interface PerformanceMetrics {
   timeToFirstByte?: number;
@@ -25,6 +25,9 @@ class PerformanceMonitoringService {
     resource: null,
     longtask: null
   };
+  // Add a throttle mechanism to avoid excessive logging
+  private lastLogTime = 0;
+  private logThreshold = 2000; // ms
 
   private constructor() {
     this.environment = import.meta.env.MODE || 'development';
@@ -42,62 +45,101 @@ class PerformanceMonitoringService {
       return;
     }
 
+    // Only fully initialize in production
     if (this.environment === 'production') {
-      // Add load event listener to capture page load metrics
+      // Use passive event listener for better performance
       window.addEventListener('load', () => {
-        // Give browser time to calculate performance metrics
-        setTimeout(() => this.captureNavigationTiming(), 0);
-      });
+        // Use requestIdleCallback to avoid affecting paint performance
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(() => this.captureNavigationTiming());
+        } else {
+          setTimeout(() => this.captureNavigationTiming(), 0);
+        }
+      }, { passive: true });
 
       // Initialize Performance Observer if available
       if ('PerformanceObserver' in window) {
-        try {
-          // Observe paint timing events
-          this.observer.paint = new PerformanceObserver((entryList) => {
-            for (const entry of entryList.getEntries()) {
-              if (entry.name === 'first-paint') {
-                this.logMetric('first-paint', entry);
-              } else if (entry.name === 'first-contentful-paint') {
-                this.logMetric('first-contentful-paint', entry);
-              }
-            }
-          });
-          this.observer.paint.observe({ type: 'paint', buffered: true });
-
-          // Observe resource timing
-          this.observer.resource = new PerformanceObserver((entryList) => {
-            const resources = entryList.getEntries().map(entry => {
-              const resource = entry as PerformanceResourceTiming;
-              return {
-                name: resource.name,
-                duration: resource.duration,
-                size: resource.transferSize || undefined,
-                type: resource.initiatorType
-              };
-            });
-            this.logResourceMetrics(resources);
-          });
-          this.observer.resource.observe({ type: 'resource', buffered: true });
-          
-          // Observe long tasks
-          if ('longtask' in PerformanceObserver.supportedEntryTypes) {
-            this.observer.longtask = new PerformanceObserver((entryList) => {
-              entryList.getEntries().forEach(entry => {
-                console.warn('[Performance] Long task detected:', 
-                  Math.round(entry.duration), 'ms', 
-                  entry.name || 'Unknown task'
-                );
-              });
-            });
-            this.observer.longtask.observe({ type: 'longtask', buffered: true });
-          }
-        } catch (e) {
-          console.error('Error setting up PerformanceObserver:', e);
-        }
+        this.setupPerformanceObservers();
       }
     }
 
     this.isInitialized = true;
+  }
+  
+  private setupPerformanceObservers(): void {
+    try {
+      // Observe paint timing events
+      this.observer.paint = new PerformanceObserver((entryList) => {
+        // Process in next idle period
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(() => {
+            for (const entry of entryList.getEntries()) {
+              if (entry.name === 'first-paint' || entry.name === 'first-contentful-paint') {
+                this.logMetric(entry.name, entry);
+              }
+            }
+          });
+        } else {
+          // Process immediately but only critical entries
+          for (const entry of entryList.getEntries()) {
+            if (entry.name === 'first-contentful-paint') {
+              this.logMetric(entry.name, entry);
+            }
+          }
+        }
+      });
+      this.observer.paint.observe({ type: 'paint', buffered: true });
+
+      // Observe resource timing but only for slow resources
+      this.observer.resource = new PerformanceObserver((entryList) => {
+        // Process in next idle period
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(() => {
+            const resources = entryList.getEntries()
+              .filter((entry) => {
+                const resource = entry as PerformanceResourceTiming;
+                // Only track resources that are slow (>1000ms) and not chrome extensions
+                return resource.duration > 1000 && !resource.name.includes('chrome-extension');
+              })
+              .map(entry => {
+                const resource = entry as PerformanceResourceTiming;
+                return {
+                  name: resource.name,
+                  duration: resource.duration,
+                  size: resource.transferSize || undefined,
+                  type: resource.initiatorType
+                };
+              });
+              
+            if (resources.length > 0) {
+              this.logResourceMetrics(resources);
+            }
+          });
+        }
+      });
+      this.observer.resource.observe({ type: 'resource', buffered: true });
+      
+      // Observe long tasks
+      if ('longtask' in PerformanceObserver.supportedEntryTypes) {
+        this.observer.longtask = new PerformanceObserver((entryList) => {
+          const now = Date.now();
+          // Throttle logging to avoid spam
+          if (now - this.lastLogTime > this.logThreshold) {
+            this.lastLogTime = now;
+            const longestTask = entryList.getEntries()
+              .reduce((longest, current) => current.duration > longest.duration ? current : longest);
+              
+            console.warn('[Performance] Long task detected:', 
+              Math.round(longestTask.duration), 'ms', 
+              longestTask.name || 'Unknown task'
+            );
+          }
+        });
+        this.observer.longtask.observe({ type: 'longtask', buffered: true });
+      }
+    } catch (e) {
+      console.error('Error setting up PerformanceObserver:', e);
+    }
   }
   
   public disconnect(): void {
@@ -135,13 +177,11 @@ class PerformanceMonitoringService {
   private logResourceMetrics(resources: any[]): void {
     // In production, you would send these to your analytics service
     if (this.environment === 'production' && resources.length > 0) {
-      const slowResources = resources
-        .filter(r => r.duration > 1000 && !r.name.includes('chrome-extension'))
-        .sort((a, b) => b.duration - a.duration);
-
-      if (slowResources.length > 0) {
-        console.info('[Performance] Slow resources:', slowResources.slice(0, 5));
-      }
+      const slowestResources = resources
+        .sort((a, b) => b.duration - a.duration)
+        .slice(0, 3); // Only log the 3 slowest
+      
+      console.info('[Performance] Slow resources:', slowestResources);
     }
   }
 
@@ -158,27 +198,29 @@ class PerformanceMonitoringService {
       const markName = `route-change-start:${route}`;
       performance.mark(markName);
       
-      // Measure after page content is likely rendered
-      setTimeout(() => {
-        if (performance && performance.mark && performance.measure) {
-          const completeMarkName = `route-change-complete:${route}`;
-          performance.mark(completeMarkName);
-          try {
-            performance.measure(
-              `route-change:${route}`,
-              markName,
-              completeMarkName
-            );
-            const measures = performance.getEntriesByName(`route-change:${route}`);
-            if (measures.length > 0) {
-              const navigationTime = measures[0].duration;
-              console.info(`[Performance] Route change to ${route}: ${Math.round(navigationTime)}ms`);
+      // Using requestAnimationFrame for smoother measurements
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (performance && performance.mark && performance.measure) {
+            const completeMarkName = `route-change-complete:${route}`;
+            performance.mark(completeMarkName);
+            try {
+              performance.measure(
+                `route-change:${route}`,
+                markName,
+                completeMarkName
+              );
+              const measures = performance.getEntriesByName(`route-change:${route}`);
+              if (measures.length > 0) {
+                const navigationTime = measures[0].duration;
+                console.info(`[Performance] Route change to ${route}: ${Math.round(navigationTime)}ms`);
+              }
+            } catch (e) {
+              // Silent error in performance monitoring
             }
-          } catch (e) {
-            console.error('Error measuring route change:', e);
           }
-        }
-      }, 100);
+        }, 100);
+      });
     }
   }
 }

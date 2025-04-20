@@ -1,11 +1,11 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
+import { lazyLoad } from '@/utils/lazyLoad';
 import Auth from '@/pages/Auth';
 import AuthCallback from '@/pages/AuthCallback';
 import { NoAuth } from '@/components/NoAuth';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import PageLoading from '@/components/ui/page-loading';
 
 export const authRoutes = (
   <>
