@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import PageLoading from '@/components/ui/page-loading';
@@ -14,6 +13,7 @@ const ConstructionCompanies = React.lazy(() => import('@/pages/ConstructionCompa
 const SustainableBuilding = React.lazy(() => import('@/pages/SustainableBuilding'));
 const Resources = React.lazy(() => import('@/pages/Resources'));
 const Demo = React.lazy(() => import('@/pages/Demo'));
+const Partners = React.lazy(() => import('@/pages/Partners'));
 
 export const marketingRoutes = (
   <>
@@ -70,6 +70,11 @@ export const marketingRoutes = (
     <Route path="/demo" element={
       <Suspense fallback={<PageLoading isLoading={true} />}>
         <Demo />
+      </Suspense>
+    } />
+    <Route path="/partners" element={
+      <Suspense fallback={<PageLoading isLoading={true} />}>
+        <Partners />
       </Suspense>
     } />
   </>
