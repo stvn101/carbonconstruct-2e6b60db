@@ -1,5 +1,4 @@
 
-// Import required types if not already imported
 import { UserProfile } from '@/types/auth';
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonCalculations';
 
@@ -30,7 +29,6 @@ export interface ProjectFormData {
   description?: string;
 }
 
-// Add ProjectContextType for ProjectContext.tsx
 export interface ProjectContextType {
   projects: SavedProject[];
   isLoading: boolean;
