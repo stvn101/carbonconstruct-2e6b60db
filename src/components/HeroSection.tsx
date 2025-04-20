@@ -1,5 +1,4 @@
 
-import { useScrollTo } from "@/hooks/useScrollTo";
 import HeroContent from "./hero/HeroContent";
 import DashboardPreview from "./hero/DashboardPreview";
 import SkeletonHero from "./hero/SkeletonHero";

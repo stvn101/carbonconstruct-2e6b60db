@@ -1,5 +1,6 @@
 
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -9,7 +10,6 @@ import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import ThemeToggle from "@/components/ThemeToggle";
-import { useEffect } from "react";
 
 const Index = () => {
   // Track when users visit important sections
