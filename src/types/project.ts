@@ -10,18 +10,18 @@ export interface SavedProject {
   updated_at: string;
   user_id: string;
   
-  // Data for calculation
+  // Data for calculation with strict typing
   materials: MaterialInput[];
   transport: TransportInput[];
   energy: EnergyInput[];
   result?: CalculationResult;
-  tags?: string[];
+  tags: string[];
   
-  // Additional properties
-  status?: 'draft' | 'completed' | 'archived';
+  // Additional properties with specific types
+  status: 'draft' | 'completed' | 'archived';
   region?: string;
-  total_emissions?: number;
-  premium_only?: boolean;
+  total_emissions: number;
+  premium_only: boolean;
 }
 
 export interface ProjectFormData {
@@ -40,8 +40,12 @@ export interface ProjectContextType {
   exportProjectCSV: (project: SavedProject) => Promise<void>;
 }
 
-// Helper function to convert from DB format (snake_case) to UI format (camelCase) if needed
-export const formatProjectForUI = (project: SavedProject): any => {
+// Helper function with proper type annotations
+export const formatProjectForUI = (project: SavedProject): SavedProject & { 
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+} => {
   return {
     ...project,
     userId: project.user_id,
@@ -50,13 +54,17 @@ export const formatProjectForUI = (project: SavedProject): any => {
   };
 };
 
-// Helper function to convert from UI format (camelCase) to DB format (snake_case) if needed
-export const formatProjectForDB = (project: any): Partial<SavedProject> => {
+// Helper function with proper type annotations
+export const formatProjectForDB = (project: SavedProject & {
+  userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}): SavedProject => {
   const { userId, createdAt, updatedAt, ...rest } = project;
   return {
     ...rest,
-    user_id: userId,
-    created_at: createdAt,
-    updated_at: updatedAt
+    user_id: userId || rest.user_id,
+    created_at: createdAt || rest.created_at,
+    updated_at: updatedAt || rest.updated_at
   };
 };

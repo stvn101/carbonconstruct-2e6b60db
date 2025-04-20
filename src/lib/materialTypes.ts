@@ -6,10 +6,10 @@ export interface MaterialData {
 }
 
 export interface ExtendedMaterialData extends MaterialData {
-  region?: string;
-  alternativeTo?: string;
-  notes?: string;
-  tags?: string[];
+  region: string | undefined;
+  alternativeTo: string | undefined;
+  notes: string | undefined;
+  tags: string[];
 }
 
 export interface MaterialOption {
