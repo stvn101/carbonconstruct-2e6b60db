@@ -12,6 +12,8 @@ const Help = React.lazy(() => import('@/pages/Help'));
 const TermsOfService = React.lazy(() => import('@/pages/TermsOfService'));
 const ConstructionCompanies = React.lazy(() => import('@/pages/ConstructionCompanies'));
 const SustainableBuilding = React.lazy(() => import('@/pages/SustainableBuilding'));
+const Resources = React.lazy(() => import('@/pages/Resources'));
+const Demo = React.lazy(() => import('@/pages/Demo'));
 
 export const marketingRoutes = (
   <>
@@ -58,6 +60,16 @@ export const marketingRoutes = (
     <Route path="/sustainable-building" element={
       <Suspense fallback={<PageLoading isLoading={true} />}>
         <SustainableBuilding />
+      </Suspense>
+    } />
+    <Route path="/resources" element={
+      <Suspense fallback={<PageLoading isLoading={true} />}>
+        <Resources />
+      </Suspense>
+    } />
+    <Route path="/demo" element={
+      <Suspense fallback={<PageLoading isLoading={true} />}>
+        <Demo />
       </Suspense>
     } />
   </>
