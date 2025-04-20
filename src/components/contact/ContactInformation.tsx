@@ -19,8 +19,8 @@ const ContactInformation = () => {
           <Mail className="h-6 w-6 text-carbon-500 mr-4 mt-1" />
           <div>
             <h3 className="font-medium">Email Us</h3>
-            <p className="text-foreground/70">contact@carbonconstruct.net</p>
             <p className="text-foreground/70">info@carbonconstruct.net</p>
+            <p className="text-foreground/70">support@carbonconstruct.net</p>
           </div>
         </div>
         
@@ -28,7 +28,7 @@ const ContactInformation = () => {
           <Phone className="h-6 w-6 text-carbon-500 mr-4 mt-1" />
           <div>
             <h3 className="font-medium">Call Us</h3>
-            <p className="text-foreground/70">0406 419 834</p>
+            <p className="text-foreground/70">(07) 3746 8765</p>
             <p className="text-sm text-foreground/60">Monday-Friday, 9am-5pm AEST</p>
           </div>
         </div>
