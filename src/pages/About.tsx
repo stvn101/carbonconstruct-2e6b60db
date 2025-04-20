@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Award, Building, Clock, BarChart } from "lucide-react";
+import NavbarLogo from "@/components/navbar/NavbarLogo";
 
 const About = () => {
   const fadeIn = {
@@ -21,12 +22,17 @@ const About = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="flex flex-col md:flex-row items-center justify-center max-w-3xl mx-auto mb-16 gap-6"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">Our Mission</h1>
-            <p className="text-lg md:text-xl text-foreground/80">
-              At CarbonConstruct, we're committed to transforming the construction industry by providing innovative solutions that measure, reduce, and report carbon emissions throughout the building lifecycle.
-            </p>
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-heading">Our Mission</h1>
+              <p className="text-lg md:text-xl text-foreground/80 max-w-xl mx-auto md:mx-0">
+                At CarbonConstruct, we're committed to transforming the construction industry by providing innovative solutions that measure, reduce, and report carbon emissions throughout the building lifecycle.
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <NavbarLogo />
+            </div>
           </motion.div>
 
           <motion.div 
@@ -51,21 +57,11 @@ const About = () => {
               <CardContent className="p-8">
                 <h2 className="text-2xl font-semibold mb-4">Our Vision</h2>
                 <p className="text-foreground/80 mb-4">
-                  We envision a future where every construction project—from small residential builds to large commercial developments—is meticulously designed, built, and operated with its carbon impact as a primary consideration, ensuring sustainability is at the heart of every decision.
-                </p>
-                <p className="text-foreground/80 mb-4">
-                  By making carbon data accessible, actionable, and seamlessly integrated into standard workflows, we aim to empower the industry to significantly reduce its environmental impact while maintaining profitability and achieving project goals.
-                </p>
-                <p className="text-foreground/80 mb-4">
-                  Our platform provides builders with the tools to track, analyze, and optimize their carbon footprint in real time, fostering a balance between ecological responsibility and economic success.
-                </p>
-                <p className="text-foreground/80">
-                  Through partnerships with industry leaders like Master Builders Queensland, we are committed to scaling this vision across Australia, targeting over 50 projects to drive meaningful change.
+                  We envision a future where every construction project—from small residential builds to large commercial developments—is meticulously designed, built, and operated with its carbon impact as a primary consideration, ensuring sustainability is at the heart of every decision. By making carbon data accessible, actionable, and seamlessly integrated into standard workflows, we aim to empower the industry to significantly reduce its environmental impact while maintaining profitability and achieving project goals. Our platform provides builders with the tools to track, analyze, and optimize their carbon footprint in real time, fostering a balance between ecological responsibility and economic success. Through partnerships with industry leaders like Master Builders Queensland, we are committed to scaling this vision across Australia, targeting over 50 projects to drive meaningful change.
                 </p>
               </CardContent>
             </Card>
           </motion.div>
-
         </section>
       </main>
       <Footer />
@@ -74,4 +70,3 @@ const About = () => {
 };
 
 export default About;
-
