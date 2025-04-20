@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
@@ -14,7 +13,7 @@ export async function fetchUserProjects(userId: string): Promise<SavedProject[]>
   
   if (!data) return [];
   
-  // Transform the data to match our SavedProject interface
+  // Transform the data to match our SavedProject interface with all required properties
   return data.map(project => ({
     id: project.id,
     name: project.name,
@@ -28,6 +27,10 @@ export async function fetchUserProjects(userId: string): Promise<SavedProject[]>
     energy: (project.energy as unknown as EnergyInput[]) || [],
     result: project.result as unknown as CalculationResult,
     tags: project.tags || [],
+    // Add required properties with default values if not present
+    status: project.status || 'draft',
+    total_emissions: project.total || 0,
+    premium_only: project.premium_only || false
   }));
 }
 
@@ -41,6 +44,9 @@ export async function createProject(
     energy: EnergyInput[];
     result?: CalculationResult;
     tags?: string[];
+    status?: 'draft' | 'completed' | 'archived';
+    total_emissions?: number;
+    premium_only?: boolean;
   }
 ): Promise<SavedProject> {
   const newProject = {
@@ -52,7 +58,10 @@ export async function createProject(
     transport: project.transport as unknown as Json,
     energy: project.energy as unknown as Json,
     result: project.result as unknown as Json,
-    tags: project.tags
+    tags: project.tags || [],
+    status: project.status || 'draft',
+    total: project.total_emissions || 0,
+    premium_only: project.premium_only || false
   };
 
   const { data, error } = await supabase
@@ -67,7 +76,7 @@ export async function createProject(
     throw new Error('No data returned from insert operation');
   }
   
-  // Transform to our SavedProject interface
+  // Transform to our SavedProject interface with all required properties
   return {
     id: data.id,
     name: data.name,
@@ -81,6 +90,10 @@ export async function createProject(
     energy: (data.energy as unknown as EnergyInput[]) || [],
     result: data.result as unknown as CalculationResult,
     tags: data.tags || [],
+    // Add required properties with default values
+    status: data.status || 'draft',
+    total_emissions: data.total || 0,
+    premium_only: data.premium_only || false
   };
 }
 

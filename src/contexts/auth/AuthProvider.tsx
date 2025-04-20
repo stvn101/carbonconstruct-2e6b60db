@@ -10,14 +10,14 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   session: null,
-  signUp: async () => ({}),
-  signIn: async () => ({}),
-  signOut: async () => {},
-  login: async () => {},
-  logout: async () => {},
-  register: async () => {},
-  signInWithGitHub: async () => {},
-  updateProfile: async () => {},
+  signUp: async () => { /* empty implementation */ },
+  signIn: async () => { /* empty implementation */ },
+  signOut: async () => { /* empty implementation */ },
+  login: async () => { /* empty implementation */ },
+  logout: async () => { /* empty implementation */ },
+  register: async () => { /* empty implementation */ },
+  signInWithGitHub: async () => { /* empty implementation */ },
+  updateProfile: async () => { /* empty implementation */ },
   loading: true,
   isLoading: true
 });
@@ -35,13 +35,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const contextValue: AuthContextType = {
     ...state,
-    signUp: (email: string, password: string, captchaToken: string | null) => {
+    signUp: async (email: string, password: string, captchaToken: string | null) => {
       const options = captchaToken ? { captchaToken } : undefined;
-      return supabase.auth.signUp({ email, password, options });
+      await supabase.auth.signUp({ email, password, options });
     },
-    signIn: (email: string, password: string, captchaToken: string | null) => {
+    signIn: async (email: string, password: string, captchaToken: string | null) => {
       const options = captchaToken ? { captchaToken } : undefined;
-      return supabase.auth.signInWithPassword({ email, password, options });
+      await supabase.auth.signInWithPassword({ email, password, options });
     },
     signOut: async () => {
       await supabase.auth.signOut();

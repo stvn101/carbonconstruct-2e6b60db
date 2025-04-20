@@ -87,6 +87,10 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         energy: calculationInput.energy,
         result: calculationResult,
         tags: ["carbon", "calculation"],
+        // Add the missing required properties
+        status: 'draft',
+        total_emissions: calculationResult.totalEmissions || 0,
+        premium_only: false
       });
       
       toast.success("Project saved successfully!");
