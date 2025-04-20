@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { motion } from "framer-motion";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
 import { CarbonReduction } from "./recommendations/CarbonReduction";
@@ -11,7 +11,8 @@ interface RecommendationsSectionProps {
   suggestions?: string[];
 }
 
-const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
+// Memoize the component to prevent unnecessary re-renders
+const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
   calculationInput,
   calculationResult,
   suggestions = []
@@ -57,6 +58,9 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
       </motion.div>
     </motion.div>
   );
-};
+});
+
+// Add display name for better debugging
+RecommendationsSection.displayName = 'RecommendationsSection';
 
 export default RecommendationsSection;

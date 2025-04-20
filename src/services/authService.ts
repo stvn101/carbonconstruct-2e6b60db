@@ -1,8 +1,17 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
 
+// Cache for user profiles
+const profileCache = new Map<string, { profile: UserProfile | null, timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
+  // Check cache first
+  const cached = profileCache.get(userId);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.profile;
+  }
+
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -15,18 +24,21 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       return null;
     }
     
-    // Convert database profile to UserProfile type with subscription_tier default
-    return {
+    const profile = {
       id: data.id,
       full_name: data.full_name,
       company_name: data.company_name,
       avatar_url: data.avatar_url,
       website: data.website,
       role: data.role,
-      // If the profile data doesn't have subscription_tier, default to 'free'
       subscription_tier: (data as any).subscription_tier || 'free',
       had_trial: (data as any).had_trial
     } as UserProfile;
+
+    // Update cache
+    profileCache.set(userId, { profile, timestamp: Date.now() });
+    
+    return profile;
   } catch (error) {
     console.error('Profile fetch error:', error);
     return null;
@@ -81,4 +93,12 @@ export async function updateUserProfile(userId: string, updates: Partial<UserPro
     .eq('id', userId);
     
   if (error) throw error;
+}
+
+export function clearProfileCache(userId?: string) {
+  if (userId) {
+    profileCache.delete(userId);
+  } else {
+    profileCache.clear();
+  }
 }

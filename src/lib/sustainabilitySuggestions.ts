@@ -1,4 +1,3 @@
-
 import { 
   CalculationResult, 
   CalculationInput,
@@ -12,8 +11,24 @@ export type ExtendedMaterial = Material |
   'recycledConcrete' | 'greenConcrete' | 'bluesteelRebar' | 
   'ausTimber' | 'ausBrick' | 'bambooCladding';
 
+// Cache results for performance
+const suggestionCache = new Map<string, string[]>();
+const alternativesCache = new Map<Material, ExtendedMaterial[]>();
+
 // Generates a suggested improvement based on the calculation results
 export const generateSuggestions = (result: CalculationResult): string[] => {
+  // Create cache key from result
+  const cacheKey = JSON.stringify({
+    materials: result.breakdownByMaterial,
+    transport: result.transportEmissions,
+    energy: result.energyEmissions
+  });
+
+  // Check cache first
+  if (suggestionCache.has(cacheKey)) {
+    return suggestionCache.get(cacheKey) || [];
+  }
+
   const suggestions: string[] = [];
 
   // Find highest emitting material
@@ -62,23 +77,38 @@ export const generateSuggestions = (result: CalculationResult): string[] => {
   // Always provide a general tip
   suggestions.push("Regular maintenance of equipment and minimizing idle time can significantly reduce energy consumption and carbon emissions on Australian construction sites.");
   
+  // Store in cache before returning
+  suggestionCache.set(cacheKey, suggestions);
   return suggestions;
 };
 
 // Function to find alternative lower-carbon materials
 export const findLowerCarbonAlternatives = (material: Material): ExtendedMaterial[] => {
+  // Check cache first
+  if (alternativesCache.has(material)) {
+    return alternativesCache.get(material) || [];
+  }
+
+  let alternatives: ExtendedMaterial[] = [];
+  
   switch(material) {
     case "concrete":
-      return ["recycledConcrete", "greenConcrete"] as ExtendedMaterial[];
+      alternatives = ["recycledConcrete", "greenConcrete"] as ExtendedMaterial[];
+      break;
     case "steel":
-      return ["bluesteelRebar", "ausTimber"] as ExtendedMaterial[];
+      alternatives = ["bluesteelRebar", "ausTimber"] as ExtendedMaterial[];
+      break;
     case "timber":
-      return ["ausTimber", "bambooCladding"] as ExtendedMaterial[];
+      alternatives = ["ausTimber", "bambooCladding"] as ExtendedMaterial[];
+      break;
     case "brick":
-      return ["ausBrick"] as ExtendedMaterial[];
-    default:
-      return [];
+      alternatives = ["ausBrick"] as ExtendedMaterial[];
+      break;
   }
+
+  // Store in cache before returning
+  alternativesCache.set(material, alternatives);
+  return alternatives;
 };
 
 // Function to estimate potential emissions savings
