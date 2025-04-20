@@ -66,38 +66,6 @@ const About = () => {
             </Card>
           </motion.div>
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <h2 className="text-3xl font-bold text-center mb-10 gradient-heading">Company Facts</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="stat-card flex flex-col items-center justify-center p-6 text-center">
-                <Users className="h-10 w-10 text-carbon-500 mb-3" />
-                <h3 className="text-2xl font-bold text-foreground">50+</h3>
-                <p className="text-foreground/70">Team Members</p>
-              </div>
-              
-              <div className="stat-card flex flex-col items-center justify-center p-6 text-center">
-                <Award className="h-10 w-10 text-carbon-500 mb-3" />
-                <h3 className="text-2xl font-bold text-foreground">12</h3>
-                <p className="text-foreground/70">Industry Awards</p>
-              </div>
-              
-              <div className="stat-card flex flex-col items-center justify-center p-6 text-center">
-                <Building className="h-10 w-10 text-carbon-500 mb-3" />
-                <h3 className="text-2xl font-bold text-foreground">500+</h3>
-                <p className="text-foreground/70">Projects Analyzed</p>
-              </div>
-              
-              <div className="stat-card flex flex-col items-center justify-center p-6 text-center">
-                <Clock className="h-10 w-10 text-carbon-500 mb-3" />
-                <h3 className="text-2xl font-bold text-foreground">3+ years</h3>
-                <p className="text-foreground/70">Industry Experience</p>
-              </div>
-            </div>
-          </motion.div>
         </section>
       </main>
       <Footer />
