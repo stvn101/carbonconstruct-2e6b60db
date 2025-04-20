@@ -35,4 +35,30 @@ export const PLUMBING_MATERIALS: Record<string, ExtendedMaterialData> = {
     notes: "Recycled copper pipes that significantly reduce embodied carbon compared to virgin copper.",
     tags: [MATERIAL_TYPES.PLUMBING, "pipes", MATERIAL_TYPES.RECYCLED]
   },
+  stainlessSteel: {
+    name: "Stainless Steel Pipes",
+    factor: 4.4,
+    unit: "kg",
+    region: "Australia",
+    notes: "High-durability pipes for specialized applications.",
+    tags: [MATERIAL_TYPES.PLUMBING, "pipes", MATERIAL_TYPES.DURABLE]
+  },
+  pexPipe: {
+    name: "PEX Piping",
+    factor: 2.0,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "pvcPipe",
+    notes: "Cross-linked polyethylene piping with good flexibility and durability.",
+    tags: [MATERIAL_TYPES.PLUMBING, "pipes", "flexible"]
+  },
+  hdpePipe: {
+    name: "HDPE Pipes",
+    factor: 1.93,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "pvcPipe",
+    notes: "High-density polyethylene pipes for water supply.",
+    tags: [MATERIAL_TYPES.PLUMBING, "pipes", "water-supply"]
+  }
 };
