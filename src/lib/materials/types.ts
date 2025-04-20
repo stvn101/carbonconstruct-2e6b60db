@@ -1,3 +1,4 @@
+
 export interface ExtendedMaterialData {
   name: string;
   factor: number;
@@ -39,7 +40,19 @@ export const MATERIAL_TYPES = {
   CEILING: "ceiling",
   MEMBRANE: "membrane",
   FINISHING: "finishing",
-  ADHESIVE: "adhesive"
+  ADHESIVE: "adhesive",
+  CIVIL: "civil",
+  COMMERCIAL: "commercial",
+  RESIDENTIAL: "residential",
+  LANDSCAPING: "landscaping",
+  SPECIALTY: "specialty",
+  PAVEMENT: "pavement",
+  WATERPROOFING: "waterproofing",
+  AGGREGATE: "aggregate",
+  PRECAST: "precast",
+  INFRASTRUCTURE: "infrastructure",
+  EXTERIOR: "exterior",
+  INTERIOR: "interior"
 } as const;
 
 export type MaterialType = keyof typeof MATERIAL_TYPES;

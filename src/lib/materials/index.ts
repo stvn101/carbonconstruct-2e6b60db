@@ -1,5 +1,5 @@
 
-import { MATERIAL_FACTORS as BASE_MATERIAL_FACTORS } from '@/lib/carbonCalculations';
+import { MATERIAL_FACTORS as BASE_MATERIAL_FACTORS } from '@/lib/carbonFactors';
 import { ExtendedMaterialData, MATERIAL_TYPES, REGIONS } from './types';
 import { ALTERNATIVE_MATERIALS } from './alternative';
 import { PLUMBING_MATERIALS } from './plumbing';
@@ -10,6 +10,10 @@ import { FUEL_MATERIALS } from './fuel';
 import { HANDOVER_MATERIALS } from './handover';
 import { ENERGY_SYSTEMS } from './energy';
 import { OTHER_MATERIALS } from './other';
+import { CIVIL_MATERIALS } from './civil';
+import { COMMERCIAL_MATERIALS } from './commercial';
+import { RESIDENTIAL_MATERIALS } from './residential';
+import { LANDSCAPING_MATERIALS } from './landscaping';
 
 // Re-export types and constants
 export { MATERIAL_TYPES, REGIONS, type ExtendedMaterialData };
@@ -33,5 +37,9 @@ export const EXTENDED_MATERIALS: Record<string, ExtendedMaterialData> = {
   ...FINISH_MATERIALS,
   ...HANDOVER_MATERIALS,
   ...ENERGY_SYSTEMS,
-  ...OTHER_MATERIALS
+  ...OTHER_MATERIALS,
+  ...CIVIL_MATERIALS,
+  ...COMMERCIAL_MATERIALS,
+  ...RESIDENTIAL_MATERIALS,
+  ...LANDSCAPING_MATERIALS
 };
