@@ -79,4 +79,60 @@ export const ALTERNATIVE_MATERIALS: Record<string, ExtendedMaterialData> = {
     notes: "Geopolymer concrete using industrial waste materials instead of Portland cement.",
     tags: ["low-carbon", "innovative"]
   },
+  
+  // Additional eco alternatives
+  recycledAluminum: {
+    name: "Recycled Aluminum",
+    factor: 1.98,
+    unit: "kg",
+    region: "Global, Australia",
+    alternativeTo: "aluminum",
+    notes: "Using recycled aluminum reduces emissions by up to 95% compared to virgin aluminum.",
+    tags: [MATERIAL_TYPES.RECYCLED, MATERIAL_TYPES.METAL]
+  },
+  biobasedPVC: {
+    name: "Bio-based PVC",
+    factor: 1.12,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "plastic",
+    notes: "PVC made partially from renewable resources, reducing fossil fuel dependency.",
+    tags: [MATERIAL_TYPES.SUSTAINABLE, "innovative"]
+  },
+  reclaimedBrick: {
+    name: "Reclaimed Brick",
+    factor: 0.06,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "brick",
+    notes: "Salvaged bricks from demolition sites, minimal processing required.",
+    tags: [MATERIAL_TYPES.RECYCLED, MATERIAL_TYPES.DURABLE]
+  },
+  crossLaminatedTimber: {
+    name: "Cross Laminated Timber",
+    factor: 0.31,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "steel",
+    notes: "Engineered wood product that can replace steel in some structural applications.",
+    tags: [MATERIAL_TYPES.WOOD, MATERIAL_TYPES.STRUCTURAL]
+  },
+  recycledGlass: {
+    name: "Recycled Glass",
+    factor: 0.45,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glass",
+    notes: "Glass made from recycled cullet, reducing energy consumption.",
+    tags: [MATERIAL_TYPES.RECYCLED, "glass"]
+  },
+  hempInsulation: {
+    name: "Hemp Insulation",
+    factor: 0.28,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "insulation",
+    notes: "Natural insulation material with excellent thermal properties.",
+    tags: [MATERIAL_TYPES.NATURAL, MATERIAL_TYPES.INSULATION]
+  }
 };

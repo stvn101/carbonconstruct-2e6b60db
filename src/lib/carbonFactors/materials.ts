@@ -41,5 +41,46 @@ export const MATERIAL_FACTORS = {
     name: "Asphalt",
     factor: 0.19,
     unit: "kg"
+  },
+  // Additional basic materials
+  copper: {
+    name: "Copper",
+    factor: 2.71,
+    unit: "kg"
+  },
+  plastic: {
+    name: "Plastic (PVC)",
+    factor: 2.41,
+    unit: "kg"
+  },
+  gypsum: {
+    name: "Gypsum Board",
+    factor: 0.276,
+    unit: "kg"
+  },
+  plywood: {
+    name: "Plywood",
+    factor: 0.45,
+    unit: "kg"
+  },
+  ceramic: {
+    name: "Ceramic Tiles",
+    factor: 0.78,
+    unit: "kg"
+  },
+  marble: {
+    name: "Marble",
+    factor: 0.93,
+    unit: "kg"
+  },
+  zinc: {
+    name: "Zinc",
+    factor: 3.41,
+    unit: "kg"
+  },
+  carpet: {
+    name: "Carpet",
+    factor: 3.89,
+    unit: "kg"
   }
 };

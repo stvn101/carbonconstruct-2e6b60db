@@ -27,4 +27,39 @@ export const INSULATION_MATERIALS: Record<string, ExtendedMaterialData> = {
     notes: "Natural insulation from sheep farms with excellent moisture management properties.",
     tags: [MATERIAL_TYPES.INSULATION, MATERIAL_TYPES.NATURAL, MATERIAL_TYPES.RENEWABLE]
   },
+  celluloseInsulation: {
+    name: "Cellulose Insulation",
+    factor: 0.28,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Made from recycled paper products, treated for fire resistance.",
+    tags: [MATERIAL_TYPES.INSULATION, MATERIAL_TYPES.RECYCLED]
+  },
+  corkInsulation: {
+    name: "Cork Insulation",
+    factor: 0.19,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Natural cork insulation with excellent acoustic properties.",
+    tags: [MATERIAL_TYPES.INSULATION, MATERIAL_TYPES.NATURAL, "acoustic"]
+  },
+  strawInsulation: {
+    name: "Straw Bale",
+    factor: 0.12,
+    unit: "kg",
+    region: "Australia",
+    alternativeTo: "glasswoolInsulation",
+    notes: "Agricultural byproduct used for wall insulation in natural building.",
+    tags: [MATERIAL_TYPES.INSULATION, MATERIAL_TYPES.NATURAL, MATERIAL_TYPES.RENEWABLE]
+  },
+  foamGlass: {
+    name: "Foam Glass Insulation",
+    factor: 1.28,
+    unit: "kg",
+    region: "Australia",
+    notes: "Made from recycled glass, excellent water resistance.",
+    tags: [MATERIAL_TYPES.INSULATION, MATERIAL_TYPES.RECYCLED, "water-resistant"]
+  }
 };

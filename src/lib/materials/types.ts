@@ -1,4 +1,3 @@
-
 export interface ExtendedMaterialData {
   name: string;
   factor: number;
@@ -30,7 +29,17 @@ export const MATERIAL_TYPES = {
   STEEL: "steel",
   THERMAL: "thermal",
   DURABLE: "durable",
-  RENEWABLE: "renewable"
+  RENEWABLE: "renewable",
+  ACOUSTIC: "acoustic",
+  WATERPROOF: "waterproof",
+  FIRE_RESISTANT: "fire-resistant",
+  DECORATIVE: "decorative",
+  FOUNDATION: "foundation",
+  FLOORING: "flooring",
+  CEILING: "ceiling",
+  MEMBRANE: "membrane",
+  FINISHING: "finishing",
+  ADHESIVE: "adhesive"
 } as const;
 
 export type MaterialType = keyof typeof MATERIAL_TYPES;
@@ -47,4 +56,3 @@ export const REGIONS = [
 ] as const;
 
 export type Region = typeof REGIONS[number];
-
