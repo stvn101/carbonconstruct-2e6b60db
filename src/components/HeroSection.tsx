@@ -1,9 +1,11 @@
 
-import HeroContent from "./hero/HeroContent";
-import DashboardPreview from "./hero/DashboardPreview";
+import { lazy, Suspense, useState, useEffect } from "react";
 import SkeletonHero from "./hero/SkeletonHero";
-import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation } from "framer-motion";
+
+// Use React.lazy for code splitting at the component level
+const HeroContent = lazy(() => import("./hero/HeroContent"));
+const DashboardPreview = lazy(() => import("./hero/DashboardPreview"));
 
 const HeroSection = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +24,10 @@ const HeroSection = () => {
   };
 
   useEffect(() => {
+    // Immediately start loading the components
+    import("./hero/HeroContent");
+    import("./hero/DashboardPreview");
+    
     // Fallback to ensure we don't show the skeleton forever
     // Even if resources fail to load
     const timer = setTimeout(() => {
@@ -39,8 +45,12 @@ const HeroSection = () => {
         ) : (
           <LazyMotion features={domAnimation}>
             <div className="flex flex-col md:flex-row items-center">
-              <HeroContent />
-              <DashboardPreview onLoad={handleResourceLoad} />
+              <Suspense fallback={<div className="md:w-1/2 animate-pulse" />}>
+                <HeroContent />
+              </Suspense>
+              <Suspense fallback={<div className="md:w-1/2 animate-pulse" />}>
+                <DashboardPreview onLoad={handleResourceLoad} />
+              </Suspense>
             </div>
           </LazyMotion>
         )}
