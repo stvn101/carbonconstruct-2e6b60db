@@ -29,11 +29,11 @@ const ContactInformation = () => {
               info@carbonconstruct.net
             </a>
             <a 
-              href="mailto:support@carbonconstruct.net" 
+              href="mailto:contact@carbonconstruct.net" 
               className="block text-foreground/70 hover:text-foreground transition-colors" 
-              aria-label="Email support at carbon construct dot net"
+              aria-label="Email contact at carbon construct dot net"
             >
-              support@carbonconstruct.net
+              contact@carbonconstruct.net
             </a>
           </div>
         </div>
@@ -43,11 +43,11 @@ const ContactInformation = () => {
           <div>
             <h3 className="font-medium">Call Us</h3>
             <a 
-              href="tel:+61737468765" 
+              href="tel:+61406419834" 
               className="block text-foreground/70 hover:text-foreground transition-colors"
-              aria-label="Call us at oh seven, three seven four six, eight seven six five"
+              aria-label="Call us at zero four zero six four one nine eight three four"
             >
-              (07) 3746 8765
+              0406 419 834
             </a>
             <p className="text-sm text-foreground/60">Monday-Friday, 9am-5pm AEST</p>
           </div>
@@ -85,3 +85,4 @@ const ContactInformation = () => {
 };
 
 export default ContactInformation;
+
