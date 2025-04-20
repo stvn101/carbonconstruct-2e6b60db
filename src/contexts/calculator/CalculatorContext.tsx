@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useState, useEffect, useCallback, useMemo } from "react";
 import { CalculationInput, CalculationResult, calculateTotalEmissions } from "@/lib/carbonCalculations";
 import { CalculatorContextType } from "./types";
 import {
@@ -25,13 +25,6 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<string>("materials");
-
-  useEffect(() => {
-    console.log("CalculatorProvider initialized");
-    return () => {
-      console.log("CalculatorProvider unmounted");
-    };
-  }, []);
 
   const handleCalculate = useCallback(() => {
     try {
@@ -60,7 +53,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     else if (activeTab === "results") setActiveTab("energy");
   }, [activeTab]);
 
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     calculationInput,
     setCalculationInput,
     calculationResult,
@@ -68,24 +61,24 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     activeTab,
     setActiveTab,
     handleAddMaterial: () => setCalculationInput(current => handleAddMaterial(current)),
-    handleUpdateMaterial: (index, field, value) => 
+    handleUpdateMaterial: (index: number, field: string, value: any) => 
       setCalculationInput(current => handleUpdateMaterial(current, index, field, value)),
-    handleRemoveMaterial: (index) => 
+    handleRemoveMaterial: (index: number) => 
       setCalculationInput(current => handleRemoveMaterial(current, index)),
     handleAddTransport: () => setCalculationInput(current => handleAddTransport(current)),
-    handleUpdateTransport: (index, field, value) => 
+    handleUpdateTransport: (index: number, field: string, value: any) => 
       setCalculationInput(current => handleUpdateTransport(current, index, field, value)),
-    handleRemoveTransport: (index) => 
+    handleRemoveTransport: (index: number) => 
       setCalculationInput(current => handleRemoveTransport(current, index)),
     handleAddEnergy: () => setCalculationInput(current => handleAddEnergy(current)),
-    handleUpdateEnergy: (index, field, value) => 
+    handleUpdateEnergy: (index: number, field: string, value: any) => 
       setCalculationInput(current => handleUpdateEnergy(current, index, field, value)),
-    handleRemoveEnergy: (index) => 
+    handleRemoveEnergy: (index: number) => 
       setCalculationInput(current => handleRemoveEnergy(current, index)),
     handleCalculate,
     handleNextTab,
     handlePrevTab
-  };
+  }), [calculationInput, calculationResult, activeTab, handleCalculate, handleNextTab, handlePrevTab]);
 
   useEffect(() => {
     console.log("💡 Calculator Context Performance Diagnostic:");
