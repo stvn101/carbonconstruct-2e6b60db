@@ -14,6 +14,9 @@ const SustainableBuilding = React.lazy(() => import('@/pages/SustainableBuilding
 const Resources = React.lazy(() => import('@/pages/Resources'));
 const Demo = React.lazy(() => import('@/pages/Demo'));
 const Partners = React.lazy(() => import('@/pages/Partners'));
+const PrivacyPolicy = React.lazy(() => import('@/pages/PrivacyPolicy'));
+const CookiePolicy = React.lazy(() => import('@/pages/CookiePolicy'));
+const DataProcessing = React.lazy(() => import('@/pages/DataProcessing'));
 
 export const marketingRoutes = (
   <>
@@ -75,6 +78,21 @@ export const marketingRoutes = (
     <Route path="/partners" element={
       <Suspense fallback={<PageLoading isLoading={true} />}>
         <Partners />
+      </Suspense>
+    } />
+    <Route path="/privacy-policy" element={
+      <Suspense fallback={<PageLoading isLoading={true} />}>
+        <PrivacyPolicy />
+      </Suspense>
+    } />
+    <Route path="/cookie-policy" element={
+      <Suspense fallback={<PageLoading isLoading={true} />}>
+        <CookiePolicy />
+      </Suspense>
+    } />
+    <Route path="/data-processing" element={
+      <Suspense fallback={<PageLoading isLoading={true} />}>
+        <DataProcessing />
       </Suspense>
     } />
   </>
