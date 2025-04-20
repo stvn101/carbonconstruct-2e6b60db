@@ -11,6 +11,8 @@ interface Props {
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   resetCondition?: any;
+  feature?: string;
+  className?: string;
 }
 
 interface State {
@@ -39,7 +41,7 @@ class ErrorBoundary extends Component<Props, State> {
     // Track the error with our error tracking service
     errorTrackingService.captureException(error, {
       componentStack: errorInfo.componentStack,
-      source: 'ErrorBoundary',
+      source: this.props.feature || 'ErrorBoundary',
       url: window.location.href,
       route: window.location.pathname
     });
@@ -85,13 +87,15 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className={`min-h-[200px] flex items-center justify-center p-4 ${this.props.className || ''}`}>
           <Card className="max-w-2xl w-full p-6">
             <Alert variant="destructive" className="mb-6">
               <AlertTriangle className="h-5 w-5" />
-              <AlertTitle className="mb-2">Something went wrong</AlertTitle>
+              <AlertTitle className="mb-2">
+                {this.props.feature ? `${this.props.feature} Error` : 'Something went wrong'}
+              </AlertTitle>
               <AlertDescription className="text-sm">
-                We apologize for the inconvenience. The application has encountered an error.
+                We apologize for the inconvenience. This section has encountered an error.
               </AlertDescription>
             </Alert>
 
