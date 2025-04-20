@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Home, ChevronLeft } from "lucide-react";
+import errorTrackingService from "@/services/errorTrackingService";
 
 interface Props {
   children: ReactNode;
@@ -33,6 +34,14 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({
       error,
       errorInfo
+    });
+
+    // Track the error with our error tracking service
+    errorTrackingService.captureException(error, {
+      componentStack: errorInfo.componentStack,
+      source: 'ErrorBoundary',
+      url: window.location.href,
+      route: window.location.pathname
     });
 
     // Call onError prop if provided
