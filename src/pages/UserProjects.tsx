@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/Navbar";
@@ -41,6 +40,12 @@ const UserProjects = () => {
     
     return matchesSearch && matchesTag;
   });
+
+  useEffect(() => {
+    console.log("🔍 UserProjects Performance Diagnostic:");
+    console.log("Total Projects:", projects.length);
+    console.log("Filtered Projects:", filteredProjects.length);
+  }, [projects, filteredProjects]);
 
   const handleDeleteConfirm = () => {
     if (projectToDelete) {

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import { CalculationInput, CalculationResult, calculateTotalEmissions } from "@/lib/carbonCalculations";
 import { CalculatorContextType } from "./types";
@@ -87,6 +86,12 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     handleNextTab,
     handlePrevTab
   };
+
+  useEffect(() => {
+    console.log("💡 Calculator Context Performance Diagnostic:");
+    console.log("Input State:", calculationInput);
+    console.log("Result State:", calculationResult);
+  }, [calculationInput, calculationResult]);
 
   return (
     <CalculatorContext.Provider value={contextValue}>
