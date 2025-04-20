@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -59,7 +60,11 @@ const UserProfile = () => {
     
     setIsLoading(true);
     try {
-      await updateProfile(formData);
+      // Update to pass both userId and formData to updateProfile
+      if (!user?.id) {
+        throw new Error('User ID not found');
+      }
+      await updateProfile(user.id, formData);
       toast.success("Profile updated successfully");
     } catch (error) {
       console.error('Failed to update profile:', error);
