@@ -1,5 +1,6 @@
 
 import * as React from "react"
+import { useMemo, memo } from "react"
 import * as RechartsPrimitive from "recharts"
 import { 
   ChartContainer, 
@@ -19,6 +20,10 @@ type ChartProps = {
   className?: string;
 }
 
+// Memoized custom tooltip component
+const MemoizedTooltipContent = memo(ChartTooltipContent);
+const MemoizedLegendContent = memo(ChartLegendContent);
+
 const Chart = ({
   type,
   data,
@@ -29,13 +34,16 @@ const Chart = ({
   showLegend = true,
   className,
 }: ChartProps) => {
-  const chartConfig = categories.reduce((acc, category, i) => {
-    acc[category] = { 
-      color: colors[i % colors.length],
-      label: category
-    };
-    return acc;
-  }, {} as ChartConfig);
+  // Memoize chart configuration to prevent unnecessary recalculations
+  const chartConfig = useMemo(() => {
+    return categories.reduce((acc, category, i) => {
+      acc[category] = { 
+        color: colors[i % colors.length],
+        label: category
+      };
+      return acc;
+    }, {} as ChartConfig);
+  }, [categories, colors]);
 
   let chartElement: React.ReactElement;
   
@@ -45,10 +53,10 @@ const Chart = ({
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
         <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
         <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
-        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
+        {showLegend && <RechartsPrimitive.Legend content={<MemoizedLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
           content={
-            <ChartTooltipContent 
+            <MemoizedTooltipContent 
               formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
             />
           } 
@@ -58,6 +66,7 @@ const Chart = ({
             key={category}
             dataKey={category} 
             fill={colors[i % colors.length]} 
+            isAnimationActive={false} // Disable animation for better performance
           />
         ))}
       </RechartsPrimitive.BarChart>
@@ -68,10 +77,10 @@ const Chart = ({
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
         <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
         <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
-        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
+        {showLegend && <RechartsPrimitive.Legend content={<MemoizedLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
           content={
-            <ChartTooltipContent 
+            <MemoizedTooltipContent 
               formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
             />
           } 
@@ -83,6 +92,7 @@ const Chart = ({
             dataKey={category}
             stroke={colors[i % colors.length]}
             activeDot={{ r: 6 }}
+            isAnimationActive={false} // Disable animation for better performance
           />
         ))}
       </RechartsPrimitive.LineChart>
@@ -92,13 +102,13 @@ const Chart = ({
       <RechartsPrimitive.PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
         <ChartTooltip 
           content={
-            <ChartTooltipContent 
+            <MemoizedTooltipContent 
               formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
             />
           }
         />
         {showLegend && <RechartsPrimitive.Legend 
-          content={<ChartLegendContent />} 
+          content={<MemoizedLegendContent />} 
           wrapperStyle={{ fontSize: '10px' }} 
           verticalAlign="bottom" 
         />}
@@ -112,6 +122,7 @@ const Chart = ({
           fill="#8884d8"
           label={(entry) => `${entry.name}: ${entry[categories[0]]}`}
           labelLine={false}
+          isAnimationActive={false} // Disable animation for better performance
         >
           {data.map((entry, i) => (
             <RechartsPrimitive.Cell key={`cell-${i}`} fill={colors[i % colors.length]} />
@@ -125,10 +136,10 @@ const Chart = ({
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
         <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
         <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
-        {showLegend && <RechartsPrimitive.Legend content={<ChartLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
+        {showLegend && <RechartsPrimitive.Legend content={<MemoizedLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
           content={
-            <ChartTooltipContent 
+            <MemoizedTooltipContent 
               formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
             />
           }
@@ -140,6 +151,7 @@ const Chart = ({
             dataKey={category}
             fill={colors[i % colors.length]}
             stroke={colors[i % colors.length]}
+            isAnimationActive={false} // Disable animation for better performance
           />
         ))}
       </RechartsPrimitive.AreaChart>
@@ -153,8 +165,11 @@ const Chart = ({
   );
 };
 
+// Memoize the Chart component to prevent unnecessary re-renders
+const MemoizedChart = memo(Chart);
+
 export { 
-  Chart,
+  MemoizedChart as Chart,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,

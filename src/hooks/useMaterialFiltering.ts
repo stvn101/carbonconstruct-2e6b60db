@@ -2,6 +2,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
 import { filterMaterials, ExtendedMaterialData, MATERIAL_TYPES } from '@/lib/materials';
+import { useDebounce } from './useDebounce';
 
 export interface MaterialFilterOptions {
   searchTerm: string;
@@ -17,6 +18,9 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
   const [selectedTag, setSelectedTag] = useState<string>(initialOptions.selectedTag || "all");
   const { selectedRegion: globalRegion } = useRegion();
   
+  // Debounce the search term to prevent excessive filtering
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
   // Set the default filter to the global region when component mounts
   useEffect(() => {
     if (globalRegion !== "National" && selectedRegion === "all") {
@@ -26,7 +30,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
 
   // Memoized filter function
   const filterPredicate = useCallback((material: ExtendedMaterialData) => {
-    const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = material.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     const matchesRegion = selectedRegion === "all" || 
       (material.region && material.region.includes(selectedRegion));
     const matchesAlternative = selectedAlternative === "none" || 
@@ -35,7 +39,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
       (material.tags && material.tags.includes(selectedTag));
     
     return matchesSearch && matchesRegion && matchesAlternative && matchesTag;
-  }, [searchTerm, selectedRegion, selectedAlternative, selectedTag]);
+  }, [debouncedSearchTerm, selectedRegion, selectedAlternative, selectedTag]);
 
   // Memoized filtered materials
   const filteredMaterials = useMemo(() => 
@@ -93,7 +97,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     });
   }, [filteredMaterials]);
 
-  // Get total materials count for displaying stats
+  // Get total materials count for displaying stats - compute only once
   const totalMaterials = useMemo(() => 
     filterMaterials(() => true).length,
     []

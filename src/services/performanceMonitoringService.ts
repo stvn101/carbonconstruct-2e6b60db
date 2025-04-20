@@ -20,6 +20,11 @@ class PerformanceMonitoringService {
   private static instance: PerformanceMonitoringService;
   private isInitialized = false;
   private environment: string;
+  private observer: Record<string, PerformanceObserver | null> = {
+    paint: null,
+    resource: null,
+    longtask: null
+  };
 
   private constructor() {
     this.environment = import.meta.env.MODE || 'development';
@@ -48,7 +53,7 @@ class PerformanceMonitoringService {
       if ('PerformanceObserver' in window) {
         try {
           // Observe paint timing events
-          const paintObserver = new PerformanceObserver((entryList) => {
+          this.observer.paint = new PerformanceObserver((entryList) => {
             for (const entry of entryList.getEntries()) {
               if (entry.name === 'first-paint') {
                 this.logMetric('first-paint', entry);
@@ -57,10 +62,10 @@ class PerformanceMonitoringService {
               }
             }
           });
-          paintObserver.observe({ type: 'paint', buffered: true });
+          this.observer.paint.observe({ type: 'paint', buffered: true });
 
           // Observe resource timing
-          const resourceObserver = new PerformanceObserver((entryList) => {
+          this.observer.resource = new PerformanceObserver((entryList) => {
             const resources = entryList.getEntries().map(entry => {
               const resource = entry as PerformanceResourceTiming;
               return {
@@ -72,7 +77,20 @@ class PerformanceMonitoringService {
             });
             this.logResourceMetrics(resources);
           });
-          resourceObserver.observe({ type: 'resource', buffered: true });
+          this.observer.resource.observe({ type: 'resource', buffered: true });
+          
+          // Observe long tasks
+          if ('longtask' in PerformanceObserver.supportedEntryTypes) {
+            this.observer.longtask = new PerformanceObserver((entryList) => {
+              entryList.getEntries().forEach(entry => {
+                console.warn('[Performance] Long task detected:', 
+                  Math.round(entry.duration), 'ms', 
+                  entry.name || 'Unknown task'
+                );
+              });
+            });
+            this.observer.longtask.observe({ type: 'longtask', buffered: true });
+          }
         } catch (e) {
           console.error('Error setting up PerformanceObserver:', e);
         }
@@ -80,6 +98,19 @@ class PerformanceMonitoringService {
     }
 
     this.isInitialized = true;
+  }
+  
+  public disconnect(): void {
+    // Cleanup observers when no longer needed
+    Object.values(this.observer).forEach(observer => {
+      if (observer) {
+        try {
+          observer.disconnect();
+        } catch (e) {
+          // Ignore errors during cleanup
+        }
+      }
+    });
   }
 
   private captureNavigationTiming(): void {
@@ -123,25 +154,25 @@ class PerformanceMonitoringService {
 
   public trackRouteChange(route: string): void {
     // Reset measurements for SPA navigation
-    if (performance && performance.mark) {
-      performance.mark(`route-change-start:${route}`);
+    if (performance && performance.mark && this.environment === 'production') {
+      const markName = `route-change-start:${route}`;
+      performance.mark(markName);
       
       // Measure after page content is likely rendered
       setTimeout(() => {
         if (performance && performance.mark && performance.measure) {
-          performance.mark(`route-change-complete:${route}`);
+          const completeMarkName = `route-change-complete:${route}`;
+          performance.mark(completeMarkName);
           try {
             performance.measure(
               `route-change:${route}`,
-              `route-change-start:${route}`,
-              `route-change-complete:${route}`
+              markName,
+              completeMarkName
             );
             const measures = performance.getEntriesByName(`route-change:${route}`);
             if (measures.length > 0) {
               const navigationTime = measures[0].duration;
-              if (this.environment === 'production') {
-                console.info(`[Performance] Route change to ${route}: ${Math.round(navigationTime)}ms`);
-              }
+              console.info(`[Performance] Route change to ${route}: ${Math.round(navigationTime)}ms`);
             }
           } catch (e) {
             console.error('Error measuring route change:', e);
