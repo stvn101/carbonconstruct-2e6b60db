@@ -26,7 +26,6 @@ const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContaine
         opacity: isVisible ? 1 : 0
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
-      style={{ height: "64px" }}
     >
       {children}
     </motion.nav>

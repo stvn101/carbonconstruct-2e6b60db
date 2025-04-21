@@ -10,25 +10,27 @@ import {
 } from "@/components/ui/select";
 import { useRegion } from "@/contexts/RegionContext";
 import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const RegionSelector = () => {
   const { selectedRegion, setSelectedRegion, regions } = useRegion();
+  const isMobile = useIsMobile();
   
   return (
-    <div className="flex items-center gap-1.5">
-      <MapPin className="h-4 w-4 text-muted-foreground" />
+    <div className="flex items-center gap-1">
+      {!isMobile && <MapPin className="h-4 w-4 text-muted-foreground" />}
       <Select 
         value={selectedRegion} 
         onValueChange={(value) => setSelectedRegion(value as any)}
       >
         <SelectTrigger className="w-auto border-none shadow-none h-8 pl-0 pr-1 focus:ring-0">
           <SelectValue>
-            <Badge variant="outline" className="font-normal">
-              {selectedRegion}
+            <Badge variant="outline" className="font-normal text-xs">
+              {isMobile ? "🇦🇺" : selectedRegion}
             </Badge>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent align="end" className="w-52">
+        <SelectContent align="end" className="w-52 z-50">
           {regions.map((region) => (
             <SelectItem 
               key={region} 

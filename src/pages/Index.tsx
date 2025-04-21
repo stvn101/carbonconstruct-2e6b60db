@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { useEffect, lazy, Suspense } from "react";
 import { preloadComponent } from "@/utils/lazyLoad";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/navbar/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ThemeToggle from "@/components/ThemeToggle";
 import SEO from "@/components/SEO";
@@ -93,7 +93,7 @@ const Index = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col mobile-friendly-container"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -106,7 +106,7 @@ const Index = () => {
         type="website"
       />
       <Navbar />
-      <main id="learn-more">
+      <main id="learn-more" className="pt-16 md:pt-16">
         <HeroSection />
         <CalculatorDemoVideo />
         <Suspense fallback={<div className="h-20" />}>
@@ -124,7 +124,7 @@ const Index = () => {
                 The all-in-one platform empowering construction companies to meet climate disclosure regulations and build a more sustainable future, starting now.
               </p>
             </div>
-            <div className="max-w-4xl mx-auto bg-white dark:bg-carbon-900 rounded-xl shadow-md p-8 md:p-10 space-y-6 border border-carbon-100 dark:border-carbon-800">
+            <div className="max-w-4xl mx-auto bg-white dark:bg-carbon-900 rounded-xl shadow-md p-6 md:p-10 space-y-6 border border-carbon-100 dark:border-carbon-800">
               <h3 className="text-2xl font-semibold text-carbon-800 dark:text-white mb-2">
                 Smarter Carbon Tracking, Made for Construction
               </h3>
@@ -152,7 +152,7 @@ const Index = () => {
               </h3>
               <p className="text-md text-carbon-700 dark:text-carbon-100">
                 Instead of scrambling to gather complex data, <strong>CarbonConstruct</strong> simplifies everything—so you can focus on building, not bureaucracy. Our automated reports are audit-ready, aligned with the latest standards, and always up-to-date for regulatory changes. Rest easy knowing your emissions tracking and climate disclosures are handled—all in a secure, central platform made for the construction industry.<br /><br />
-                Don’t wait for the deadline—get started now and turn compliance into a competitive advantage.
+                Don't wait for the deadline—get started now and turn compliance into a competitive advantage.
               </p>
             </div>
           </div>
@@ -166,7 +166,7 @@ const Index = () => {
           <CTASection />
         </Suspense>
       </main>
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-40">
         <ThemeToggle />
       </div>
       <Suspense fallback={<div className="h-16 bg-background" />}>
@@ -177,4 +177,3 @@ const Index = () => {
 };
 
 export default Index;
-
