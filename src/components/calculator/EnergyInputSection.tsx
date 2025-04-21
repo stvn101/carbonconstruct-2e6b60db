@@ -1,4 +1,3 @@
-
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Energy, EnergyInput, ENERGY_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
+import React, { useState } from "react";
 
 interface EnergyInputSectionProps {
   energyItems: EnergyInput[];
@@ -26,9 +26,39 @@ const EnergyInputSection = ({
 }: EnergyInputSectionProps) => {
   const isMobile = useIsMobile();
   
-  // Handle focus to select all text when clicking on input
+  const [errors, setErrors] = useState<Record<number, string>>({});
+  
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.select();
+  };
+  
+  const handleAmountChange = (index: number, value: string) => {
+    const numValue = Number(value);
+    
+    if (value === "") {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[index];
+        return newErrors;
+      });
+      onUpdateEnergy(index, "amount", "");
+      return;
+    }
+    
+    if (!isNaN(numValue)) {
+      if (numValue < 0) {
+        setErrors(prev => ({ ...prev, [index]: "Amount cannot be negative" }));
+        onUpdateEnergy(index, "amount", numValue);
+      } else {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[index];
+          return newErrors;
+        });
+        onUpdateEnergy(index, "amount", numValue);
+      }
+    } else {
+    }
   };
   
   return (
@@ -65,11 +95,18 @@ const EnergyInputSection = ({
               id={`energy-amount-${index}`}
               type="number"
               value={energy.amount === 0 ? '' : energy.amount}
-              onChange={(e) => onUpdateEnergy(index, "amount", e.target.value === '' ? 0 : e.target.value)}
+              onChange={(e) => handleAmountChange(index, e.target.value)}
               min={0}
               onFocus={handleFocus}
               className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              aria-invalid={errors[index] ? "true" : "false"}
+              aria-describedby={errors[index] ? `energy-amount-error-${index}` : undefined}
             />
+            {errors[index] && (
+              <p id={`energy-amount-error-${index}`} className="mt-1 text-xs text-destructive">
+                {errors[index]}
+              </p>
+            )}
           </div>
           
           <div className="w-full flex justify-end">
