@@ -29,7 +29,8 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
                 onClick={onClose}
               >
                 <span className="flex items-center">
-                  {link.icon && <span className="mr-3">{link.icon}</span>}
+                  {/* Add safe check for link.icon */}
+                  {link.icon ? <span className="mr-3">{link.icon}</span> : null}
                   {link.title}
                   {link.premium && (
                     <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -47,3 +48,4 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
 };
 
 export default MobileMenu;
+
