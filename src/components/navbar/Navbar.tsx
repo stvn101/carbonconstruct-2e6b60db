@@ -1,56 +1,25 @@
 
-import { useState, useEffect } from "react";
+// Refactored for clarity and separation of concerns
+import { useState } from "react";
 import NavbarMainSection from "./NavbarMainSection";
 import NavbarContainer from "@/components/navbar/NavbarContainer";
 import MobileMenu from "@/components/navbar/MobileMenu";
 import { useAuth } from '@/contexts/auth';
 import { useUserNavLinks } from "@/hooks/useUserNavLinks";
 
+// Newly extracted hooks for clarity
+import { useIsDarkMode } from "@/hooks/navbar/useIsDarkMode";
+import { useMobileMenu } from "@/hooks/navbar/useMobileMenu";
+import { useNavbarHeight } from "@/hooks/navbar/useNavbarHeight";
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const { profile } = useAuth();
   const { navLinks } = useUserNavLinks();
+  const isDarkMode = useIsDarkMode();
 
-  // Dark mode detection
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark');
-    setIsDarkMode(isDark);
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.attributeName === 'class' &&
-          mutation.target === document.documentElement
-        ) {
-          setIsDarkMode(document.documentElement.classList.contains('dark'));
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-    return () => observer.disconnect();
-  }, []);
-
-  // Set CSS variable for navbar height to use throughout the app
-  useEffect(() => {
-    document.documentElement.style.setProperty('--navbar-height', '64px');
-  }, []);
-
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    if (!isMenuOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.mobile-menu-container') && !target.closest('.mobile-menu-button')) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [isMenuOpen]);
+  useNavbarHeight("64px");
+  useMobileMenu(isMenuOpen, setIsMenuOpen);
 
   return (
     <NavbarContainer
