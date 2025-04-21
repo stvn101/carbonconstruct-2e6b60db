@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CalculatorHeader from "./calculator/CalculatorHeader";
 import ProjectNameCard from "./calculator/ProjectNameCard";
 import CalculatorTabs from "./calculator/CalculatorTabs";
+import PageLoading from "./ui/page-loading";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -23,6 +24,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const { saveProject } = useProjects();
   const [projectName, setProjectName] = useState("New Carbon Project");
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Try to access calculator context, handle errors gracefully
   let calculatorContext = null;
@@ -78,6 +80,8 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       return;
     }
     
+    setIsSaving(true);
+    
     try {
       await saveProject({
         name: projectName,
@@ -98,6 +102,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     } catch (error) {
       console.error("Error saving project:", error);
       toast.error("Failed to save project");
+      setIsSaving(false);
     }
   };
 
@@ -152,6 +157,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
           projectName={projectName}
           onProjectNameChange={setProjectName}
           onSave={handleSaveProject}
+          isSaving={isSaving}
         />
       
         <CalculatorTabs 
@@ -161,6 +167,9 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
           onCalculate={handleCalculateWithTracking}
         />
       </motion.div>
+      
+      {/* Loading overlay while saving */}
+      <PageLoading isLoading={isSaving} text="Saving project..." />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import { BookmarkCheck } from "lucide-react";
+import { BookmarkCheck, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,14 @@ interface ProjectNameCardProps {
   projectName: string;
   onProjectNameChange: (value: string) => void;
   onSave: () => void;
+  isSaving?: boolean;
 }
 
 const ProjectNameCard = ({ 
   projectName, 
   onProjectNameChange, 
-  onSave 
+  onSave,
+  isSaving = false
 }: ProjectNameCardProps) => {
   return (
     <Card className="mb-4">
@@ -30,15 +32,26 @@ const ProjectNameCard = ({
               onChange={(e) => onProjectNameChange(e.target.value)}
               className="w-full"
               placeholder="Enter project name"
+              disabled={isSaving}
             />
           </div>
           <div className="w-full md:w-auto flex justify-end mt-2 md:mt-6">
             <Button 
               onClick={onSave}
               className="bg-carbon-600 hover:bg-carbon-700 text-white"
+              disabled={isSaving}
             >
-              <BookmarkCheck className="h-4 w-4 mr-2" />
-              Save Project
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <BookmarkCheck className="h-4 w-4 mr-2" />
+                  Save Project
+                </>
+              )}
             </Button>
           </div>
         </div>
