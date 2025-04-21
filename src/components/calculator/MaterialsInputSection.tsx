@@ -1,3 +1,4 @@
+
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MaterialInput, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { SkeletonContent } from "@/components/ui/skeleton-content";
 
 interface MaterialsInputSectionProps {
   materials: MaterialInput[];
@@ -26,6 +28,8 @@ const MaterialsInputSection = ({
   
   // Manage validation errors for negative quantities per material index
   const [errors, setErrors] = useState<Record<number, string>>({});
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
   
   // Handle focus to select all text when clicking on input
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
@@ -68,6 +72,35 @@ const MaterialsInputSection = ({
       // Alternatively, we could block input or give error, but for now do nothing
     }
   };
+  
+  // Simulate material options loading time
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800); // Simulate loading for 800ms
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-4 md:space-y-6">
+        <div className="text-md md:text-lg font-medium flex items-center gap-2">
+          <Leaf className="h-4 w-4 md:h-5 md:w-5 text-carbon-600" />
+          <span>Loading Construction Materials...</span>
+        </div>
+        
+        {[1, 2].map((index) => (
+          <div 
+            key={`skeleton-${index}`}
+            className="grid grid-cols-1 gap-3 items-end border border-carbon-100 p-3 md:p-4 rounded-lg"
+          >
+            <SkeletonContent lines={2} />
+          </div>
+        ))}
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-4 md:space-y-6">
