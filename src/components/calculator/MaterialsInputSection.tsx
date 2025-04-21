@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Material, MaterialInput, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+import { MaterialInput, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
+import React, { useState } from "react";
 
 interface MaterialsInputSectionProps {
   materials: MaterialInput[];
@@ -23,16 +24,49 @@ const MaterialsInputSection = ({
 }: MaterialsInputSectionProps) => {
   const isMobile = useIsMobile();
   
+  // Manage validation errors for negative quantities per material index
+  const [errors, setErrors] = useState<Record<number, string>>({});
+  
   // Handle focus to select all text when clicking on input
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.select();
   };
   
-  // Handle input change with empty string check to clear the 0
+  // Handle input change with validation for negative values
   const handleQuantityChange = (index: number, value: string) => {
-    // If the field is empty or just "0", set it to empty string (which will be converted to 0 in the state)
-    // Otherwise, pass the value through
-    onUpdateMaterial(index, "quantity", value === "" || value === "0" ? "" : value);
+    // Parse value to number if possible
+    const numValue = Number(value);
+    
+    if (value === "") {
+      // Clear input, clear error, allow empty string
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[index];
+        return newErrors;
+      });
+      onUpdateMaterial(index, "quantity", "");
+      return;
+    }
+    
+    if (!isNaN(numValue)) {
+      if (numValue < 0) {
+        // Set validation error for negative number
+        setErrors(prev => ({ ...prev, [index]: "Quantity cannot be negative" }));
+        // Still update, or block? We'll update but keep error displayed
+        onUpdateMaterial(index, "quantity", numValue);
+      } else {
+        // Clear error if previously set
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[index];
+          return newErrors;
+        });
+        onUpdateMaterial(index, "quantity", numValue);
+      }
+    } else {
+      // Invalid number (like letters) - ignore update
+      // Alternatively, we could block input or give error, but for now do nothing
+    }
   };
   
   return (
@@ -73,7 +107,14 @@ const MaterialsInputSection = ({
               min={0}
               onFocus={handleFocus}
               className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              aria-invalid={errors[index] ? "true" : "false"}
+              aria-describedby={errors[index] ? `material-quantity-error-${index}` : undefined}
             />
+            {errors[index] && (
+              <p id={`material-quantity-error-${index}`} className="mt-1 text-xs text-destructive">
+                {errors[index]}
+              </p>
+            )}
           </div>
           
           <div className="w-full flex justify-end">
