@@ -27,9 +27,9 @@ const NavbarLinks = () => {
   };
   
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-1">
       {user ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <NotificationBell unreadCount={unreadNotifications} />
           <UserMenu 
             profile={profile}

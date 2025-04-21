@@ -41,6 +41,21 @@ const Navbar = () => {
   useEffect(() => {
     document.documentElement.style.setProperty('--navbar-height', '64px');
   }, []);
+  
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.mobile-menu-container') && !target.closest('.mobile-menu-button')) {
+        setIsMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMenuOpen]);
 
   return (
     <NavbarContainer 
@@ -48,7 +63,7 @@ const Navbar = () => {
       isPremiumUser={profile?.subscription_tier === 'premium'}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-[56px]">
           <div className="flex items-center">
             <NavbarLogo />
           </div>
@@ -69,18 +84,20 @@ const Navbar = () => {
               size="icon" 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
-              className="ml-2"
+              className="ml-2 mobile-menu-button"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
-        <MobileMenu 
-          isOpen={isMenuOpen}
-          navLinks={navLinks}
-          onClose={() => setIsMenuOpen(false)}
-        />
+        <div className="mobile-menu-container">
+          <MobileMenu 
+            isOpen={isMenuOpen}
+            navLinks={navLinks}
+            onClose={() => setIsMenuOpen(false)}
+          />
+        </div>
       </div>
     </NavbarContainer>
   );
