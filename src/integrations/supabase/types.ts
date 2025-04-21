@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      blog_posts: {
+        Row: {
+          content: string | null
+          date: string | null
+          id: number
+          title: string | null
+        }
+        Insert: {
+          content?: string | null
+          date?: string | null
+          id?: number
+          title?: string | null
+        }
+        Update: {
+          content?: string | null
+          date?: string | null
+          id?: number
+          title?: string | null
+        }
+        Relationships: []
+      }
       calculator_usage: {
         Row: {
           created_at: string | null
@@ -27,6 +48,27 @@ export type Database = {
           id?: string
           ip_address?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      case_studies: {
+        Row: {
+          co2_reduction: number | null
+          description: string | null
+          id: number
+          title: string | null
+        }
+        Insert: {
+          co2_reduction?: number | null
+          description?: string | null
+          id?: number
+          title?: string | null
+        }
+        Update: {
+          co2_reduction?: number | null
+          description?: string | null
+          id?: number
+          title?: string | null
         }
         Relationships: []
       }
