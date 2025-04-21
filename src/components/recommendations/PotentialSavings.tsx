@@ -3,10 +3,10 @@ import React from "react";
 import { ArrowRight, TrendingDown } from "lucide-react";
 import { 
   ExtendedMaterial, 
-  Material,
   getMaterialName
 } from "@/lib/sustainabilitySuggestions";
 import { MATERIAL_FACTORS } from "@/lib/carbonData";
+import { Material } from "@/lib/carbonTypes";
 
 interface PotentialSavingsProps {
   material: Material;
