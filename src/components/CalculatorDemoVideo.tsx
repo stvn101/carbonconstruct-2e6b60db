@@ -16,13 +16,13 @@ const CalculatorDemoVideo = () => {
           <div className="aspect-w-16 aspect-h-9 bg-black">
             <iframe
               title="Carbon Calculator Demo"
-              src="https://www.youtube.com/embed/7d5l3v06h3U" 
+              src="https://www.youtube.com/embed/do1AHeLpAsw"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="w-full h-64 md:h-96"
               style={{ border: "none" }}
             />
-            {/* Example placeholder video */}
+            {/* Updated with user provided video */}
           </div>
         </div>
       </div>
@@ -31,3 +31,4 @@ const CalculatorDemoVideo = () => {
 };
 
 export default CalculatorDemoVideo;
+
