@@ -1,3 +1,4 @@
+
 import { 
   CalculationResult, 
   CalculationInput,
@@ -14,6 +15,32 @@ export type ExtendedMaterial = Material |
 // Cache results for performance
 const suggestionCache = new Map<string, string[]>();
 const alternativesCache = new Map<Material, ExtendedMaterial[]>();
+
+// Generate fallback material names for extended materials
+const EXTENDED_MATERIAL_NAMES: Record<string, string> = {
+  'recycledConcrete': 'Recycled Concrete',
+  'greenConcrete': 'Green Concrete',
+  'bluesteelRebar': 'BlueSteel Rebar',
+  'ausTimber': 'Australian Timber',
+  'ausBrick': 'Australian Brick',
+  'bambooCladding': 'Bamboo Cladding'
+};
+
+// Safely get material name with fallback
+export const getMaterialName = (materialType: ExtendedMaterial): string => {
+  // First try to get from MATERIAL_FACTORS
+  if (materialType in MATERIAL_FACTORS) {
+    return MATERIAL_FACTORS[materialType as Material].name;
+  }
+  
+  // Then try ALL_MATERIAL_FACTORS
+  if (ALL_MATERIAL_FACTORS && materialType in ALL_MATERIAL_FACTORS) {
+    return ALL_MATERIAL_FACTORS[materialType]?.name || EXTENDED_MATERIAL_NAMES[materialType] || String(materialType);
+  }
+  
+  // Fallback to our own mapping
+  return EXTENDED_MATERIAL_NAMES[materialType] || String(materialType);
+};
 
 // Generates a suggested improvement based on the calculation results
 export const generateSuggestions = (result: CalculationResult): string[] => {
@@ -47,7 +74,7 @@ export const generateSuggestions = (result: CalculationResult): string[] => {
       } else if (materialKey === "timber") {
         suggestions.push(`Consider using certified Australian Hardwood from sustainable forests for structural elements.`);
       } else {
-        suggestions.push(`Consider reducing the use of ${MATERIAL_FACTORS[materialKey as Material].name} or finding alternatives with lower carbon footprints.`);
+        suggestions.push(`Consider reducing the use of ${MATERIAL_FACTORS[materialKey as Material]?.name || materialKey} or finding alternatives with lower carbon footprints.`);
       }
     }
   }
@@ -134,8 +161,11 @@ export const calculatePotentialSavings = (input: CalculationInput): {
     const originalEmission = MATERIAL_FACTORS[material.type].factor * material.quantity;
     
     alternatives.forEach(alt => {
-      // Use ALL_MATERIAL_FACTORS which contains both standard and Australian specific materials
-      const altFactor = ALL_MATERIAL_FACTORS[alt].factor;
+      // Safely access ALL_MATERIAL_FACTORS with fallback
+      const altFactor = (ALL_MATERIAL_FACTORS && ALL_MATERIAL_FACTORS[alt]) 
+        ? ALL_MATERIAL_FACTORS[alt].factor 
+        : MATERIAL_FACTORS[alt as Material]?.factor || MATERIAL_FACTORS[material.type].factor * 0.7; // Fallback factor
+        
       const alternativeEmission = altFactor * material.quantity;
       const saved = originalEmission - alternativeEmission;
       const percentage = (saved / originalEmission) * 100;

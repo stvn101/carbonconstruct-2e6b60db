@@ -62,14 +62,14 @@ const ResultsSection = ({
       
       {calculationResult && (
         <div>
-          {/* Increased responsive margin top more on small screens to prevent clashes */}
-          <Tabs defaultValue="results" className="mt-8 md:mt-0 sm:mt-10">
-            <TabsList className="mb-4 bg-muted/70">
+          {/* Increased spacing on all screen sizes, with extra margin on mobile */}
+          <Tabs defaultValue="results" className="mt-12 sm:mt-14 md:mt-8">
+            <TabsList className="mb-6 bg-muted/70">
               <TabsTrigger value="results" className="text-sm">Results</TabsTrigger>
               <TabsTrigger value="recommendations" className="text-sm">Recommendations</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="results" className="pt-4">
+            <TabsContent value="results" className="pt-6">
               <CalculatorResults 
                 result={calculationResult}
                 materials={materials}
@@ -80,7 +80,7 @@ const ResultsSection = ({
               />
             </TabsContent>
             
-            <TabsContent value="recommendations" className="pt-4">
+            <TabsContent value="recommendations" className="pt-6">
               <RecommendationsSection 
                 calculationResult={calculationResult}
                 calculationInput={calculationInput}
@@ -104,4 +104,3 @@ const ResultsSection = ({
 };
 
 export default ResultsSection;
-
