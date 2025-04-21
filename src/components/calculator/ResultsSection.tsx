@@ -62,13 +62,14 @@ const ResultsSection = ({
       
       {calculationResult && (
         <div>
-          <Tabs defaultValue="results" className="mt-3 md:mt-0">
+          {/* Added responsive margin top to avoid clash on mobile */}
+          <Tabs defaultValue="results" className="mt-3 md:mt-0 sm:mt-6">
             <TabsList className="mb-4 bg-muted/70">
               <TabsTrigger value="results" className="text-sm">Results</TabsTrigger>
               <TabsTrigger value="recommendations" className="text-sm">Recommendations</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="results">
+            <TabsContent value="results" className="pt-4">
               <CalculatorResults 
                 result={calculationResult}
                 materials={materials}
@@ -79,7 +80,7 @@ const ResultsSection = ({
               />
             </TabsContent>
             
-            <TabsContent value="recommendations">
+            <TabsContent value="recommendations" className="pt-4">
               <RecommendationsSection 
                 calculationResult={calculationResult}
                 calculationInput={calculationInput}
