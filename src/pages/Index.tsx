@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ThemeToggle from "@/components/ThemeToggle";
 import SEO from "@/components/SEO";
+import CalculatorDemoVideo from "@/components/CalculatorDemoVideo";
 
 const FeaturesSection = lazy(() => import("@/components/FeaturesSection"));
 const BenefitsSection = lazy(() => import("@/components/BenefitsSection"));
@@ -107,6 +108,7 @@ const Index = () => {
       <Navbar />
       <main id="learn-more">
         <HeroSection />
+        <CalculatorDemoVideo />
         <Suspense fallback={<div className="h-20" />}>
           <FeaturesSection />
         </Suspense>
