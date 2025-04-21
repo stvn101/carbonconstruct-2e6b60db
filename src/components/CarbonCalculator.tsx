@@ -12,6 +12,7 @@ import CalculatorHeader from "./calculator/CalculatorHeader";
 import ProjectNameCard from "./calculator/ProjectNameCard";
 import CalculatorTabs from "./calculator/CalculatorTabs";
 import PageLoading from "./ui/page-loading";
+import SaveProjectConfirmDialog from "./calculator/SaveProjectConfirmDialog";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -21,10 +22,11 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { saveProject } = useProjects();
+  const { saveProject, projects } = useProjects();
   const [projectName, setProjectName] = useState("New Carbon Project");
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
   
   // Try to access calculator context, handle errors gracefully
   let calculatorContext = null;
@@ -68,7 +70,12 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     handleCalculate
   } = calculatorContext;
 
-  const handleSaveProject = async () => {
+  // Check if a project with the same name already exists
+  const isExistingProject = !!projects.find(
+    p => p.name.toLowerCase() === projectName.toLowerCase()
+  );
+
+  const handleSaveClick = () => {
     if (!user) {
       toast.error("Please log in to save your project");
       navigate("/auth");
@@ -79,7 +86,11 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       toast.error("Please complete your calculation before saving");
       return;
     }
-    
+
+    setShowSaveDialog(true);
+  };
+
+  const handleSaveConfirm = async () => {
     setIsSaving(true);
     
     try {
@@ -103,7 +114,12 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       console.error("Error saving project:", error);
       toast.error("Failed to save project");
       setIsSaving(false);
+      setShowSaveDialog(false);
     }
+  };
+
+  const handleSaveCancel = () => {
+    setShowSaveDialog(false);
   };
 
   const recordCalculatorUsage = useCallback(async () => {
@@ -156,7 +172,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         <ProjectNameCard
           projectName={projectName}
           onProjectNameChange={setProjectName}
-          onSave={handleSaveProject}
+          onSave={handleSaveClick}
           isSaving={isSaving}
         />
       
@@ -170,6 +186,16 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       
       {/* Loading overlay while saving */}
       <PageLoading isLoading={isSaving} text="Saving project..." />
+
+      {/* Save confirmation dialog */}
+      <SaveProjectConfirmDialog
+        isOpen={showSaveDialog}
+        projectName={projectName}
+        isSaving={isSaving}
+        onConfirm={handleSaveConfirm}
+        onCancel={handleSaveCancel}
+        isOverwrite={isExistingProject}
+      />
     </div>
   );
 };
