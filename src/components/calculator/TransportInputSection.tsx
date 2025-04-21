@@ -1,4 +1,3 @@
-
 import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Transport, TransportInput, TRANSPORT_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
+import React, { useState } from "react";
 
 interface TransportInputSectionProps {
   transportItems: TransportInput[];
@@ -26,9 +26,56 @@ const TransportInputSection = ({
 }: TransportInputSectionProps) => {
   const isMobile = useIsMobile();
   
-  // Handle focus to select all text when clicking on input
+  const [errors, setErrors] = useState<Record<number, Record<string, string>>>({});
+  
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.select();
+  };
+  
+  const handleInputChange = (index: number, field: keyof TransportInput, value: string) => {
+    const numValue = Number(value);
+    
+    if (value === "") {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        if (newErrors[index]) {
+          delete newErrors[index][field];
+          if (Object.keys(newErrors[index]).length === 0) {
+            delete newErrors[index];
+          }
+        }
+        return newErrors;
+      });
+      onUpdateTransport(index, field, "");
+      return;
+    }
+    
+    if (!isNaN(numValue)) {
+      if (numValue < 0) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          if (!newErrors[index]) {
+            newErrors[index] = {};
+          }
+          newErrors[index][field] = `${field === 'distance' ? 'Distance' : 'Weight'} cannot be negative`;
+          return newErrors;
+        });
+        onUpdateTransport(index, field, numValue);
+      } else {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          if (newErrors[index] && newErrors[index][field]) {
+            delete newErrors[index][field];
+            if (Object.keys(newErrors[index]).length === 0) {
+              delete newErrors[index];
+            }
+          }
+          return newErrors;
+        });
+        onUpdateTransport(index, field, numValue);
+      }
+    } else {
+    }
   };
   
   return (
@@ -63,11 +110,18 @@ const TransportInputSection = ({
               id={`transport-distance-${index}`}
               type="number"
               value={transport.distance === 0 ? '' : transport.distance}
-              onChange={(e) => onUpdateTransport(index, "distance", e.target.value === '' ? 0 : e.target.value)}
+              onChange={(e) => handleInputChange(index, "distance", e.target.value)}
               min={0}
               onFocus={handleFocus}
               className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              aria-invalid={errors[index]?.distance ? "true" : "false"}
+              aria-describedby={errors[index]?.distance ? `transport-distance-error-${index}` : undefined}
             />
+            {errors[index]?.distance && (
+              <p id={`transport-distance-error-${index}`} className="mt-1 text-xs text-destructive">
+                {errors[index].distance}
+              </p>
+            )}
           </div>
           
           <div className="w-full sm:col-span-2">
@@ -76,11 +130,18 @@ const TransportInputSection = ({
               id={`transport-weight-${index}`}
               type="number"
               value={transport.weight === 0 ? '' : transport.weight}
-              onChange={(e) => onUpdateTransport(index, "weight", e.target.value === '' ? 0 : e.target.value)}
+              onChange={(e) => handleInputChange(index, "weight", e.target.value)}
               min={0}
               onFocus={handleFocus}
               className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              aria-invalid={errors[index]?.weight ? "true" : "false"}
+              aria-describedby={errors[index]?.weight ? `transport-weight-error-${index}` : undefined}
             />
+            {errors[index]?.weight && (
+              <p id={`transport-weight-error-${index}`} className="mt-1 text-xs text-destructive">
+                {errors[index].weight}
+              </p>
+            )}
           </div>
           
           <div className="w-full sm:col-span-2 flex justify-end">
