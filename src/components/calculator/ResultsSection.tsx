@@ -62,8 +62,8 @@ const ResultsSection = ({
       
       {calculationResult && (
         <div>
-          {/* Added responsive margin top to avoid clash on mobile */}
-          <Tabs defaultValue="results" className="mt-3 md:mt-0 sm:mt-6">
+          {/* Increased responsive margin top more on small screens to prevent clashes */}
+          <Tabs defaultValue="results" className="mt-8 md:mt-0 sm:mt-10">
             <TabsList className="mb-4 bg-muted/70">
               <TabsTrigger value="results" className="text-sm">Results</TabsTrigger>
               <TabsTrigger value="recommendations" className="text-sm">Recommendations</TabsTrigger>
@@ -104,3 +104,4 @@ const ResultsSection = ({
 };
 
 export default ResultsSection;
+
