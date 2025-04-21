@@ -11,7 +11,7 @@ import {
 import CalculatorResults from "../CalculatorResults";
 import RecommendationsSection from "../RecommendationsSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { generateSuggestions, calculatePotentialSavings } from "@/lib/sustainabilitySuggestions";
+import { generateSuggestions } from "@/lib/sustainabilitySuggestions";
 
 interface ResultsSectionProps {
   calculationResult: CalculationResult | null;
@@ -41,7 +41,7 @@ const ResultsSection = ({
   const suggestions = calculationResult ? generateSuggestions(calculationResult) : [];
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-12 sm:space-y-16"> {/* increased overall vertical spacing */}
       {!calculationResult && (
         <div className="text-center p-8">
           <h3 className="text-xl font-medium mb-4">Ready to Calculate Results</h3>
@@ -62,9 +62,9 @@ const ResultsSection = ({
       
       {calculationResult && (
         <div>
-          {/* Increased spacing on all screen sizes, with extra margin on mobile */}
-          <Tabs defaultValue="results" className="mt-12 sm:mt-14 md:mt-8">
-            <TabsList className="mb-6 bg-muted/70">
+          {/* Added space on top to separate tabs from previous content */}
+          <Tabs defaultValue="results" className="mt-16 sm:mt-20 md:mt-16"> 
+            <TabsList className="mb-8 bg-muted/70 px-2 sm:px-4 rounded-md"> {/* more bottom margin + horizontal padding on TabsList */}
               <TabsTrigger value="results" className="text-sm">Results</TabsTrigger>
               <TabsTrigger value="recommendations" className="text-sm">Recommendations</TabsTrigger>
             </TabsList>
