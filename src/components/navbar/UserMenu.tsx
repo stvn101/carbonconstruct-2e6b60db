@@ -1,6 +1,6 @@
 
-import { Link } from "react-router-dom";
-import { User } from "@supabase/supabase-js";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +11,8 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
-  User as UserIcon, 
+  User, 
   LogOut, 
   Calculator, 
   LayoutDashboard, 
@@ -22,27 +21,26 @@ import {
   UserCircle,
   FolderPlus,
   Star,
-  Settings,
   CreditCard,
   BarChart
 } from "lucide-react";
-import { UserProfile } from "@/types/auth";
+import { Badge } from "@/components/ui/badge";
 
 interface UserMenuProps {
-  user: User;
-  profile: UserProfile | null;
+  profile: any;
   isPremiumUser: boolean;
   isMobile: boolean;
+  user: any;
   onLogout: () => Promise<void>;
 }
 
-const UserMenu = ({ user, profile, isPremiumUser, isMobile, onLogout }: UserMenuProps) => {
+const UserMenu = ({ profile, isPremiumUser, isMobile, user, onLogout }: UserMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="gap-2">
           <div className="flex items-center gap-2">
-            <UserIcon className="h-4 w-4" />
+            <User className="h-4 w-4" />
             {!isMobile && (
               <span className="hidden lg:inline max-w-[150px] truncate">
                 {profile?.full_name || user.email}
