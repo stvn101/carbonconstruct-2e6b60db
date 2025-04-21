@@ -1,4 +1,5 @@
-import { Zap } from "lucide-react";
+
+import { Zap, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Energy, EnergyInput, ENERGY_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import React, { useState } from "react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface EnergyInputSectionProps {
   energyItems: EnergyInput[];
@@ -88,9 +90,25 @@ const EnergyInputSection = ({
           </div>
           
           <div className="w-full">
-            <Label htmlFor={`energy-amount-${index}`} className="text-xs md:text-sm">
-              Amount ({ENERGY_FACTORS[energy.type].unit})
-            </Label>
+            <div className="flex items-center space-x-1">
+              <Label htmlFor={`energy-amount-${index}`} className="text-xs md:text-sm">
+                Amount ({ENERGY_FACTORS[energy.type].unit})
+              </Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`Information about unit ${ENERGY_FACTORS[energy.type].unit}`}
+                    className="text-carbon-500 hover:text-carbon-700"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  The unit "{ENERGY_FACTORS[energy.type].unit}" represents the measurement unit used for this energy type.
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <Input
               id={`energy-amount-${index}`}
               type="number"
@@ -157,3 +175,4 @@ const EnergyInputSection = ({
 };
 
 export default EnergyInputSection;
+
