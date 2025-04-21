@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -61,10 +62,10 @@ const ResultsSection = ({
       
       {calculationResult && (
         <div>
-          <Tabs defaultValue="results">
-            <TabsList className="mb-4">
-              <TabsTrigger value="results">Results</TabsTrigger>
-              <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+          <Tabs defaultValue="results" className="mt-3 md:mt-0">
+            <TabsList className="mb-4 bg-muted/70">
+              <TabsTrigger value="results" className="text-sm">Results</TabsTrigger>
+              <TabsTrigger value="recommendations" className="text-sm">Recommendations</TabsTrigger>
             </TabsList>
             
             <TabsContent value="results">

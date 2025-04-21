@@ -12,13 +12,13 @@ const CalculatorTabTriggers = ({ isMobile }: CalculatorTabTriggersProps) => {
         <div className="col-span-2 flex space-x-1">
           <TabsTrigger 
             value="materials" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
+            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
           >
             Materials
           </TabsTrigger>
           <TabsTrigger 
             value="transport" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
+            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
           >
             Transport
           </TabsTrigger>
@@ -26,13 +26,13 @@ const CalculatorTabTriggers = ({ isMobile }: CalculatorTabTriggersProps) => {
         <div className="col-span-2 flex space-x-1 mt-1">
           <TabsTrigger 
             value="energy" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
+            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
           >
             Energy
           </TabsTrigger>
           <TabsTrigger 
             value="results" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1.5 text-foreground"
+            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
           >
             Results
           </TabsTrigger>

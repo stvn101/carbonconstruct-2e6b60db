@@ -107,7 +107,7 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
       variants={chartVariants}
     >
       <Card>
-        <CardHeader>
+        <CardHeader className="sm:pt-6 pt-4">
           <CardTitle>Emissions Breakdown</CardTitle>
           <CardDescription>
             Distribution of carbon emissions by category
