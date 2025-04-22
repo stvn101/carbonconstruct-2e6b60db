@@ -23,8 +23,8 @@ export const SkipToContent = () => {
       className={`
         fixed top-4 left-4 z-50 transform transition-transform
         bg-carbon-600 text-white px-4 py-3 rounded-md shadow-md
+        focus:outline-none focus:ring-2 focus:ring-carbon-400 focus:ring-offset-2
         ${focused ? "translate-y-0" : "-translate-y-20"}
-        focus:outline-none focus:ring-2 focus:ring-carbon-400
       `}
       onFocus={handleFocus}
       onBlur={handleBlur}
