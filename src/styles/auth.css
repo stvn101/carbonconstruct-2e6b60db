@@ -11,7 +11,7 @@
 
 /* Make the active tab have a prominent green background */
 .auth-tab-trigger[data-state="active"] {
-  @apply bg-green-500 text-white font-semibold;
+  @apply bg-green-500 text-white font-semibold shadow-md;
 }
 
 /* Hover effect for inactive tabs */
