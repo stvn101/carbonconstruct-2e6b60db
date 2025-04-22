@@ -1,0 +1,48 @@
+
+/* ======== LAYOUT & SPACING ======== */
+.content-top-spacing {
+  padding-top: calc(var(--navbar-height) + 1.5rem);
+}
+
+/* Card styling */
+.card {
+  padding: 2em;
+}
+
+/* Fix for overflow issues on mobile */
+.mobile-friendly-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Z-index hierarchy for overlapping elements */
+.z-popup {
+  z-index: 100;
+}
+
+.z-dropdown {
+  z-index: 50;
+}
+
+.z-navbar {
+  z-index: 40;
+}
+
+.z-theme-toggle {
+  z-index: 30;
+}
+
+/* Safe area insets for modern mobile browsers */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-inset {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Navbar spacer */
+.navbar-spacer {
+  height: var(--navbar-height, 64px);
+}
