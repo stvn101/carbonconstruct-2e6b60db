@@ -1,7 +1,7 @@
 
 import { useMemo } from 'react';
 import { MATERIAL_FACTORS, EXTENDED_MATERIALS, REGIONS } from '@/lib/materials';
-import { ExtendedMaterialData } from '@/lib/materials';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 
 interface UseMaterialDataProps {
   searchTerm: string;
