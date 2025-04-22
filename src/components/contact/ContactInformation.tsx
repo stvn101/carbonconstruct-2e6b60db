@@ -1,5 +1,5 @@
 
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -50,18 +50,6 @@ const ContactInformation = () => {
               0406 419 834
             </a>
             <p className="text-sm text-foreground/60">Monday-Friday, 9am-5pm AEST</p>
-          </div>
-        </div>
-        
-        <div className="flex items-start group">
-          <MapPin className="h-6 w-6 text-carbon-500 mr-4 mt-1 group-hover:text-carbon-600 transition-colors" aria-hidden="true" />
-          <div>
-            <h3 className="font-medium">Visit Us</h3>
-            <address className="text-foreground/70 not-italic">
-              Level 5, 410 Queen Street<br />
-              Brisbane, QLD 4000<br />
-              Australia
-            </address>
           </div>
         </div>
       </div>
