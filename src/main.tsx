@@ -31,3 +31,6 @@ if ('requestIdleCallback' in window) {
     performanceMonitoringService.initialize();
   }, 0);
 }
+
+// Add console log to verify app is mounting correctly
+console.log('Application initialized and mounted');
