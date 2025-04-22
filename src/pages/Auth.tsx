@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -86,14 +85,14 @@ const Auth = () => {
                     className="auth-tab-trigger"
                     aria-label="Sign in tab"
                   >
-                    <span className="mx-auto font-medium">Sign In</span>
+                    <div className="mx-auto text-center">Sign In</div>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
                     className="auth-tab-trigger"
                     aria-label="Create account tab"
                   >
-                    <span className="mx-auto font-medium">Create Account</span>
+                    <div className="mx-auto text-center">Create Account</div>
                   </TabsTrigger>
                 </TabsList>
                 
