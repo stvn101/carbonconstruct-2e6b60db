@@ -1,4 +1,3 @@
-
 /* Dark mode auth component styles */
 
 .dark .auth-card {
@@ -38,7 +37,7 @@
 
 /* Make the active tab have a clearly distinct appearance in dark mode */
 .dark .auth-tab-trigger[data-state="active"] {
-  @apply bg-green-600 text-white font-semibold shadow-md border-b-4 border-green-800;
+  @apply bg-purple-600 text-white font-semibold shadow-md border-b-4 border-purple-800;
 }
 
 /* Hover effect for inactive tabs in dark mode */
