@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const RegionSelector = () => {
-  const { selectedRegion, regions } = useRegion();
+  const { selectedRegion, setSelectedRegion, regions } = useRegion();
   const isMobile = useIsMobile();
   
   return (
@@ -21,8 +21,7 @@ const RegionSelector = () => {
       {!isMobile && <MapPin className="h-4 w-4 text-muted-foreground" />}
       <Select 
         value={selectedRegion} 
-        // onValueChange intentionally omitted to disable dropdown
-        disabled // disables select interaction
+        onValueChange={(value) => setSelectedRegion(value as any)}
       >
         <SelectTrigger className="w-auto border-none shadow-none h-8 pl-0 pr-1 focus:ring-0">
           <SelectValue>
@@ -31,14 +30,12 @@ const RegionSelector = () => {
             </Badge>
           </SelectValue>
         </SelectTrigger>
-        {/* Show the available option but unselectable */}
         <SelectContent align="end" className="w-52 z-50">
           {regions.map((region) => (
             <SelectItem 
               key={region} 
               value={region}
-              className={`${region === "National" ? "font-medium text-carbon-600" : ""}`}
-              disabled // disable all items
+              className="font-medium text-carbon-600"
             >
               <span className="inline-flex items-center">
                 🇦🇺 {region}
