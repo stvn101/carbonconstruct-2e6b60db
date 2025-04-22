@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ErrorBoundary } from "../ErrorBoundary";
+import ErrorBoundary from "../ErrorBoundary";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 

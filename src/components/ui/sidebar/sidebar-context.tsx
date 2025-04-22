@@ -20,7 +20,7 @@ export function useSidebar() {
 
 export const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderProps>(
   ({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
-    const isMobile = useIsMobile();
+    const { isMobile } = useIsMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
     const [_open, _setOpen] = React.useState(defaultOpen);
     
@@ -60,7 +60,7 @@ export const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderP
         state,
         open,
         setOpen,
-        isMobile,
+        isMobile: !!isMobile,
         openMobile,
         setOpenMobile,
         toggleSidebar,

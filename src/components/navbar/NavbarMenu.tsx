@@ -5,9 +5,10 @@ import { NavLink } from "@/types/navigation";
 
 interface NavbarMenuProps {
   navLinks: NavLink[];
+  isMobile?: boolean;
 }
 
-const NavbarMenu = ({ navLinks }: NavbarMenuProps) => {
+const NavbarMenu = ({ navLinks, isMobile }: NavbarMenuProps) => {
   return (
     <>
       {navLinks.map((link) => (
