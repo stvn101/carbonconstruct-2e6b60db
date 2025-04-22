@@ -1,0 +1,17 @@
+
+/* Dark mode form element styles */
+
+/* Form elements and inputs */
+.dark .Card, 
+.dark input,
+.dark .Input,
+.dark .input,
+.dark [role="textbox"],
+.dark [role="combobox"],
+.dark [role="dialog"],
+.dark textarea {
+  background-color: hsl(220, 14%, 13%) !important;
+  color: hsl(123, 30%, 80%) !important;
+  border-color: hsl(220, 10%, 25%) !important;
+}
+

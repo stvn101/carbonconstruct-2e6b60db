@@ -5,3 +5,7 @@
 @import './dark-mode/dropdowns.css';
 @import './dark-mode/text.css';
 @import './dark-mode/backgrounds.css';
+@import './dark-mode/form-elements.css';
+@import './dark-mode/auth.css';
+@import './dark-mode/switch.css';
+
