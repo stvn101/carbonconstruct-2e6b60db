@@ -16,7 +16,7 @@ const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContaine
       className={`py-4 border-b backdrop-blur-sm fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
           ? "border-border/50 bg-background/95 shadow-sm" 
-          : "border-transparent bg-background/80"
+          : "border-transparent bg-background/90"
       } ${
         isDarkMode ? "dark dark-navbar text-carbon-200" : ""
       } ${isPremiumUser ? 'premium-user' : ''}`}
