@@ -51,9 +51,15 @@ const ContactForm = () => {
   function onSubmit(data: ContactFormValues) {
     setIsSubmitting(true);
     
-    // Simulate API call
+    // Prepare email data
+    const emailData = {
+      ...data,
+      recipient: 'contact@carbonconstruct.net'
+    };
+    
+    // Simulate API call to send email
     setTimeout(() => {
-      console.log(data);
+      console.log('Sending email to contact@carbonconstruct.net', emailData);
       setIsSubmitting(false);
       toast({
         title: "Message sent!",
@@ -68,6 +74,7 @@ const ContactForm = () => {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6, delay: 0.4 }}
+      className="border border-black dark:border-white/10 rounded-lg p-6 bg-white dark:bg-gray-800"
     >
       <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
       
