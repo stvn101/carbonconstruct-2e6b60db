@@ -54,7 +54,7 @@ const ProjectNameCard = ({
   }, [projectName]);
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
       <CardContent className="pt-4">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-grow w-full md:w-auto">
