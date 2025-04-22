@@ -15,6 +15,14 @@
   @apply bg-gray-700;
 }
 
+.dark .auth-card .tabs-trigger[data-state="active"] {
+  @apply bg-gray-600 text-carbon-50;
+}
+
+.dark .auth-card .tabs-trigger:not([data-state="active"]) {
+  @apply text-carbon-200;
+}
+
 .dark .auth-card input {
   @apply bg-gray-700 border-gray-600 text-carbon-50;
 }
@@ -23,30 +31,3 @@
   @apply text-carbon-200;
 }
 
-.dark .auth-card button[type="submit"] {
-  @apply border-white/40 hover:border-white/60 shadow-lg text-white;
-}
-
-/* Auth tabs styling for dark mode */
-.dark .auth-tabs-list {
-  @apply border-gray-700 bg-gray-800;
-}
-
-.dark .auth-tab-trigger {
-  @apply text-gray-300;
-}
-
-/* Make the active tab have a clearly distinct appearance in dark mode */
-.dark .auth-tab-trigger[data-state="active"] {
-  @apply bg-gray-700 text-white font-semibold shadow-md;
-}
-
-/* Green indicator bar for selected tab in dark mode */
-.dark .auth-tab-trigger[data-state="active"]::after {
-  @apply bg-green-400;
-}
-
-/* Hover effect for inactive tabs in dark mode */
-.dark .auth-tab-trigger:hover:not([data-state="active"]) {
-  @apply bg-gray-600;
-}
