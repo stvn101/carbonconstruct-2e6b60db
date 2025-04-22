@@ -1,4 +1,3 @@
-
 /* Dark mode component fixes */
 .dark .dropdown-menu {
   @apply bg-gray-800 border-gray-700;
@@ -224,7 +223,7 @@
 }
 
 .dark [data-radix-switch-thumb] {
-  @apply bg-carbon-100;
+  @apply bg-white;
 }
 
 .dark [data-state="checked"] {
