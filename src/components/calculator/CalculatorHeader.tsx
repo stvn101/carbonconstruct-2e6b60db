@@ -2,6 +2,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface CalculatorHeaderProps {
   isPremiumUser?: boolean;
@@ -30,15 +31,13 @@ const CalculatorHeader = ({ isPremiumUser = false }: CalculatorHeaderProps) => {
       
       {!isPremiumUser && (
         <div className="mt-4 md:mt-0">
-          <a 
-            href="https://docs.carbonconstruct.com/calculator/guide" 
-            target="_blank" 
-            rel="noopener noreferrer"
+          <Link 
+            to="/help" 
             className="text-carbon-600 hover:text-carbon-800 dark:text-carbon-300 dark:hover:text-carbon-100 flex items-center gap-1 text-sm"
           >
             <GraduationCap className="h-4 w-4" />
             <span>Learn how to use the calculator</span>
-          </a>
+          </Link>
         </div>
       )}
     </div>
@@ -46,3 +45,4 @@ const CalculatorHeader = ({ isPremiumUser = false }: CalculatorHeaderProps) => {
 };
 
 export default CalculatorHeader;
+
