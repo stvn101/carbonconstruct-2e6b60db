@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -38,7 +39,7 @@ const Auth = () => {
   return (
     <>
       <Helmet>
-        <title>Sign In | CarbonConstruct</title>
+        <title>{activeTab === "signin" ? "Sign In" : "Create Account"} | CarbonConstruct</title>
       </Helmet>
       <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-8">
         <motion.div
@@ -63,14 +64,24 @@ const Auth = () => {
               <div className="h-4 w-4 bg-white rounded-full"></div>
             </div>
             <h1 className="text-2xl font-bold dark:text-carbon-50">Welcome to CarbonConstruct</h1>
-            <p className="text-muted-foreground mt-2 dark:text-carbon-200">Sign in to measure and reduce your construction carbon footprint</p>
+            <p className="text-muted-foreground mt-2 dark:text-carbon-200">
+              {activeTab === "signin" 
+                ? "Sign in to access your account" 
+                : "Create an account to get started"}
+            </p>
           </div>
           
           <Card className="auth-card dark:border-gray-700 dark:bg-gray-800 border-2 border-black/20 shadow-md">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl dark:text-carbon-50">Authentication</CardTitle>
+              <CardTitle className="text-2xl dark:text-carbon-50">
+                {activeTab === "signin" ? "Sign In" : "Create Account"}
+              </CardTitle>
               <CardDescription className="dark:text-carbon-200">
-                {location.state?.returnTo ? 'Sign in to save your project' : 'Enter your credentials to access your account'}
+                {location.state?.returnTo 
+                  ? 'Sign in to save your project' 
+                  : activeTab === "signin"
+                    ? 'Enter your credentials to access your account'
+                    : 'Fill in your details to create a new account'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -85,14 +96,14 @@ const Auth = () => {
                     className="auth-tab-trigger"
                     aria-label="Sign in tab"
                   >
-                    <div className="mx-auto text-center">Sign In</div>
+                    Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
                     className="auth-tab-trigger"
                     aria-label="Create account tab"
                   >
-                    <div className="mx-auto text-center">Create Account</div>
+                    Create Account
                   </TabsTrigger>
                 </TabsList>
                 
