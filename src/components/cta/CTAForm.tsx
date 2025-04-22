@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
@@ -50,7 +49,6 @@ const CTAForm = ({ onSubmit, isSubmitting }: CTAFormProps) => {
     const { id, value } = e.target;
     setFormState(prev => ({ ...prev, [id]: value }));
     
-    // Clear error when user starts typing
     if (errors[id]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -185,7 +183,7 @@ const CTAForm = ({ onSubmit, isSubmitting }: CTAFormProps) => {
         <Button 
           type="submit" 
           size="lg" 
-          className="w-full bg-white text-carbon-600 hover:bg-white/90 transition-all duration-300 relative overflow-hidden"
+          className="w-full bg-carbon-600 text-white hover:bg-carbon-700 transition-all duration-300 relative overflow-hidden"
           disabled={isSubmitting}
         >
           {isSubmitting ? (
@@ -196,7 +194,7 @@ const CTAForm = ({ onSubmit, isSubmitting }: CTAFormProps) => {
               transition={{ duration: 0.2 }}
             >
               <svg 
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-carbon-600" 
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" 
                 xmlns="http://www.w3.org/2000/svg" 
                 fill="none" 
                 viewBox="0 0 24 24"
@@ -220,8 +218,8 @@ const CTAForm = ({ onSubmit, isSubmitting }: CTAFormProps) => {
           ) : "Schedule a Free Demo"}
         </Button>
       </motion.div>
-      <div className="text-xs text-white/60 text-center mt-2">
-        By submitting this form, you agree to our <a href="#" className="underline hover:text-white">Terms & Privacy Policy</a>
+      <div className="text-xs text-carbon-700 dark:text-carbon-200 text-center mt-2">
+        By submitting this form, you agree to our <a href="#" className="underline hover:text-carbon-900 dark:hover:text-carbon-50">Terms & Privacy Policy</a>
       </div>
     </motion.form>
   );
