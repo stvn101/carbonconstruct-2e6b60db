@@ -14,6 +14,7 @@ interface TransportInputSectionProps {
   onRemoveTransport: (index: number) => void;
   onNext: () => void;
   onPrev: () => void;
+  demoMode?: boolean;
 }
 
 const TransportInputSection = ({
@@ -22,9 +23,10 @@ const TransportInputSection = ({
   onAddTransport,
   onRemoveTransport,
   onNext,
-  onPrev
+  onPrev,
+  demoMode = false
 }: TransportInputSectionProps) => {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile().isMobile;
   const { errors, validateField } = useTransportValidation();
   
   const handleInputChange = (index: number, field: keyof TransportInput, value: string) => {
@@ -38,6 +40,9 @@ const TransportInputSection = ({
       <div className="text-md md:text-lg font-medium flex items-center gap-2">
         <Truck className="h-4 w-4 md:h-5 md:w-5 text-carbon-600" />
         <span>Enter Transportation Details</span>
+        {demoMode && (
+          <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Demo Mode</span>
+        )}
       </div>
       
       {transportItems.map((transport, index) => (
