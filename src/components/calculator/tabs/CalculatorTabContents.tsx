@@ -1,5 +1,5 @@
 
-import { TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import MaterialsInputSection from "../MaterialsInputSection";
 import TransportInputSection from "../TransportInputSection";
 import EnergyInputSection from "../EnergyInputSection";
@@ -42,7 +42,7 @@ const CalculatorTabContents = ({
   demoMode = false
 }: CalculatorTabContentsProps) => {
   return (
-    <>
+    <Tabs defaultValue="materials">
       <TabsContent value="materials">
         <MaterialsInputSection 
           materials={calculationInput.materials}
@@ -89,7 +89,7 @@ const CalculatorTabContents = ({
           demoMode={demoMode}
         />
       </TabsContent>
-    </>
+    </Tabs>
   );
 };
 
