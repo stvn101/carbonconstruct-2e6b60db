@@ -13,10 +13,10 @@ const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContaine
   
   return (
     <motion.nav 
-      className={`py-4 border-b backdrop-blur-sm fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`py-4 border-b fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
-          ? "border-border/50 bg-background/95 shadow-sm" 
-          : "border-transparent bg-background/90"
+          ? "border-border/50 bg-white shadow-sm dark:bg-gray-900" 
+          : "border-transparent bg-white dark:bg-gray-900"
       } ${
         isDarkMode ? "dark dark-navbar text-carbon-200" : ""
       } ${isPremiumUser ? 'premium-user' : ''}`}
