@@ -65,9 +65,9 @@ const EmissionsBreakdownChart = ({ result }: EmissionsBreakdownChartProps) => {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background border border-border rounded-md shadow-md p-3 text-sm">
+        <div className="bg-background border border-border rounded-md shadow-md p-3 text-sm max-w-[90vw] overflow-hidden">
           <p className="font-medium">{payload[0].name}</p>
-          <p className="text-carbon-600">
+          <p className="text-carbon-600 dark:text-carbon-300">
             {payload[0].value.toFixed(2)} kg CO2e ({payload[0].payload.percentage}%)
           </p>
         </div>

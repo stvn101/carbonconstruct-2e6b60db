@@ -45,13 +45,33 @@ const Chart = ({
     }, {} as ChartConfig);
   }, [categories, colors]);
 
+  // Determine chart margins based on screen size
+  const getChartMargins = () => {
+    // Use smaller margins on mobile
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      return { top: 5, right: 5, left: 5, bottom: 20 };
+    }
+    return { top: 5, right: 5, left: 0, bottom: 5 };
+  };
+
   let chartElement: React.ReactElement;
   
   if (type === 'bar') {
     chartElement = (
-      <RechartsPrimitive.BarChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+      <RechartsPrimitive.BarChart data={data} margin={getChartMargins()}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-        <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
+        <RechartsPrimitive.XAxis 
+          dataKey={index} 
+          tick={{ fontSize: 10 }} 
+          height={35}
+          tickFormatter={(value) => {
+            // For small screens, truncate long texts
+            if (typeof window !== 'undefined' && window.innerWidth < 640 && value.length > 8) {
+              return `${value.substring(0, 6)}...`;
+            }
+            return value;
+          }}
+        />
         <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
         {showLegend && <RechartsPrimitive.Legend content={<MemoizedLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
@@ -73,9 +93,19 @@ const Chart = ({
     );
   } else if (type === 'line') {
     chartElement = (
-      <RechartsPrimitive.LineChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+      <RechartsPrimitive.LineChart data={data} margin={getChartMargins()}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-        <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
+        <RechartsPrimitive.XAxis 
+          dataKey={index} 
+          tick={{ fontSize: 10 }}
+          tickFormatter={(value) => {
+            // For small screens, truncate long texts
+            if (typeof window !== 'undefined' && window.innerWidth < 640 && value.length > 8) {
+              return `${value.substring(0, 6)}...`;
+            }
+            return value;
+          }}
+        />
         <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
         {showLegend && <RechartsPrimitive.Legend content={<MemoizedLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
@@ -106,6 +136,7 @@ const Chart = ({
               formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
             />
           }
+          wrapperStyle={{ zIndex: 1000 }}
         />
         {showLegend && <RechartsPrimitive.Legend 
           content={<MemoizedLegendContent />} 
@@ -120,8 +151,12 @@ const Chart = ({
           cy="45%"
           outerRadius={70}
           fill="#8884d8"
-          label={(entry) => `${entry.name}: ${entry[categories[0]]}`}
-          labelLine={false}
+          label={(entry) => {
+            // Only show labels on larger screens
+            if (typeof window !== 'undefined' && window.innerWidth < 640) return null;
+            return `${entry.name}: ${entry[categories[0]]}`;
+          }}
+          labelLine={typeof window !== 'undefined' && window.innerWidth >= 640}
           isAnimationActive={false} // Disable animation for better performance
         >
           {data.map((entry, i) => (
@@ -132,9 +167,19 @@ const Chart = ({
     );
   } else { // area chart
     chartElement = (
-      <RechartsPrimitive.AreaChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+      <RechartsPrimitive.AreaChart data={data} margin={getChartMargins()}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-        <RechartsPrimitive.XAxis dataKey={index} tick={{ fontSize: 10 }} />
+        <RechartsPrimitive.XAxis 
+          dataKey={index} 
+          tick={{ fontSize: 10 }} 
+          tickFormatter={(value) => {
+            // For small screens, truncate long texts
+            if (typeof window !== 'undefined' && window.innerWidth < 640 && value.length > 8) {
+              return `${value.substring(0, 6)}...`;
+            }
+            return value;
+          }}
+        />
         <RechartsPrimitive.YAxis className="text-foreground" tick={{ fontSize: 10 }} />
         {showLegend && <RechartsPrimitive.Legend content={<MemoizedLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
         <ChartTooltip 
@@ -143,6 +188,7 @@ const Chart = ({
               formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
             />
           }
+          wrapperStyle={{ zIndex: 1000 }}
         />
         {categories.map((category, i) => (
           <RechartsPrimitive.Area
