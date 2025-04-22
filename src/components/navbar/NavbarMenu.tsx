@@ -19,7 +19,7 @@ const NavbarMenu = ({ navLinks }: NavbarMenuProps) => {
         >
           <Link 
             to={link.path} 
-            className="text-foreground/80 hover:text-foreground transition-colors relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:w-0 after:bg-carbon-500 after:transition-all hover:after:w-full px-2 py-1 text-sm dark:text-carbon-100 dark:hover:text-carbon-50"
+            className="text-foreground/80 hover:text-foreground transition-colors relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:w-0 after:bg-carbon-500 after:transition-all hover:after:w-full px-2 py-1 text-sm dark:text-carbon-50 dark:hover:text-white"
           >
             {link.title}
           </Link>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -8,7 +8,7 @@ import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/auth';
 import { ProjectProvider } from './contexts/ProjectContext';
 import { CalculatorProvider } from './contexts/calculator';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundaryWrapper from './components/error/ErrorBoundaryWrapper';
 import PageLoading from './components/ui/page-loading';
 import RouteChangeTracker from './components/RouteChangeTracker';
 import SkipToContent from './components/SkipToContent';
@@ -17,14 +17,61 @@ import { authRoutes } from './routes/authRoutes';
 import { marketingRoutes } from './routes/marketingRoutes';
 import { projectRoutes } from './routes/projectRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
+import { useAccessibility } from './hooks/useAccessibility';
 
+// Lazy load main pages for better initial load performance
 const Index = lazyLoad(() => import('./pages/Index'));
 const NotFound = lazyLoad(() => import('./pages/NotFound'));
 const Calculator = lazyLoad(() => import('./pages/Calculator'));
 
+// Loading fallback for Suspense
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <PageLoading isLoading={true} text="Loading application..." />
+  </div>
+);
+
+const AppContent = () => {
+  // Apply app-wide accessibility improvements
+  useAccessibility();
+  
+  return (
+    <>
+      <SkipToContent />
+      <RouteChangeTracker />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        
+        {/* Calculator route with error boundary */}
+        <Route path="/calculator" element={
+          <ErrorBoundaryWrapper feature="Calculator">
+            <Calculator />
+          </ErrorBoundaryWrapper>
+        } />
+
+        {/* Auth routes */}
+        {authRoutes}
+
+        {/* Marketing routes */}
+        {marketingRoutes}
+
+        {/* Protected routes */}
+        {protectedRoutes}
+
+        {/* Project routes */}
+        {projectRoutes}
+
+        <Route path="/case-studies" element={<Navigate to="/" />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster richColors position="top-right" />
+    </>
+  );
+};
+
 const App: React.FC = () => {
   return (
-    <ErrorBoundary feature="Application">
+    <ErrorBoundaryWrapper feature="Application">
       <HelmetProvider>
         <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
           <RegionProvider>
@@ -32,34 +79,9 @@ const App: React.FC = () => {
               <AuthProvider>
                 <ProjectProvider>
                   <CalculatorProvider>
-                    <SkipToContent />
-                    <RouteChangeTracker />
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      
-                      {/* Calculator route with error boundary */}
-                      <Route path="/calculator" element={
-                        <ErrorBoundary feature="Calculator">
-                          <Calculator />
-                        </ErrorBoundary>
-                      } />
-
-                      {/* Auth routes */}
-                      {authRoutes}
-
-                      {/* Marketing routes */}
-                      {marketingRoutes}
-
-                      {/* Protected routes */}
-                      {protectedRoutes}
-
-                      {/* Project routes */}
-                      {projectRoutes}
-
-                      <Route path="/case-studies" element={<Navigate to="/" />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                    <Toaster />
+                    <Suspense fallback={<LoadingFallback />}>
+                      <AppContent />
+                    </Suspense>
                   </CalculatorProvider>
                 </ProjectProvider>
               </AuthProvider>
@@ -67,7 +89,7 @@ const App: React.FC = () => {
           </RegionProvider>
         </ThemeProvider>
       </HelmetProvider>
-    </ErrorBoundary>
+    </ErrorBoundaryWrapper>
   );
 };
 
