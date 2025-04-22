@@ -19,18 +19,23 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation menu"
         >
-          <div className="flex flex-col space-y-1">
+          <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => (
               <Link 
                 key={link.path}
                 to={link.path} 
                 className={`px-4 py-3 text-foreground/80 hover:text-foreground transition-colors hover:bg-accent rounded-md ${link.premium ? 'premium-feature' : ''}`}
-                onClick={onClose}
+                onClick={() => {
+                  onClose();
+                }}
+                role="menuitem"
               >
                 <span className="flex items-center">
-                  {/* Add safe check for link.icon */}
-                  {link.icon ? <span className="mr-3">{link.icon}</span> : null}
+                  {link.icon && <span className="mr-3">{link.icon}</span>}
                   {link.title}
                   {link.premium && (
                     <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -40,7 +45,7 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
                 </span>
               </Link>
             ))}
-          </div>
+          </nav>
         </motion.div>
       )}
     </AnimatePresence>
@@ -48,4 +53,3 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
 };
 
 export default MobileMenu;
-
