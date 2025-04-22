@@ -1,4 +1,3 @@
-
 /* This file contains utility classes that don't fit in other categories */
 
 /* Helper tip styling */
@@ -54,7 +53,22 @@
 
 /* Accessible tab navigation focus indicators */
 :focus-visible {
-  @apply outline-2 outline-carbon-500 outline-offset-2;
+  @apply outline-2 outline-carbon-500 outline-offset-2 ring-2 ring-carbon-500/50 ring-offset-2;
+}
+
+/* Ensure focusable elements have proper z-index */
+button, 
+a,
+input,
+select,
+textarea,
+[tabindex="0"] {
+  @apply z-10 focus-visible:z-20;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  @apply sr-only focus:not-sr-only fixed top-4 left-4 z-50 bg-carbon-600 text-white px-4 py-3 rounded-md;
 }
 
 /* Fix for button interaction issues */
@@ -86,4 +100,19 @@ button, a {
 
 .premium-user .navbar-item-premium {
   @apply block;
+}
+
+/* Improve form field tab order */
+.form-field {
+  @apply relative;
+}
+
+.form-field:focus-within {
+  @apply z-20;
+}
+
+/* Fix chart tooltip tab navigation */
+.recharts-tooltip-wrapper {
+  pointer-events: none;
+  z-index: 1000 !important;
 }
