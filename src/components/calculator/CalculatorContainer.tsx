@@ -6,6 +6,7 @@ import { useProjects } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import ProjectNameCard from "./ProjectNameCard";
 import CalculatorTabs from "./CalculatorTabs";
 import PageLoading from "../ui/page-loading";
@@ -93,10 +94,10 @@ const CalculatorContainer = ({
           />
         
           <CalculatorTabs 
-            isMobile={isMobile}
             activeTab={activeTab || "materials"}
             setActiveTab={setActiveTab}
             onCalculate={handleCalculateWithTracking}
+            isMobile={isMobile}
           />
         </motion.div>
         
