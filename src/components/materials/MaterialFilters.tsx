@@ -38,6 +38,13 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
   allRegions,
   baseOptions
 }) => {
+  // Set Australia as default if no region is selected
+  React.useEffect(() => {
+    if (selectedRegion === "all") {
+      setSelectedRegion("Australia");
+    }
+  }, []);
+
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -56,20 +63,19 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
           <Select
             value={selectedRegion}
             onValueChange={setSelectedRegion}
-            disabled // Disable region selection
           >
             <SelectTrigger>
-              <SelectValue placeholder="Australia" />
+              <SelectValue placeholder="Select region" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Australia">🇦🇺 Australia</SelectItem>
-              {Array.from(allRegions).filter(region => region !== "Australia").map((region) => (
+              <SelectItem value="all">All Regions</SelectItem>
+              {Array.from(allRegions).map((region) => (
                 <SelectItem 
                   key={region} 
                   value={region}
-                  disabled
+                  className={region === "Australia" ? "text-carbon-600 font-medium" : ""}
                 >
-                  {region}
+                  {region === "Australia" ? "🇦🇺 Australia" : region}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -124,9 +130,9 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
           variant="outline" 
           onClick={() => {
             setSearchTerm("");
+            setSelectedRegion("all");
             setSelectedAlternative("none");
             setSelectedTag("all");
-            // Don't reset region as it should stay as Australia
           }}
         >
           Clear Filters

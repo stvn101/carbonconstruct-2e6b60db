@@ -47,8 +47,8 @@ export const useMaterialData = ({
   const filteredMaterials = useMemo(() => {
     return Object.entries(EXTENDED_MATERIALS).filter(([key, material]) => {
       const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase());
-      // Always filter for Australia in region
-      const matchesRegion = (material.region && material.region.includes("Australia"));
+      const matchesRegion = selectedRegion === "all" || 
+        (material.region && material.region.includes(selectedRegion));
       const matchesAlternative = selectedAlternative === "none" || 
         material.alternativeTo === selectedAlternative;
       const matchesTag = selectedTag === "all" ||
@@ -56,7 +56,7 @@ export const useMaterialData = ({
       
       return matchesSearch && matchesRegion && matchesAlternative && matchesTag;
     });
-  }, [searchTerm, selectedAlternative, selectedTag]);
+  }, [searchTerm, selectedRegion, selectedAlternative, selectedTag]);
 
   return {
     filteredMaterials,
