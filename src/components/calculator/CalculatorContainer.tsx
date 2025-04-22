@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProjectNameCard from "./ProjectNameCard";
 import CalculatorTabs from "./CalculatorTabs";
+import CalculatorTabContents from "./tabs/CalculatorTabContents";
 import PageLoading from "../ui/page-loading";
 import SaveProjectConfirmDialog from "./SaveProjectConfirmDialog";
 import CalculatorUsageTracker from "./CalculatorUsageTracker";
@@ -53,13 +54,24 @@ const CalculatorContainer = ({
   calculatorContext,
   isPremiumUser = false
 }: CalculatorContainerProps) => {
-  const { isMobile } = useIsMobile();
+  const isMobile = useIsMobile().isMobile;
   const {
     calculationInput,
     calculationResult,
     activeTab,
     setActiveTab,
-    handleCalculate
+    handleCalculate,
+    handleAddMaterial,
+    handleUpdateMaterial,
+    handleRemoveMaterial,
+    handleAddTransport,
+    handleUpdateTransport,
+    handleRemoveTransport,
+    handleAddEnergy,
+    handleUpdateEnergy,
+    handleRemoveEnergy,
+    handleNextTab,
+    handlePrevTab
   } = calculatorContext;
 
   const handleCalculateWithTracking = () => {
@@ -103,6 +115,24 @@ const CalculatorContainer = ({
             isPremiumUser={isPremiumUser}
           />
         </motion.div>
+        
+        <CalculatorTabContents
+          calculationInput={calculationInput}
+          calculationResult={calculationResult}
+          onUpdateMaterial={handleUpdateMaterial}
+          onAddMaterial={handleAddMaterial}
+          onRemoveMaterial={handleRemoveMaterial}
+          onUpdateTransport={handleUpdateTransport}
+          onAddTransport={handleAddTransport}
+          onRemoveTransport={handleRemoveTransport}
+          onUpdateEnergy={handleUpdateEnergy}
+          onAddEnergy={handleAddEnergy}
+          onRemoveEnergy={handleRemoveEnergy}
+          onCalculate={handleCalculateWithTracking}
+          onPrevTab={handlePrevTab}
+          onNextTab={handleNextTab}
+          demoMode={demoMode}
+        />
         
         <PageLoading isLoading={isSaving} text="Saving project..." />
 

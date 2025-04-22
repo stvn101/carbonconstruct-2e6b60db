@@ -21,6 +21,7 @@ interface CalculatorTabContentsProps {
   onCalculate: () => void;
   onPrevTab: () => void;
   onNextTab: () => void;
+  demoMode?: boolean;
 }
 
 const CalculatorTabContents = ({
@@ -37,7 +38,8 @@ const CalculatorTabContents = ({
   onRemoveEnergy,
   onCalculate,
   onPrevTab,
-  onNextTab
+  onNextTab,
+  demoMode = false
 }: CalculatorTabContentsProps) => {
   return (
     <>
@@ -48,6 +50,7 @@ const CalculatorTabContents = ({
           onAddMaterial={onAddMaterial}
           onRemoveMaterial={onRemoveMaterial}
           onNext={onNextTab}
+          demoMode={demoMode}
         />
       </TabsContent>
       
@@ -59,6 +62,7 @@ const CalculatorTabContents = ({
           onRemoveTransport={onRemoveTransport}
           onNext={onNextTab}
           onPrev={onPrevTab}
+          demoMode={demoMode}
         />
       </TabsContent>
       
@@ -70,6 +74,7 @@ const CalculatorTabContents = ({
           onRemoveEnergy={onRemoveEnergy}
           onCalculate={onNextTab}
           onPrev={onPrevTab}
+          demoMode={demoMode}
         />
       </TabsContent>
       
@@ -81,6 +86,7 @@ const CalculatorTabContents = ({
           energy={calculationInput.energy}
           onCalculate={onCalculate}
           onPrev={onPrevTab}
+          demoMode={demoMode}
         />
       </TabsContent>
     </>

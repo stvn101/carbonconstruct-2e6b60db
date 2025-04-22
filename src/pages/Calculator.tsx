@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/auth';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import CalculatorHeader from "@/components/calculator/CalculatorHeader";
 
 function Calculator() {
   const location = useLocation();
@@ -20,6 +21,9 @@ function Calculator() {
   useEffect(() => {
     // Check if we're in demo mode from navigation state
     if (location.state?.demoMode) {
+      setDemoMode(true);
+    } else if (!user) {
+      // If not explicitly in demo mode and not logged in, default to demo mode
       setDemoMode(true);
     }
     
@@ -43,19 +47,16 @@ function Calculator() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 pt-24 pb-12">
-        <h1 className="text-3xl font-bold mb-6">Carbon Calculator</h1>
+        <CalculatorHeader isPremiumUser={isPremiumUser} />
         
         {!user && (
           <Alert className="mb-6 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/30 dark:border-yellow-800">
             <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
             <AlertTitle className="text-yellow-800 dark:text-yellow-300">Demo Mode</AlertTitle>
             <AlertDescription className="text-yellow-700 dark:text-yellow-400">
-              You're using the calculator in demo mode. Your calculations won't be saved.
+              You're using the calculator in demo mode. Try out the basic features, but your calculations won't be saved.
               <div className="mt-2">
                 <Button onClick={handleSignUp} className="mr-2 bg-carbon-600 hover:bg-carbon-700 text-white">Sign Up</Button>
-                {demoMode && (
-                  <Button variant="outline" onClick={exitDemoMode}>Exit Demo</Button>
-                )}
               </div>
             </AlertDescription>
           </Alert>

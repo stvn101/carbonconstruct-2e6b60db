@@ -20,6 +20,7 @@ interface ResultsSectionProps {
   energy: EnergyInput[];
   onCalculate: () => void;
   onPrev: () => void;
+  demoMode?: boolean;
 }
 
 const ResultsSection = ({ 
@@ -28,7 +29,8 @@ const ResultsSection = ({
   transport, 
   energy,
   onCalculate, 
-  onPrev 
+  onPrev,
+  demoMode = false
 }: ResultsSectionProps) => {
   // Combine all inputs for the calculation
   const calculationInput: CalculationInput = {
@@ -42,6 +44,15 @@ const ResultsSection = ({
   
   return (
     <div className="space-y-12 sm:space-y-16"> {/* increased overall vertical spacing */}
+      {demoMode && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+          <h3 className="font-medium text-yellow-800">Demo Mode</h3>
+          <p className="text-yellow-700 text-sm">
+            This is a demonstration of the calculator's results section. In a full account, you'll be able to save these results and access advanced analysis features.
+          </p>
+        </div>
+      )}
+      
       {!calculationResult && (
         <div className="text-center p-8">
           <h3 className="text-xl font-medium mb-4">Ready to Calculate Results</h3>

@@ -15,6 +15,7 @@ interface EnergyInputSectionProps {
   onRemoveEnergy: (index: number) => void;
   onCalculate: () => void;
   onPrev: () => void;
+  demoMode?: boolean;
 }
 
 const EnergyInputSection = ({
@@ -23,9 +24,10 @@ const EnergyInputSection = ({
   onAddEnergy,
   onRemoveEnergy,
   onCalculate,
-  onPrev
+  onPrev,
+  demoMode = false
 }: EnergyInputSectionProps) => {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile().isMobile;
   const [errors, setErrors] = useState<Record<number, string>>({});
 
   const handleAmountChange = (index: number, value: string) => {
@@ -67,6 +69,9 @@ const EnergyInputSection = ({
       <div className="text-md md:text-lg font-medium flex items-center gap-2">
         <Zap className="h-4 w-4 md:h-5 md:w-5 text-carbon-600" />
         <span>Enter Energy Consumption</span>
+        {demoMode && (
+          <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Demo Mode</span>
+        )}
       </div>
       
       {energyItems.map((energy, index) => (

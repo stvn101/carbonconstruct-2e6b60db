@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Leaf, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ interface MaterialsInputSectionProps {
   onAddMaterial: () => void;
   onRemoveMaterial: (index: number) => void;
   onNext: () => void;
+  demoMode?: boolean;
 }
 
 const MaterialsInputSection = ({
@@ -21,9 +23,10 @@ const MaterialsInputSection = ({
   onUpdateMaterial,
   onAddMaterial,
   onRemoveMaterial,
-  onNext
+  onNext,
+  demoMode = false
 }: MaterialsInputSectionProps) => {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile().isMobile;
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,6 +90,9 @@ const MaterialsInputSection = ({
       <div className="text-md md:text-lg font-medium flex items-center gap-2">
         <Leaf className="h-4 w-4 md:h-5 md:w-5 text-carbon-600" />
         <span>Enter Construction Materials</span>
+        {demoMode && (
+          <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Demo Mode</span>
+        )}
       </div>
       
       {materials.map((material, index) => (
