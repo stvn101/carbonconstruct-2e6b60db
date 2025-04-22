@@ -18,9 +18,20 @@
 
 /* Navbar specific styles */
 .dark-navbar {
-  @apply bg-gray-900/95 border-gray-800;
+  @apply bg-gray-900 border-gray-800;
 }
 
 .dark .navbar-container {
-  @apply bg-gray-900/95;
+  @apply bg-gray-900;
+}
+
+/* Ensure dropdown menus are not transparent */
+.dark [data-radix-popper-content-wrapper] > div {
+  @apply bg-gray-800 !important;
+  backdrop-filter: none !important;
+}
+
+/* Theme toggle dropdown specifically */
+.dark .DropdownMenuContent {
+  @apply bg-gray-800 border-gray-700;
 }

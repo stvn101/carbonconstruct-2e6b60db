@@ -55,7 +55,7 @@ const CTAContainer = () => {
 
   return (
     <motion.div 
-      className="bg-white/10 backdrop-blur-sm rounded-xl p-6 md:p-8 mb-8"
+      className="bg-white dark:bg-gray-800 rounded-xl p-6 md:p-8 mb-8 shadow-md"
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

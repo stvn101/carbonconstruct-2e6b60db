@@ -19,3 +19,16 @@
 .dark main {
   @apply bg-gray-900;
 }
+
+/* Prevent transparency in background elements */
+.dark [class*="bg-white/"], 
+.dark [class*="bg-gray-800/"],
+.dark [class*="bg-background/"] {
+  @apply bg-gray-800;
+}
+
+[class*="bg-white/"], 
+[class*="bg-gray-800/"],
+[class*="bg-background/"] {
+  @apply bg-white dark:bg-gray-800;
+}
