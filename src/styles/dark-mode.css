@@ -1,3 +1,4 @@
+
 /* Dark mode component fixes */
 .dark .dropdown-menu {
   @apply bg-gray-800 border-gray-700;
@@ -222,6 +223,7 @@
   @apply border-carbon-600;
 }
 
+/* Ensure the switch thumb is visible in dark mode */
 .dark [data-radix-switch-thumb] {
   @apply bg-white;
 }
