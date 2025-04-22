@@ -6,6 +6,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import CarbonCalculator from "@/components/CarbonCalculator";
 import { toast } from "sonner";
 import { useAuth } from '@/contexts/auth';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 import CalculatorHeader from "@/components/calculator/CalculatorHeader";
 
 function Calculator() {
