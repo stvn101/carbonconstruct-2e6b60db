@@ -1,9 +1,8 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
-import { MATERIAL_FACTORS, MATERIAL_TYPES } from '@/lib/carbonCalculations';
+import { MATERIAL_FACTORS, ExtendedMaterialData, MATERIAL_TYPES } from '@/lib/materials';
 import { useDebounce } from './useDebounce';
-import { ExtendedMaterialData } from '@/lib/materials';
 
 export interface MaterialFilterOptions {
   searchTerm: string;
@@ -37,10 +36,10 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
         name: value.name || key,
         factor: value.factor,
         unit: value.unit || 'kg',
-        region: value.region || 'Australia',
-        tags: value.tags || ['construction'],
-        notes: value.notes,
-        alternativeTo: value.alternativeTo,
+        region: 'Australia',
+        tags: ['construction'],
+        notes: '',
+        alternativeTo: undefined,
         sustainabilityScore: Math.floor(Math.random() * 40) + 60, // Example data
         recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low' // Example data
       };
