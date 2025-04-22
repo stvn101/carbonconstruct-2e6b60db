@@ -13,7 +13,7 @@ const HeroContent = () => {
   const { scrollToElement } = useScrollTo();
 
   const handleLearnMore = () => {
-    scrollToElement('features');
+    scrollToElement('features')();
   };
 
   const handleTryCalculator = () => {
