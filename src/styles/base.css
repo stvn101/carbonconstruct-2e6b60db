@@ -17,6 +17,11 @@
   .dark ::selection {
     @apply bg-carbon-400 text-carbon-950;
   }
+
+  /* Ensure dark mode styles propagate to root */
+  html.dark {
+    @apply bg-gray-900;
+  }
 }
 
 #root {

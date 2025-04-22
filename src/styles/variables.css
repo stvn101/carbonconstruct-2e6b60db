@@ -21,25 +21,25 @@
 
   .dark {
     /* Dark mode colors - updated for better dark background */
-    --background: 240 10% 3.9%; /* Deep dark background */
-    --foreground: 123 47% 70%; /* Soft green-white for text */
-    --card: 240 10% 3.9%; /* Dark card background */
-    --card-foreground: 123 47% 70%;
-    --popover: 240 10% 3.9%; /* Dark popover background */
-    --popover-foreground: 123 47% 70%;
-    --primary: 123 47% 70%;
+    --background: 220 10% 12%; /* Deeper dark background with slight blue tint */
+    --foreground: 123 30% 85%; /* Soft green-white for text */
+    --card: 220 10% 12%; /* Dark card background */
+    --card-foreground: 123 30% 85%;
+    --popover: 220 10% 12%; /* Dark popover background */
+    --popover-foreground: 123 30% 85%;
+    --primary: 123 47% 60%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 123 47% 70%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 123 47% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 123 47% 70%;
+    --secondary: 220 7% 18%;
+    --secondary-foreground: 123 30% 85%;
+    --muted: 220 7% 18%;
+    --muted-foreground: 123 12% 70%;
+    --accent: 220 7% 18%;
+    --accent-foreground: 123 30% 85%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 123 47% 70%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --destructive-foreground: 123 30% 85%;
+    --border: 220 7% 22%;
+    --input: 220 7% 22%;
+    --ring: 123 47% 42%;
     
     /* Carbon theme dark mode colors - slightly adjusted */
     --carbon-50: 130 45% 10%; /* Very dark green */
