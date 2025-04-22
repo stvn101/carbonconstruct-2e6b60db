@@ -1,5 +1,5 @@
 
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsTrigger } from "@/components/ui/tabs";
 
 interface CalculatorTabTriggersProps {
   isMobile: boolean;
