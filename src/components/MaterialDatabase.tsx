@@ -27,10 +27,10 @@ const MaterialDatabase = () => {
   const { selectedRegion: globalRegion } = useRegion();
   
   React.useEffect(() => {
-    if (selectedRegion === "all") {
-      setSelectedRegion("Australia");
+    if (globalRegion !== "National" && selectedRegion === "all") {
+      setSelectedRegion(globalRegion);
     }
-  }, []);
+  }, [globalRegion]);
   
   const {
     filteredMaterials,
@@ -48,7 +48,7 @@ const MaterialDatabase = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion("Australia");
+    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
@@ -80,10 +80,13 @@ const MaterialDatabase = () => {
               </div>
             </div>
             <h1 className="text-3xl font-bold mb-2">
-              Material Database
+              {globalRegion === "National" 
+                ? "Material Database" 
+                : `${globalRegion} Material Database`}
             </h1>
             <p className="text-lg text-muted-foreground">
-              Explore our comprehensive database of construction materials with accurate carbon coefficients for Australia
+              Explore our comprehensive database of construction materials with accurate carbon coefficients
+              {globalRegion !== "National" && ` for ${globalRegion}`}
             </p>
             
             <RegionStats materialsByRegion={materialsByRegion} />
