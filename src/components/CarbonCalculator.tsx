@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useCalculator } from "@/contexts/calculator";
@@ -13,6 +12,7 @@ import CalculatorTabs from "./calculator/CalculatorTabs";
 import PageLoading from "./ui/page-loading";
 import SaveProjectConfirmDialog from "./calculator/SaveProjectConfirmDialog";
 import CalculatorUsageTracker from "./calculator/CalculatorUsageTracker";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -26,6 +26,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const isMobile = useIsMobile();
 
   // Try to access calculator context, handle errors gracefully
   let calculatorContext;
@@ -124,6 +125,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         />
       
         <CalculatorTabs 
+          isMobile={isMobile}
           activeTab={activeTab || "materials"}
           setActiveTab={setActiveTab}
           onCalculate={handleCalculateWithTracking}
