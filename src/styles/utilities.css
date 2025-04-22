@@ -1,4 +1,3 @@
-
 /* This file contains utility classes that don't fit in other categories */
 
 /* Form field consistency */
@@ -16,6 +15,35 @@
 
 .form-error {
   @apply text-red-500 text-xs mt-1 min-h-[1.25rem];
+}
+
+/* Input validation states */
+.input-valid {
+  @apply border-green-500 bg-green-50/50 focus:ring-green-500/20 focus:border-green-500;
+}
+
+.input-invalid {
+  @apply border-destructive bg-destructive/5 focus:ring-destructive/20 focus:border-destructive;
+}
+
+.input-warning {
+  @apply border-orange-500 bg-orange-50/50 focus:ring-orange-500/20 focus:border-orange-500;
+}
+
+.validation-message {
+  @apply flex items-center gap-1.5 text-xs mt-1;
+}
+
+.validation-message.error {
+  @apply text-destructive;
+}
+
+.validation-message.warning {
+  @apply text-orange-600;
+}
+
+.validation-message.success {
+  @apply text-green-600;
 }
 
 /* Content spacing with fixed navbar */
