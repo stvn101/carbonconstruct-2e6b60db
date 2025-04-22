@@ -55,7 +55,7 @@ const ProjectNameCard = ({
     : "Save project";
 
   return (
-    <Card className="mb-4 border border-border shadow-sm">
+    <Card className="mb-4 border border-border shadow-sm bg-white dark:bg-gray-800">
       <CardContent className="pt-4">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-grow w-full md:w-auto">
@@ -66,7 +66,7 @@ const ProjectNameCard = ({
               id="project-name"
               value={projectName}
               onChange={(e) => handleNameChange(e.target.value)}
-              className={`w-full ${nameError ? 'border-destructive' : ''}`}
+              className={`w-full ${nameError ? 'border-destructive' : ''} bg-background`}
               placeholder="Enter project name"
               disabled={isSaving}
               aria-invalid={!!nameError}
