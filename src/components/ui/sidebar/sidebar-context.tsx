@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SidebarContext, SidebarProviderProps } from "./types";
+import type { SidebarContext, SidebarProviderProps } from "./types";
 import { TooltipProvider } from "../tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
