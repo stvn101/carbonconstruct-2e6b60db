@@ -20,38 +20,38 @@
   }
 
   .dark {
-    /* Dark mode colors - updated for better dark background */
-    --background: 220 10% 12%; /* Deeper dark background with slight blue tint */
-    --foreground: 123 30% 85%; /* Soft green-white for text */
-    --card: 220 10% 12%; /* Dark card background */
-    --card-foreground: 123 30% 85%;
-    --popover: 220 10% 12%; /* Dark popover background */
-    --popover-foreground: 123 30% 85%;
+    /* Dark mode colors - restored to original darker theme */
+    --background: 220 14% 10%; /* Deeper dark background with blue tint */
+    --foreground: 123 30% 92%; /* Brighter text for better contrast */
+    --card: 220 14% 13%; /* Slightly lighter card background */
+    --card-foreground: 123 30% 92%;
+    --popover: 220 14% 13%; /* Match card for consistency */
+    --popover-foreground: 123 30% 92%;
     --primary: 123 47% 60%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 220 7% 18%;
-    --secondary-foreground: 123 30% 85%;
-    --muted: 220 7% 18%;
-    --muted-foreground: 123 12% 70%;
-    --accent: 220 7% 18%;
-    --accent-foreground: 123 30% 85%;
+    --secondary: 220 10% 20%; /* Darker secondary for better contrast */
+    --secondary-foreground: 123 30% 92%;
+    --muted: 220 10% 20%;
+    --muted-foreground: 123 20% 80%; /* Brighter muted text */
+    --accent: 220 10% 20%;
+    --accent-foreground: 123 30% 92%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 123 30% 85%;
-    --border: 220 7% 22%;
-    --input: 220 7% 22%;
+    --destructive-foreground: 123 30% 92%;
+    --border: 220 10% 25%; /* Stronger borders */
+    --input: 220 10% 25%;
     --ring: 123 47% 42%;
     
-    /* Carbon theme dark mode colors - slightly adjusted */
-    --carbon-50: 130 45% 10%; /* Very dark green */
-    --carbon-100: 127 42% 15%;
-    --carbon-200: 126 52% 20%;
-    --carbon-300: 125 54% 25%;
-    --carbon-400: 123 47% 30%;
-    --carbon-500: 124 40% 35%;
-    --carbon-600: 125 40% 40%;
-    --carbon-700: 126 43% 45%;
-    --carbon-800: 126 53% 50%;
-    --carbon-900: 127 63% 55%;
-    --carbon-950: 127 63% 60%;
+    /* Carbon theme dark mode colors - restored to original */
+    --carbon-50: 130 45% 12%; /* Slightly brighter for visibility */
+    --carbon-100: 127 42% 18%;
+    --carbon-200: 126 52% 22%;
+    --carbon-300: 125 54% 28%;
+    --carbon-400: 123 47% 35%;
+    --carbon-500: 124 40% 40%;
+    --carbon-600: 125 40% 45%;
+    --carbon-700: 126 43% 50%;
+    --carbon-800: 126 53% 55%;
+    --carbon-900: 127 63% 60%;
+    --carbon-950: 127 63% 65%;
   }
 }

@@ -18,7 +18,7 @@ const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContaine
           ? "border-border/50 bg-background/95 shadow-sm" 
           : "border-transparent bg-background/80"
       } ${
-        isDarkMode ? "dark" : ""
+        isDarkMode ? "dark dark-navbar text-carbon-200" : ""
       } ${isPremiumUser ? 'premium-user' : ''}`}
       initial={{ y: -100 }}
       animate={{ 
