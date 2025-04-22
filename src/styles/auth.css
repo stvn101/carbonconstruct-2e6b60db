@@ -11,7 +11,7 @@
 
 /* Make the active tab have a clearly distinct appearance */
 .auth-tab-trigger[data-state="active"] {
-  @apply bg-green-500 text-white font-semibold shadow-md border-b-4 border-green-700;
+  @apply bg-purple-500 text-white font-semibold shadow-md border-b-4 border-purple-700;
 }
 
 /* Hover effect for inactive tabs */
