@@ -67,7 +67,7 @@ const Auth = () => {
             <p className="text-muted-foreground mt-2 dark:text-carbon-200">Sign in to measure and reduce your construction carbon footprint</p>
           </div>
           
-          <Card className="auth-card dark:border-gray-700 dark:bg-gray-800">
+          <Card className="auth-card dark:border-gray-700 dark:bg-gray-800 border-2 border-black/20 shadow-md">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl dark:text-carbon-50">Authentication</CardTitle>
               <CardDescription className="dark:text-carbon-200">
@@ -80,17 +80,17 @@ const Auth = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700 tabs-list">
+                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700 tabs-list border border-black/30 dark:border-white/20">
                   <TabsTrigger 
                     value="signin"
-                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger font-medium py-2.5"
                     aria-label="Sign in tab"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
-                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger font-medium py-2.5"
                     aria-label="Create account tab"
                   >
                     Create Account

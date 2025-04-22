@@ -56,10 +56,11 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
           <Button
             type="submit"
             className="w-full bg-carbon-600 hover:bg-carbon-700 
-              border border-black/80 dark:border-white/20 
-              rounded-md shadow-sm 
-              hover:border-black/90 dark:hover:border-white/30 
-              transition-all duration-200"
+              border-2 border-black dark:border-white/40 
+              rounded-md shadow-md py-6
+              hover:shadow-lg hover:border-black dark:hover:border-white/60
+              transition-all duration-200 
+              font-medium text-base"
             disabled={loading}
           >
             {loading ? (
