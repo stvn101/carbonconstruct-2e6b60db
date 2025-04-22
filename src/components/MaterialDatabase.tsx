@@ -41,6 +41,7 @@ const MaterialDatabase = () => {
     totalMaterials
   } = useMaterialFiltering();
 
+  // Transform materials for the table component
   const materialTableData: [string, ExtendedMaterialData][] = filteredMaterials.map(
     (material, index) => [`material-${index}`, material]
   );

@@ -1,8 +1,9 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
-import { filterMaterials, ExtendedMaterialData, MATERIAL_TYPES } from '@/lib/materials';
+import { MATERIAL_FACTORS, MATERIAL_TYPES } from '@/lib/carbonCalculations';
 import { useDebounce } from './useDebounce';
+import { ExtendedMaterialData } from '@/lib/materials';
 
 export interface MaterialFilterOptions {
   searchTerm: string;
@@ -28,6 +29,26 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     }
   }, [globalRegion]);
 
+  // Convert MATERIAL_FACTORS to array format for filtering
+  const allMaterials = useMemo(() => {
+    return Object.entries(MATERIAL_FACTORS).map(([key, value]) => {
+      // Enriching the material data with additional properties
+      const materialWithMetadata: ExtendedMaterialData = {
+        name: value.name || key,
+        factor: value.factor,
+        unit: value.unit || 'kg',
+        region: value.region || 'Australia',
+        tags: value.tags || ['construction'],
+        notes: value.notes,
+        alternativeTo: value.alternativeTo,
+        sustainabilityScore: Math.floor(Math.random() * 40) + 60, // Example data
+        recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low' // Example data
+      };
+      
+      return materialWithMetadata;
+    });
+  }, []);
+
   // Memoized filter function
   const filterPredicate = useCallback((material: ExtendedMaterialData) => {
     const matchesSearch = material.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
@@ -43,8 +64,8 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
 
   // Memoized filtered materials
   const filteredMaterials = useMemo(() => 
-    filterMaterials(filterPredicate),
-    [filterPredicate]
+    allMaterials.filter(filterPredicate),
+    [allMaterials, filterPredicate]
   );
 
   // Memoized statistics
@@ -53,7 +74,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     const allRegions = new Set<string>();
     const allTags = new Set<string>();
     
-    filteredMaterials.forEach(material => {
+    allMaterials.forEach(material => {
       if (material.region) {
         const regions = material.region.split(", ");
         regions.forEach(region => {
@@ -70,7 +91,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
       allTags: Array.from(allTags).sort(),
       totalCount: filteredMaterials.length
     };
-  }, [filteredMaterials]);
+  }, [allMaterials, filteredMaterials]);
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
@@ -82,25 +103,25 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
   // Extract base material options for the dropdown
   const baseOptions = useMemo(() => {
     const options = new Set<string>();
-    filteredMaterials.forEach(material => {
+    allMaterials.forEach(material => {
       if (material.alternativeTo) {
         options.add(material.alternativeTo);
       }
     });
     
     return Array.from(options).map(id => {
-      const material = filteredMaterials.find(m => m.name.toLowerCase() === id.toLowerCase());
+      const material = allMaterials.find(m => m.name.toLowerCase() === id.toLowerCase());
       return {
         id,
         name: material ? material.name : id
       };
     });
-  }, [filteredMaterials]);
+  }, [allMaterials]);
 
   // Get total materials count for displaying stats - compute only once
   const totalMaterials = useMemo(() => 
-    filterMaterials(() => true).length,
-    []
+    allMaterials.length,
+    [allMaterials]
   );
 
   return {
