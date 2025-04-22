@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { lazyLoad } from '@/utils/lazyLoad';
 
 // Use the lazyLoad utility for consistent code splitting
@@ -37,5 +37,6 @@ export const marketingRoutes = (
     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
     <Route path="/cookie-policy" element={<CookiePolicy />} />
     <Route path="/data-processing" element={<DataProcessing />} />
+    <Route path="/material-browser" element={<Navigate to="/materials" />} />
   </>
 );
