@@ -39,7 +39,7 @@ const Auth = () => {
   return (
     <>
       <Helmet>
-        <title>{activeTab === "signin" ? "Sign In" : "Create Account"} | CarbonConstruct</title>
+        <title>Sign In | CarbonConstruct</title>
       </Helmet>
       <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-8">
         <motion.div
@@ -64,24 +64,14 @@ const Auth = () => {
               <div className="h-4 w-4 bg-white rounded-full"></div>
             </div>
             <h1 className="text-2xl font-bold dark:text-carbon-50">Welcome to CarbonConstruct</h1>
-            <p className="text-muted-foreground mt-2 dark:text-carbon-200">
-              {activeTab === "signin" 
-                ? "Sign in to access your account" 
-                : "Create an account to get started"}
-            </p>
+            <p className="text-muted-foreground mt-2 dark:text-carbon-200">Sign in to measure and reduce your construction carbon footprint</p>
           </div>
           
-          <Card className="auth-card dark:border-gray-700 dark:bg-gray-800 border-2 border-black/20 shadow-md">
+          <Card className="auth-card dark:border-gray-700 dark:bg-gray-800">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl dark:text-carbon-50">
-                {activeTab === "signin" ? "Sign In" : "Create Account"}
-              </CardTitle>
+              <CardTitle className="text-2xl dark:text-carbon-50">Authentication</CardTitle>
               <CardDescription className="dark:text-carbon-200">
-                {location.state?.returnTo 
-                  ? 'Sign in to save your project' 
-                  : activeTab === "signin"
-                    ? 'Enter your credentials to access your account'
-                    : 'Fill in your details to create a new account'}
+                {location.state?.returnTo ? 'Sign in to save your project' : 'Enter your credentials to access your account'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -90,17 +80,17 @@ const Auth = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-6 auth-tabs-list">
+                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700 tabs-list">
                   <TabsTrigger 
                     value="signin"
-                    className="auth-tab-trigger"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
                     aria-label="Sign in tab"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
-                    className="auth-tab-trigger"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
                     aria-label="Create account tab"
                   >
                     Create Account
