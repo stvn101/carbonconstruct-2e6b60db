@@ -36,6 +36,20 @@
   @apply bg-gray-800 border-gray-700 text-carbon-300;
 }
 
+/* Fix for project name card and other input areas */
+.dark .Card, 
+.dark input,
+.dark .Input,
+.dark .input,
+.dark [role="textbox"],
+.dark [role="combobox"],
+.dark [role="dialog"],
+.dark textarea {
+  background-color: hsl(220, 14%, 13%) !important;
+  color: hsl(123, 30%, 80%) !important;
+  border-color: hsl(220, 10%, 25%) !important;
+}
+
 /* Ensure text visibility on all backgrounds */
 .dark .text-black, 
 .dark .text-gray-900, 
