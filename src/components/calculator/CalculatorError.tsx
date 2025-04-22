@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
+import CalculatorHeader from "./CalculatorHeader";
 
 const CalculatorError = () => {
   return (
