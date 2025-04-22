@@ -1,0 +1,22 @@
+
+/* Dark mode switch component styles */
+
+/* Switch component base styles */
+.dark .switch,
+.dark [data-radix-switch-root] {
+  @apply border-carbon-600;
+}
+
+/* Explicitly set the thumb color for better visibility */
+.dark [data-radix-switch-thumb] {
+  @apply bg-white !important;
+}
+
+.dark [data-state="checked"] {
+  @apply bg-carbon-500 border-carbon-400;
+}
+
+.dark [data-state="unchecked"] {
+  @apply bg-gray-600 border-gray-500;
+}
+
