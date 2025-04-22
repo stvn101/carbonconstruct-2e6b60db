@@ -21,10 +21,22 @@
   /* Ensure dark mode styles propagate to root */
   html.dark {
     @apply bg-gray-900;
+    color-scheme: dark;
+  }
+
+  /* Apply dark mode to body as well */
+  html.dark body {
+    @apply bg-gray-900 text-carbon-300;
   }
 }
 
 #root {
   max-width: 100%;
   margin: 0 auto;
+}
+
+/* Ensure that all Radix dropdowns are properly styled in dark mode */
+html.dark [data-radix-popper-content-wrapper] {
+  @apply bg-gray-800 border-gray-700;
+  --select-trigger-color: hsl(var(--carbon-300));
 }

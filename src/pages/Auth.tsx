@@ -59,10 +59,10 @@ const Auth = () => {
             <p className="text-muted-foreground mt-2">Sign in to measure and reduce your construction carbon footprint</p>
           </div>
           
-          <Card>
+          <Card className="auth-card dark:border-gray-700 dark:bg-gray-800">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl">Authentication</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl dark:text-carbon-200">Authentication</CardTitle>
+              <CardDescription className="dark:text-carbon-300">
                 {location.state?.returnTo ? 'Sign in to save your project' : 'Enter your credentials to access your account'}
               </CardDescription>
             </CardHeader>
@@ -72,14 +72,24 @@ const Auth = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Create Account</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700">
+                  <TabsTrigger 
+                    value="signin"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-200 dark:text-carbon-300"
+                  >
+                    Sign In
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="signup"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-200 dark:text-carbon-300"
+                  >
+                    Create Account
+                  </TabsTrigger>
                 </TabsList>
                 
                 <Suspense fallback={
                   <div className="flex justify-center p-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-carbon-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-carbon-600 dark:border-carbon-400"></div>
                   </div>
                 }>
                   <TabsContent value="signin">

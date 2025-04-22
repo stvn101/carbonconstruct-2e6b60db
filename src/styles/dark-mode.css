@@ -1,15 +1,15 @@
 
 /* Dark mode component fixes */
 .dark .dropdown-menu {
-  @apply bg-gray-900 border-gray-700;
+  @apply bg-gray-800 border-gray-700;
 }
 
 .dark .alert {
-  @apply bg-gray-900 border-gray-700;
+  @apply bg-gray-800 border-gray-700;
 }
 
 .dark .bg-carbon-50, .dark .bg-carbon-100 {
-  @apply text-carbon-50 bg-gray-900;
+  @apply text-carbon-50 bg-gray-800;
 }
 
 /* Fix for charts in dark mode */
@@ -55,7 +55,7 @@
   @apply text-carbon-300;
 }
 
-/* Fix for ThemeToggle dropdown in dark mode */
+/* Enhanced styling for dropdown menus in dark mode */
 .dark [data-radix-popper-content-wrapper] {
   @apply bg-gray-800 border-gray-700;
 }
@@ -85,7 +85,7 @@
   filter: brightness(0.85) contrast(1.1);
 }
 
-/* Fix for dropdown menus */
+/* Fix for dropdown menus - improved visibility */
 .dark .DropdownMenuContent,
 .dark .dropdown-menu-content {
   @apply bg-gray-800 border-gray-700;
@@ -100,4 +100,33 @@
 .dark #root,
 .dark main {
   @apply bg-gray-900;
+}
+
+/* Improved Select dropdown visibility */
+.dark [data-radix-select-content] {
+  @apply bg-gray-800 border-gray-700 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.dark [data-radix-select-item] {
+  @apply text-carbon-300 !important;
+}
+
+.dark [data-radix-select-item]:hover {
+  @apply bg-gray-700 !important;
+}
+
+/* Fix specifically for Auth page in dark mode */
+.dark .auth-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Make navbar text brighter in dark mode for better visibility */
+.dark .text-foreground\/80 {
+  @apply text-carbon-200;
+}
+
+.dark .text-muted-foreground {
+  @apply text-carbon-300;
 }
