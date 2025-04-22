@@ -49,7 +49,11 @@ const LoginForm = ({ returnTo = "/dashboard" }: LoginFormProps) => {
           
           <Button
             type="submit"
-            className="w-full bg-carbon-600 hover:bg-carbon-700 border border-black dark:border-white/10"
+            className="w-full bg-carbon-600 hover:bg-carbon-700 
+              border border-black/80 dark:border-white/20 
+              rounded-md shadow-sm 
+              hover:border-black/90 dark:hover:border-white/30 
+              transition-all duration-200"
             disabled={loading}
           >
             {loading ? (
