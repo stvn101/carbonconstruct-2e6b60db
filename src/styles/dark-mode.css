@@ -1,15 +1,15 @@
 
 /* Dark mode component fixes */
 .dark .dropdown-menu {
-  @apply bg-carbon-900 border-carbon-700;
+  @apply bg-gray-900 border-gray-700;
 }
 
 .dark .alert {
-  @apply bg-carbon-900 border-carbon-700;
+  @apply bg-gray-900 border-gray-700;
 }
 
 .dark .bg-carbon-50, .dark .bg-carbon-100 {
-  @apply text-carbon-50 bg-carbon-900;
+  @apply text-carbon-50 bg-gray-900;
 }
 
 /* Fix for charts in dark mode */
@@ -31,8 +31,9 @@
 }
 
 /* Fix for cards in dark mode to ensure proper contrast */
+.dark .card,
 .dark .bg-white {
-  @apply bg-gray-900 text-carbon-300;
+  @apply bg-gray-800 border-gray-700 text-carbon-300;
 }
 
 /* Ensure text visibility on all backgrounds */
@@ -46,11 +47,6 @@
 }
 
 /* Fix buttons in dark mode */
-.dark .text-white {
-  @apply text-carbon-300;
-}
-
-/* Fix dropdown menus in dark mode to ensure proper visibility */
 .dark .bg-background {
   @apply bg-gray-900;
 }
@@ -60,8 +56,12 @@
 }
 
 /* Fix for ThemeToggle dropdown in dark mode */
-.dark .DropdownMenuContent {
-  @apply bg-gray-800 border-gray-700 text-carbon-300;
+.dark [data-radix-popper-content-wrapper] {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark [data-radix-popper-content-wrapper] * {
+  @apply text-carbon-300;
 }
 
 /* Add more contrast to the cards in dark mode */
@@ -80,3 +80,24 @@
   @apply bg-gray-900;
 }
 
+/* Fix for tooltips in dark mode */
+.dark .recharts-tooltip-wrapper {
+  filter: brightness(0.85) contrast(1.1);
+}
+
+/* Fix for dropdown menus */
+.dark .DropdownMenuContent,
+.dark .dropdown-menu-content {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Ensure background color works on html element in dark mode */
+.dark {
+  @apply bg-gray-900;
+}
+
+.dark body,
+.dark #root,
+.dark main {
+  @apply bg-gray-900;
+}

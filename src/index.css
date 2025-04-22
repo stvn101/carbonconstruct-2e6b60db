@@ -5,3 +5,13 @@
 
 /* Import all other CSS files through the styles/index.css file */
 @import './styles/index.css';
+
+/* Ensure dark mode is applied to body */
+.dark-mode-body {
+  background-color: hsl(220, 10%, 12%);
+  color: hsl(123, 30%, 85%);
+}
+
+html.dark {
+  background-color: hsl(220, 10%, 12%);
+}

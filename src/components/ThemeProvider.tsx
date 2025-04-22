@@ -45,6 +45,13 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
+
+    // Ensure body and html get background color too
+    if (theme === "dark") {
+      document.body.classList.add("dark-mode-body");
+    } else {
+      document.body.classList.remove("dark-mode-body");
+    }
   }, [theme]);
 
   // Listen for system theme changes
@@ -56,11 +63,16 @@ export function ThemeProvider({
         if (mediaQuery.matches) {
           root.classList.remove("light");
           root.classList.add("dark");
+          document.body.classList.add("dark-mode-body");
         } else {
           root.classList.remove("dark");
           root.classList.add("light");
+          document.body.classList.remove("dark-mode-body");
         }
       };
+      
+      // Run once on mount to set initial state
+      handleChange();
       
       mediaQuery.addEventListener("change", handleChange);
       return () => mediaQuery.removeEventListener("change", handleChange);
