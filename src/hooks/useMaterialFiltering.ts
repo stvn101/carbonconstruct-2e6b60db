@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
-import { MATERIAL_FACTORS, EXTENDED_MATERIALS, MATERIAL_TYPES } from '@/lib/materials';
+import { EXTENDED_MATERIALS, MATERIAL_TYPES } from '@/lib/materials';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { useDebounce } from './useDebounce';
 
@@ -29,7 +29,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     }
   }, [globalRegion]);
 
-  // Use EXTENDED_MATERIALS directly instead of converting MATERIAL_FACTORS
+  // Use EXTENDED_MATERIALS directly
   const allMaterials = useMemo(() => {
     return Object.entries(EXTENDED_MATERIALS).map(([key, material]) => material);
   }, []);

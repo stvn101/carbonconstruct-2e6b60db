@@ -19,7 +19,7 @@ const Partners = lazyLoad(() => import('@/pages/Partners'));
 const PrivacyPolicy = lazyLoad(() => import('@/pages/PrivacyPolicy'));
 const CookiePolicy = lazyLoad(() => import('@/pages/CookiePolicy'));
 const DataProcessing = lazyLoad(() => import('@/pages/DataProcessing'));
-const MaterialDatabase = lazyLoad(() => import('@/components/MaterialDatabase'));
+const MaterialDatabase = lazyLoad(() => import('@/pages/MaterialDatabase'));
 
 export const marketingRoutes = (
   <>
