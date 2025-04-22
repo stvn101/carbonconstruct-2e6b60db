@@ -4,21 +4,24 @@
   button, 
   a.button,
   .clickable {
-    min-height: 40px;
-    min-width: 40px;
+    min-height: 44px; /* Updated to meet WCAG guidelines */
+    min-width: 44px;
+    padding: 0.5rem 1rem;
   }
   
   input, select, textarea {
-    padding: 0.5rem;
+    padding: 0.75rem;
+    font-size: 16px; /* Prevent iOS zoom */
   }
 
   /* Consistent form field spacing on mobile */
   .form-field {
-    @apply mb-3;
+    @apply mb-4;
   }
   
   /* Better dropdown positioning for mobile */
   [data-radix-popper-content-wrapper] {
+    max-width: calc(100vw - 24px) !important;
     z-index: 999 !important;
   }
   
@@ -26,32 +29,37 @@
   html, body {
     max-width: 100vw;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   
   /* Improve text readability on mobile */
   .text-sm {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     line-height: 1.5rem;
   }
 
   /* Ensure chart tooltips don't get cut off on mobile screens */
   .recharts-tooltip-wrapper {
     max-width: 80vw !important;
-    pointer-events: none !important;
-    z-index: 1000 !important;
   }
 
   .recharts-default-tooltip {
     max-width: 100% !important;
     overflow-wrap: break-word !important;
     white-space: normal !important;
-    font-size: 11px !important;
+    font-size: 12px !important;
+  }
+
+  /* Fix navbar on mobile */
+  .navbar-container {
+    @apply px-4;
   }
 }
 
 /* Ensure tooltips stay within viewport on all screen sizes */
 .recharts-tooltip-wrapper {
   pointer-events: none;
+  z-index: 1000 !important;
 }
 
 /* Fix for chart tooltips that may get cut off at viewport edges */
@@ -63,4 +71,49 @@
 
 .recharts-tooltip-container {
   max-width: calc(100vw - 40px);
+}
+
+/* Fix mobile menu layering */
+.mobile-menu {
+  z-index: 50;
+}
+
+/* Improve mobile form inputs */
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    @apply w-full text-base;
+    -webkit-appearance: none;
+    border-radius: 6px;
+  }
+
+  /* Fix for iOS input shadows */
+  input,
+  textarea {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+/* Responsive table adjustments */
+@media (max-width: 640px) {
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Fix sticky header on mobile */
+@supports (-webkit-touch-callout: none) {
+  .sticky-header {
+    position: -webkit-sticky;
+    top: 0;
+    z-index: 40;
+  }
 }
