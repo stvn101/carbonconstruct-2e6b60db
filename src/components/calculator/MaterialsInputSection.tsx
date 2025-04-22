@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Leaf } from "lucide-react";
+import { Leaf, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MaterialInput } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
