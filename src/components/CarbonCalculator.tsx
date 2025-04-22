@@ -1,25 +1,24 @@
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useCalculator } from "@/contexts/calculator";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useProjects } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import CalculatorError from "./calculator/CalculatorError";
 import CalculatorHeader from "./calculator/CalculatorHeader";
 import ProjectNameCard from "./calculator/ProjectNameCard";
 import CalculatorTabs from "./calculator/CalculatorTabs";
 import PageLoading from "./ui/page-loading";
 import SaveProjectConfirmDialog from "./calculator/SaveProjectConfirmDialog";
+import CalculatorUsageTracker from "./calculator/CalculatorUsageTracker";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
 }
 
 const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
-  const isMobile = useIsMobile();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { saveProject, projects } = useProjects();
@@ -27,39 +26,14 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  
+
   // Try to access calculator context, handle errors gracefully
-  let calculatorContext = null;
+  let calculatorContext;
   try {
     calculatorContext = useCalculator();
   } catch (error) {
     console.error("Error accessing calculator context:", error);
-    
-    // Return error UI
-    return (
-      <div className="container mx-auto px-4 md:px-6">
-        <CalculatorHeader />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-6"
-        >
-          <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-800 mt-6">
-            <h3 className="text-lg font-medium text-red-800 dark:text-red-300">Calculator Error</h3>
-            <p className="mt-2 text-red-700 dark:text-red-400">
-              There was a problem loading the calculator. Please refresh the page or contact support if the issue persists.
-            </p>
-            <button 
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-              onClick={() => window.location.reload()}
-            >
-              Refresh Page
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
+    return <CalculatorError />;
   }
 
   const {
@@ -70,7 +44,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     handleCalculate
   } = calculatorContext;
 
-  // Check if a project with the same name already exists
   const isExistingProject = !!projects.find(
     p => p.name.toLowerCase() === projectName.toLowerCase()
   );
@@ -102,7 +75,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         energy: calculationInput.energy,
         result: calculationResult,
         tags: ["carbon", "calculation"],
-        // Add the missing required properties
         status: 'draft',
         total_emissions: calculationResult.totalEmissions || 0,
         premium_only: false
@@ -118,46 +90,21 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
     }
   };
 
-  const handleSaveCancel = () => {
-    setShowSaveDialog(false);
-  };
-
-  const recordCalculatorUsage = useCallback(async () => {
-    try {
-      if (user && !demoMode) {
-        const { error } = await supabase
-          .from('calculator_usage')
-          .insert({ 
-            user_id: user.id,
-            ip_address: null
-          });
-
-        if (error) {
-          console.error('Failed to record calculator usage:', error);
-        }
-      }
-    } catch (error) {
-      console.error('Error recording calculator usage:', error);
-    }
-  }, [user, demoMode]);
-
-  const handleCalculateWithTracking = useCallback(() => {
+  const handleCalculateWithTracking = () => {
     if (isCalculating) return;
-    
     setIsCalculating(true);
+    
     try {
       handleCalculate();
       setTimeout(() => {
-        recordCalculatorUsage().finally(() => {
-          setIsCalculating(false);
-        });
+        setIsCalculating(false);
       }, 100);
     } catch (error) {
       console.error("Error during calculation:", error);
       setIsCalculating(false);
       toast.error("Calculation failed. Please try again.");
     }
-  }, [handleCalculate, recordCalculatorUsage, isCalculating]);
+  };
 
   return (
     <div className="container mx-auto px-4 md:px-6">
@@ -177,7 +124,6 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         />
       
         <CalculatorTabs 
-          isMobile={isMobile}
           activeTab={activeTab || "materials"}
           setActiveTab={setActiveTab}
           onCalculate={handleCalculateWithTracking}
@@ -193,8 +139,14 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
         projectName={projectName}
         isSaving={isSaving}
         onConfirm={handleSaveConfirm}
-        onCancel={handleSaveCancel}
+        onCancel={() => setShowSaveDialog(false)}
         isOverwrite={isExistingProject}
+      />
+
+      {/* Usage tracker */}
+      <CalculatorUsageTracker
+        demoMode={demoMode}
+        onComplete={() => setIsCalculating(false)}
       />
     </div>
   );
