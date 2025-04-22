@@ -31,6 +31,7 @@ export interface CalculatorContainerProps {
   onSignIn: () => void;
   isExistingProject: boolean;
   calculatorContext: any;
+  isPremiumUser?: boolean;
 }
 
 const CalculatorContainer = ({
@@ -49,7 +50,8 @@ const CalculatorContainer = ({
   onSaveClick,
   onSignIn,
   isExistingProject,
-  calculatorContext
+  calculatorContext,
+  isPremiumUser = false
 }: CalculatorContainerProps) => {
   const { isMobile } = useIsMobile();
   const {
@@ -98,6 +100,7 @@ const CalculatorContainer = ({
             setActiveTab={setActiveTab}
             onCalculate={handleCalculateWithTracking}
             isMobile={isMobile}
+            isPremiumUser={isPremiumUser}
           />
         </motion.div>
         
@@ -114,6 +117,7 @@ const CalculatorContainer = ({
 
         <CalculatorUsageTracker
           demoMode={demoMode}
+          isPremiumUser={isPremiumUser}
           onComplete={() => setIsCalculating(false)}
         />
       </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { RequireAuth } from '@/components/RequireAuth';
 import { lazyLoad } from '@/utils/lazyLoad';
@@ -42,6 +42,12 @@ export const projectRoutes = (
         <RequireAuth>
           <ProjectDetail />
         </RequireAuth>
+      </ErrorBoundary>
+    } />
+    {/* Calculator is available to everyone, but with restricted functionality for non-premium users */}
+    <Route path="/calculator" element={
+      <ErrorBoundary feature="Calculator">
+        <Calculator />
       </ErrorBoundary>
     } />
   </>

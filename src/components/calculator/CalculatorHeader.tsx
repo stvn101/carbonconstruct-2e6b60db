@@ -1,18 +1,47 @@
 
-import { Calculator } from "lucide-react";
-import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { GraduationCap, Star } from "lucide-react";
 
-const CalculatorHeader = () => {
+interface CalculatorHeaderProps {
+  isPremiumUser?: boolean;
+}
+
+const CalculatorHeader = ({ isPremiumUser = false }: CalculatorHeaderProps) => {
   return (
-    <CardHeader className="pb-2 md:pb-6">
-      <div className="flex items-center gap-2 md:gap-3">
-        <Calculator className="h-5 w-5 md:h-6 md:w-6 text-carbon-600 dark:text-carbon-400" />
-        <CardTitle className="text-lg md:text-2xl text-foreground">Project Carbon Calculator</CardTitle>
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <h1 className="text-2xl font-bold">Carbon Calculator</h1>
+          {isPremiumUser && (
+            <Badge className="bg-carbon-500 text-xs">
+              <Star className="h-3 w-3 mr-1" />
+              Premium
+            </Badge>
+          )}
+        </div>
+        <p className="text-muted-foreground">
+          Calculate the carbon footprint for your construction project.
+          {isPremiumUser 
+            ? " Access all premium features and unlimited calculations." 
+            : " Sign up for a premium account to unlock advanced features."}
+        </p>
       </div>
-      <CardDescription className="text-xs md:text-sm mt-1 text-muted-foreground">
-        Enter the details of your construction project to calculate its carbon footprint.
-      </CardDescription>
-    </CardHeader>
+      
+      {!isPremiumUser && (
+        <div className="mt-4 md:mt-0">
+          <a 
+            href="https://docs.carbonconstruct.com/calculator/guide" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-carbon-600 hover:text-carbon-800 dark:text-carbon-300 dark:hover:text-carbon-100 flex items-center gap-1 text-sm"
+          >
+            <GraduationCap className="h-4 w-4" />
+            <span>Learn how to use the calculator</span>
+          </a>
+        </div>
+      )}
+    </div>
   );
 };
 

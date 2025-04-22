@@ -1,11 +1,47 @@
 
 import { TabsTrigger } from "@/components/ui/tabs";
+import { Lock } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CalculatorTabTriggersProps {
   isMobile: boolean;
+  isPremiumUser?: boolean;
 }
 
-const CalculatorTabTriggers = ({ isMobile }: CalculatorTabTriggersProps) => {
+const CalculatorTabTriggers = ({ isMobile, isPremiumUser = false }: CalculatorTabTriggersProps) => {
+  const renderAdvancedTrigger = (value: string, label: string) => {
+    if (isPremiumUser) {
+      return (
+        <TabsTrigger 
+          value={value} 
+          className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
+        >
+          {label}
+        </TabsTrigger>
+      );
+    }
+    
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <TabsTrigger 
+              value={value}
+              disabled={!isPremiumUser}
+              className="relative data-[state=active]:bg-gray-400 data-[state=active]:text-white text-gray-400"
+            >
+              {label}
+              <Lock className="h-3 w-3 ml-1 inline-flex" />
+            </TabsTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Premium feature. Upgrade to access.</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
   if (isMobile) {
     return (
       <>

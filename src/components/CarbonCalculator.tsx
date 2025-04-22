@@ -12,9 +12,10 @@ import CalculatorContainer from "./calculator/CalculatorContainer";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
+  isPremiumUser?: boolean;
 }
 
-const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
+const CarbonCalculator = ({ demoMode = false, isPremiumUser = false }: CarbonCalculatorProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { saveProject, projects } = useProjects();
@@ -85,7 +86,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
         tags: ["carbon", "calculation"],
         status: 'draft',
         total_emissions: calculationResult.totalEmissions || 0,
-        premium_only: false
+        premium_only: isPremiumUser
       });
       
       console.log("Project saved successfully:", savedProject);
@@ -105,7 +106,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
 
   return (
     <div className="container mx-auto px-4 md:px-6">
-      <CalculatorHeader />
+      <CalculatorHeader isPremiumUser={isPremiumUser} />
       
       <CalculatorAlerts 
         demoMode={demoMode} 
@@ -131,6 +132,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
         onSignIn={handleSignIn}
         isExistingProject={isExistingProject}
         calculatorContext={calculatorContext}
+        isPremiumUser={isPremiumUser}
       />
     </div>
   );
