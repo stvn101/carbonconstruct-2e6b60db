@@ -33,9 +33,6 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
   const handleSubmit = async (data: RegisterFormValues) => {
     try {
       setServerError(null);
-      // The register function from useAuth requires 3 params: name, email, password
-      // Since we don't collect name in our form, we'll use email as a default name
-      // This is to match the function signature in useAuthHandlers.ts
       await register(data.email, data.email, data.password);
       navigate(returnTo, { state: { fromAuth: true } });
     } catch (error) {
@@ -58,7 +55,7 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
 
           <Button
             type="submit"
-            className="w-full bg-carbon-600 hover:bg-carbon-700"
+            className="w-full bg-carbon-600 hover:bg-carbon-700 border border-black dark:border-white/10"
             disabled={loading}
           >
             {loading ? (
