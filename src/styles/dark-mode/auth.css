@@ -12,11 +12,11 @@
 }
 
 .dark .auth-card .tabs-list {
-  @apply bg-gray-700;
+  @apply bg-gray-700 border-gray-600;
 }
 
 .dark .auth-card .tabs-trigger[data-state="active"] {
-  @apply bg-gray-600 text-carbon-50;
+  @apply bg-gray-600 text-carbon-50 border-b-2 border-green-500 shadow-md;
 }
 
 .dark .auth-card .tabs-trigger:not([data-state="active"]) {
@@ -31,3 +31,6 @@
   @apply text-carbon-200;
 }
 
+.dark .auth-tab-trigger[data-state="active"] {
+  @apply bg-gray-600 shadow-md;
+}
