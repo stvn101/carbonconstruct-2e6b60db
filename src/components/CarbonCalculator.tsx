@@ -14,12 +14,15 @@ import PageLoading from "./ui/page-loading";
 import SaveProjectConfirmDialog from "./calculator/SaveProjectConfirmDialog";
 import CalculatorUsageTracker from "./calculator/CalculatorUsageTracker";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
 }
 
-const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
+const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { saveProject, projects } = useProjects();
@@ -27,6 +30,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   // Try to access calculator context, handle errors gracefully
@@ -51,9 +55,10 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   );
 
   const handleSaveClick = () => {
+    setAuthError(null);
+    
     if (!user) {
-      toast.error("Please log in to save your project");
-      navigate("/auth");
+      setAuthError("Please log in to save your project");
       return;
     }
     
@@ -66,6 +71,12 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
   };
 
   const handleSaveConfirm = async () => {
+    if (!user) {
+      setAuthError("Authentication required to save projects");
+      setShowSaveDialog(false);
+      return;
+    }
+    
     setIsSaving(true);
     
     try {
@@ -107,10 +118,54 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
       toast.error("Calculation failed. Please try again.");
     }
   };
+  
+  const handleSignIn = () => {
+    navigate("/auth", { state: { returnTo: "/calculator" } });
+  };
 
   return (
     <div className="container mx-auto px-4 md:px-6">
       <CalculatorHeader />
+      
+      {demoMode && (
+        <Alert className="mb-6 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/30 dark:border-yellow-800">
+          <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          <AlertTitle className="text-yellow-800 dark:text-yellow-300">Demo Mode</AlertTitle>
+          <AlertDescription className="text-yellow-700 dark:text-yellow-400">
+            You're using the calculator in demo mode. Your calculations won't be saved.
+            {!user && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button onClick={handleSignIn} size="sm" className="bg-carbon-600 hover:bg-carbon-700 text-white">
+                  Sign In to Save
+                </Button>
+              </div>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {authError && (
+        <Alert className="mb-6 bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800">
+          <ExclamationTriangleIcon className="h-4 w-4 text-red-600 dark:text-red-400" />
+          <AlertTitle className="text-red-800 dark:text-red-300">Authentication Required</AlertTitle>
+          <AlertDescription className="text-red-700 dark:text-red-400">
+            {authError}
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button onClick={handleSignIn} size="sm" className="bg-carbon-600 hover:bg-carbon-700 text-white">
+                Sign In
+              </Button>
+              <Button 
+                onClick={() => setAuthError(null)} 
+                size="sm" 
+                variant="outline" 
+                className="border-red-200 dark:border-red-800"
+              >
+                Continue in Demo Mode
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -123,6 +178,7 @@ const CarbonCalculator = ({ demoMode }: CarbonCalculatorProps) => {
           onProjectNameChange={setProjectName}
           onSave={handleSaveClick}
           isSaving={isSaving}
+          demoMode={demoMode}
         />
       
         <CalculatorTabs 
