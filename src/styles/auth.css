@@ -6,12 +6,12 @@
 }
 
 .auth-tab-trigger {
-  @apply relative flex items-center justify-center transition-all duration-200 py-3 font-medium;
+  @apply relative flex items-center justify-center transition-all duration-200 py-3 font-medium text-gray-600;
 }
 
-/* Make the active tab have a prominent green background */
+/* Make the active tab have a clearly distinct appearance */
 .auth-tab-trigger[data-state="active"] {
-  @apply bg-green-500 text-white font-semibold shadow-lg border-b-2 border-green-600;
+  @apply bg-green-500 text-white font-semibold shadow-md border-b-4 border-green-700;
 }
 
 /* Hover effect for inactive tabs */
