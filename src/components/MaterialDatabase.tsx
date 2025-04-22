@@ -12,39 +12,49 @@ import { useRegion } from "@/contexts/RegionContext";
 import RegionStats from "@/components/materials/RegionStats";
 import MaterialFilters from "@/components/materials/MaterialFilters";
 import MaterialTable from "@/components/materials/MaterialTable";
-import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
-import { ExtendedMaterialData } from "@/lib/materials";
+import { useMaterialData } from "@/hooks/useMaterialData";
+import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 
 const MaterialDatabase = () => {
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedRegion, setSelectedRegion] = React.useState<string>("all");
+  const [selectedAlternative, setSelectedAlternative] = React.useState<string>("none");
+  const [selectedTag, setSelectedTag] = React.useState<string>("all");
   const { selectedRegion: globalRegion } = useRegion();
+  
+  React.useEffect(() => {
+    if (globalRegion !== "National" && selectedRegion === "all") {
+      setSelectedRegion(globalRegion);
+    }
+  }, [globalRegion]);
+  
   const {
-    searchTerm,
-    setSearchTerm,
-    selectedRegion,
-    setSelectedRegion,
-    selectedAlternative,
-    setSelectedAlternative,
-    selectedTag,
-    setSelectedTag,
-    
     filteredMaterials,
     materialsByRegion,
     allTags,
     allRegions,
     baseOptions,
-    resetFilters,
-    materialCount,
-    totalMaterials
-  } = useMaterialFiltering();
+    materialCount
+  } = useMaterialData({
+    searchTerm,
+    selectedRegion,
+    selectedAlternative,
+    selectedTag
+  });
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
+    setSelectedAlternative("none");
+    setSelectedTag("all");
+  };
 
   // Transform materials for the table component
-  const materialTableData: [string, ExtendedMaterialData][] = filteredMaterials.map(
-    (material, index) => [`material-${index}`, material]
-  );
+  const materialTableData = filteredMaterials;
 
   return (
     <motion.div
@@ -123,7 +133,7 @@ const MaterialDatabase = () => {
               />
               
               <p className="text-sm text-muted-foreground mt-2">
-                Showing {materialCount} of {totalMaterials} materials
+                Showing {materialCount} of {materialCount} materials
               </p>
             </CardContent>
           </Card>

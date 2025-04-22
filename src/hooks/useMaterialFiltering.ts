@@ -1,7 +1,8 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
-import { MATERIAL_FACTORS, ExtendedMaterialData, MATERIAL_TYPES } from '@/lib/materials';
+import { MATERIAL_FACTORS, EXTENDED_MATERIALS, MATERIAL_TYPES } from '@/lib/materials';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { useDebounce } from './useDebounce';
 
 export interface MaterialFilterOptions {
@@ -28,24 +29,9 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     }
   }, [globalRegion]);
 
-  // Convert MATERIAL_FACTORS to array format for filtering
+  // Use EXTENDED_MATERIALS directly instead of converting MATERIAL_FACTORS
   const allMaterials = useMemo(() => {
-    return Object.entries(MATERIAL_FACTORS).map(([key, value]) => {
-      // Enriching the material data with additional properties
-      const materialWithMetadata: ExtendedMaterialData = {
-        name: value.name || key,
-        factor: value.factor,
-        unit: value.unit || 'kg',
-        region: 'Australia',
-        tags: ['construction'],
-        notes: '',
-        alternativeTo: undefined,
-        sustainabilityScore: Math.floor(Math.random() * 40) + 60, // Example data
-        recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low' // Example data
-      };
-      
-      return materialWithMetadata;
-    });
+    return Object.entries(EXTENDED_MATERIALS).map(([key, material]) => material);
   }, []);
 
   // Memoized filter function

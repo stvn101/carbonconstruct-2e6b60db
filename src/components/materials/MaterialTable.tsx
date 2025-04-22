@@ -13,25 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Database, Info } from "lucide-react";
 import MaterialDetails from "./MaterialDetails";
-import { MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-interface ExtendedMaterialData {
-  name: string;
-  factor: number;
-  unit: string;
-  region?: string;
-  alternativeTo?: string;
-  notes?: string;
-  tags?: string[];
-  sustainabilityScore?: number;
-  recyclability?: "High" | "Medium" | "Low";
-}
 
 interface MaterialTableProps {
   filteredMaterials: Array<[string, ExtendedMaterialData]>;
@@ -85,7 +73,7 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
                     <Tooltip>
                       <TooltipTrigger>
                         <Badge variant="outline" className="cursor-help">
-                          {MATERIAL_FACTORS[material.alternativeTo as keyof typeof MATERIAL_FACTORS]?.name}
+                          {material.alternativeTo}
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
