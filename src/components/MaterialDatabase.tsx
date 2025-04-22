@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Database, Filter } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -18,7 +17,6 @@ import { ExtendedMaterialData } from "@/lib/materials";
 const MaterialDatabase = () => {
   const { selectedRegion: globalRegion } = useRegion();
   const {
-    // Filter states
     searchTerm,
     setSearchTerm,
     selectedRegion,
@@ -28,7 +26,6 @@ const MaterialDatabase = () => {
     selectedTag,
     setSelectedTag,
     
-    // Results and data
     filteredMaterials,
     materialsByRegion,
     allTags,
@@ -39,7 +36,6 @@ const MaterialDatabase = () => {
     totalMaterials
   } = useMaterialFiltering();
 
-  // Transform the filteredMaterials to match the expected format for MaterialTable
   const materialTableData: [string, ExtendedMaterialData][] = filteredMaterials.map(
     (material, index) => [`material-${index}`, material]
   );
@@ -47,11 +43,10 @@ const MaterialDatabase = () => {
   return (
     <div className="container mx-auto px-4 py-8 content-top-spacing">
       <div className="max-w-5xl mx-auto">
-        {/* Header Section */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-carbon-100">
-              <Database className="h-6 w-6 text-carbon-700" />
+              <BookOpen className="h-6 w-6 text-carbon-700" />
             </div>
           </div>
           <h1 className="text-3xl font-bold mb-2">
@@ -67,7 +62,6 @@ const MaterialDatabase = () => {
           <RegionStats materialsByRegion={materialsByRegion} />
         </div>
         
-        {/* Filters Card */}
         <Card className="mb-8 border-carbon-100">
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -95,7 +89,6 @@ const MaterialDatabase = () => {
           </CardContent>
         </Card>
         
-        {/* Results Card */}
         <Card className="border-carbon-100">
           <CardHeader>
             <CardTitle>Construction Materials</CardTitle>
