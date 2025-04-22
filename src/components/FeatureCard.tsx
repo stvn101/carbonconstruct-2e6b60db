@@ -16,7 +16,6 @@ interface FeatureCardProps {
 const FeatureCard = ({ icon: Icon, title, description, items, explanationContent }: FeatureCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Open dialog with more information
   const handleLearnMoreClick = () => {
     setIsDialogOpen(true);
   };
@@ -40,7 +39,7 @@ const FeatureCard = ({ icon: Icon, title, description, items, explanationContent
               {description}
             </CardDescription>
             <motion.div 
-              className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-carbon-100/20 to-transparent rounded-full -mt-10 -mr-10 opacity-0 group-hover:opacity-100" 
+              className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-carbon-100 to-transparent rounded-full -mt-10 -mr-10 opacity-0 group-hover:opacity-0" 
               initial={{ scale: 0 }}
               whileHover={{ scale: 1 }}
               transition={{ duration: 0.3 }}
@@ -71,7 +70,7 @@ const FeatureCard = ({ icon: Icon, title, description, items, explanationContent
               ))}
             </ul>
             <motion.div
-              className="mt-6 pt-4 border-t border-carbon-100 group-hover:border-carbon-200 transition-colors duration-300 opacity-0 group-hover:opacity-100"
+              className="mt-6 pt-4 border-t border-carbon-100 group-hover:border-carbon-200 transition-colors duration-300"
               initial={{ y: 20 }}
               whileHover={{ y: 0 }}
               transition={{ duration: 0.3 }}
@@ -89,7 +88,7 @@ const FeatureCard = ({ icon: Icon, title, description, items, explanationContent
       </motion.div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-gray-800">
+        <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-carbon-100 dark:border-carbon-700">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>

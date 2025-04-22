@@ -17,9 +17,10 @@
   @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm;
 }
 
-/* Remove any backdrop filters that might cause transparency */
+/* Remove any backdrop filters */
 [class*="backdrop-blur"] {
   backdrop-filter: none !important;
+  @apply bg-white dark:bg-gray-800 opacity-100;
 }
 
 /* Force solid backgrounds on common UI components */
@@ -28,13 +29,12 @@
 .dialog,
 .sheet,
 [data-radix-popper-content-wrapper] > * {
-  @apply bg-white dark:bg-gray-800 !important;
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 !important;
   backdrop-filter: none !important;
+  opacity: 1 !important;
 }
 
 /* Ensure sections with secondary backgrounds are solid */
 [class*="bg-secondary"] {
   @apply bg-gray-50 dark:bg-gray-800 !important;
 }
-
-/* ... keep existing code */
