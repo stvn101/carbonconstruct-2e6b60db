@@ -20,5 +20,3 @@
 .auth-tab-trigger:not([data-state="active"]) {
   @apply text-gray-600 bg-gray-100 hover:bg-gray-200 hover:text-gray-800;
 }
-
-/* Add the auth.css to index.css */
