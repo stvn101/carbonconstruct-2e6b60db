@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useCallback, useMemo } from "react";
 import { CalculationInput, CalculationResult, calculateTotalEmissions } from "@/lib/carbonCalculations";
 import { CalculatorContextType } from "./types";
@@ -13,6 +12,8 @@ import {
   handleUpdateEnergy,
   handleRemoveEnergy
 } from "@/utils/calculatorHandlers";
+import { validateCalculationInput, ValidationError } from "@/utils/calculatorValidation";
+import { toast } from "sonner";
 import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonTypes";
 
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {
@@ -27,19 +28,30 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<'materials' | 'transport' | 'energy' | 'results'>('materials');
-  const [error, setError] = useState<Error | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
   const handleCalculate = useCallback(() => {
     try {
-      if (!calculationInput?.materials?.length || !calculationInput?.transport?.length || !calculationInput?.energy?.length) {
-        throw new Error("Please fill in all required fields");
+      const errors = validateCalculationInput(calculationInput);
+      if (errors.length > 0) {
+        setValidationErrors(errors);
+        const errorMessages = errors.map(e => e.message);
+        toast.error(errorMessages[0]);
+        return;
       }
+      
+      setValidationErrors([]);
+      
       const result = calculateTotalEmissions(calculationInput);
       setCalculationResult(result);
-      setError(null);
+      
+      console.log('Calculation completed:', {
+        input: calculationInput,
+        result: result
+      });
     } catch (error) {
-      setError(error as Error);
       console.error("Error calculating emissions:", error);
+      toast.error("Error calculating emissions. Please check your inputs.");
     }
   }, [calculationInput]);
 
@@ -65,7 +77,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setCalculationResult,
     activeTab,
     setActiveTab,
-    error,
+    validationErrors,
     handleAddMaterial: () => setCalculationInput(current => handleAddMaterial(current)),
     handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: any) => 
       setCalculationInput(current => handleUpdateMaterial(current, index, field, value)),
@@ -84,7 +96,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     handleCalculate,
     handleNextTab,
     handlePrevTab
-  }), [calculationInput, calculationResult, activeTab, error, handleCalculate, handleNextTab, handlePrevTab]);
+  }), [calculationInput, calculationResult, activeTab, validationErrors, handleCalculate, handleNextTab, handlePrevTab]);
 
   return (
     <CalculatorContext.Provider value={contextValue}>
