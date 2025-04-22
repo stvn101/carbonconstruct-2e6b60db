@@ -6,7 +6,7 @@ const CTAStats = () => {
   return (
     <div className="flex flex-col md:flex-row justify-center gap-6 text-sm">
       <motion.div 
-        className="flex items-center justify-center bg-white/20 dark:bg-gray-800/90 px-4 py-2 rounded-full"
+        className="flex items-center justify-center bg-white dark:bg-gray-800 px-4 py-2 rounded-full border border-carbon-100 dark:border-carbon-700"
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
@@ -16,7 +16,7 @@ const CTAStats = () => {
         <span>Used by 200+ construction companies</span>
       </motion.div>
       <motion.div 
-        className="flex items-center justify-center bg-white/20 dark:bg-gray-800/90 px-4 py-2 rounded-full"
+        className="flex items-center justify-center bg-white dark:bg-gray-800 px-4 py-2 rounded-full border border-carbon-100 dark:border-carbon-700"
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.2 }}
