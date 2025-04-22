@@ -6,7 +6,7 @@
 }
 
 .auth-tab-trigger {
-  @apply relative transition-all duration-200 py-3;
+  @apply relative flex items-center justify-center transition-all duration-200 py-3 font-medium;
 }
 
 /* Make the active tab have a prominent green background */

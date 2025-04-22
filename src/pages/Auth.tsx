@@ -80,17 +80,17 @@ const Auth = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-6 auth-tabs-list border border-black/30 dark:border-white/20">
+                <TabsList className="grid w-full grid-cols-2 mb-6 auth-tabs-list">
                   <TabsTrigger 
                     value="signin"
-                    className="auth-tab-trigger py-3 font-medium"
+                    className="auth-tab-trigger"
                     aria-label="Sign in tab"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
-                    className="auth-tab-trigger py-3 font-medium"
+                    className="auth-tab-trigger"
                     aria-label="Create account tab"
                   >
                     Create Account
