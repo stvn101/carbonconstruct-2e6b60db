@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { ArrowRight, CalendarDays, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
   }
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
       <div className="relative h-48 overflow-hidden rounded-t-lg">
         <img 
           src={post.imageUrl} 
@@ -76,3 +77,4 @@ const BlogCard = ({ post }: BlogCardProps) => {
 };
 
 export default BlogCard;
+
