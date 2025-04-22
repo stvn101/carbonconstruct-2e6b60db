@@ -15,14 +15,6 @@
   @apply bg-gray-700;
 }
 
-.dark .auth-card .tabs-trigger[data-state="active"] {
-  @apply bg-gray-600 text-carbon-50;
-}
-
-.dark .auth-card .tabs-trigger:not([data-state="active"]) {
-  @apply text-carbon-200;
-}
-
 .dark .auth-card input {
   @apply bg-gray-700 border-gray-600 text-carbon-50;
 }
@@ -41,18 +33,20 @@
 }
 
 .auth-tab-trigger {
-  @apply relative transition-all duration-200 border-b-2 border-transparent;
+  @apply relative transition-all duration-200;
 }
 
+/* Make the active tab have a prominent green background in both modes */
 .auth-tab-trigger[data-state="active"] {
-  @apply bg-carbon-100/70 border-carbon-600 text-carbon-800 font-semibold;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  @apply bg-green-500 text-white font-bold;
 }
 
+/* Dark mode specific styling for active tab */
 .dark .auth-tab-trigger[data-state="active"] {
-  @apply bg-carbon-600 text-white border-carbon-400;
+  @apply bg-green-600 text-white;
 }
 
+/* Hover effect for inactive tabs */
 .auth-tab-trigger:hover:not([data-state="active"]) {
   @apply bg-gray-100 dark:bg-gray-700;
 }

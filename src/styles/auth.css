@@ -2,20 +2,21 @@
 /* Light mode auth component styles */
 
 .auth-tabs-list {
-  @apply border border-black/20 overflow-hidden;
+  @apply border border-black/20 overflow-hidden rounded-md;
 }
 
 .auth-tab-trigger {
-  @apply relative transition-all duration-200;
+  @apply relative transition-all duration-200 py-3;
 }
 
+/* Make the active tab have a prominent green background */
 .auth-tab-trigger[data-state="active"] {
-  @apply bg-carbon-100 text-carbon-800 font-semibold border-b-2 border-carbon-600;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  @apply bg-green-500 text-white font-semibold;
 }
 
+/* Hover effect for inactive tabs */
 .auth-tab-trigger:hover:not([data-state="active"]) {
-  @apply bg-gray-50;
+  @apply bg-gray-100;
 }
 
 .auth-card {

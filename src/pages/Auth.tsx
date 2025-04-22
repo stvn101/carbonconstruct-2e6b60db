@@ -83,14 +83,14 @@ const Auth = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-6 auth-tabs-list border border-black/30 dark:border-white/20">
                   <TabsTrigger 
                     value="signin"
-                    className="auth-tab-trigger dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 py-3 font-medium"
+                    className="auth-tab-trigger py-3 font-medium"
                     aria-label="Sign in tab"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
-                    className="auth-tab-trigger dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 py-3 font-medium"
+                    className="auth-tab-trigger py-3 font-medium"
                     aria-label="Create account tab"
                   >
                     Create Account
