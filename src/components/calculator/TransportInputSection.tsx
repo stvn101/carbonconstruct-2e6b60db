@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Truck } from "lucide-react";
+import { Truck, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TransportInput } from "@/lib/carbonTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -52,13 +52,13 @@ const TransportInputSection = ({
       ))}
       
       <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:justify-between">
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
           <Button 
             type="button" 
             variant="outline" 
             size={isMobile ? "sm" : "default"}
             onClick={onPrev} 
-            className="hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300 text-xs md:text-sm"
+            className="w-full sm:w-auto hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300 text-xs md:text-sm"
           >
             Previous
           </Button>
@@ -66,7 +66,7 @@ const TransportInputSection = ({
             type="button" 
             size={isMobile ? "sm" : "default"}
             onClick={onAddTransport} 
-            className="bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm"
+            className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm mt-2 sm:mt-0"
           >
             Add Transport
           </Button>
@@ -75,7 +75,7 @@ const TransportInputSection = ({
           type="button" 
           size={isMobile ? "sm" : "default"}
           onClick={onNext} 
-          className="bg-carbon-600 hover:bg-carbon-700 text-white mt-2 sm:mt-0 text-xs md:text-sm"
+          className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white mt-2 sm:mt-0 text-xs md:text-sm"
         >
           Next: Energy
         </Button>

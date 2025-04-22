@@ -1,3 +1,5 @@
+
+import React, { useState, useEffect } from "react";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MaterialInput, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
-import React, { useState, useEffect } from "react";
 import { SkeletonContent } from "@/components/ui/skeleton-content";
 
 const MAX_QUANTITY = 10000;
@@ -62,7 +63,6 @@ const MaterialsInputSection = ({
         });
         onUpdateMaterial(index, "quantity", numValue);
       }
-    } else {
     }
   };
   
@@ -109,12 +109,17 @@ const MaterialsInputSection = ({
               value={material.type}
               onValueChange={(value) => onUpdateMaterial(index, "type", value)}
             >
-              <SelectTrigger id={`material-type-${index}`} className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm">
+              <SelectTrigger 
+                id={`material-type-${index}`} 
+                className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              >
                 <SelectValue placeholder="Select material" />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(MATERIAL_FACTORS).map(([key, value]) => (
-                  <SelectItem key={key} value={key} className="text-xs md:text-sm">{value.name}</SelectItem>
+                  <SelectItem key={key} value={key} className="text-xs md:text-sm">
+                    {value.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -137,8 +142,11 @@ const MaterialsInputSection = ({
               aria-describedby={errors[index] ? `material-quantity-error-${index}` : undefined}
             />
             {errors[index] && (
-              <p id={`material-quantity-error-${index}`} className="mt-1 text-xs text-destructive">
-                {errors[index]}
+              <p 
+                id={`material-quantity-error-${index}`} 
+                className="mt-1 text-xs text-destructive flex items-center gap-1"
+              >
+                <AlertCircle className="h-3 w-3" /> {errors[index]}
               </p>
             )}
           </div>
@@ -162,7 +170,7 @@ const MaterialsInputSection = ({
           type="button" 
           size={isMobile ? "sm" : "default"}
           onClick={onAddMaterial} 
-          className="bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm"
+          className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm"
         >
           Add Material
         </Button>
@@ -170,7 +178,7 @@ const MaterialsInputSection = ({
           type="button" 
           size={isMobile ? "sm" : "default"}
           onClick={onNext} 
-          className="bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm"
+          className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm"
         >
           Next: Transport
         </Button>
