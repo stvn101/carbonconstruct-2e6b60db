@@ -1,6 +1,11 @@
 
+// Export sidebar base
 export { Sidebar } from "./sidebar-base";
+
+// Export sidebar context
 export { SidebarProvider, useSidebar } from "./sidebar-context";
+
+// Export sidebar menu
 export { 
   SidebarMenu,
   SidebarMenuItem,
@@ -8,9 +13,11 @@ export {
   SidebarMenuAction,
   sidebarMenuButtonVariants 
 } from "./sidebar-menu";
+
+// Export types
 export type { SidebarContext, SidebarProviderProps, SidebarMenuButtonProps, SidebarMenuActionProps } from "./types";
 
-// Re-export other components from the original sidebar
+// Export other components from the components file
 export {
   SidebarContent,
   SidebarFooter,

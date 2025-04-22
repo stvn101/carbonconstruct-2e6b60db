@@ -2,6 +2,7 @@
 import { VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { TooltipContent } from "../tooltip";
+import { sidebarMenuButtonVariants } from "./sidebar-menu";
 
 export type SidebarContext = {
   state: "expanded" | "collapsed";
