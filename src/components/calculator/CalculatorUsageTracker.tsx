@@ -6,9 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface CalculatorUsageTrackerProps {
   onComplete: () => void;
   demoMode?: boolean;
+  isPremiumUser?: boolean;
 }
 
-const CalculatorUsageTracker = ({ onComplete, demoMode }: CalculatorUsageTrackerProps) => {
+const CalculatorUsageTracker = ({ onComplete, demoMode, isPremiumUser = false }: CalculatorUsageTrackerProps) => {
   const { user } = useAuth();
 
   const recordCalculatorUsage = useCallback(async () => {
@@ -18,7 +19,8 @@ const CalculatorUsageTracker = ({ onComplete, demoMode }: CalculatorUsageTracker
           .from('calculator_usage')
           .insert({ 
             user_id: user.id,
-            ip_address: null
+            ip_address: null,
+            is_premium: isPremiumUser
           });
 
         if (error) {
@@ -30,7 +32,7 @@ const CalculatorUsageTracker = ({ onComplete, demoMode }: CalculatorUsageTracker
     } finally {
       onComplete();
     }
-  }, [user, demoMode, onComplete]);
+  }, [user, demoMode, isPremiumUser, onComplete]);
 
   return null;
 };

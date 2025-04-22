@@ -8,7 +8,7 @@ import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/auth';
 import { ProjectProvider } from './contexts/ProjectContext';
 import { CalculatorProvider } from './contexts/calculator';
-import ErrorBoundaryWrapper from './components/error/ErrorBoundaryWrapper';
+import ErrorBoundary from './components/ErrorBoundary';
 import PageLoading from './components/ui/page-loading';
 import RouteChangeTracker from './components/RouteChangeTracker';
 import SkipToContent from './components/SkipToContent';
@@ -22,7 +22,6 @@ import { useAccessibility } from './hooks/useAccessibility';
 // Lazy load main pages for better initial load performance
 const Index = lazyLoad(() => import('./pages/Index'));
 const NotFound = lazyLoad(() => import('./pages/NotFound'));
-const Calculator = lazyLoad(() => import('./pages/Calculator'));
 
 // Loading fallback for Suspense
 const LoadingFallback = () => (
@@ -42,13 +41,6 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         
-        {/* Calculator route with error boundary */}
-        <Route path="/calculator" element={
-          <ErrorBoundaryWrapper feature="Calculator">
-            <Calculator />
-          </ErrorBoundaryWrapper>
-        } />
-
         {/* Auth routes */}
         {authRoutes}
 
@@ -58,7 +50,7 @@ const AppContent = () => {
         {/* Protected routes */}
         {protectedRoutes}
 
-        {/* Project routes */}
+        {/* Project routes including calculator */}
         {projectRoutes}
 
         <Route path="/case-studies" element={<Navigate to="/" />} />
@@ -71,7 +63,7 @@ const AppContent = () => {
 
 const App: React.FC = () => {
   return (
-    <ErrorBoundaryWrapper feature="Application">
+    <ErrorBoundary feature="Application">
       <HelmetProvider>
         <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
           <RegionProvider>
@@ -89,7 +81,7 @@ const App: React.FC = () => {
           </RegionProvider>
         </ThemeProvider>
       </HelmetProvider>
-    </ErrorBoundaryWrapper>
+    </ErrorBoundary>
   );
 };
 
