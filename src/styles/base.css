@@ -39,4 +39,21 @@
 html.dark [data-radix-popper-content-wrapper] {
   @apply bg-gray-800 border-gray-700;
   --select-trigger-color: hsl(var(--carbon-300));
+  background-color: hsl(220, 14%, 13%) !important;
+}
+
+/* Fix for transparency in tab panels */
+[role="tabpanel"] {
+  background-color: white;
+}
+
+.dark [role="tabpanel"] {
+  background-color: hsl(220, 14%, 13%);
+}
+
+/* Fix for transparent UI components */
+.tabs-content,
+.tab-content {
+  opacity: 1 !important;
+  background-color: inherit;
 }
