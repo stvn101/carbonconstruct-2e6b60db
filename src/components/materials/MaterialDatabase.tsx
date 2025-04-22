@@ -28,16 +28,16 @@ const MaterialDatabase = () => {
     selectedTag
   });
   
-  // Default to Australia since it's our only region
+  // Set the default filter to the global region
   useEffect(() => {
-    if (selectedRegion === "all") {
-      setSelectedRegion("Australia");
+    if (globalRegion !== "National" && selectedRegion === "all") {
+      setSelectedRegion(globalRegion);
     }
-  }, []);
+  }, [globalRegion]);
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion("Australia");
+    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
