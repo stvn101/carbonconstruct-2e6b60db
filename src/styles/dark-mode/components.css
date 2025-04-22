@@ -1,0 +1,80 @@
+
+/* Dark mode component-specific styles */
+
+/* Dropdown and menu styles */
+.dark .dropdown-menu {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .alert {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Card styling */
+.dark .card,
+.dark .bg-white {
+  @apply bg-gray-800 border-gray-700 text-carbon-300;
+}
+
+/* Form elements and inputs */
+.dark .Card, 
+.dark input,
+.dark .Input,
+.dark .input,
+.dark [role="textbox"],
+.dark [role="combobox"],
+.dark [role="dialog"],
+.dark textarea {
+  background-color: hsl(220, 14%, 13%) !important;
+  color: hsl(123, 30%, 80%) !important;
+  border-color: hsl(220, 10%, 25%) !important;
+}
+
+/* Switch component */
+.dark .switch,
+.dark [data-radix-switch-root] {
+  @apply border-carbon-600;
+}
+
+.dark [data-radix-switch-thumb] {
+  @apply bg-white;
+}
+
+.dark [data-state="checked"] {
+  @apply bg-carbon-500 border-carbon-400;
+}
+
+.dark [data-state="unchecked"] {
+  @apply bg-gray-600 border-gray-500;
+}
+
+/* Auth components */
+.dark .auth-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .auth-card .card-header h2,
+.dark .auth-card .card-header h3,
+.dark .auth-card .card-title {
+  @apply text-carbon-50;
+}
+
+.dark .auth-card .tabs-list {
+  @apply bg-gray-700;
+}
+
+.dark .auth-card .tabs-trigger[data-state="active"] {
+  @apply bg-gray-600 text-carbon-50;
+}
+
+.dark .auth-card .tabs-trigger:not([data-state="active"]) {
+  @apply text-carbon-200;
+}
+
+.dark .auth-card input {
+  @apply bg-gray-700 border-gray-600 text-carbon-50;
+}
+
+.dark .auth-card label {
+  @apply text-carbon-200;
+}

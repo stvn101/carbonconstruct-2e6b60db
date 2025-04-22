@@ -1,0 +1,39 @@
+
+/* Dark mode chart styles */
+
+/* Fix for charts in dark mode */
+.dark .recharts-cartesian-axis-line,
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: rgba(130, 200, 130, 0.4);
+}
+
+.dark .recharts-cartesian-grid line {
+  stroke: rgba(130, 200, 130, 0.2);
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  @apply bg-gray-800 border-gray-700 text-carbon-300;
+}
+
+.dark .recharts-text {
+  fill: rgba(130, 200, 130, 0.8);
+}
+
+/* Fix transparency issues for tab content in calculator */
+.dark [data-radix-tabs-content] {
+  background-color: transparent;
+  backdrop-filter: none;
+}
+
+/* Fix background opacity in calculator components */
+.dark .tabs-content {
+  background-color: hsl(220, 14%, 13%) !important;
+  opacity: 1 !important;
+}
+
+/* Ensure calculator sections are not transparent */
+.dark .tab-content,
+.dark [role="tabpanel"] {
+  background-color: transparent;
+  opacity: 1 !important;
+}
