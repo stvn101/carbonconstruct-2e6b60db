@@ -27,26 +27,21 @@
   @apply border-white/40 hover:border-white/60 shadow-lg text-white;
 }
 
-/* Auth tabs styling for both light and dark modes */
-.auth-tabs-list {
-  @apply rounded-md overflow-hidden;
+/* Auth tabs styling for dark mode */
+.dark .auth-tabs-list {
+  @apply border-gray-600 bg-gray-800;
 }
 
-.auth-tab-trigger {
-  @apply relative transition-all duration-200;
+.dark .auth-tab-trigger {
+  @apply text-gray-300;
 }
 
-/* Make the active tab have a prominent green background in both modes */
-.auth-tab-trigger[data-state="active"] {
-  @apply bg-green-500 text-white font-bold;
-}
-
-/* Dark mode specific styling for active tab */
+/* Make the active tab have a prominent green background in dark mode */
 .dark .auth-tab-trigger[data-state="active"] {
   @apply bg-green-600 text-white;
 }
 
-/* Hover effect for inactive tabs */
-.auth-tab-trigger:hover:not([data-state="active"]) {
-  @apply bg-gray-100 dark:bg-gray-700;
+/* Hover effect for inactive tabs in dark mode */
+.dark .auth-tab-trigger:hover:not([data-state="active"]) {
+  @apply bg-gray-700;
 }
