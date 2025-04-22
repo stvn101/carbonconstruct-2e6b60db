@@ -77,7 +77,7 @@ const SustainableBuilding = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + index * 0.1 }}
-                className="bg-background border border-border rounded-lg p-6 hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-gray-800 border border-border rounded-lg p-6 hover:shadow-md transition-shadow"
               >
                 <div className="h-12 w-12 rounded-full bg-carbon-100 flex items-center justify-center mb-4">
                   {item.icon}

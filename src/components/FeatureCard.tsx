@@ -30,7 +30,7 @@ const FeatureCard = ({ icon: Icon, title, description, items, explanationContent
         }}
         transition={{ duration: 0.2 }}
       >
-        <Card className="border-carbon-100 h-full overflow-hidden group hover:border-carbon-300 transition-colors duration-300">
+        <Card className="border-carbon-100 h-full overflow-hidden group hover:border-carbon-300 transition-colors duration-300 bg-white dark:bg-gray-800">
           <CardHeader className="pb-2 relative">
             <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-carbon-100 group-hover:bg-carbon-200 transition-colors duration-300">
               <Icon className="h-5 w-5 text-carbon-700 group-hover:text-carbon-800 transition-all duration-300" />
@@ -89,7 +89,7 @@ const FeatureCard = ({ icon: Icon, title, description, items, explanationContent
       </motion.div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white dark:bg-gray-800">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>

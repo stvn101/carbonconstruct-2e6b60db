@@ -22,4 +22,19 @@
   backdrop-filter: none !important;
 }
 
+/* Force solid backgrounds on common UI components */
+.dropdown-menu,
+.popover,
+.dialog,
+.sheet,
+[data-radix-popper-content-wrapper] > * {
+  @apply bg-white dark:bg-gray-800 !important;
+  backdrop-filter: none !important;
+}
+
+/* Ensure sections with secondary backgrounds are solid */
+[class*="bg-secondary"] {
+  @apply bg-gray-50 dark:bg-gray-800 !important;
+}
+
 /* ... keep existing code */
