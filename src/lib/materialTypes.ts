@@ -1,29 +1,9 @@
 
-export interface MaterialData {
-  name: string;
-  factor: number;
-  unit: string;
-}
+import { ExtendedMaterialData } from './materials';
 
-export interface ExtendedMaterialData extends MaterialData {
-  region: string | undefined;
-  alternativeTo: string | undefined;
-  notes: string | undefined;
-  tags: string[];
-}
+export type MaterialsByRegion = Record<string, number>;
 
 export interface MaterialOption {
   id: string;
   name: string;
-}
-
-export interface FilterProps {
-  searchTerm: string;
-  selectedRegion: string;
-  selectedAlternative: string;
-  selectedTag: string;
-}
-
-export interface MaterialsByRegion {
-  [key: string]: number;
 }

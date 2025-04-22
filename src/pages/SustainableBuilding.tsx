@@ -92,7 +92,7 @@ const SustainableBuilding = () => {
             <h2 className="text-2xl font-bold mb-6">Ready to make your building projects sustainable?</h2>
             <div className="flex flex-wrap gap-4 justify-center">
               <Button asChild size="lg">
-                <Link to="/material-browser">Browse Sustainable Materials</Link>
+                <Link to="/materials">Browse Sustainable Materials</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/pricing">View Pricing Plans</Link>

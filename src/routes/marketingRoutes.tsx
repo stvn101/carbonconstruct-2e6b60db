@@ -19,6 +19,7 @@ const Partners = lazyLoad(() => import('@/pages/Partners'));
 const PrivacyPolicy = lazyLoad(() => import('@/pages/PrivacyPolicy'));
 const CookiePolicy = lazyLoad(() => import('@/pages/CookiePolicy'));
 const DataProcessing = lazyLoad(() => import('@/pages/DataProcessing'));
+const MaterialDatabase = lazyLoad(() => import('@/components/MaterialDatabase'));
 
 export const marketingRoutes = (
   <>
@@ -37,6 +38,7 @@ export const marketingRoutes = (
     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
     <Route path="/cookie-policy" element={<CookiePolicy />} />
     <Route path="/data-processing" element={<DataProcessing />} />
+    <Route path="/materials" element={<MaterialDatabase />} />
     <Route path="/material-browser" element={<Navigate to="/materials" />} />
   </>
 );
