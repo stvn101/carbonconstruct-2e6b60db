@@ -21,10 +21,21 @@ function Calculator() {
     if (location.state?.demoMode) {
       setDemoMode(true);
     }
-  }, [location]);
+    
+    // Check if we've been redirected from authentication
+    if (location.state?.fromAuth && user) {
+      toast.success("Successfully signed in! You can now save your projects.");
+    }
+  }, [location, user]);
 
   const handleSignUp = () => {
     navigate("/auth", { state: { returnTo: "/calculator" } });
+  };
+  
+  const exitDemoMode = () => {
+    setDemoMode(false);
+    // Reset location state so demo mode isn't persisted on refresh
+    navigate("/calculator", { replace: true });
   };
 
   return (
@@ -41,7 +52,7 @@ function Calculator() {
               You're using the calculator in demo mode. Your calculations won't be saved.
               <div className="mt-2">
                 <Button onClick={handleSignUp} className="mr-2">Sign Up</Button>
-                <Button variant="outline" onClick={() => setDemoMode(false)}>Exit Demo</Button>
+                <Button variant="outline" onClick={exitDemoMode}>Exit Demo</Button>
               </div>
             </AlertDescription>
           </Alert>

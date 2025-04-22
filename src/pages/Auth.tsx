@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, lazy, Suspense } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
+import { NoAuth } from "@/components/NoAuth";
 
 // Lazy load the auth forms
 const LoginForm = lazy(() => import("@/components/auth/LoginForm"));
@@ -15,15 +16,17 @@ const RegisterForm = lazy(() => import("@/components/auth/RegisterForm"));
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("signin");
+  const returnTo = location.state?.returnTo || '/dashboard';
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to returnTo or dashboard
     if (user) {
-      navigate('/dashboard');
+      navigate(returnTo, { state: { fromAuth: true } });
     }
-  }, [user, navigate]);
+  }, [user, navigate, returnTo]);
 
   return (
     <>
@@ -60,7 +63,7 @@ const Auth = () => {
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl">Authentication</CardTitle>
               <CardDescription>
-                Enter your credentials to access your account
+                {location.state?.returnTo ? 'Sign in to save your project' : 'Enter your credentials to access your account'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -80,11 +83,11 @@ const Auth = () => {
                   </div>
                 }>
                   <TabsContent value="signin">
-                    <LoginForm />
+                    <LoginForm returnTo={returnTo} />
                   </TabsContent>
                   
                   <TabsContent value="signup">
-                    <RegisterForm />
+                    <RegisterForm returnTo={returnTo} />
                   </TabsContent>
                 </Suspense>
               </Tabs>
