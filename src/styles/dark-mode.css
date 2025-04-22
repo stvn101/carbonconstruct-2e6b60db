@@ -107,7 +107,6 @@
 
 /* Improved Select dropdown visibility - fix for see-through dropdowns */
 .dark [data-radix-select-content] {
-  @apply bg-gray-800 border-gray-700 !important;
   background-color: hsl(220, 14%, 13%) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
@@ -174,4 +173,23 @@
 
 .dark .auth-card label {
   @apply text-carbon-200;
+}
+
+/* Fix transparency issues for tab content in calculator */
+.dark [data-radix-tabs-content] {
+  background-color: transparent;
+  backdrop-filter: none;
+}
+
+/* Fix for background opacity in calculator components */
+.dark .tabs-content {
+  background-color: hsl(220, 14%, 13%) !important;
+  opacity: 1 !important;
+}
+
+/* Ensure calculator sections are not transparent */
+.dark .tab-content,
+.dark [role="tabpanel"] {
+  background-color: transparent;
+  opacity: 1 !important;
 }

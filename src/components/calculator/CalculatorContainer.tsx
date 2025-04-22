@@ -107,6 +107,7 @@ const CalculatorContainer = ({
             demoMode={demoMode}
           />
         
+          {/* Place tabs after project name card to match original layout */}
           <CalculatorTabs 
             activeTab={activeTab || "materials"}
             setActiveTab={setActiveTab}
@@ -116,23 +117,26 @@ const CalculatorContainer = ({
           />
         </motion.div>
         
-        <CalculatorTabContents
-          calculationInput={calculationInput}
-          calculationResult={calculationResult}
-          onUpdateMaterial={handleUpdateMaterial}
-          onAddMaterial={handleAddMaterial}
-          onRemoveMaterial={handleRemoveMaterial}
-          onUpdateTransport={handleUpdateTransport}
-          onAddTransport={handleAddTransport}
-          onRemoveTransport={handleRemoveTransport}
-          onUpdateEnergy={handleUpdateEnergy}
-          onAddEnergy={handleAddEnergy}
-          onRemoveEnergy={handleRemoveEnergy}
-          onCalculate={handleCalculateWithTracking}
-          onPrevTab={handlePrevTab}
-          onNextTab={handleNextTab}
-          demoMode={demoMode}
-        />
+        {/* Ensure tab contents have proper styling to avoid transparency */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
+          <CalculatorTabContents
+            calculationInput={calculationInput}
+            calculationResult={calculationResult}
+            onUpdateMaterial={handleUpdateMaterial}
+            onAddMaterial={handleAddMaterial}
+            onRemoveMaterial={handleRemoveMaterial}
+            onUpdateTransport={handleUpdateTransport}
+            onAddTransport={handleAddTransport}
+            onRemoveTransport={handleRemoveTransport}
+            onUpdateEnergy={handleUpdateEnergy}
+            onAddEnergy={handleAddEnergy}
+            onRemoveEnergy={handleRemoveEnergy}
+            onCalculate={handleCalculateWithTracking}
+            onPrevTab={handlePrevTab}
+            onNextTab={handleNextTab}
+            demoMode={demoMode}
+          />
+        </div>
         
         <PageLoading isLoading={isSaving} text="Saving project..." />
 
