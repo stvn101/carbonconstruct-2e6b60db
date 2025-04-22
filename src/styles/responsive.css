@@ -33,4 +33,34 @@
     font-size: 0.875rem;
     line-height: 1.5rem;
   }
+
+  /* Ensure chart tooltips don't get cut off on mobile screens */
+  .recharts-tooltip-wrapper {
+    max-width: 80vw !important;
+    pointer-events: none !important;
+    z-index: 1000 !important;
+  }
+
+  .recharts-default-tooltip {
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Ensure tooltips stay within viewport on all screen sizes */
+.recharts-tooltip-wrapper {
+  pointer-events: none;
+}
+
+/* Fix for chart tooltips that may get cut off at viewport edges */
+[data-radix-popper-content-wrapper],
+.recharts-tooltip-wrapper {
+  overflow: visible !important;
+  pointer-events: none;
+}
+
+.recharts-tooltip-container {
+  max-width: calc(100vw - 40px);
 }

@@ -87,9 +87,9 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
     if (active && payload && payload.length) {
       const percentage = ((payload[0].value / totalCategoryEmissions) * 100).toFixed(1);
       return (
-        <div className="bg-background border border-border rounded-md shadow-md p-3 text-sm">
+        <div className="bg-background border border-border rounded-md shadow-md p-3 text-sm max-w-[90vw]">
           <p className="font-medium">{label}</p>
-          <p className="text-carbon-600">
+          <p className="text-carbon-600 dark:text-carbon-300">
             {payload[0].value.toFixed(2)} kg CO2e ({percentage}%)
           </p>
         </div>
@@ -116,12 +116,19 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
             <>
               <motion.div className="h-72" variants={chartVariants}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={filteredChartData}>
+                  <BarChart data={filteredChartData} margin={{ right: 10, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis 
                       dataKey="name" 
                       tick={{ fontSize: 12 }}
                       tickLine={{ stroke: "#e5e7eb" }}
+                      height={60}
+                      tickFormatter={(value) => {
+                        // For small screens, truncate long names
+                        return window.innerWidth < 640 && value.length > 10
+                          ? `${value.substring(0, 8)}...`
+                          : value;
+                      }}
                     />
                     <YAxis 
                       label={{ 
@@ -134,7 +141,7 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
                       tick={{ fontSize: 12 }}
                       tickLine={{ stroke: "#e5e7eb" }}
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} wrapperStyle={{ zIndex: 1000 }} />
                     <Bar 
                       dataKey="value" 
                       fill={fillColor} 
@@ -160,8 +167,8 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
                       className="space-y-1"
                     >
                       <div className="flex justify-between text-sm">
-                        <span className="font-medium">{item.name}</span>
-                        <span>{item.value.toFixed(2)} kg CO2e ({percentage.toFixed(1)}%)</span>
+                        <span className="font-medium truncate max-w-[60%]">{item.name}</span>
+                        <span className="shrink-0">{item.value.toFixed(2)} kg CO2e ({percentage.toFixed(1)}%)</span>
                       </div>
                       <Progress 
                         value={percentage} 
