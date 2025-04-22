@@ -75,13 +75,13 @@ const ErrorBoundaryWrapper = ({ children, feature }: ErrorBoundaryWrapperProps) 
   return (
     <ErrorBoundary 
       feature={feature}
-      fallbackRender={({ error, resetErrorBoundary }) => (
+      fallback={
         <ErrorFallback 
-          error={error} 
-          resetErrorBoundary={resetErrorBoundary} 
+          error={new Error("An error occurred")} 
+          resetErrorBoundary={() => {}} 
           feature={feature} 
         />
-      )}
+      }
     >
       {children}
     </ErrorBoundary>

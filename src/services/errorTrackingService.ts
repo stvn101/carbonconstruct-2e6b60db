@@ -3,6 +3,13 @@
 
 type ErrorMetadata = Record<string, any>;
 
+interface PerformanceEntryWithTiming extends PerformanceEntry {
+  processingStart?: number;
+  startTime: number;
+  value?: number;
+  hadRecentInput?: boolean;
+}
+
 class ErrorTrackingService {
   private static instance: ErrorTrackingService;
   private isInitialized = false;
@@ -67,8 +74,9 @@ class ErrorTrackingService {
       // Monitor First Input Delay (FID)
       const fidObserver = new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
-          if (entry.processingStart && entry.processingStart - entry.startTime > 100) {
-            console.warn('High FID detected:', entry.processingStart - entry.startTime);
+          const typedEntry = entry as PerformanceEntryWithTiming;
+          if (typedEntry.processingStart && typedEntry.processingStart - typedEntry.startTime > 100) {
+            console.warn('High FID detected:', typedEntry.processingStart - typedEntry.startTime);
           }
         }
       });
@@ -78,8 +86,9 @@ class ErrorTrackingService {
       const clsObserver = new PerformanceObserver((entryList) => {
         let clsValue = 0;
         for (const entry of entryList.getEntries()) {
-          if (!(entry as any).hadRecentInput) {
-            clsValue += (entry as any).value;
+          const typedEntry = entry as PerformanceEntryWithTiming;
+          if (!typedEntry.hadRecentInput) {
+            clsValue += typedEntry.value || 0;
           }
         }
         if (clsValue > 0.1) {
