@@ -23,12 +23,28 @@
 /* Prevent transparency in background elements */
 .dark [class*="bg-white/"], 
 .dark [class*="bg-gray-800/"],
-.dark [class*="bg-background/"] {
+.dark [class*="bg-background/"],
+.dark [class*="bg-secondary/"] {
   @apply bg-gray-800;
 }
 
 [class*="bg-white/"], 
 [class*="bg-gray-800/"],
-[class*="bg-background/"] {
+[class*="bg-background/"],
+[class*="bg-secondary/"] {
   @apply bg-white dark:bg-gray-800;
+}
+
+/* Force all cards to be opaque */
+.dark .card,
+.dark [class*="card"],
+.dark [data-radix-popper-content-wrapper] > * {
+  @apply bg-gray-800 border-gray-700 !important;
+  backdrop-filter: none !important;
+}
+
+/* Remove all backdrop-blur effects in dark mode */
+.dark [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  @apply bg-gray-800 !important;
 }
