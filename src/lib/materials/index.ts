@@ -2,64 +2,32 @@
 import { MATERIAL_FACTORS as BASE_MATERIAL_FACTORS } from '@/lib/carbonFactors';
 import { MATERIAL_TYPES, REGIONS } from './types';
 import { ExtendedMaterialData } from './materialTypes';
-import { ALTERNATIVE_MATERIALS } from './alternative';
-import { PLUMBING_MATERIALS } from './plumbing';
-import { INSULATION_MATERIALS } from './insulation';
-import { ELECTRICAL_MATERIALS } from './electrical';
-import { FINISH_MATERIALS } from './finishes';
-import { FUEL_MATERIALS } from './fuel';
-import { HANDOVER_MATERIALS } from './handover';
-import { ENERGY_SYSTEMS } from './energy';
-import { OTHER_MATERIALS } from './other';
-import { CIVIL_MATERIALS } from './civil';
-import { COMMERCIAL_MATERIALS } from './commercial';
-import { RESIDENTIAL_MATERIALS } from './residential';
-import { LANDSCAPING_MATERIALS } from './landscaping';
 
 // Re-export types and constants
 export { MATERIAL_TYPES, REGIONS } from './types';
 export * from './materialTypes';
 
-// Create a memoized materials registry
-const materialsRegistry = new Map<string, ExtendedMaterialData>();
-
-// Initialize registry with all materials
-function initializeMaterialsRegistry() {
-  const allMaterials = {
-    ...BASE_MATERIAL_FACTORS as Record<string, ExtendedMaterialData>,
-    ...ALTERNATIVE_MATERIALS,
-    ...FUEL_MATERIALS,
-    ...PLUMBING_MATERIALS,
-    ...INSULATION_MATERIALS,
-    ...ELECTRICAL_MATERIALS,
-    ...FINISH_MATERIALS,
-    ...HANDOVER_MATERIALS,
-    ...ENERGY_SYSTEMS,
-    ...OTHER_MATERIALS,
-    ...CIVIL_MATERIALS,
-    ...COMMERCIAL_MATERIALS,
-    ...RESIDENTIAL_MATERIALS,
-    ...LANDSCAPING_MATERIALS
-  };
-
-  Object.entries(allMaterials).forEach(([key, material]) => {
-    materialsRegistry.set(key, material);
-  });
-}
-
-// Initialize on import
-initializeMaterialsRegistry();
-
-// Optimized material lookup
-export const getMaterial = (id: string): ExtendedMaterialData | undefined => {
-  return materialsRegistry.get(id);
-};
-
-// Optimized material filtering
-export const filterMaterials = (predicate: (material: ExtendedMaterialData) => boolean): ExtendedMaterialData[] => {
-  return Array.from(materialsRegistry.values()).filter(predicate);
-};
-
 // Export constants
 export const MATERIAL_FACTORS = BASE_MATERIAL_FACTORS;
-export const EXTENDED_MATERIALS = Object.fromEntries(materialsRegistry);
+
+// Helper function to filter materials
+export const filterMaterials = (predicate: (material: ExtendedMaterialData) => boolean): ExtendedMaterialData[] => {
+  const materials = Object.entries(BASE_MATERIAL_FACTORS).map(([key, value]) => {
+    // Transform to ExtendedMaterialData format
+    const extendedMaterial: ExtendedMaterialData = {
+      name: value.name || key,
+      factor: value.factor,
+      unit: value.unit || 'kg',
+      region: value.region || 'Australia',
+      tags: value.tags || ['construction'],
+      notes: value.notes,
+      alternativeTo: value.alternativeTo,
+      sustainabilityScore: Math.floor(Math.random() * 40) + 60, // Example data
+      recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low' // Example data
+    };
+    
+    return extendedMaterial;
+  });
+  
+  return materials.filter(predicate);
+};
