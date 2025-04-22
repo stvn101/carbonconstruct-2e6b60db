@@ -1,0 +1,24 @@
+
+/* Light mode auth component styles */
+
+.auth-card {
+  @apply bg-white border-gray-200;
+}
+
+.auth-card .tabs-list {
+  @apply bg-gray-100 border border-gray-300 p-1 rounded-md;
+}
+
+.auth-tab-trigger {
+  @apply transition-all duration-200;
+}
+
+.auth-tab-trigger[data-state="active"] {
+  @apply bg-white text-foreground shadow-sm border-b-2 border-green-500 font-medium;
+}
+
+.auth-tab-trigger:not([data-state="active"]) {
+  @apply text-gray-600 bg-gray-100 hover:bg-gray-200 hover:text-gray-800;
+}
+
+/* Add the auth.css to index.css */

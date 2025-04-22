@@ -24,7 +24,7 @@ const Auth = () => {
 
   // Improve accessibility
   useA11y({
-    title: "Sign In | CarbonConstruct",
+    title: activeTab === "signin" ? "Sign In | CarbonConstruct" : "Create Account | CarbonConstruct",
     announceRouteChanges: true,
     focusMainContentOnRouteChange: true
   });
@@ -39,7 +39,7 @@ const Auth = () => {
   return (
     <>
       <Helmet>
-        <title>Sign In | CarbonConstruct</title>
+        <title>{activeTab === "signin" ? "Sign In" : "Create Account"} | CarbonConstruct</title>
       </Helmet>
       <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-8">
         <motion.div
@@ -80,17 +80,17 @@ const Auth = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700 tabs-list">
+                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700 tabs-list bg-gray-100">
                   <TabsTrigger 
                     value="signin"
-                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
+                    className="auth-tab-trigger data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
                     aria-label="Sign in tab"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
-                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
+                    className="auth-tab-trigger data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
                     aria-label="Create account tab"
                   >
                     Create Account
