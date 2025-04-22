@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
 import { NoAuth } from "@/components/NoAuth";
+import { useA11y } from "@/hooks/useA11y";
 
 // Lazy load the auth forms
 const LoginForm = lazy(() => import("@/components/auth/LoginForm"));
@@ -20,6 +21,13 @@ const Auth = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("signin");
   const returnTo = location.state?.returnTo || '/dashboard';
+
+  // Improve accessibility
+  useA11y({
+    title: "Sign In | CarbonConstruct",
+    announceRouteChanges: true,
+    focusMainContentOnRouteChange: true
+  });
 
   useEffect(() => {
     // If user is already logged in, redirect to returnTo or dashboard
@@ -55,14 +63,14 @@ const Auth = () => {
             <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-tr from-carbon-600 to-carbon-400 flex items-center justify-center mb-4">
               <div className="h-4 w-4 bg-white rounded-full"></div>
             </div>
-            <h1 className="text-2xl font-bold">Welcome to CarbonConstruct</h1>
-            <p className="text-muted-foreground mt-2">Sign in to measure and reduce your construction carbon footprint</p>
+            <h1 className="text-2xl font-bold dark:text-carbon-50">Welcome to CarbonConstruct</h1>
+            <p className="text-muted-foreground mt-2 dark:text-carbon-200">Sign in to measure and reduce your construction carbon footprint</p>
           </div>
           
           <Card className="auth-card dark:border-gray-700 dark:bg-gray-800">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl dark:text-carbon-200">Authentication</CardTitle>
-              <CardDescription className="dark:text-carbon-300">
+              <CardTitle className="text-2xl dark:text-carbon-50">Authentication</CardTitle>
+              <CardDescription className="dark:text-carbon-200">
                 {location.state?.returnTo ? 'Sign in to save your project' : 'Enter your credentials to access your account'}
               </CardDescription>
             </CardHeader>
@@ -72,24 +80,27 @@ const Auth = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700">
+                <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700 tabs-list">
                   <TabsTrigger 
                     value="signin"
-                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-200 dark:text-carbon-300"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
+                    aria-label="Sign in tab"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
-                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-200 dark:text-carbon-300"
+                    className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-carbon-50 dark:text-carbon-200 tabs-trigger"
+                    aria-label="Create account tab"
                   >
                     Create Account
                   </TabsTrigger>
                 </TabsList>
                 
                 <Suspense fallback={
-                  <div className="flex justify-center p-4">
+                  <div className="flex justify-center p-4" aria-live="polite" aria-busy="true">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-carbon-600 dark:border-carbon-400"></div>
+                    <span className="sr-only">Loading authentication forms...</span>
                   </div>
                 }>
                   <TabsContent value="signin">

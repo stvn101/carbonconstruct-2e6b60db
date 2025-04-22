@@ -1,5 +1,5 @@
+
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useCalculator } from "@/contexts/calculator";
 import { useProjects } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/auth";
@@ -7,16 +7,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorHeader from "./calculator/CalculatorHeader";
-import ProjectNameCard from "./calculator/ProjectNameCard";
-import CalculatorTabs from "./calculator/CalculatorTabs";
-import PageLoading from "./ui/page-loading";
-import SaveProjectConfirmDialog from "./calculator/SaveProjectConfirmDialog";
-import CalculatorUsageTracker from "./calculator/CalculatorUsageTracker";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import CalculatorAlerts from "./calculator/CalculatorAlerts";
+import CalculatorContainer from "./calculator/CalculatorContainer";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -31,7 +23,6 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const isMobile = useIsMobile();
 
   // Try to access calculator context, handle errors gracefully
   let calculatorContext;
@@ -45,9 +36,6 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
   const {
     calculationInput,
     calculationResult,
-    activeTab,
-    setActiveTab,
-    handleCalculate
   } = calculatorContext;
 
   const isExistingProject = !!projects.find(
@@ -110,111 +98,41 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
       setShowSaveDialog(false);
     }
   };
-
-  const handleCalculateWithTracking = () => {
-    if (isCalculating) return;
-    setIsCalculating(true);
-    
-    try {
-      handleCalculate();
-      setTimeout(() => {
-        setIsCalculating(false);
-      }, 100);
-    } catch (error) {
-      console.error("Error during calculation:", error);
-      setIsCalculating(false);
-      toast.error("Calculation failed. Please try again.");
-    }
-  };
   
   const handleSignIn = () => {
     navigate("/auth", { state: { returnTo: "/calculator" } });
   };
 
   return (
-    <TooltipProvider>
-      <div className="container mx-auto px-4 md:px-6">
-        <CalculatorHeader />
-        
-        {demoMode && (
-          <Alert className="mb-6 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/30 dark:border-yellow-800">
-            <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-            <AlertTitle className="text-yellow-800 dark:text-yellow-300">Demo Mode</AlertTitle>
-            <AlertDescription className="text-yellow-700 dark:text-yellow-400">
-              You're using the calculator in demo mode. Your calculations won't be saved.
-              {!user && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Button onClick={handleSignIn} size="sm" className="bg-carbon-600 hover:bg-carbon-700 text-white">
-                    Sign In to Save
-                  </Button>
-                </div>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {authError && (
-          <Alert className="mb-6 bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800">
-            <ExclamationTriangleIcon className="h-4 w-4 text-red-600 dark:text-red-400" />
-            <AlertTitle className="text-red-800 dark:text-red-300">Authentication Required</AlertTitle>
-            <AlertDescription className="text-red-700 dark:text-red-400">
-              {authError}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button onClick={handleSignIn} size="sm" className="bg-carbon-600 hover:bg-carbon-700 text-white">
-                  Sign In
-                </Button>
-                <Button 
-                  onClick={() => setAuthError(null)} 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-red-200 dark:border-red-800"
-                >
-                  Continue in Demo Mode
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-6"
-        >
-          <ProjectNameCard
-            projectName={projectName}
-            onProjectNameChange={setProjectName}
-            onSave={handleSaveClick}
-            isSaving={isSaving}
-            demoMode={demoMode}
-          />
-        
-          <CalculatorTabs 
-            isMobile={isMobile}
-            activeTab={activeTab || "materials"}
-            setActiveTab={setActiveTab}
-            onCalculate={handleCalculateWithTracking}
-          />
-        </motion.div>
-        
-        <PageLoading isLoading={isSaving} text="Saving project..." />
-
-        <SaveProjectConfirmDialog
-          isOpen={showSaveDialog}
-          projectName={projectName}
-          isSaving={isSaving}
-          onConfirm={handleSaveConfirm}
-          onCancel={() => setShowSaveDialog(false)}
-          isOverwrite={isExistingProject}
-        />
-
-        <CalculatorUsageTracker
-          demoMode={demoMode}
-          onComplete={() => setIsCalculating(false)}
-        />
-      </div>
-    </TooltipProvider>
+    <div className="container mx-auto px-4 md:px-6">
+      <CalculatorHeader />
+      
+      <CalculatorAlerts 
+        demoMode={demoMode} 
+        authError={authError}
+        onAuthErrorClear={() => setAuthError(null)}
+        onSignIn={handleSignIn}
+      />
+      
+      <CalculatorContainer
+        projectName={projectName}
+        setProjectName={setProjectName}
+        authError={authError}
+        setAuthError={setAuthError}
+        isSaving={isSaving}
+        setIsSaving={setIsSaving}
+        showSaveDialog={showSaveDialog}
+        setShowSaveDialog={setShowSaveDialog}
+        demoMode={demoMode}
+        isCalculating={isCalculating}
+        setIsCalculating={setIsCalculating}
+        onSaveConfirm={handleSaveConfirm}
+        onSaveClick={handleSaveClick}
+        onSignIn={handleSignIn}
+        isExistingProject={isExistingProject}
+        calculatorContext={calculatorContext}
+      />
+    </div>
   );
 };
 
