@@ -16,3 +16,11 @@
   @apply bg-gray-800 border-gray-700 text-carbon-300;
 }
 
+/* Navbar specific styles */
+.dark-navbar {
+  @apply bg-gray-900/95 border-gray-800;
+}
+
+.dark .navbar-container {
+  @apply bg-gray-900/95;
+}
