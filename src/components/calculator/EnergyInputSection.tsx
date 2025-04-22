@@ -9,6 +9,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import React, { useState } from "react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
+// Define the maximum energy amount allowed per NCC 2025 regulations
+const MAX_ENERGY_AMOUNT = 10000; // 10,000 kWh
+
 interface EnergyInputSectionProps {
   energyItems: EnergyInput[];
   onUpdateEnergy: (index: number, field: keyof EnergyInput, value: string | number) => void;
@@ -51,6 +54,13 @@ const EnergyInputSection = ({
       if (numValue < 0) {
         setErrors(prev => ({ ...prev, [index]: "Amount cannot be negative" }));
         onUpdateEnergy(index, "amount", numValue);
+      } else if (numValue > MAX_ENERGY_AMOUNT) {
+        // Maximum value error
+        setErrors(prev => ({ 
+          ...prev, 
+          [index]: `Maximum amount is ${MAX_ENERGY_AMOUNT.toLocaleString()} ${ENERGY_FACTORS[energyItems[index].type].unit}` 
+        }));
+        onUpdateEnergy(index, "amount", numValue);
       } else {
         setErrors(prev => {
           const newErrors = { ...prev };
@@ -59,7 +69,6 @@ const EnergyInputSection = ({
         });
         onUpdateEnergy(index, "amount", numValue);
       }
-    } else {
     }
   };
   
@@ -115,8 +124,9 @@ const EnergyInputSection = ({
               value={energy.amount === 0 ? '' : energy.amount}
               onChange={(e) => handleAmountChange(index, e.target.value)}
               min={0}
+              max={MAX_ENERGY_AMOUNT}
               onFocus={handleFocus}
-              className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              className={`mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm ${errors[index] ? 'border-destructive' : ''}`}
               aria-invalid={errors[index] ? "true" : "false"}
               aria-describedby={errors[index] ? `energy-amount-error-${index}` : undefined}
             />
@@ -175,4 +185,3 @@ const EnergyInputSection = ({
 };
 
 export default EnergyInputSection;
-

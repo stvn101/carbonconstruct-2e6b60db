@@ -1,3 +1,4 @@
+
 import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Transport, TransportInput, TRANSPORT_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import React, { useState } from "react";
+
+// Define the maximum values allowed per NCC 2025 regulations
+const MAX_DISTANCE = 10000; // 10,000 km
+const MAX_WEIGHT = 10000;   // 10,000 kg
 
 interface TransportInputSectionProps {
   transportItems: TransportInput[];
@@ -52,6 +57,7 @@ const TransportInputSection = ({
     
     if (!isNaN(numValue)) {
       if (numValue < 0) {
+        // Negative value error
         setErrors(prev => {
           const newErrors = { ...prev };
           if (!newErrors[index]) {
@@ -61,7 +67,22 @@ const TransportInputSection = ({
           return newErrors;
         });
         onUpdateTransport(index, field, numValue);
+      } else if ((field === 'distance' && numValue > MAX_DISTANCE) || 
+                (field === 'weight' && numValue > MAX_WEIGHT)) {
+        // Maximum value error
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          if (!newErrors[index]) {
+            newErrors[index] = {};
+          }
+          const maxValue = field === 'distance' ? MAX_DISTANCE : MAX_WEIGHT;
+          const unit = field === 'distance' ? 'km' : 'kg';
+          newErrors[index][field] = `Maximum ${field} is ${maxValue.toLocaleString()} ${unit}`;
+          return newErrors;
+        });
+        onUpdateTransport(index, field, numValue);
       } else {
+        // Valid value
         setErrors(prev => {
           const newErrors = { ...prev };
           if (newErrors[index] && newErrors[index][field]) {
@@ -74,7 +95,6 @@ const TransportInputSection = ({
         });
         onUpdateTransport(index, field, numValue);
       }
-    } else {
     }
   };
   
@@ -112,8 +132,9 @@ const TransportInputSection = ({
               value={transport.distance === 0 ? '' : transport.distance}
               onChange={(e) => handleInputChange(index, "distance", e.target.value)}
               min={0}
+              max={MAX_DISTANCE}
               onFocus={handleFocus}
-              className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              className={`mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm ${errors[index]?.distance ? 'border-destructive' : ''}`}
               aria-invalid={errors[index]?.distance ? "true" : "false"}
               aria-describedby={errors[index]?.distance ? `transport-distance-error-${index}` : undefined}
             />
@@ -132,8 +153,9 @@ const TransportInputSection = ({
               value={transport.weight === 0 ? '' : transport.weight}
               onChange={(e) => handleInputChange(index, "weight", e.target.value)}
               min={0}
+              max={MAX_WEIGHT}
               onFocus={handleFocus}
-              className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              className={`mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm ${errors[index]?.weight ? 'border-destructive' : ''}`}
               aria-invalid={errors[index]?.weight ? "true" : "false"}
               aria-describedby={errors[index]?.weight ? `transport-weight-error-${index}` : undefined}
             />
