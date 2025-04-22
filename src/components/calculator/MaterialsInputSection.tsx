@@ -1,4 +1,3 @@
-
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,8 @@ import { MaterialInput, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import React, { useState, useEffect } from "react";
 import { SkeletonContent } from "@/components/ui/skeleton-content";
+
+const MAX_QUANTITY = 10000;
 
 interface MaterialsInputSectionProps {
   materials: MaterialInput[];
@@ -26,23 +27,17 @@ const MaterialsInputSection = ({
 }: MaterialsInputSectionProps) => {
   const isMobile = useIsMobile();
   
-  // Manage validation errors for negative quantities per material index
   const [errors, setErrors] = useState<Record<number, string>>({});
-  // Add loading state
   const [isLoading, setIsLoading] = useState(true);
   
-  // Handle focus to select all text when clicking on input
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.select();
   };
   
-  // Handle input change with validation for negative values
   const handleQuantityChange = (index: number, value: string) => {
-    // Parse value to number if possible
     const numValue = Number(value);
     
     if (value === "") {
-      // Clear input, clear error, allow empty string
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[index];
@@ -54,12 +49,12 @@ const MaterialsInputSection = ({
     
     if (!isNaN(numValue)) {
       if (numValue < 0) {
-        // Set validation error for negative number
         setErrors(prev => ({ ...prev, [index]: "Quantity cannot be negative" }));
-        // Still update, or block? We'll update but keep error displayed
+        onUpdateMaterial(index, "quantity", numValue);
+      } else if (numValue > MAX_QUANTITY) {
+        setErrors(prev => ({ ...prev, [index]: `Maximum quantity is ${MAX_QUANTITY} ${MATERIAL_FACTORS[materials[index].type].unit}` }));
         onUpdateMaterial(index, "quantity", numValue);
       } else {
-        // Clear error if previously set
         setErrors(prev => {
           const newErrors = { ...prev };
           delete newErrors[index];
@@ -68,16 +63,13 @@ const MaterialsInputSection = ({
         onUpdateMaterial(index, "quantity", numValue);
       }
     } else {
-      // Invalid number (like letters) - ignore update
-      // Alternatively, we could block input or give error, but for now do nothing
     }
   };
   
-  // Simulate material options loading time
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 800); // Simulate loading for 800ms
+    }, 800);
     
     return () => clearTimeout(timer);
   }, []);
@@ -138,8 +130,9 @@ const MaterialsInputSection = ({
               value={material.quantity === 0 ? '' : material.quantity}
               onChange={(e) => handleQuantityChange(index, e.target.value)}
               min={0}
+              max={MAX_QUANTITY}
               onFocus={handleFocus}
-              className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+              className={`mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm ${errors[index] ? 'border-destructive' : ''}`}
               aria-invalid={errors[index] ? "true" : "false"}
               aria-describedby={errors[index] ? `material-quantity-error-${index}` : undefined}
             />
