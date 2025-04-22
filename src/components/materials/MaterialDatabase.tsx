@@ -13,6 +13,7 @@ const MaterialDatabase = () => {
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const { selectedRegion: globalRegion } = useRegion();
   
+  // Setup data using our hook
   const {
     filteredMaterials,
     materialsByRegion,
@@ -29,7 +30,7 @@ const MaterialDatabase = () => {
   
   // Set the default filter to the global region
   useEffect(() => {
-    if (globalRegion !== "National") {
+    if (globalRegion !== "National" && selectedRegion === "all") {
       setSelectedRegion(globalRegion);
     }
   }, [globalRegion]);
@@ -40,6 +41,12 @@ const MaterialDatabase = () => {
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
+
+  console.log("Materials data loaded:", {
+    count: filteredMaterials.length,
+    regions: allRegions,
+    tags: allTags
+  });
 
   return (
     <div className="container mx-auto px-4 py-8 content-top-spacing">
