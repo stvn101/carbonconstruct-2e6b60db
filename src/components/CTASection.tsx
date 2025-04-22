@@ -1,7 +1,5 @@
-
 import { useEffect } from "react";
 import CTAContainer from "./cta/CTAContainer";
-import CTAStats from "./cta/CTAStats";
 
 const CTASection = () => {
   // Track CTA view for analytics
@@ -44,7 +42,7 @@ const CTASection = () => {
             Join construction companies across the world who are reducing their carbon footprint and meeting sustainability goals with CarbonConstruct.
           </p>
           <CTAContainer />
-          <CTAStats />
+          {/* Removed CTAStats component */}
         </div>
       </div>
     </section>
