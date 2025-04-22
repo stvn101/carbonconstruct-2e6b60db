@@ -6,6 +6,7 @@ import HeroSection from "@/components/HeroSection";
 import ThemeToggle from "@/components/ThemeToggle";
 import SEO from "@/components/SEO";
 import CalculatorDemoVideo from "@/components/CalculatorDemoVideo";
+import { useA11y } from "@/hooks/useA11y";
 
 const FeaturesSection = lazy(() => import("@/components/FeaturesSection"));
 const BenefitsSection = lazy(() => import("@/components/BenefitsSection"));
@@ -19,6 +20,11 @@ if (typeof window !== 'undefined') {
 }
 
 const Index = () => {
+  useA11y({
+    title: "CarbonConstruct - Sustainable Carbon Management for Construction",
+    announceRouteChanges: true,
+  });
+
   useEffect(() => {
     const sections = ['learn-more', 'features', 'testimonials', 'demo'];
 
@@ -105,7 +111,7 @@ const Index = () => {
         type="website"
       />
       <Navbar />
-      <main id="learn-more" className="pt-16 md:pt-16">
+      <main id="main-content" tabIndex={-1} className="pt-16 md:pt-16">
         <HeroSection />
         <CalculatorDemoVideo />
         <Suspense fallback={<div className="h-20" />}>
