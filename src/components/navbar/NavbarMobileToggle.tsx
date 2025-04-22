@@ -13,6 +13,8 @@ const NavbarMobileToggle = ({ isMenuOpen, setIsMenuOpen }: NavbarMobileTogglePro
     size="icon"
     onClick={() => setIsMenuOpen(!isMenuOpen)}
     aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
+    aria-expanded={isMenuOpen}
+    aria-controls="mobile-menu"
     className="ml-2 mobile-menu-button"
   >
     {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
