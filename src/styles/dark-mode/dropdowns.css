@@ -1,0 +1,40 @@
+
+/* Dark mode dropdown styles */
+
+/* Enhanced dropdown styling in dark mode */
+.dark [data-radix-popper-content-wrapper] {
+  background-color: hsl(220, 14%, 13%) !important; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid hsl(220, 10%, 25%);
+}
+
+.dark [data-radix-popper-content-wrapper] * {
+  @apply text-carbon-300;
+}
+
+/* Improved dark mode dropdown visibility */
+.dark .DropdownMenuContent,
+.dark .dropdown-menu-content {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Select dropdown visibility fix */
+.dark [data-radix-select-content] {
+  background-color: hsl(220, 14%, 13%) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.dark [data-radix-select-viewport],
+.dark [data-radix-dropdown-menu-content] {
+  background-color: hsl(220, 14%, 13%) !important;
+  color: hsl(123, 30%, 80%);
+}
+
+.dark [data-radix-select-item] {
+  @apply text-carbon-300 !important;
+}
+
+.dark [data-radix-select-item]:hover {
+  @apply bg-gray-700 !important;
+}
