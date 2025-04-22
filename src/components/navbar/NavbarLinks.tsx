@@ -10,7 +10,7 @@ import UserMenu from "@/components/navbar/UserMenu";
 
 const NavbarLinks = () => {
   const { user, profile, logout } = useAuth();
-  const isMobile = useIsMobile();
+  const { isMobile } = useIsMobile();
   const { unreadNotifications } = useNotifications();
   const navigate = useNavigate();
   
