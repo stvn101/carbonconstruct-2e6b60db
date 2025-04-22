@@ -1,6 +1,7 @@
 
 import { useMemo } from 'react';
-import { MATERIAL_FACTORS, EXTENDED_MATERIALS, REGIONS } from '@/lib/materialData';
+import { MATERIAL_FACTORS, EXTENDED_MATERIALS, REGIONS } from '@/lib/materials';
+import { ExtendedMaterialData } from '@/lib/materials';
 
 interface UseMaterialDataProps {
   searchTerm: string;
@@ -18,7 +19,7 @@ export const useMaterialData = ({
   
   const baseOptions = useMemo(() => Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
     id: key,
-    name: value.name
+    name: value.name || key
   })), []);
   
   const allTags = useMemo(() => Array.from(
