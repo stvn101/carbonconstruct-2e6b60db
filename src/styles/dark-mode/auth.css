@@ -38,7 +38,7 @@
 
 /* Make the active tab have a prominent green background in dark mode */
 .dark .auth-tab-trigger[data-state="active"] {
-  @apply bg-green-600 text-white shadow-md;
+  @apply bg-green-600 text-white border-b-2 border-green-700;
 }
 
 /* Hover effect for inactive tabs in dark mode */

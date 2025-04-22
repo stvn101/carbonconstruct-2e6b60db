@@ -86,14 +86,14 @@ const Auth = () => {
                     className="auth-tab-trigger"
                     aria-label="Sign in tab"
                   >
-                    Sign In
+                    <span className="mx-auto font-medium">Sign In</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup"
                     className="auth-tab-trigger"
                     aria-label="Create account tab"
                   >
-                    Create Account
+                    <span className="mx-auto font-medium">Create Account</span>
                   </TabsTrigger>
                 </TabsList>
                 
