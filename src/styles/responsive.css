@@ -1,0 +1,36 @@
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  button, 
+  a.button,
+  .clickable {
+    min-height: 40px;
+    min-width: 40px;
+  }
+  
+  input, select, textarea {
+    padding: 0.5rem;
+  }
+
+  /* Consistent form field spacing on mobile */
+  .form-field {
+    @apply mb-3;
+  }
+  
+  /* Better dropdown positioning for mobile */
+  [data-radix-popper-content-wrapper] {
+    z-index: 999 !important;
+  }
+  
+  /* Fix mobile scrolling with fixed elements */
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Improve text readability on mobile */
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+  }
+}

@@ -1,87 +1,15 @@
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
-    --carbon-50: 127 63% 95%;
-    --carbon-100: 126 53% 90%;
-    --carbon-200: 126 43% 80%;
-    --carbon-300: 125 40% 70%;
-    --carbon-400: 124 40% 60%;
-    --carbon-500: 123 47% 42%;
-    --carbon-600: 125 54% 32%;
-    --carbon-700: 126 52% 25%;
-    --carbon-800: 127 42% 22%;
-    --carbon-900: 128 35% 15%;
-    --carbon-950: 130 45% 8%;
-  }
-
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 123 47% 70%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 123 47% 70%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 123 47% 70%;
-    --primary: 123 47% 70%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 123 47% 70%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 123 47% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 123 47% 70%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 123 47% 70%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --carbon-50: 130 45% 92%;
-    --carbon-100: 127 42% 82%;
-    --carbon-200: 126 52% 65%;
-    --carbon-300: 125 54% 55%;
-    --carbon-400: 123 47% 48%;
-    --carbon-500: 124 40% 40%;
-    --carbon-600: 125 40% 30%;
-    --carbon-700: 126 43% 20%;
-    --carbon-800: 126 53% 15%;
-    --carbon-900: 127 63% 10%;
-    --carbon-950: 127 63% 5%;
-  }
-}
-
 @layer base {
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
-  /* Improve selection text visibility */
+  /* Selection styling */
   ::selection {
     @apply bg-carbon-500 text-carbon-950;
   }
@@ -94,5 +22,4 @@
 #root {
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
 }

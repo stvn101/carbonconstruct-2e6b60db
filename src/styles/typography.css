@@ -1,0 +1,10 @@
+
+/* ======== TYPOGRAPHY ======== */
+.gradient-heading {
+  @apply bg-gradient-to-r from-carbon-800 via-carbon-700 to-carbon-600 bg-clip-text text-transparent dark:from-carbon-200 dark:via-carbon-300 dark:to-carbon-400;
+}
+
+.gradient-heading strong,
+.gradient-heading b {
+  @apply bg-gradient-to-r from-carbon-700 to-carbon-500 bg-clip-text text-transparent dark:from-carbon-100 dark:via-carbon-200 dark:to-carbon-300;
+}

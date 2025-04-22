@@ -1,7 +1,12 @@
 
 /* Import all CSS files */
 @import './base.css';
+@import './variables.css';
 @import './components.css';
 @import './charts.css';
 @import './dark-mode.css';
 @import './utilities.css';
+@import './forms.css';
+@import './layout.css';
+@import './typography.css';
+@import './responsive.css';
