@@ -22,12 +22,12 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
   // Debounce the search term to prevent excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
-  // Set the default filter to the global region when component mounts
+  // Set the default filter to Australia since we only have one region
   useEffect(() => {
-    if (globalRegion !== "National" && selectedRegion === "all") {
-      setSelectedRegion(globalRegion);
+    if (selectedRegion === "all") {
+      setSelectedRegion("Australia");
     }
-  }, [globalRegion]);
+  }, []);
 
   // Use EXTENDED_MATERIALS directly
   const allMaterials = useMemo(() => {
@@ -80,10 +80,10 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
-    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
+    setSelectedRegion("Australia"); // Default to Australia
     setSelectedAlternative("none");
     setSelectedTag("all");
-  }, [globalRegion]);
+  }, []);
 
   // Extract base material options for the dropdown
   const baseOptions = useMemo(() => {
