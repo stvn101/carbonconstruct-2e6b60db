@@ -12,4 +12,14 @@
          selection:text-carbon-950 dark:selection:text-carbon-50;
 }
 
-/* ... keep existing code (rest of the file) the same */
+/* Card styling - ensure solid backgrounds */
+.card {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm;
+}
+
+/* Remove any backdrop filters that might cause transparency */
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+}
+
+/* ... keep existing code */

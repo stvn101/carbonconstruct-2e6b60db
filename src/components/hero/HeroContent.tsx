@@ -22,7 +22,7 @@ const HeroContent = () => {
 
   return (
     <motion.div 
-      className="md:w-1/2 mb-8 md:mb-0 md:pr-8"
+      className="md:w-1/2 mb-8 md:mb-0 md:pr-8 bg-white dark:bg-gray-900 p-6 rounded-lg"
       initial="initial"
       whileInView="animate"
       viewport={{ once: true, amount: 0.3 }}
