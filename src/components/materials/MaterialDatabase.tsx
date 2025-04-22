@@ -8,7 +8,7 @@ import DatabaseResultsCard from './DatabaseResultsCard';
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState<string>("Australia");
+  const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [selectedAlternative, setSelectedAlternative] = useState<string>("none");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const { selectedRegion: globalRegion } = useRegion();
@@ -28,15 +28,16 @@ const MaterialDatabase = () => {
     selectedTag
   });
   
-  // Set the default filter to Australia
+  // Set the default filter to the global region
   useEffect(() => {
-    // Always use "Australia" regardless of global region
-    setSelectedRegion("Australia");
-  }, []);
+    if (globalRegion !== "National" && selectedRegion === "all") {
+      setSelectedRegion(globalRegion);
+    }
+  }, [globalRegion]);
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion("Australia"); // Always reset to Australia
+    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
