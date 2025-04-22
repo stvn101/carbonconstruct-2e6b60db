@@ -41,6 +41,11 @@ class ErrorTrackingService {
         colno: event.colno,
         filename: event.filename
       });
+      
+      // Prevent default error handling in production to improve UX
+      if (this.environment === 'production') {
+        event.preventDefault();
+      }
     });
 
     // Add unhandled promise rejection handler
@@ -48,59 +53,15 @@ class ErrorTrackingService {
       this.captureException(event.reason instanceof Error ? event.reason : new Error(String(event.reason)), {
         source: 'unhandledrejection'
       });
+      
+      // Prevent default handling in production
+      if (this.environment === 'production') {
+        event.preventDefault();
+      }
     });
-    
-    // Add performance monitoring
-    if (this.environment === 'production' && 'PerformanceObserver' in window) {
-      this.initPerformanceMonitoring();
-    }
 
     this.isInitialized = true;
     console.info('Error tracking service initialized');
-  }
-  
-  private initPerformanceMonitoring(): void {
-    try {
-      // Monitor Largest Contentful Paint (LCP)
-      const lcpObserver = new PerformanceObserver((entryList) => {
-        const entries = entryList.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        if (lastEntry && lastEntry.startTime > 2500) {
-          console.warn('High LCP detected:', lastEntry.startTime);
-        }
-      });
-      lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-      
-      // Monitor First Input Delay (FID)
-      const fidObserver = new PerformanceObserver((entryList) => {
-        for (const entry of entryList.getEntries()) {
-          const typedEntry = entry as PerformanceEntryWithTiming;
-          if (typedEntry.processingStart && typedEntry.processingStart - typedEntry.startTime > 100) {
-            console.warn('High FID detected:', typedEntry.processingStart - typedEntry.startTime);
-          }
-        }
-      });
-      fidObserver.observe({ type: 'first-input', buffered: true });
-      
-      // Monitor Cumulative Layout Shift (CLS)
-      const clsObserver = new PerformanceObserver((entryList) => {
-        let clsValue = 0;
-        for (const entry of entryList.getEntries()) {
-          const typedEntry = entry as PerformanceEntryWithTiming;
-          if (!typedEntry.hadRecentInput) {
-            clsValue += typedEntry.value || 0;
-          }
-        }
-        if (clsValue > 0.1) {
-          console.warn('High CLS detected:', clsValue);
-        }
-      });
-      clsObserver.observe({ type: 'layout-shift', buffered: true });
-      
-      console.info('Performance monitoring initialized');
-    } catch (e) {
-      console.error('Failed to initialize performance monitoring:', e);
-    }
   }
 
   public captureException(error: Error, metadata: ErrorMetadata = {}): void {
@@ -144,20 +105,52 @@ class ErrorTrackingService {
   public captureMessage(message: string, metadata: ErrorMetadata = {}): void {
     if (this.environment === 'production') {
       console.warn('[Error Tracking] Message:', message, metadata);
-      // Send to error tracking service in production
     } else {
       console.warn('[DEV Message]', message, metadata);
     }
   }
 
   public setUser(userId: string, email?: string): void {
-    // In production, you would associate the current session with a user
     console.info('Set user context:', { userId, email });
   }
 
   public clearUser(): void {
-    // Clear user association
     console.info('User context cleared');
+  }
+  
+  // Add accessibility error reporting
+  public captureAccessibilityIssue(element: HTMLElement, issue: string): void {
+    const elementPath = this.getElementPath(element);
+    this.captureMessage(`Accessibility issue: ${issue}`, {
+      elementPath,
+      elementType: element.tagName,
+      elementId: element.id,
+      elementClasses: element.className
+    });
+  }
+  
+  // Helper to get DOM path for element
+  private getElementPath(element: HTMLElement): string {
+    const path: string[] = [];
+    let currentElem: HTMLElement | null = element;
+    
+    while (currentElem && currentElem !== document.body) {
+      let selector = currentElem.tagName.toLowerCase();
+      
+      if (currentElem.id) {
+        selector += `#${currentElem.id}`;
+      } else if (currentElem.className) {
+        selector += `.${currentElem.className.split(' ')[0]}`;
+      }
+      
+      path.unshift(selector);
+      currentElem = currentElem.parentElement;
+      
+      // Limit path length
+      if (path.length > 5) break;
+    }
+    
+    return path.join(' > ');
   }
 }
 

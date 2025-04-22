@@ -30,7 +30,7 @@
   fill: rgba(130, 200, 130, 0.8);
 }
 
-/* Fix for cards in dark mode to ensure proper contrast */
+/* Card and background fixes for dark mode */
 .dark .card,
 .dark .bg-white {
   @apply bg-gray-800 border-gray-700 text-carbon-300;
@@ -55,10 +55,9 @@
   @apply text-carbon-300;
 }
 
-/* Enhanced styling for dropdown menus in dark mode - fixed transparency issues */
+/* Enhanced dropdown styling in dark mode */
 .dark [data-radix-popper-content-wrapper] {
-  @apply bg-gray-800 border-gray-700;
-  background-color: hsl(220, 14%, 13%) !important;
+  background-color: hsl(220, 14%, 13%) !important; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border: 1px solid hsl(220, 10%, 25%);
 }
@@ -67,34 +66,19 @@
   @apply text-carbon-300;
 }
 
-/* Add more contrast to the cards in dark mode */
-.dark .card {
-  @apply bg-gray-800 border-gray-700;
-}
-
-/* Ensure popup content is visible in dark mode */
+/* Ensures popup content is visible in dark mode */
 .dark [role="dialog"],
 .dark [data-state="open"] {
   @apply bg-gray-800 border-gray-700;
 }
 
-/* Fix for profile page UI in dark mode */
-.dark .bg-carbon-50 {
-  @apply bg-gray-900;
-}
-
-/* Fix for tooltips in dark mode */
-.dark .recharts-tooltip-wrapper {
-  filter: brightness(0.85) contrast(1.1);
-}
-
-/* Fix for dropdown menus - improved visibility */
+/* Improved dark mode dropdown visibility */
 .dark .DropdownMenuContent,
 .dark .dropdown-menu-content {
   @apply bg-gray-800 border-gray-700;
 }
 
-/* Ensure background color works on html element in dark mode */
+/* Ensures background color works on html element in dark mode */
 .dark {
   @apply bg-gray-900;
 }
@@ -105,7 +89,7 @@
   @apply bg-gray-900;
 }
 
-/* Improved Select dropdown visibility - fix for see-through dropdowns */
+/* Select dropdown visibility fix */
 .dark [data-radix-select-content] {
   background-color: hsl(220, 14%, 13%) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
@@ -120,12 +104,12 @@
   @apply bg-gray-700 !important;
 }
 
-/* Fix specifically for Auth page in dark mode */
+/* Auth page dark mode fixes */
 .dark .auth-card {
   @apply bg-gray-800 border-gray-700;
 }
 
-/* Make navbar text brighter in dark mode for better visibility */
+/* Make navbar text brighter in dark mode */
 .dark .text-foreground\/80 {
   @apply text-carbon-50;
 }
@@ -141,14 +125,14 @@
   color: hsl(123, 30%, 80%);
 }
 
-/* Improve dark mode selector styling */
+/* Improved dark mode selector styling */
 .dark select,
 .dark select option {
   background-color: hsl(220, 14%, 13%);
   color: hsl(123, 30%, 80%);
 }
 
-/* Better styling for the sign in page in dark mode */
+/* Better auth page dark mode styling */
 .dark .auth-card .card-header h2,
 .dark .auth-card .card-header h3,
 .dark .auth-card .card-title {
@@ -181,7 +165,7 @@
   backdrop-filter: none;
 }
 
-/* Fix for background opacity in calculator components */
+/* Fix background opacity in calculator components */
 .dark .tabs-content {
   background-color: hsl(220, 14%, 13%) !important;
   opacity: 1 !important;
@@ -192,4 +176,29 @@
 .dark [role="tabpanel"] {
   background-color: transparent;
   opacity: 1 !important;
+}
+
+/* Fix focus outlines for better a11y */
+.dark :focus-visible {
+  outline: 2px solid hsl(123, 30%, 70%);
+  outline-offset: 2px;
+}
+
+/* Fix scrollbars in dark mode */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: hsl(220, 14%, 10%);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(220, 10%, 25%);
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(220, 10%, 30%);
 }

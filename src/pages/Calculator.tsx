@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import CalculatorHeader from "@/components/calculator/CalculatorHeader";
+import { useA11y } from "@/hooks/useA11y";
 
 function Calculator() {
   const location = useLocation();
@@ -17,6 +18,13 @@ function Calculator() {
   const { user, profile } = useAuth();
   const [demoMode, setDemoMode] = useState(false);
   const isPremiumUser = profile?.subscription_tier === 'premium';
+  
+  // Set page title and a11y features
+  useA11y({
+    title: "Carbon Calculator - CarbonConstruct",
+    announceRouteChanges: true,
+    focusMainContentOnRouteChange: true
+  });
   
   useEffect(() => {
     // Check if we're in demo mode from navigation state
@@ -46,14 +54,12 @@ function Calculator() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 pt-24 pb-12">
+      <main className="flex-grow container mx-auto px-4 pt-24 pb-12" id="main-content" tabIndex={-1}>
         <CalculatorHeader isPremiumUser={isPremiumUser} />
-        
-        {/* Removed the redundant demo mode alert */}
         
         {user && !isPremiumUser && (
           <Alert className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800">
-            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
             <AlertTitle className="text-blue-800 dark:text-blue-300">Free Account</AlertTitle>
             <AlertDescription className="text-blue-700 dark:text-blue-400">
               You're using the basic calculator. Upgrade to Premium for advanced features and unlimited calculations.
@@ -61,6 +67,7 @@ function Calculator() {
                 <Button 
                   onClick={() => navigate("/pricing")} 
                   className="bg-carbon-600 hover:bg-carbon-700 text-white"
+                  aria-label="Upgrade to Premium"
                 >
                   Upgrade to Premium
                 </Button>

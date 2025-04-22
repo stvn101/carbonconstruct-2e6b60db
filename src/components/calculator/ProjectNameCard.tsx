@@ -31,30 +31,31 @@ const ProjectNameCard = ({
     // Allow alphanumeric characters, spaces, hyphens, underscores and common punctuation
     const sanitizedValue = value.replace(/[^\w\s.,\-()&]/g, '');
     
-    if (sanitizedValue.trim() === '') {
+    validateProjectName(sanitizedValue);
+    onProjectNameChange(sanitizedValue);
+  };
+  
+  const validateProjectName = (name: string) => {
+    if (name.trim() === '') {
       setNameError('Project name cannot be empty');
-    } else if (sanitizedValue.length > 50) {
+    } else if (name.length > 50) {
       setNameError('Project name must be less than 50 characters');
     } else {
       setNameError(null);
     }
-    
-    onProjectNameChange(sanitizedValue);
   };
 
   // Validate initial project name
   useEffect(() => {
-    if (projectName.trim() === '') {
-      setNameError('Project name cannot be empty');
-    } else if (projectName.length > 50) {
-      setNameError('Project name must be less than 50 characters');
-    } else {
-      setNameError(null);
-    }
+    validateProjectName(projectName);
   }, [projectName]);
 
+  const buttonLabel = demoMode && !user 
+    ? "Sign in to save projects" 
+    : "Save project";
+
   return (
-    <Card className="mb-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+    <Card className="mb-4 border border-border shadow-sm">
       <CardContent className="pt-4">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-grow w-full md:w-auto">
@@ -70,9 +71,10 @@ const ProjectNameCard = ({
               disabled={isSaving}
               aria-invalid={!!nameError}
               aria-describedby={nameError ? "project-name-error" : undefined}
+              maxLength={50}
             />
             {nameError && (
-              <p id="project-name-error" className="mt-1 text-xs text-destructive">
+              <p id="project-name-error" className="mt-1 text-xs text-destructive" role="alert">
                 {nameError}
               </p>
             )}
@@ -86,17 +88,17 @@ const ProjectNameCard = ({
               `}
               disabled={isSaving || !!nameError}
               title={demoMode && !user ? "Sign in to save projects" : undefined}
-              aria-label={demoMode && !user ? "Sign in to save projects" : "Save project"}
+              aria-label={buttonLabel}
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+                  <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  <BookmarkCheck className="h-4 w-4 mr-2" />
-                  {demoMode && !user ? "Sign In to Save" : "Save Project"}
+                  <BookmarkCheck className="h-4 w-4 mr-2" aria-hidden="true" />
+                  <span>{demoMode && !user ? "Sign In to Save" : "Save Project"}</span>
                 </>
               )}
             </Button>
