@@ -1,11 +1,6 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useCalculator } from "@/contexts/calculator";
-import { useProjects } from "@/contexts/ProjectContext";
-import { useAuth } from "@/contexts/auth";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProjectNameCard from "./ProjectNameCard";
 import CalculatorTabs from "./CalculatorTabs";
@@ -14,6 +9,7 @@ import PageLoading from "../ui/page-loading";
 import SaveProjectConfirmDialog from "./SaveProjectConfirmDialog";
 import CalculatorUsageTracker from "./CalculatorUsageTracker";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "react-error-boundary";
 
 export interface CalculatorContainerProps {
   projectName: string;
@@ -35,6 +31,20 @@ export interface CalculatorContainerProps {
   isPremiumUser?: boolean;
 }
 
+// Error fallback component
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
+  <div className="p-6 border border-destructive/50 bg-destructive/10 rounded-md text-center" role="alert">
+    <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
+    <p className="text-muted-foreground mb-4">{error.message || "An error occurred while rendering the calculator"}</p>
+    <button 
+      onClick={resetErrorBoundary}
+      className="px-4 py-2 bg-carbon-600 text-white rounded-md hover:bg-carbon-700"
+    >
+      Try again
+    </button>
+  </div>
+);
+
 const CalculatorContainer = ({
   projectName,
   setProjectName,
@@ -55,6 +65,8 @@ const CalculatorContainer = ({
   isPremiumUser = false
 }: CalculatorContainerProps) => {
   const isMobile = useIsMobile().isMobile;
+  const [tabError, setTabError] = useState<string | null>(null);
+  
   const {
     calculationInput,
     calculationResult,
@@ -77,6 +89,7 @@ const CalculatorContainer = ({
   const handleCalculateWithTracking = () => {
     if (isCalculating) return;
     setIsCalculating(true);
+    setTabError(null);
     
     try {
       handleCalculate();
@@ -86,7 +99,7 @@ const CalculatorContainer = ({
     } catch (error) {
       console.error("Error during calculation:", error);
       setIsCalculating(false);
-      toast.error("Calculation failed. Please try again.");
+      setTabError((error as Error)?.message || "Calculation failed. Please try again.");
     }
   };
 
@@ -107,7 +120,7 @@ const CalculatorContainer = ({
             demoMode={demoMode}
           />
         
-          {/* Place tabs after project name card to match original layout */}
+          {/* Tabs after project name card */}
           <CalculatorTabs 
             activeTab={activeTab || "materials"}
             setActiveTab={setActiveTab}
@@ -117,26 +130,39 @@ const CalculatorContainer = ({
           />
         </motion.div>
         
-        {/* Ensure tab contents have proper styling to avoid transparency */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
-          <CalculatorTabContents
-            calculationInput={calculationInput}
-            calculationResult={calculationResult}
-            onUpdateMaterial={handleUpdateMaterial}
-            onAddMaterial={handleAddMaterial}
-            onRemoveMaterial={handleRemoveMaterial}
-            onUpdateTransport={handleUpdateTransport}
-            onAddTransport={handleAddTransport}
-            onRemoveTransport={handleRemoveTransport}
-            onUpdateEnergy={handleUpdateEnergy}
-            onAddEnergy={handleAddEnergy}
-            onRemoveEnergy={handleRemoveEnergy}
-            onCalculate={handleCalculateWithTracking}
-            onPrevTab={handlePrevTab}
-            onNextTab={handleNextTab}
-            demoMode={demoMode}
-          />
-        </div>
+        {/* Display tab error if exists */}
+        {tabError && (
+          <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4" role="alert">
+            <p className="font-medium">{tabError}</p>
+          </div>
+        )}
+        
+        {/* Tab contents with error boundary */}
+        <ErrorBoundary 
+          FallbackComponent={ErrorFallback}
+          onReset={() => setTabError(null)}
+          resetKeys={[activeTab]}
+        >
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
+            <CalculatorTabContents
+              calculationInput={calculationInput}
+              calculationResult={calculationResult}
+              onUpdateMaterial={handleUpdateMaterial}
+              onAddMaterial={handleAddMaterial}
+              onRemoveMaterial={handleRemoveMaterial}
+              onUpdateTransport={handleUpdateTransport}
+              onAddTransport={handleAddTransport}
+              onRemoveTransport={handleRemoveTransport}
+              onUpdateEnergy={handleUpdateEnergy}
+              onAddEnergy={handleAddEnergy}
+              onRemoveEnergy={handleRemoveEnergy}
+              onCalculate={handleCalculateWithTracking}
+              onPrevTab={handlePrevTab}
+              onNextTab={handleNextTab}
+              demoMode={demoMode}
+            />
+          </div>
+        </ErrorBoundary>
         
         <PageLoading isLoading={isSaving} text="Saving project..." />
 

@@ -13,11 +13,11 @@ const CalculatorHeader = ({ isPremiumUser = false }: CalculatorHeaderProps) => {
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <h1 className="text-2xl font-bold">Carbon Calculator</h1>
+          <h1 className="text-2xl font-bold text-foreground" id="calculator-heading">Carbon Calculator</h1>
           {isPremiumUser && (
             <Badge className="bg-carbon-500 text-xs">
-              <Star className="h-3 w-3 mr-1" />
-              Premium
+              <Star className="h-3 w-3 mr-1" aria-hidden="true" />
+              <span>Premium</span>
             </Badge>
           )}
         </div>
@@ -34,8 +34,9 @@ const CalculatorHeader = ({ isPremiumUser = false }: CalculatorHeaderProps) => {
           <Link 
             to="/help" 
             className="text-carbon-600 hover:text-carbon-800 dark:text-carbon-300 dark:hover:text-carbon-100 flex items-center gap-1 text-sm"
+            aria-label="Learn how to use the calculator"
           >
-            <GraduationCap className="h-4 w-4" />
+            <GraduationCap className="h-4 w-4" aria-hidden="true" />
             <span>Learn how to use the calculator</span>
           </Link>
         </div>
@@ -45,4 +46,3 @@ const CalculatorHeader = ({ isPremiumUser = false }: CalculatorHeaderProps) => {
 };
 
 export default CalculatorHeader;
-
