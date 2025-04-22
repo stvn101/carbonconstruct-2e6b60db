@@ -56,6 +56,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
 
   const handleSaveClick = () => {
     setAuthError(null);
+    console.log("Save clicked - Auth status:", !!user);
     
     if (!user) {
       setAuthError("Please log in to save your project");
@@ -67,6 +68,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
       return;
     }
 
+    console.log("Opening save dialog with project name:", projectName);
     setShowSaveDialog(true);
   };
 
@@ -78,9 +80,14 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
     }
     
     setIsSaving(true);
+    console.log("Saving project:", {
+      name: projectName,
+      calculationInput,
+      calculationResult
+    });
     
     try {
-      await saveProject({
+      const savedProject = await saveProject({
         name: projectName,
         description: "Carbon calculation project",
         materials: calculationInput.materials,
@@ -93,6 +100,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
         premium_only: false
       });
       
+      console.log("Project saved successfully:", savedProject);
       toast.success("Project saved successfully!");
       navigate(`/projects`);
     } catch (error) {
