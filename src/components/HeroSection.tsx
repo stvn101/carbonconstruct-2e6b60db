@@ -1,15 +1,12 @@
-
-import React, { lazy, Suspense, useState, useEffect } from "react";
+import React, { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import SkeletonHero from "./hero/SkeletonHero";
 import { LazyMotion, domAnimation } from "framer-motion";
 
-// Use React.lazy for code splitting at the component level
 const HeroContent = lazy(() => import("./hero/HeroContent"));
 const DashboardPreview = lazy(() => 
   import("./hero/DashboardPreview")
     .catch(err => {
       console.error("Failed to load DashboardPreview:", err);
-      // Return a minimal component to prevent the entire app from crashing
       return { 
         default: () => <div className="md:w-1/2 bg-secondary/20 rounded-lg p-6">Dashboard preview unavailable</div> 
       };
@@ -19,9 +16,8 @@ const DashboardPreview = lazy(() =>
 const HeroSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [resourcesLoaded, setResourcesLoaded] = useState(0);
-  const totalResources = 1; // Increase this number if loading more assets
+  const totalResources = 1;
 
-  // Function to track when resources are loaded
   const handleResourceLoad = useCallback(() => {
     setResourcesLoaded(prev => {
       const newCount = prev + 1;
@@ -32,12 +28,10 @@ const HeroSection = () => {
     });
   }, []);
 
-  // Only run the timer effect once on mount
   useEffect(() => {
-    // Fallback to ensure we don't show the skeleton forever
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000); // Max loading time
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
