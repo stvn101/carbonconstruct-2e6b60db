@@ -38,3 +38,11 @@
 [class*="bg-secondary"] {
   @apply bg-gray-50 dark:bg-gray-800 !important;
 }
+
+/* Make dialogs completely opaque */
+[role="dialog"],
+div[data-state] {
+  @apply bg-white dark:bg-gray-900 !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+}
