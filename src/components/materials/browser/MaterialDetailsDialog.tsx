@@ -17,12 +17,12 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
         <Button 
           variant="outline" 
           size="sm" 
-          className="bg-carbon-100 hover:bg-carbon-200 border-carbon-300"
+          className="bg-carbon-100 hover:bg-carbon-200 border-carbon-300 dark:bg-carbon-700 dark:hover:bg-carbon-600 dark:border-carbon-600 dark:text-white"
         >
           <Info className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg bg-background border-carbon-300 shadow-lg">
+      <DialogContent className="sm:max-w-lg bg-white dark:bg-gray-800 border-carbon-300 dark:border-gray-700 shadow-lg">
         <DialogHeader>
           <DialogTitle>{material.type}</DialogTitle>
           <DialogDescription>
@@ -43,9 +43,9 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
             <div>
               <label className="text-sm font-medium">Sustainability Score</label>
               <div className="flex items-center">
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mr-2">
                   <div 
-                    className="bg-carbon-600 h-2.5 rounded-full" 
+                    className="bg-carbon-600 dark:bg-carbon-500 h-2.5 rounded-full" 
                     style={{ width: `${material.sustainabilityScore}%` }}
                   ></div>
                 </div>
@@ -62,7 +62,7 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
             {material.alternativeToStandard && (
               <div>
                 <label className="text-sm font-medium">Carbon Reduction</label>
-                <p className="text-green-600 font-medium">{material.carbonReduction}% less CO₂</p>
+                <p className="text-green-600 dark:text-green-400 font-medium">{material.carbonReduction}% less CO₂</p>
               </div>
             )}
             <div>
@@ -71,10 +71,10 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
                 variant="outline"
                 className={
                   material.recyclability === 'High' 
-                    ? 'bg-green-100 text-green-800 border-green-300' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-300 dark:border-green-700' 
                     : material.recyclability === 'Medium'
-                      ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
-                      : 'bg-red-100 text-red-800 border-red-300'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-300 dark:border-red-700'
                 }
               >
                 {material.recyclability}
@@ -87,7 +87,7 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
           </div>
         </div>
         
-        <div className="bg-carbon-50 p-4 rounded-md mt-2 dark:bg-carbon-900">
+        <div className="bg-carbon-50 dark:bg-carbon-900 p-4 rounded-md mt-2">
           <h4 className="font-medium mb-1">Environmental Impact</h4>
           <p className="text-sm text-muted-foreground">
             {material.factor < 1 

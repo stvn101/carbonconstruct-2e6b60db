@@ -66,3 +66,11 @@
   opacity: 1 !important;
   backdrop-filter: none !important;
 }
+
+/* Specifically target Radix UI Dialog content */
+.dark [data-radix-popper-content-wrapper],
+.dark [data-state] > [role="dialog"] {
+  @apply bg-gray-800 !important;
+  opacity: 1 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9) !important;
+}
