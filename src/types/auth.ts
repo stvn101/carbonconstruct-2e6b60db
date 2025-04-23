@@ -1,4 +1,3 @@
-
 import { Session, User } from '@supabase/supabase-js';
 
 export interface UserProfile {
@@ -9,7 +8,7 @@ export interface UserProfile {
   website: string | null;
   role: string | null;
   subscription_tier: 'free' | 'premium' | 'enterprise' | null;
-  had_trial?: boolean;
+  had_trial: boolean;
 }
 
 export interface AuthContextType {

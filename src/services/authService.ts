@@ -12,7 +12,6 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
 
     if (error) {
       console.error('Error fetching profile:', error);
-      // Return null instead of throwing when profile not found
       return null;
     }
 
