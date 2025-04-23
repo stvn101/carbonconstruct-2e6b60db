@@ -1,4 +1,3 @@
-
 // Optimized performance monitoring service focused on essential metrics
 
 interface PerformanceMetrics {
@@ -28,28 +27,39 @@ class PerformanceMonitoringService {
   }
 
   public initialize(): void {
-    if (this.isInitialized || typeof window === 'undefined') {
+    if (this.isInitialized || typeof window === 'undefined' || typeof document === 'undefined') {
       return;
     }
 
-    // Only fully initialize in production
-    if (this.environment === 'production') {
-      // Use passive event listener for better performance
-      window.addEventListener('load', () => {
-        if ('requestIdleCallback' in window) {
-          (window as any).requestIdleCallback(() => this.captureNavigationTiming());
-        } else {
-          setTimeout(() => this.captureNavigationTiming(), 0);
+    // Wait until document is fully loaded
+    const initializeWhenReady = () => {
+      // Only fully initialize in production
+      if (this.environment === 'production') {
+        // Use passive event listener for better performance
+        window.addEventListener('load', () => {
+          if ('requestIdleCallback' in window) {
+            (window as any).requestIdleCallback(() => this.captureNavigationTiming());
+          } else {
+            setTimeout(() => this.captureNavigationTiming(), 0);
+          }
+        }, { passive: true });
+
+        // Initialize Performance Observer if available
+        if ('PerformanceObserver' in window) {
+          this.setupPerformanceObservers();
         }
-      }, { passive: true });
-
-      // Initialize Performance Observer if available
-      if ('PerformanceObserver' in window) {
-        this.setupPerformanceObservers();
       }
-    }
 
-    this.isInitialized = true;
+      this.isInitialized = true;
+    };
+
+    // Check if document is already loaded
+    if (document.readyState === 'complete') {
+      initializeWhenReady();
+    } else {
+      // Otherwise wait for it to load
+      window.addEventListener('load', initializeWhenReady, { once: true, passive: true });
+    }
   }
   
   private setupPerformanceObservers(): void {
@@ -83,16 +93,19 @@ class PerformanceMonitoringService {
 
   private observeLongTasks(): void {
     if (!('PerformanceObserver' in window) || 
-        !PerformanceObserver.supportedEntryTypes.includes('longtask')) return;
+        !(PerformanceObserver.supportedEntryTypes || []).includes('longtask')) return;
     
     try {
       const observer = new PerformanceObserver((entryList) => {
         const now = Date.now();
         if (now - this.lastLogTime > this.logThreshold) {
           this.lastLogTime = now;
-          const longestTask = entryList.getEntries()
-            .reduce((longest, current) => current.duration > longest.duration ? current : longest);
-          console.warn('[Performance] Long task detected:', Math.round(longestTask.duration), 'ms');
+          const entries = entryList.getEntries();
+          if (entries && entries.length > 0) {
+            const longestTask = entries
+              .reduce((longest, current) => current.duration > longest.duration ? current : longest);
+            console.warn('[Performance] Long task detected:', Math.round(longestTask.duration), 'ms');
+          }
         }
       });
       observer.observe({ type: 'longtask', buffered: true });
@@ -108,10 +121,14 @@ class PerformanceMonitoringService {
       const observer = new PerformanceObserver((entryList) => {
         if ('requestIdleCallback' in window) {
           (window as any).requestIdleCallback(() => {
-            const slowResources = entryList.getEntries()
+            const entries = entryList.getEntries();
+            const slowResources = entries
               .filter((entry) => {
                 const resource = entry as PerformanceResourceTiming;
-                return resource.duration > 1000 && !resource.name.includes('chrome-extension');
+                return resource && 
+                  resource.duration > 1000 && 
+                  resource.name && 
+                  !resource.name.includes('chrome-extension');
               })
               .slice(0, 3) // Only track the 3 slowest
               .map(entry => ({
@@ -134,15 +151,19 @@ class PerformanceMonitoringService {
   private captureNavigationTiming(): void {
     if (!performance || !performance.timing) return;
 
-    const timing = performance.timing;
-    const metrics: PerformanceMetrics = {
-      timeToFirstByte: timing.responseStart - timing.navigationStart,
-      domLoadTime: timing.domContentLoadedEventEnd - timing.navigationStart,
-      windowLoadTime: timing.loadEventEnd - timing.navigationStart
-    };
+    try {
+      const timing = performance.timing;
+      const metrics: PerformanceMetrics = {
+        timeToFirstByte: timing.responseStart - timing.navigationStart,
+        domLoadTime: timing.domContentLoadedEventEnd - timing.navigationStart,
+        windowLoadTime: timing.loadEventEnd - timing.navigationStart
+      };
 
-    if (this.environment === 'production') {
-      console.info('[Performance] Page load metrics:', metrics);
+      if (this.environment === 'production') {
+        console.info('[Performance] Page load metrics:', metrics);
+      }
+    } catch (e) {
+      console.warn('Error capturing navigation timing:', e);
     }
   }
 
@@ -153,27 +174,33 @@ class PerformanceMonitoringService {
   }
 
   public trackRouteChange(route: string): void {
-    if (performance && performance.mark && this.environment === 'production') {
-      const markName = `route-change-start:${route}`;
-      performance.mark(markName);
-      
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          if (performance && performance.mark && performance.measure) {
-            const completeMarkName = `route-change-complete:${route}`;
-            performance.mark(completeMarkName);
-            try {
-              performance.measure(`route-change:${route}`, markName, completeMarkName);
-              const measures = performance.getEntriesByName(`route-change:${route}`);
-              if (measures.length > 0) {
-                console.info(`[Performance] Route change to ${route}: ${Math.round(measures[0].duration)}ms`);
+    if (!performance || !performance.mark) return;
+    
+    try {
+      if (this.environment === 'production') {
+        const markName = `route-change-start:${route}`;
+        performance.mark(markName);
+        
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            if (performance && performance.mark && performance.measure) {
+              const completeMarkName = `route-change-complete:${route}`;
+              performance.mark(completeMarkName);
+              try {
+                performance.measure(`route-change:${route}`, markName, completeMarkName);
+                const measures = performance.getEntriesByName(`route-change:${route}`);
+                if (measures.length > 0) {
+                  console.info(`[Performance] Route change to ${route}: ${Math.round(measures[0].duration)}ms`);
+                }
+              } catch (e) {
+                // Silent error in performance monitoring
               }
-            } catch (e) {
-              // Silent error in performance monitoring
             }
-          }
-        }, 100);
-      });
+          }, 100);
+        });
+      }
+    } catch (e) {
+      // Silent fail for performance tracking
     }
   }
 }

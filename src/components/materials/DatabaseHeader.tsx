@@ -51,7 +51,9 @@ const DatabaseHeader = ({ globalRegion, materialsByRegion }: DatabaseHeaderProps
         {getHeaderDescription()}
       </p>
       
-      <RegionStats materialsByRegion={materialsByRegion} />
+      {materialsByRegion && Object.keys(materialsByRegion).length > 0 && (
+        <RegionStats materialsByRegion={materialsByRegion} />
+      )}
     </div>
   );
 };
