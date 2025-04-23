@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/hooks/notifications/useNotifications";
 import { toast } from "sonner";
 import NotificationBell from "@/components/navbar/NotificationBell";
 import UserMenu from "@/components/navbar/UserMenu";
