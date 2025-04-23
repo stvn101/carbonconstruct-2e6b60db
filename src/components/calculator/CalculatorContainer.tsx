@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -32,9 +32,7 @@ export interface CalculatorContainerProps {
   isPremiumUser?: boolean;
 }
 
-// Error fallback component
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => {
-  // Log the error when the fallback is rendered
   React.useEffect(() => {
     ErrorTrackingService.captureException(error, { 
       component: 'CalculatorContainer', 
@@ -56,7 +54,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-const CalculatorContainer = ({
+const CalculatorContainer = ({ 
   projectName,
   setProjectName,
   authError,
@@ -79,7 +77,6 @@ const CalculatorContainer = ({
   const [tabError, setTabError] = useState<string | null>(null);
   const [calculatorKey, setCalculatorKey] = useState<number>(0);
   
-  // Safety check for calculator context
   if (!calculatorContext) {
     return (
       <div className="p-6 border border-destructive/50 bg-destructive/10 rounded-md text-center">
@@ -136,7 +133,6 @@ const CalculatorContainer = ({
   };
 
   const handleResetCalculator = () => {
-    // Increment the key to force a re-render of the ErrorBoundary's children
     setCalculatorKey(prev => prev + 1);
     setTabError(null);
   };
@@ -169,7 +165,6 @@ const CalculatorContainer = ({
               demoMode={demoMode}
             />
           
-            {/* Tabs after project name card */}
             <CalculatorTabs 
               activeTab={activeTab || "materials"}
               setActiveTab={setActiveTab}
@@ -179,14 +174,12 @@ const CalculatorContainer = ({
             />
           </motion.div>
           
-          {/* Display tab error if exists */}
           {tabError && (
             <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4" role="alert">
               <p className="font-medium">{tabError}</p>
             </div>
           )}
           
-          {/* Tab contents with error boundary */}
           <ErrorBoundary 
             FallbackComponent={ErrorFallback}
             onReset={() => setTabError(null)}

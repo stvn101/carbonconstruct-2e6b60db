@@ -16,7 +16,11 @@ const EmailField = ({ form }: EmailFieldProps) => {
         <FormItem>
           <FormLabel>Email</FormLabel>
           <FormControl>
-            <Input placeholder="you@example.com" {...field} />
+            <Input 
+              placeholder="you@example.com" 
+              autoComplete="email" 
+              {...field} 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
