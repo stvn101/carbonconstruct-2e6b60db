@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -9,6 +9,7 @@ import { AuthProvider } from './contexts/auth';
 import { ProjectProvider } from './contexts/ProjectContext';
 import { CalculatorProvider } from './contexts/calculator';
 import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundaryWrapper from './components/error/ErrorBoundaryWrapper';
 import PageLoading from './components/ui/page-loading';
 import RouteChangeTracker from './components/RouteChangeTracker';
 import SkipToContent from './components/SkipToContent';
@@ -18,6 +19,8 @@ import { marketingRoutes } from './routes/marketingRoutes';
 import { projectRoutes } from './routes/projectRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { useAccessibility } from './hooks/useAccessibility';
+import ErrorTrackingService from './services/errorTrackingService';
+import performanceMonitoringService from './services/performanceMonitoringService';
 
 // Import critical pages directly to avoid dynamic import failures
 import Index from './pages/Index';
@@ -34,11 +37,28 @@ const AppContent = () => {
   // Apply app-wide accessibility improvements
   useAccessibility();
   
+  // Log route change performance
+  useEffect(() => {
+    // Initialize performance monitoring
+    performanceMonitoringService.trackRouteChange(window.location.pathname);
+    
+    // Flush error tracking on app unmount
+    return () => {
+      ErrorTrackingService.flush();
+    };
+  }, []);
+  
   return (
     <>
       <SkipToContent />
       <RouteChangeTracker />
-      <ErrorBoundary feature="Application Routes">
+      <ErrorBoundaryWrapper 
+        feature="Application Routes"
+        onReset={() => {
+          // Force page reload on critical error
+          window.location.reload();
+        }}
+      >
         <Routes>
           <Route path="/" element={<Index />} />
           
@@ -57,21 +77,48 @@ const AppContent = () => {
           <Route path="/case-studies" element={<Navigate to="/" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </ErrorBoundary>
+      </ErrorBoundaryWrapper>
       <Toaster richColors position="top-right" />
     </>
   );
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Initialize error tracking on app mount
+    ErrorTrackingService.initialize();
+    
+    // Initialize performance monitoring
+    performanceMonitoringService.initialize();
+    
+    // Listen for unload to flush errors
+    const handleBeforeUnload = () => {
+      ErrorTrackingService.flush();
+      performanceMonitoringService.cleanup();
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+  
   return (
-    <ErrorBoundary feature="Application">
+    <ErrorBoundaryWrapper 
+      feature="Application" 
+      className="h-full min-h-screen"
+      onReset={() => {
+        // Force page reload on critical error
+        window.location.reload();
+      }}
+    >
       <HelmetProvider>
         <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
           <RegionProvider>
             <Router>
               <AuthProvider>
-                <ErrorBoundary feature="Project Data">
+                <ErrorBoundaryWrapper feature="Project Data">
                   <ProjectProvider>
                     <CalculatorProvider>
                       <Suspense fallback={<LoadingFallback />}>
@@ -79,13 +126,13 @@ const App: React.FC = () => {
                       </Suspense>
                     </CalculatorProvider>
                   </ProjectProvider>
-                </ErrorBoundary>
+                </ErrorBoundaryWrapper>
               </AuthProvider>
             </Router>
           </RegionProvider>
         </ThemeProvider>
       </HelmetProvider>
-    </ErrorBoundary>
+    </ErrorBoundaryWrapper>
   );
 };
 
