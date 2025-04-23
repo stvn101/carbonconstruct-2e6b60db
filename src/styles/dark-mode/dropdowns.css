@@ -6,6 +6,7 @@
   background-color: hsl(220, 14%, 13%) !important; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border: 1px solid hsl(220, 10%, 25%);
+  opacity: 1 !important;
 }
 
 .dark [data-radix-popper-content-wrapper] * {
@@ -13,22 +14,24 @@
 }
 
 /* Improved dark mode dropdown visibility */
-.dark .DropdownMenuContent,
+.dark .dropdown-menu,
 .dark .dropdown-menu-content {
-  @apply bg-gray-800 border-gray-700;
+  @apply bg-gray-800 border-gray-700 opacity-100 !important;
 }
 
 /* Select dropdown visibility fix */
 .dark [data-radix-select-content] {
   background-color: hsl(220, 14%, 13%) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  backdrop-filter: none !important;
+  opacity: 1 !important;
 }
 
 .dark [data-radix-select-viewport],
 .dark [data-radix-dropdown-menu-content] {
   background-color: hsl(220, 14%, 13%) !important;
   color: hsl(123, 30%, 80%);
+  opacity: 1 !important;
 }
 
 .dark [data-radix-select-item] {
@@ -37,4 +40,11 @@
 
 .dark [data-radix-select-item]:hover {
   @apply bg-gray-700 !important;
+}
+
+/* Force solid backgrounds on dropdown menus */
+.dark .dropdown-menu,
+.dark [data-radix-dropdown-menu-content] {
+  @apply bg-gray-800 border border-gray-700 opacity-100 !important;
+  backdrop-filter: none !important;
 }
