@@ -1,11 +1,20 @@
 
-import { lazy, Suspense, useState, useEffect } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import SkeletonHero from "./hero/SkeletonHero";
 import { LazyMotion, domAnimation } from "framer-motion";
 
 // Use React.lazy for code splitting at the component level
 const HeroContent = lazy(() => import("./hero/HeroContent"));
-const DashboardPreview = lazy(() => import("./hero/DashboardPreview"));
+const DashboardPreview = lazy(() => 
+  import("./hero/DashboardPreview")
+    .catch(err => {
+      console.error("Failed to load DashboardPreview:", err);
+      // Return a minimal component to prevent the entire app from crashing
+      return { 
+        default: () => <div className="md:w-1/2 bg-secondary/20 rounded-lg p-6">Dashboard preview unavailable</div> 
+      };
+    })
+);
 
 const HeroSection = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,13 +32,8 @@ const HeroSection = () => {
     });
   };
 
-  useEffect(() => {
-    // Immediately start loading the components
-    import("./hero/HeroContent");
-    import("./hero/DashboardPreview");
-    
+  React.useEffect(() => {
     // Fallback to ensure we don't show the skeleton forever
-    // Even if resources fail to load
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2000); // Max loading time
@@ -45,10 +49,10 @@ const HeroSection = () => {
         ) : (
           <LazyMotion features={domAnimation}>
             <div className="flex flex-col md:flex-row items-center">
-              <Suspense fallback={<div className="md:w-1/2 animate-pulse" />}>
+              <Suspense fallback={<div className="md:w-1/2 animate-pulse h-64 bg-secondary/20 rounded-lg" />}>
                 <HeroContent />
               </Suspense>
-              <Suspense fallback={<div className="md:w-1/2 animate-pulse" />}>
+              <Suspense fallback={<div className="md:w-1/2 animate-pulse h-64 bg-secondary/20 rounded-lg" />}>
                 <DashboardPreview onLoad={handleResourceLoad} />
               </Suspense>
             </div>
