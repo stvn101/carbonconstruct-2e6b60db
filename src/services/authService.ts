@@ -16,7 +16,19 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       return null;
     }
 
-    return data as UserProfile;
+    // Transform the data to ensure it matches the UserProfile type
+    const profile: UserProfile = {
+      id: data.id,
+      full_name: data.full_name,
+      company_name: data.company_name,
+      avatar_url: data.avatar_url,
+      website: data.website,
+      role: data.role,
+      subscription_tier: data.subscription_tier || 'free',
+      had_trial: data.had_trial || false
+    };
+
+    return profile;
   } catch (error) {
     console.error('Error fetching profile:', error);
     return null;
@@ -36,7 +48,19 @@ export async function createUserProfile(profile: UserProfile): Promise<UserProfi
       return null;
     }
 
-    return data as UserProfile;
+    // Transform returned data to ensure it matches UserProfile type
+    const createdProfile: UserProfile = {
+      id: data.id,
+      full_name: data.full_name,
+      company_name: data.company_name,
+      avatar_url: data.avatar_url,
+      website: data.website,
+      role: data.role,
+      subscription_tier: data.subscription_tier || 'free',
+      had_trial: data.had_trial || false
+    };
+
+    return createdProfile;
   } catch (error) {
     console.error('Error creating profile:', error);
     return null;
@@ -57,7 +81,19 @@ export async function updateUserProfile(profile: UserProfile): Promise<UserProfi
       return null;
     }
 
-    return data as UserProfile;
+    // Transform returned data to ensure it matches UserProfile type
+    const updatedProfile: UserProfile = {
+      id: data.id,
+      full_name: data.full_name,
+      company_name: data.company_name,
+      avatar_url: data.avatar_url,
+      website: data.website,
+      role: data.role,
+      subscription_tier: data.subscription_tier || 'free',
+      had_trial: data.had_trial || false
+    };
+
+    return updatedProfile;
   } catch (error) {
     console.error('Error updating profile:', error);
     return null;
