@@ -86,12 +86,7 @@ const UserProfile = () => {
   };
 
   return (
-    <motion.div 
-      className="min-h-screen flex flex-col bg-carbon-50 dark:bg-gray-900"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
+    <div className="min-h-screen flex flex-col bg-carbon-50 dark:bg-gray-900">
       <Helmet>
         <title>My Profile | CarbonConstruct</title>
         <meta 
@@ -102,7 +97,7 @@ const UserProfile = () => {
       
       <Navbar />
       
-      <main className="flex-grow content-top-spacing px-4">
+      <main className="flex-grow content-top-spacing px-4 pb-12">
         <div className="container mx-auto max-w-3xl">
           <h1 className="text-2xl md:text-3xl font-bold mb-8 dark:text-carbon-300">My Profile</h1>
           
@@ -194,7 +189,7 @@ const UserProfile = () => {
       </main>
       
       <Footer />
-    </motion.div>
+    </div>
   );
 };
 

@@ -1,44 +1,90 @@
 
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchUserProfile } from '@/services/authService';
+import { fetchUserProfile, createUserProfile } from '@/services/authService';
 import { AuthState } from '../types';
+import { UserProfile } from '@/types/auth';
 
 export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => void) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         updateState({
           session: session,
           user: session?.user ?? null
         });
         
         if (session?.user) {
-          setTimeout(() => {
-            fetchUserProfile(session.user.id).then((profile) => {
+          try {
+            const profile = await fetchUserProfile(session.user.id);
+            
+            if (!profile) {
+              // Create a new profile if one doesn't exist
+              const newProfile: UserProfile = {
+                id: session.user.id,
+                full_name: session.user.user_metadata?.full_name || null,
+                company_name: null,
+                avatar_url: null,
+                website: null,
+                role: 'user',
+                subscription_tier: 'free',
+                had_trial: false
+              };
+              
+              const createdProfile = await createUserProfile(newProfile);
+              updateState({ profile: createdProfile });
+            } else {
               updateState({ profile });
-            });
-          }, 0);
+            }
+          } catch (error) {
+            console.error('Error processing user profile:', error);
+          }
         } else if (event === 'SIGNED_OUT') {
           updateState({ profile: null });
         }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       updateState({
         session,
         user: session?.user ?? null
       });
       
       if (session?.user) {
-        fetchUserProfile(session.user.id).then((profile) => {
-          updateState({ 
-            profile,
-            loading: false,
-            isLoading: false
-          });
-        });
+        try {
+          const profile = await fetchUserProfile(session.user.id);
+          
+          if (!profile) {
+            // Create a new profile if one doesn't exist
+            const newProfile: UserProfile = {
+              id: session.user.id,
+              full_name: session.user.user_metadata?.full_name || null,
+              company_name: null,
+              avatar_url: null,
+              website: null,
+              role: 'user',
+              subscription_tier: 'free',
+              had_trial: false
+            };
+            
+            const createdProfile = await createUserProfile(newProfile);
+            updateState({ 
+              profile: createdProfile,
+              loading: false,
+              isLoading: false
+            });
+          } else {
+            updateState({ 
+              profile,
+              loading: false,
+              isLoading: false
+            });
+          }
+        } catch (error) {
+          console.error('Error processing user profile:', error);
+          updateState({ loading: false, isLoading: false });
+        }
       } else {
         updateState({ loading: false, isLoading: false });
       }

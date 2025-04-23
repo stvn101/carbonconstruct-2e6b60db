@@ -12,6 +12,7 @@ const Dashboard = lazyLoad(() => import('@/pages/Dashboard'),
 );
 const MaterialBrowser = lazyLoad(() => import('@/pages/MaterialBrowser'));
 const Notifications = lazyLoad(() => import('@/pages/Notifications'));
+const UserProfile = lazyLoad(() => import('@/pages/UserProfile'));
 
 export const protectedRoutes = (
   <>
@@ -30,6 +31,11 @@ export const protectedRoutes = (
     <Route path="/notifications" element={
       <RequireAuth>
         <Notifications />
+      </RequireAuth>
+    } />
+    <Route path="/profile" element={
+      <RequireAuth>
+        <UserProfile />
       </RequireAuth>
     } />
   </>
