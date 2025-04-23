@@ -14,7 +14,11 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="bg-carbon-100 hover:bg-carbon-200 border-carbon-300"
+        >
           <Info className="h-4 w-4" />
         </Button>
       </DialogTrigger>
