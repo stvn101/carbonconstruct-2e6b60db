@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import FormInput from "./form/FormInput";
 import SubmitButton from "./form/SubmitButton";
 import { useFormValidation } from "./form/useFormValidation";
@@ -96,7 +96,10 @@ const CTAForm = ({ onSubmit, isSubmitting }: CTAFormProps) => {
       </div>
       <SubmitButton isSubmitting={isSubmitting} />
       <div className="text-xs text-carbon-700 dark:text-carbon-200 text-center mt-2">
-        By submitting this form, you agree to our <a href="#" className="underline hover:text-carbon-900 dark:hover:text-carbon-50">Terms & Privacy Policy</a>
+        By submitting this form, you agree to our{" "}
+        <Link to="/terms-of-service" className="underline hover:text-carbon-900 dark:hover:text-carbon-50">Terms of Service</Link>{" "}
+        &{" "}
+        <Link to="/privacy-policy" className="underline hover:text-carbon-900 dark:hover:text-carbon-50">Privacy Policy</Link>
       </div>
     </motion.form>
   );
