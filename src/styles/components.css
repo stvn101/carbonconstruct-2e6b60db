@@ -46,3 +46,11 @@ div[data-state] {
   opacity: 1 !important;
   backdrop-filter: none !important;
 }
+
+/* Specifically target Radix UI Dialog content */
+[data-radix-popper-content-wrapper],
+[data-state] > [role="dialog"] {
+  @apply bg-white dark:bg-gray-800 !important;
+  opacity: 1 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
