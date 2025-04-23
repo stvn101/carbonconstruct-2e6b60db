@@ -1,3 +1,4 @@
+
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 
@@ -23,8 +24,8 @@ const initialize = () => {
       // Enable debugging mode
       debug: import.meta.env.DEV,
       
-      // Performance monitoring options
-      enable ত্রুটিHandling: true,
+      // Ensure error tracking is enabled
+      enableErrorHandling: true,
       
       // Release version
       release: import.meta.env.VITE_VERSION,
