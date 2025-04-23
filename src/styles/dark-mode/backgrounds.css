@@ -62,7 +62,7 @@
 /* Make dialogs completely opaque */
 .dark [role="dialog"],
 .dark div[data-state] {
-  @apply bg-gray-900 !important;
+  @apply bg-gray-800 !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
 }
@@ -73,4 +73,24 @@
   @apply bg-gray-800 !important;
   opacity: 1 !important;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Ensure dropdown content is visible */
+.dark [data-radix-dropdown-menu-content] {
+  @apply bg-gray-800 !important;
+}
+
+/* Ensure dialog content is visible */
+.dark [role="dialog"] {
+  @apply bg-gray-800 !important;
+}
+
+/* Improve material detail buttons in dark mode */
+.dark .details-btn {
+  @apply bg-carbon-600 text-carbon-100 border-carbon-500;
+}
+
+/* Fix content panels in dark mode */
+.dark [data-orientation] [role="tabpanel"] {
+  @apply bg-transparent !important;
 }

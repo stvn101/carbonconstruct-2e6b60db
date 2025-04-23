@@ -134,3 +134,13 @@ html.dark [data-radix-popper-content-wrapper] {
     text-decoration: underline;
   }
 }
+
+/* Fix tooltip styling */
+.dark [data-radix-tooltip-content] {
+  @apply bg-gray-800 border-gray-700 text-carbon-300;
+}
+
+/* Ensure all dropdowns have proper contrast */
+.dark [data-radix-dropdown-menu-content] [role="menuitem"] {
+  @apply hover:bg-gray-700;
+}
