@@ -1,31 +1,33 @@
 
-import { useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/auth';
-import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export const useNotificationSubscription = (onNewNotification: () => void) => {
   const { user } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      const channel = supabase
-        .channel('notifications-subscription')
-        .on('postgres_changes', { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        }, () => {
-          onNewNotification();
-          toast.info("You have a new notification");
-        })
-        .subscribe();
-        
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [user, onNewNotification]);
+  
+  if (!user) return () => {}; // Return no-op if not authenticated
+  
+  // Set up subscription
+  const channel = supabase
+    .channel('notifications')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`
+      },
+      (payload) => {
+        console.log('New notification received:', payload);
+        onNewNotification();
+      }
+    )
+    .subscribe();
+  
+  // Return unsubscribe function
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
-
