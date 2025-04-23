@@ -12,16 +12,7 @@ export const useNotifications = () => {
   }, [fetchUnreadNotificationCount]);
 
   // Set up notification subscription once
-  useEffect(() => {
-    const unsubscribe = useNotificationSubscription(handleNewNotification);
-    
-    // Clean up subscription when component unmounts
-    return () => {
-      if (unsubscribe && typeof unsubscribe === 'function') {
-        unsubscribe();
-      }
-    };
-  }, [handleNewNotification]);
+  useNotificationSubscription(handleNewNotification);
 
   return { unreadNotifications, fetchUnreadNotificationCount };
 };
