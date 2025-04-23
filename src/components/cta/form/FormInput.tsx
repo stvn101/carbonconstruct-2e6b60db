@@ -23,8 +23,15 @@ const FormInput = ({
       case 'email': return 'email';
       case 'phone': return 'tel';
       case 'company': return 'organization';
+      case 'website': return 'url';
+      case 'address': return 'street-address';
+      case 'city': return 'address-level2';
+      case 'state': return 'address-level1';
+      case 'zip': return 'postal-code';
+      case 'country': return 'country';
       default: return type === 'email' ? 'email' : 
-               type === 'tel' ? 'tel' : 'off';
+               type === 'tel' ? 'tel' :
+               type === 'url' ? 'url' : 'off';
     }
   };
 
@@ -37,6 +44,7 @@ const FormInput = ({
         <input 
           type={type}
           id={id}
+          name={id}
           placeholder={placeholder}
           className={`w-full px-4 py-2 bg-white dark:bg-gray-700 border ${
             error ? 'border-red-400' : activeField === id ? 'border-carbon-600 dark:border-carbon-400' : 'border-gray-300 dark:border-gray-600'
@@ -46,6 +54,8 @@ const FormInput = ({
           onFocus={onFocus}
           onBlur={onBlur}
           aria-label={label}
+          aria-required={!isOptional}
+          aria-invalid={!!error}
           autoComplete={getAutoCompleteValue()}
         />
         {error && (
@@ -54,6 +64,7 @@ const FormInput = ({
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
+            aria-live="polite"
           >
             <span className="bg-red-400/20 p-1 rounded-full mr-1">!</span>
             {error}

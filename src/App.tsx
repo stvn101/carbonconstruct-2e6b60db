@@ -42,7 +42,7 @@ const AppContent = () => {
     // Initialize performance monitoring
     performanceMonitoringService.trackRouteChange(window.location.pathname);
     
-    // Flush error tracking on app unmount
+    // Use a cleanup function to handle component unmount
     return () => {
       ErrorTrackingService.flush();
     };
@@ -91,16 +91,18 @@ const App: React.FC = () => {
     // Initialize performance monitoring
     performanceMonitoringService.initialize();
     
-    // Listen for unload to flush errors
-    const handleBeforeUnload = () => {
-      ErrorTrackingService.flush();
-      performanceMonitoringService.cleanup();
+    // Use page visibility API instead of unload event
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        ErrorTrackingService.flush();
+        performanceMonitoringService.cleanup();
+      }
     };
     
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
   

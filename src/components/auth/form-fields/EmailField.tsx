@@ -19,6 +19,8 @@ const EmailField = ({ form }: EmailFieldProps) => {
             <Input 
               placeholder="you@example.com" 
               autoComplete="email" 
+              type="email"
+              aria-label="Email address"
               {...field} 
             />
           </FormControl>
