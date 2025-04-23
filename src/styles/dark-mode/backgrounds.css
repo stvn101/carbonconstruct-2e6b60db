@@ -58,3 +58,11 @@
   backdrop-filter: none !important;
   @apply bg-gray-800 opacity-100 !important;
 }
+
+/* Make dialogs completely opaque */
+.dark [role="dialog"],
+.dark div[data-state] {
+  @apply bg-gray-900 !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+}
