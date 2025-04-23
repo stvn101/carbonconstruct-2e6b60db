@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -29,7 +30,7 @@ const Notifications = () => {
     if (user) {
       fetchNotifications();
       
-      // Set up real-time subscription for new notifications
+      // Set up real-time subscription with optimized filter
       const channel = supabase
         .channel('notifications-page')
         .on('postgres_changes', { 
@@ -54,6 +55,7 @@ const Notifications = () => {
     
     setIsLoading(true);
     try {
+      // Optimize query to efficiently use the index on user_id
       const { data, error } = await supabase
         .from('notifications')
         .select('id, title, message, type, read, created_at')
@@ -73,6 +75,7 @@ const Notifications = () => {
   
   const markAsRead = async (id: string) => {
     try {
+      // Always filter by user_id first to utilize the index
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
@@ -94,6 +97,7 @@ const Notifications = () => {
   
   const deleteNotification = async (id: string) => {
     try {
+      // Always filter by user_id first to utilize the index
       const { error } = await supabase
         .from('notifications')
         .delete()
@@ -112,6 +116,7 @@ const Notifications = () => {
   
   const markAllAsRead = async () => {
     try {
+      // Always filter by user_id to utilize the index
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })

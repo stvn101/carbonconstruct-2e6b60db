@@ -12,7 +12,7 @@ export const useNotifications = () => {
     if (user) {
       fetchUnreadNotificationCount();
       
-      // Set up real-time subscription for notifications
+      // Set up real-time subscription for notifications with optimized filters
       const channel = supabase
         .channel('notifications')
         .on('postgres_changes', { 
@@ -46,12 +46,12 @@ export const useNotifications = () => {
     if (!user) return;
     
     try {
+      // Optimize query to use the user_id index efficiently
       const { count, error } = await supabase
         .from('notifications')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('read', false)
-        .order('created_at', { ascending: false });
+        .eq('read', false);
         
       if (error) throw error;
       
