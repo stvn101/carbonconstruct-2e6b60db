@@ -17,13 +17,13 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({ material }) => {
         <Button 
           variant="outline" 
           size="sm" 
-          className="bg-carbon-100 hover:bg-carbon-200 border-carbon-300 dark:bg-carbon-700 dark:hover:bg-carbon-600 dark:border-carbon-600 dark:text-white"
+          className="bg-carbon-300 hover:bg-carbon-400 border-carbon-400 dark:bg-carbon-800 dark:hover:bg-carbon-700 dark:border-carbon-600 dark:text-white transition-colors duration-300"
         >
           <Info className="h-4 w-4 mr-1" />
           Details
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-white dark:bg-gray-800 border-carbon-300 dark:border-gray-700 shadow-lg">
+      <DialogContent className="max-w-md bg-white dark:bg-gray-900 border border-carbon-300 dark:border-carbon-700 shadow-xl">
         <DialogHeader>
           <DialogTitle>{material.name}</DialogTitle>
           <DialogDescription>
@@ -116,3 +116,4 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({ material }) => {
 };
 
 export default MaterialDetails;
+

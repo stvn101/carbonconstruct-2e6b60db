@@ -29,9 +29,10 @@
 .dialog,
 .sheet,
 [data-radix-popper-content-wrapper] > * {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 !important;
+  @apply bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 !important; /* Adjusted dark-bg to darker */
   backdrop-filter: none !important;
   opacity: 1 !important;
+  z-index: 9999; /* Ensure it is on top */
 }
 
 /* Ensure sections with secondary backgrounds are solid */
@@ -50,7 +51,21 @@ div[data-state] {
 /* Specifically target Radix UI Dialog content */
 [data-radix-popper-content-wrapper],
 [data-state] > [role="dialog"] {
-  @apply bg-white dark:bg-gray-800 !important;
+  @apply bg-white dark:bg-gray-900 !important; /* Dark mode background stronger */
   opacity: 1 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25) !important; /* Darker shadow */
+  z-index: 9999;
 }
+
+/* Details button dark mode adjustment */
+button.bg-carbon-100.dark\:bg-carbon-700 {
+  @apply bg-carbon-700 text-white border-carbon-600 hover:bg-carbon-600 transition-colors;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* Force all backdrop blur elements fully opaque and no transparency */
+.dark [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  @apply bg-gray-900 opacity-100 !important;
+}
+
