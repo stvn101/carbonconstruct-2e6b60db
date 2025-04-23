@@ -19,7 +19,7 @@ import { projectRoutes } from './routes/projectRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { useAccessibility } from './hooks/useAccessibility';
 
-// Import Index directly instead of lazy loading
+// Import critical pages directly to avoid dynamic import failures
 import Index from './pages/Index';
 const NotFound = lazyLoad(() => import('./pages/NotFound'));
 
@@ -38,24 +38,26 @@ const AppContent = () => {
     <>
       <SkipToContent />
       <RouteChangeTracker />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        
-        {/* Auth routes */}
-        {authRoutes}
+      <ErrorBoundary feature="Application Routes">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          
+          {/* Auth routes */}
+          {authRoutes}
 
-        {/* Marketing routes */}
-        {marketingRoutes}
+          {/* Marketing routes */}
+          {marketingRoutes}
 
-        {/* Protected routes */}
-        {protectedRoutes}
+          {/* Protected routes */}
+          {protectedRoutes}
 
-        {/* Project routes including calculator */}
-        {projectRoutes}
+          {/* Project routes including calculator */}
+          {projectRoutes}
 
-        <Route path="/case-studies" element={<Navigate to="/" />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="/case-studies" element={<Navigate to="/" />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ErrorBoundary>
       <Toaster richColors position="top-right" />
     </>
   );
@@ -69,13 +71,15 @@ const App: React.FC = () => {
           <RegionProvider>
             <Router>
               <AuthProvider>
-                <ProjectProvider>
-                  <CalculatorProvider>
-                    <Suspense fallback={<LoadingFallback />}>
-                      <AppContent />
-                    </Suspense>
-                  </CalculatorProvider>
-                </ProjectProvider>
+                <ErrorBoundary feature="Project Data">
+                  <ProjectProvider>
+                    <CalculatorProvider>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <AppContent />
+                      </Suspense>
+                    </CalculatorProvider>
+                  </ProjectProvider>
+                </ErrorBoundary>
               </AuthProvider>
             </Router>
           </RegionProvider>

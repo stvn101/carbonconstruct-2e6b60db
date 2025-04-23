@@ -3,6 +3,7 @@ import React from "react";
 import ErrorBoundary from "../ErrorBoundary";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 interface ErrorFallbackProps {
   error: Error;
@@ -16,21 +17,10 @@ const ErrorFallback = ({ error, resetErrorBoundary, feature }: ErrorFallbackProp
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
       <div className="w-16 h-16 mb-4 rounded-full bg-red-100 flex items-center justify-center dark:bg-red-900/30">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
+        <AlertTriangle
           className="h-8 w-8 text-red-600 dark:text-red-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
           aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          />
-        </svg>
+        />
       </div>
       <h2 className="text-2xl font-bold mb-2 dark:text-carbon-50">
         {feature} Error
@@ -42,15 +32,17 @@ const ErrorFallback = ({ error, resetErrorBoundary, feature }: ErrorFallbackProp
         <Button
           variant="default"
           onClick={resetErrorBoundary}
-          className="bg-carbon-600 hover:bg-carbon-700 text-white"
+          className="flex items-center gap-2 bg-carbon-600 hover:bg-carbon-700 text-white"
         >
+          <RefreshCw className="h-4 w-4" />
           Try Again
         </Button>
         <Button
           variant="outline"
           onClick={() => navigate("/")}
-          className="border-carbon-300 dark:border-carbon-700 dark:text-carbon-200"
+          className="flex items-center gap-2 border-carbon-300 dark:border-carbon-700 dark:text-carbon-200"
         >
+          <Home className="h-4 w-4" />
           Go Home
         </Button>
       </div>
@@ -75,13 +67,13 @@ const ErrorBoundaryWrapper = ({ children, feature }: ErrorBoundaryWrapperProps) 
   return (
     <ErrorBoundary 
       feature={feature}
-      fallback={
+      fallback={({ error, resetErrorBoundary }) => (
         <ErrorFallback 
-          error={new Error("An error occurred")} 
-          resetErrorBoundary={() => {}} 
+          error={error} 
+          resetErrorBoundary={resetErrorBoundary} 
           feature={feature} 
         />
-      }
+      )}
     >
       {children}
     </ErrorBoundary>

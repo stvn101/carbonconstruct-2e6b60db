@@ -8,7 +8,7 @@ import errorTrackingService from "@/services/errorTrackingService";
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
+  fallback?: ReactNode | ((props: { error: Error, resetErrorBoundary: () => void }) => ReactNode);
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   resetCondition?: any;
   feature?: string;
@@ -83,6 +83,12 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
+        if (typeof this.props.fallback === 'function') {
+          return (this.props.fallback as Function)({ 
+            error: this.state.error as Error, 
+            resetErrorBoundary: this.handleReset 
+          });
+        }
         return this.props.fallback;
       }
 

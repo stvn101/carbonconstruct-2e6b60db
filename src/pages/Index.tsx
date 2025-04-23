@@ -8,13 +8,14 @@ import ThemeToggle from "@/components/ThemeToggle";
 import SEO from "@/components/SEO";
 import CalculatorDemoVideo from "@/components/CalculatorDemoVideo";
 import { useA11y } from "@/hooks/useA11y";
+import Footer from "@/components/Footer"; // Direct import to avoid lazy loading issues
 
+// Lazy load non-critical components
 const FeaturesSection = lazy(() => import("@/components/FeaturesSection"));
 const BenefitsSection = lazy(() => import("@/components/BenefitsSection"));
 const CTASection = lazy(() => import("@/components/CTASection"));
-// Import Footer directly instead of lazy loading
-import Footer from "@/components/Footer";
 
+// Preload Calculator for better UX
 if (typeof window !== 'undefined') {
   import("@/pages/Calculator").then(() => {
     console.log("Calculator page preloaded");
@@ -176,7 +177,7 @@ const Index = () => {
       <div className="fixed bottom-4 right-4 z-40">
         <ThemeToggle />
       </div>
-      {/* Use Footer directly instead of lazy loading */}
+      {/* Use Footer directly instead of lazy loading it */}
       <Footer />
     </motion.div>
   );
