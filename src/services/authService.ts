@@ -15,6 +15,10 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       return null;
     }
 
+    if (!data) {
+      return null;
+    }
+
     // Transform the data to ensure it matches the UserProfile type
     const profile: UserProfile = {
       id: data.id,
@@ -44,6 +48,10 @@ export async function createUserProfile(profile: UserProfile): Promise<UserProfi
 
     if (error) {
       console.error('Error creating profile:', error);
+      return null;
+    }
+
+    if (!data) {
       return null;
     }
 
@@ -77,6 +85,10 @@ export async function updateUserProfile(profile: UserProfile): Promise<UserProfi
 
     if (error) {
       console.error('Error updating profile:', error);
+      return null;
+    }
+
+    if (!data) {
       return null;
     }
 

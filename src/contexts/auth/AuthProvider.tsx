@@ -37,15 +37,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const contextValue: AuthContextType = {
     ...state,
     signUp: async (email: string, password: string, captchaToken: string | null) => {
-      const options = captchaToken ? { captchaToken } : undefined;
-      await supabase.auth.signUp({ email, password, options });
+      try {
+        const options = captchaToken ? { captchaToken } : undefined;
+        const { error } = await supabase.auth.signUp({ email, password, options });
+        if (error) throw error;
+      } catch (error: any) {
+        console.error("Sign up error:", error.message);
+        throw error;
+      }
     },
     signIn: async (email: string, password: string, captchaToken: string | null) => {
-      const options = captchaToken ? { captchaToken } : undefined;
-      await supabase.auth.signInWithPassword({ email, password, options });
+      try {
+        const options = captchaToken ? { captchaToken } : undefined;
+        const { error } = await supabase.auth.signInWithPassword({ email, password, options });
+        if (error) throw error;
+      } catch (error: any) {
+        console.error("Sign in error:", error.message);
+        throw error;
+      }
     },
     signOut: async () => {
-      await supabase.auth.signOut();
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      } catch (error: any) {
+        console.error("Sign out error:", error.message);
+        throw error;
+      }
     },
     ...authHandlers
   };

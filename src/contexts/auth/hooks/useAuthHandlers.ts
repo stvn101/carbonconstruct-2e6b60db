@@ -72,6 +72,10 @@ export const useAuthHandlers = () => {
 
   const updateProfile = async (updatedProfile: UserProfile) => {
     try {
+      if (!updatedProfile.id) {
+        throw new Error('Profile ID is required for updating');
+      }
+      
       const { error } = await supabase
         .from('profiles')
         .update(updatedProfile)

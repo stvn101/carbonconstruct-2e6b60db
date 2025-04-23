@@ -17,9 +17,13 @@ export interface AuthContextType {
   profile: UserProfile | null;
   session: Session | null;
   isLoading: boolean;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   signInWithGitHub: () => Promise<void>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  updateProfile: (updatedProfile: UserProfile) => Promise<void>;
+  signUp: (email: string, password: string, captchaToken: string | null) => Promise<void>;
+  signIn: (email: string, password: string, captchaToken: string | null) => Promise<void>;
+  signOut: () => Promise<void>;
 }

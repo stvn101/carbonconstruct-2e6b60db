@@ -27,6 +27,7 @@ export const useUserNavLinks = () => {
     { title: "Blog", path: "/blog" },
   ];
   
+  // Safely check if the user has a premium subscription
   const isPremiumUser = profile?.subscription_tier === 'premium';
   const navLinks = isPremiumUser ? premiumUserNavLinks : freeUserNavLinks;
 
