@@ -22,7 +22,7 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
           <Info className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg bg-background border-carbon-300 shadow-lg">
         <DialogHeader>
           <DialogTitle>{material.type}</DialogTitle>
           <DialogDescription>
