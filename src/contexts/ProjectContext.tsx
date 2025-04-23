@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth';
 import { SavedProject, ProjectContextType } from '@/types/project';
@@ -24,12 +25,29 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [projects, setProjects] = useState<SavedProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Use useCallback for loadProjects to avoid unnecessary re-creations
+  const loadProjects = useCallback(async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      const projectData = await fetchUserProjects(user.id);
+      setProjects(projectData);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      toast.error("Failed to load your projects");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     let projectChannel: RealtimeChannel;
 
     if (user) {
       loadProjects();
 
+      // Setup realtime subscription
       projectChannel = supabase
         .channel('project_changes')
         .on(
@@ -43,19 +61,30 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
           (payload) => {
             console.log('Received real-time update:', payload);
             
+            // Use functional updates to avoid dependency on current state
             if (payload.eventType === 'INSERT') {
-              setProjects(prev => [...prev, payload.new as SavedProject]);
-              toast.success('New project created');
+              const newProject = payload.new as SavedProject;
+              setProjects(prev => {
+                // Check if project already exists to avoid duplicates
+                if (prev.some(p => p.id === newProject.id)) {
+                  return prev;
+                }
+                return [...prev, newProject];
+              });
+              // Avoid calling toast inside state updates
+              setTimeout(() => toast.success('New project created'), 0);
             } 
             else if (payload.eventType === 'UPDATE') {
+              const updatedProject = payload.new as SavedProject;
               setProjects(prev => 
-                prev.map(p => p.id === payload.new.id ? payload.new as SavedProject : p)
+                prev.map(p => p.id === updatedProject.id ? updatedProject : p)
               );
-              toast.success('Project updated');
+              setTimeout(() => toast.success('Project updated'), 0);
             }
             else if (payload.eventType === 'DELETE') {
-              setProjects(prev => prev.filter(p => p.id !== payload.old.id));
-              toast.success('Project deleted');
+              const deletedId = payload.old.id;
+              setProjects(prev => prev.filter(p => p.id !== deletedId));
+              setTimeout(() => toast.success('Project deleted'), 0);
             }
           }
         )
@@ -70,22 +99,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         supabase.removeChannel(projectChannel);
       }
     };
-  }, [user]);
-
-  const loadProjects = async () => {
-    if (!user) return;
-    
-    setIsLoading(true);
-    try {
-      const projectData = await fetchUserProjects(user.id);
-      setProjects(projectData);
-    } catch (error) {
-      console.error('Error loading projects:', error);
-      toast.error("Failed to load your projects");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [user, loadProjects]); // Added loadProjects as dependency
 
   const saveProject = async (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!user) {
@@ -94,7 +108,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     try {
       const savedProject = await createProject(user.id, project);
-      setProjects(prevProjects => [...prevProjects, savedProject]);
+      // Let the realtime subscription handle the state update
       toast.success("Project saved successfully");
       return savedProject;
     } catch (error) {
@@ -107,9 +121,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateProject = async (project: SavedProject) => {
     try {
       const updatedProject = await updateProjectInDB(project);
-      setProjects(prevProjects => 
-        prevProjects.map(p => p.id === project.id ? updatedProject : p)
-      );
+      // Let the realtime subscription handle the state update
       toast.success("Project updated successfully");
       return updatedProject;
     } catch (error) {
@@ -122,7 +134,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const deleteProject = async (id: string) => {
     try {
       await deleteProjectInDB(id);
-      setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
+      // Let the realtime subscription handle the state update
       toast.success("Project deleted successfully");
     } catch (error) {
       console.error('Delete project error:', error);

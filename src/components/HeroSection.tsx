@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense, useState, useEffect } from "react";
 import SkeletonHero from "./hero/SkeletonHero";
 import { LazyMotion, domAnimation } from "framer-motion";
 
@@ -22,7 +22,7 @@ const HeroSection = () => {
   const totalResources = 1; // Increase this number if loading more assets
 
   // Function to track when resources are loaded
-  const handleResourceLoad = () => {
+  const handleResourceLoad = useCallback(() => {
     setResourcesLoaded(prev => {
       const newCount = prev + 1;
       if (newCount >= totalResources) {
@@ -30,9 +30,10 @@ const HeroSection = () => {
       }
       return newCount;
     });
-  };
+  }, []);
 
-  React.useEffect(() => {
+  // Only run the timer effect once on mount
+  useEffect(() => {
     // Fallback to ensure we don't show the skeleton forever
     const timer = setTimeout(() => {
       setIsLoading(false);
