@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/auth';
 import { SavedProject, ProjectContextType } from '@/types/project';
 import { fetchUserProjects, createProject, updateProject as updateProjectInDB, deleteProject as deleteProjectInDB } from '@/services/projectService';
 import { exportProjectToPDF, exportProjectToCSV } from '@/utils/exportUtils';
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -23,12 +25,51 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let projectChannel: RealtimeChannel;
+
     if (user) {
       loadProjects();
+
+      projectChannel = supabase
+        .channel('project_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'projects',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Received real-time update:', payload);
+            
+            if (payload.eventType === 'INSERT') {
+              setProjects(prev => [...prev, payload.new as SavedProject]);
+              toast.success('New project created');
+            } 
+            else if (payload.eventType === 'UPDATE') {
+              setProjects(prev => 
+                prev.map(p => p.id === payload.new.id ? payload.new as SavedProject : p)
+              );
+              toast.success('Project updated');
+            }
+            else if (payload.eventType === 'DELETE') {
+              setProjects(prev => prev.filter(p => p.id !== payload.old.id));
+              toast.success('Project deleted');
+            }
+          }
+        )
+        .subscribe();
     } else {
       setProjects([]);
       setIsLoading(false);
     }
+
+    return () => {
+      if (projectChannel) {
+        supabase.removeChannel(projectChannel);
+      }
+    };
   }, [user]);
 
   const loadProjects = async () => {
