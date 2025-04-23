@@ -3,6 +3,7 @@ import React from 'react';
 import { Database } from 'lucide-react';
 import RegionStats from './RegionStats';
 import { MaterialsByRegion } from '@/lib/materialTypes';
+import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 
 interface DatabaseHeaderProps {
   globalRegion: string;
@@ -51,9 +52,11 @@ const DatabaseHeader = ({ globalRegion, materialsByRegion }: DatabaseHeaderProps
         {getHeaderDescription()}
       </p>
       
-      {materialsByRegion && Object.keys(materialsByRegion).length > 0 && (
-        <RegionStats materialsByRegion={materialsByRegion} />
-      )}
+      <ErrorBoundaryWrapper feature="Region Stats">
+        {materialsByRegion && Object.keys(materialsByRegion).length > 0 && (
+          <RegionStats materialsByRegion={materialsByRegion} />
+        )}
+      </ErrorBoundaryWrapper>
     </div>
   );
 };

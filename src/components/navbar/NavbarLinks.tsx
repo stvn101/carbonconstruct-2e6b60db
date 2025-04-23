@@ -4,18 +4,28 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useNotifications } from "@/hooks/notifications/useNotifications";
+import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { toast } from "sonner";
 import NotificationBell from "@/components/navbar/NotificationBell";
 import UserMenu from "@/components/navbar/UserMenu";
-import ErrorBoundary from "@/components/ErrorBoundary";
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
+import ErrorTrackingService from "@/services/errorTrackingService";
 
 const NavbarLinks = () => {
   const { user, profile, logout } = useAuth();
   const { isMobile } = useIsMobile();
-  const { unreadNotifications } = useNotifications();
+  const { unreadNotifications, error: notificationError } = useNotifications();
   const navigate = useNavigate();
+  
+  // Log notification errors to error tracking service
+  React.useEffect(() => {
+    if (notificationError) {
+      ErrorTrackingService.captureMessage(`Notification error: ${notificationError}`, {
+        component: 'NavbarLinks',
+        userId: user?.id
+      });
+    }
+  }, [notificationError, user?.id]);
   
   const isPremiumUser = profile?.subscription_tier === 'premium';
   
@@ -26,6 +36,10 @@ const NavbarLinks = () => {
       toast.success("You have been logged out successfully");
     } catch (error) {
       console.error('Logout error:', error);
+      ErrorTrackingService.captureException(
+        error instanceof Error ? error : new Error('Logout failed'),
+        { component: 'NavbarLinks', action: 'logout' }
+      );
       toast.error("Failed to log out. Please try again.");
     }
   };

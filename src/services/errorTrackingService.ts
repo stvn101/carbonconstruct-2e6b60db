@@ -1,7 +1,8 @@
 
-// Enhanced error tracking service with production optimizations
+// Enhanced error tracking service with production optimizations and retry mechanisms
 
 type ErrorMetadata = Record<string, any>;
+type ErrorCallback = (error: Error) => void;
 
 interface PerformanceEntryWithTiming extends PerformanceEntry {
   processingStart?: number;
@@ -15,7 +16,11 @@ class ErrorTrackingService {
   private isInitialized = false;
   private environment: string;
   private errorCount: Record<string, number> = {};
-  private readonly MAX_ERRORS_PER_TYPE = 5;
+  private readonly MAX_ERRORS_PER_TYPE = 10;
+  private errorCallbacks: ErrorCallback[] = [];
+  private offlineErrors: {error: Error, metadata: ErrorMetadata}[] = [];
+  private lastErrorSent: number = 0;
+  private readonly ERROR_THROTTLE_MS = 2000; // 2 second throttle for repeated errors
   
   private constructor() {
     this.environment = import.meta.env.MODE || 'development';
@@ -60,11 +65,43 @@ class ErrorTrackingService {
       }
     });
 
+    // Check online status changes to send stored offline errors
+    window.addEventListener('online', () => {
+      this.sendOfflineErrors();
+    });
+
+    // Try to establish connection if network is already available
+    if (navigator.onLine) {
+      this.sendOfflineErrors();
+    }
+
     this.isInitialized = true;
     console.info('Error tracking service initialized');
   }
 
+  public registerErrorCallback(callback: ErrorCallback): () => void {
+    this.errorCallbacks.push(callback);
+    
+    // Return unsubscribe function
+    return () => {
+      this.errorCallbacks = this.errorCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  private sendOfflineErrors(): void {
+    if (this.offlineErrors.length === 0) return;
+    
+    const errorsToSend = [...this.offlineErrors];
+    this.offlineErrors = [];
+    
+    errorsToSend.forEach(({error, metadata}) => {
+      this.captureException(error, {...metadata, wasOffline: true});
+    });
+  }
+
   public captureException(error: Error, metadata: ErrorMetadata = {}): void {
+    if (!error) return;
+    
     const errorKey = `${error.name}:${error.message}`;
     this.errorCount[errorKey] = (this.errorCount[errorKey] || 0) + 1;
     
@@ -73,6 +110,20 @@ class ErrorTrackingService {
       if (this.errorCount[errorKey] === this.MAX_ERRORS_PER_TYPE + 1) {
         console.warn(`Error "${errorKey}" occurred too many times. Suppressing future logs.`);
       }
+      return;
+    }
+
+    // Throttle frequent identical errors
+    const now = Date.now();
+    if (errorKey === Object.keys(this.errorCount).slice(-1)[0] && 
+        now - this.lastErrorSent < this.ERROR_THROTTLE_MS) {
+      return;
+    }
+    this.lastErrorSent = now;
+    
+    // Handle offline mode
+    if (!navigator.onLine) {
+      this.offlineErrors.push({error, metadata});
       return;
     }
     
@@ -92,9 +143,19 @@ class ErrorTrackingService {
           viewport: {
             width: window.innerWidth,
             height: window.innerHeight
-          }
+          },
+          sessionDuration: this.getSessionDuration(),
         },
         count: this.errorCount[errorKey]
+      });
+
+      // Call error callbacks
+      this.errorCallbacks.forEach(callback => {
+        try {
+          callback(error);
+        } catch (callbackError) {
+          console.error('Error in error callback:', callbackError);
+        }
       });
     } else {
       // In development, just log with full details
@@ -151,6 +212,23 @@ class ErrorTrackingService {
     }
     
     return path.join(' > ');
+  }
+
+  // Get session duration
+  private getSessionDuration(): number {
+    const navigationStart = performance?.timing?.navigationStart || 0;
+    if (navigationStart === 0) return 0;
+    return Date.now() - navigationStart;
+  }
+
+  // Flush all errors - useful before app unmounts
+  public flush(): void {
+    if (this.offlineErrors.length > 0) {
+      console.info(`Flushing ${this.offlineErrors.length} stored offline errors`);
+      if (navigator.onLine) {
+        this.sendOfflineErrors();
+      }
+    }
   }
 }
 
