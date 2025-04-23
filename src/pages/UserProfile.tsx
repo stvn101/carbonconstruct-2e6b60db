@@ -60,11 +60,20 @@ const UserProfile = () => {
     
     setIsLoading(true);
     try {
-      // Update to pass both userId and formData to updateProfile
-      if (!user?.id) {
-        throw new Error('User ID not found');
+      if (!user?.id || !profile) {
+        throw new Error('User ID or profile not found');
       }
-      await updateProfile(user.id, formData);
+      
+      // Create an updated profile object with all the existing fields
+      const updatedProfile = {
+        ...profile,
+        full_name: formData.full_name,
+        company_name: formData.company_name,
+        website: formData.website,
+        avatar_url: formData.avatar_url,
+      };
+      
+      await updateProfile(updatedProfile);
       toast.success("Profile updated successfully");
     } catch (error) {
       console.error('Failed to update profile:', error);
