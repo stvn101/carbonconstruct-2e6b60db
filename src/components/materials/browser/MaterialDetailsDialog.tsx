@@ -17,7 +17,7 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
         <Button 
           variant="outline" 
           size="sm" 
-          className="bg-carbon-100 hover:bg-carbon-200 border-carbon-300 dark:bg-carbon-700 dark:hover:bg-carbon-600 dark:border-carbon-600 dark:text-white"
+          className="bg-carbon-300 hover:bg-carbon-400 border-carbon-400 dark:bg-carbon-600 dark:hover:bg-carbon-500 dark:border-carbon-500 dark:text-white transition-colors"
         >
           <Info className="h-4 w-4" />
         </Button>
@@ -87,7 +87,7 @@ const MaterialDetailsDialog = ({ material }: MaterialDetailsDialogProps) => {
           </div>
         </div>
         
-        <div className="bg-carbon-50 dark:bg-carbon-900 p-4 rounded-md mt-2">
+        <div className="bg-carbon-50 dark:bg-gray-700 p-4 rounded-md mt-2">
           <h4 className="font-medium mb-1">Environmental Impact</h4>
           <p className="text-sm text-muted-foreground">
             {material.factor < 1 

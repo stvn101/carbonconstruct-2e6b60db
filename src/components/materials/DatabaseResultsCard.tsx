@@ -15,7 +15,7 @@ const DatabaseResultsCard = ({
   materialCount
 }: DatabaseResultsCardProps) => {
   return (
-    <Card className="border-carbon-100">
+    <Card className="border-carbon-200 dark:border-carbon-700">
       <CardHeader>
         <CardTitle>Construction Materials</CardTitle>
         <CardDescription>

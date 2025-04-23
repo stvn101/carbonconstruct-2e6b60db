@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Database, Info } from "lucide-react";
+import { Database } from "lucide-react";
 import MaterialDetails from "./MaterialDetails";
 import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
 import {
@@ -90,7 +90,7 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
                             {material.alternativeTo}
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                           <p>Alternative to standard material</p>
                         </TooltipContent>
                       </Tooltip>

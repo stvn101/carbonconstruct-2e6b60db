@@ -29,7 +29,7 @@
 .dialog,
 .sheet,
 [data-radix-popper-content-wrapper] > * {
-  @apply bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 !important; /* Adjusted dark-bg to darker */
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 !important;
   backdrop-filter: none !important;
   opacity: 1 !important;
   z-index: 9999; /* Ensure it is on top */
@@ -43,7 +43,7 @@
 /* Make dialogs completely opaque */
 [role="dialog"],
 div[data-state] {
-  @apply bg-white dark:bg-gray-900 !important;
+  @apply bg-white dark:bg-gray-800 !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
 }
@@ -51,21 +51,29 @@ div[data-state] {
 /* Specifically target Radix UI Dialog content */
 [data-radix-popper-content-wrapper],
 [data-state] > [role="dialog"] {
-  @apply bg-white dark:bg-gray-900 !important; /* Dark mode background stronger */
+  @apply bg-white dark:bg-gray-800 !important;
   opacity: 1 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25) !important; /* Darker shadow */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25) !important;
   z-index: 9999;
 }
 
-/* Details button dark mode adjustment */
-button.bg-carbon-100.dark\:bg-carbon-700 {
-  @apply bg-carbon-700 text-white border-carbon-600 hover:bg-carbon-600 transition-colors;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+/* Details button styling */
+.details-btn {
+  @apply bg-carbon-400 hover:bg-carbon-500 border-carbon-500 dark:bg-carbon-600 dark:hover:bg-carbon-500 dark:border-carbon-500 dark:text-white transition-colors;
 }
 
 /* Force all backdrop blur elements fully opaque and no transparency */
 .dark [class*="backdrop-blur"] {
   backdrop-filter: none !important;
-  @apply bg-gray-900 opacity-100 !important;
+  @apply bg-gray-800 opacity-100 !important;
 }
 
+/* Improve dropdown menu item visibility */
+[data-radix-dropdown-menu-content] {
+  @apply bg-white dark:bg-gray-800 !important;
+}
+
+/* Fix transparency in content containers */
+[data-radix-tabs-content] {
+  @apply bg-transparent !important;
+}
