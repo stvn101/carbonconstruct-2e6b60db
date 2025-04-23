@@ -4,13 +4,13 @@ import { m as motion } from "framer-motion";
 import { dashboardVariants, fadeInUp } from "@/utils/animationVariants";
 
 interface DashboardPreviewProps {
-  onLoad: () => void;
+  onLoad?: () => void;
 }
 
 const DashboardPreview = ({ onLoad }: DashboardPreviewProps) => {
   // Let the parent know that dashboard content is loaded
   const handleContentLoad = () => {
-    onLoad();
+    if (onLoad) onLoad();
   };
 
   return (
