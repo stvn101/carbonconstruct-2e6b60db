@@ -31,14 +31,13 @@ const Notifications = () => {
       
       // Set up real-time subscription for new notifications
       const channel = supabase
-        .channel('public:notifications')
+        .channel('notifications-page')
         .on('postgres_changes', { 
           event: 'INSERT', 
           schema: 'public', 
           table: 'notifications',
           filter: `user_id=eq.${user.id}`
         }, (payload) => {
-          // Add the new notification to the list
           setNotifications(current => [payload.new as Notification, ...current]);
           toast.info(`New notification: ${(payload.new as Notification).title}`);
         })
@@ -57,7 +56,7 @@ const Notifications = () => {
     try {
       const { data, error } = await supabase
         .from('notifications')
-        .select('*')
+        .select('id, title, message, type, read, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
@@ -77,11 +76,11 @@ const Notifications = () => {
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
+        .eq('user_id', user?.id)
         .eq('id', id);
         
       if (error) throw error;
       
-      // Update local state
       setNotifications(prev => 
         prev.map(notification => 
           notification.id === id ? { ...notification, read: true } : notification
@@ -98,11 +97,11 @@ const Notifications = () => {
       const { error } = await supabase
         .from('notifications')
         .delete()
+        .eq('user_id', user?.id)
         .eq('id', id);
         
       if (error) throw error;
       
-      // Update local state
       setNotifications(prev => prev.filter(notification => notification.id !== id));
       toast.success("Notification deleted");
     } catch (error) {
@@ -121,7 +120,6 @@ const Notifications = () => {
         
       if (error) throw error;
       
-      // Update local state
       setNotifications(prev => prev.map(notification => ({ ...notification, read: true })));
       toast.success("All notifications marked as read");
     } catch (error) {
@@ -130,7 +128,6 @@ const Notifications = () => {
     }
   };
 
-  // Helper function to format the date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -142,7 +139,6 @@ const Notifications = () => {
     });
   };
   
-  // Get notification badge color based on type
   const getNotificationColor = (type: string) => {
     switch(type) {
       case 'info':

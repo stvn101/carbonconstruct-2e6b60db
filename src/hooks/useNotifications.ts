@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/auth';
@@ -13,14 +14,13 @@ export const useNotifications = () => {
       
       // Set up real-time subscription for notifications
       const channel = supabase
-        .channel('public:notifications')
+        .channel('notifications')
         .on('postgres_changes', { 
           event: 'INSERT', 
           schema: 'public', 
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${user.id} AND read=eq.false`
         }, () => {
-          // Increment the unread count
           setUnreadNotifications(prev => prev + 1);
           toast.info("You have a new notification");
         })
@@ -30,7 +30,6 @@ export const useNotifications = () => {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`
         }, () => {
-          // Refetch the unread count on any update
           fetchUnreadNotificationCount();
         })
         .subscribe();
@@ -51,7 +50,8 @@ export const useNotifications = () => {
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('read', false);
+        .eq('read', false)
+        .order('created_at', { ascending: false });
         
       if (error) throw error;
       
