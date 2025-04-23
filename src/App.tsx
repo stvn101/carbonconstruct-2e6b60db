@@ -19,8 +19,8 @@ import { projectRoutes } from './routes/projectRoutes';
 import { protectedRoutes } from './routes/protectedRoutes';
 import { useAccessibility } from './hooks/useAccessibility';
 
-// Lazy load main pages for better initial load performance
-const Index = lazyLoad(() => import('./pages/Index'));
+// Import Index directly instead of lazy loading
+import Index from './pages/Index';
 const NotFound = lazyLoad(() => import('./pages/NotFound'));
 
 // Loading fallback for Suspense
