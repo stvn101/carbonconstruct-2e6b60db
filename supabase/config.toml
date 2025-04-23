@@ -26,6 +26,7 @@ enabled = true
 site_url = "http://localhost:5173"
 additional_redirect_urls = ["https://localhost:5173", "http://localhost:3000"]
 enable_signup = true
+enable_pwned_check = true
 
 [functions]
 [functions.create-payment]
