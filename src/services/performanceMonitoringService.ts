@@ -1,6 +1,6 @@
 
-import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
+import * as Sentry from "@sentry/browser";
+import { BrowserTracing } from "@sentry/browser";
 
 // Initialize Sentry for performance monitoring and error tracking
 const initialize = () => {
@@ -58,6 +58,22 @@ const trackMetric = ({ metric, value, tags }: { metric: string; value: number; t
   }
 };
 
+// Track route changes
+const trackRouteChange = (path: string) => {
+  console.debug(`[Performance] Route change to: ${path}`);
+  trackMetric({
+    metric: 'route_change',
+    value: performance.now(),
+    tags: { path }
+  });
+};
+
+// Cleanup resources
+const cleanup = () => {
+  // Any cleanup logic needed when the app unmounts
+  console.debug('[Performance] Cleaning up performance monitors');
+};
+
 // Monitor First Input Delay (FID)
 const monitorFirstInputDelay = () => {
   if (!('performance' in window)) return;
@@ -97,7 +113,10 @@ const monitorLargestContentfulPaint = () => {
     for (const entry of list.getEntries()) {
       // Ensure entry is a LargestContentfulPaint
       if (entry.entryType === 'largest-contentful-paint') {
-        const lcpEntry = entry as LargestContentfulPaint;
+        const lcpEntry = entry as PerformanceEntry & {
+          startTime: number;
+          element?: Element;
+        };
         
         // Log LCP metric
         console.debug(`[Performance] Largest Contentful Paint: ${lcpEntry.startTime}ms`);
@@ -130,7 +149,10 @@ const monitorCumulativeLayoutShift = () => {
     for (const entry of list.getEntries()) {
       // Ensure entry is a LayoutShift
       if (entry.entryType === 'layout-shift') {
-        const layoutShiftEntry = entry as LayoutShift;
+        const layoutShiftEntry = entry as PerformanceEntry & { 
+          value: number;
+          hadRecentInput: boolean;
+        };
         
         // Only count layout shifts that are not expected
         if (!layoutShiftEntry.hadRecentInput) {
@@ -193,6 +215,8 @@ const monitorPaintTiming = () => {
 const performanceMonitoringService = {
   initialize,
   trackMetric,
+  trackRouteChange,
+  cleanup
 };
 
 export default performanceMonitoringService;

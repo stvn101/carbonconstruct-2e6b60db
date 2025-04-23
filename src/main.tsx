@@ -60,6 +60,14 @@ try {
       performanceMonitoringService.initialize();
     }, 0);
   }
+
+  // Use page visibility API instead of beforeunload for cleanup
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      errorTrackingService.flush();
+      performanceMonitoringService.cleanup();
+    }
+  });
 } catch (error) {
   console.error('Failed to initialize application:', error);
   
