@@ -12,7 +12,8 @@ import { useA11y } from "@/hooks/useA11y";
 const FeaturesSection = lazy(() => import("@/components/FeaturesSection"));
 const BenefitsSection = lazy(() => import("@/components/BenefitsSection"));
 const CTASection = lazy(() => import("@/components/CTASection"));
-const Footer = lazy(() => import("@/components/Footer"));
+// Import Footer directly instead of lazy loading
+import Footer from "@/components/Footer";
 
 if (typeof window !== 'undefined') {
   import("@/pages/Calculator").then(() => {
@@ -175,9 +176,8 @@ const Index = () => {
       <div className="fixed bottom-4 right-4 z-40">
         <ThemeToggle />
       </div>
-      <Suspense fallback={<div className="h-16 bg-background" />}>
-        <Footer />
-      </Suspense>
+      {/* Use Footer directly instead of lazy loading */}
+      <Footer />
     </motion.div>
   );
 };
