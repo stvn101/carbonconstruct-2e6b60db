@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -86,7 +87,7 @@ const ContactForm = () => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your name" {...field} />
+                  <Input placeholder="Your name" autoComplete="name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -100,7 +101,7 @@ const ContactForm = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="your.email@example.com" {...field} />
+                  <Input placeholder="your.email@example.com" autoComplete="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -115,7 +116,7 @@ const ContactForm = () => {
                 <FormItem>
                   <FormLabel>Company (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your company" {...field} />
+                    <Input placeholder="Your company" autoComplete="organization" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,7 +130,7 @@ const ContactForm = () => {
                 <FormItem>
                   <FormLabel>Phone (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your phone number" {...field} />
+                    <Input placeholder="Your phone number" autoComplete="tel" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,6 +148,7 @@ const ContactForm = () => {
                   <Textarea 
                     placeholder="How can we help you?" 
                     className="min-h-32" 
+                    autoComplete="off"
                     {...field} 
                   />
                 </FormControl>

@@ -16,6 +16,18 @@ const FormInput = ({
   onFocus,
   onBlur 
 }: InputProps) => {
+  // Determine appropriate autocomplete value based on id/type
+  const getAutoCompleteValue = () => {
+    switch(id) {
+      case 'name': return 'name';
+      case 'email': return 'email';
+      case 'phone': return 'tel';
+      case 'company': return 'organization';
+      default: return type === 'email' ? 'email' : 
+               type === 'tel' ? 'tel' : 'off';
+    }
+  };
+
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium mb-1 text-gray-800 dark:text-gray-200">
@@ -34,6 +46,7 @@ const FormInput = ({
           onFocus={onFocus}
           onBlur={onBlur}
           aria-label={label}
+          autoComplete={getAutoCompleteValue()}
         />
         {error && (
           <motion.p 

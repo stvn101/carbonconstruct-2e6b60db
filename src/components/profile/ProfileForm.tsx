@@ -75,6 +75,7 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           placeholder="Your full name"
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={1}
+          autoComplete="name"
         />
         <div className="form-error">{errors.full_name || ''}</div>
       </div>
@@ -89,6 +90,7 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           placeholder="Your company or organization"
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={2}
+          autoComplete="organization"
         />
         <div className="form-error">{errors.company_name || ''}</div>
       </div>
@@ -104,6 +106,7 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           type="url"
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={3}
+          autoComplete="url"
         />
         <div className="form-error">{errors.website || ''}</div>
       </div>
@@ -119,6 +122,7 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           type="url"
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={4}
+          autoComplete="off"
         />
         <div className="form-error">{errors.avatar_url || ''}</div>
       </div>

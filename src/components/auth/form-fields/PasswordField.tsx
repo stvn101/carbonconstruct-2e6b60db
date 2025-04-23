@@ -18,7 +18,12 @@ const PasswordField = ({ form, name = "password", label = "Password" }: Password
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input type="password" placeholder="••••••" {...field} />
+            <Input 
+              type="password" 
+              placeholder="••••••" 
+              autoComplete={name === "password" ? "current-password" : "new-password"}
+              {...field} 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
