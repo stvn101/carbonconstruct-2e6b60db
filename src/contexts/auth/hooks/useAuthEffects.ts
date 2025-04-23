@@ -7,6 +7,7 @@ import { UserProfile } from '@/types/auth';
 
 export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => void) => {
   useEffect(() => {
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         updateState({
@@ -45,6 +46,7 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
       }
     );
 
+    // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       updateState({
         session,

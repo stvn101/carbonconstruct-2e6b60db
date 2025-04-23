@@ -7,6 +7,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { toast } from "sonner";
 import NotificationBell from "@/components/navbar/NotificationBell";
 import UserMenu from "@/components/navbar/UserMenu";
+import { useEffect } from "react";
 
 const NavbarLinks = () => {
   const { user, profile, logout } = useAuth();
@@ -20,6 +21,7 @@ const NavbarLinks = () => {
     try {
       await logout();
       navigate('/auth');
+      toast.success("You have been logged out successfully");
     } catch (error) {
       console.error('Logout error:', error);
       toast.error("Failed to log out. Please try again.");
