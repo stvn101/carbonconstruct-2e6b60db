@@ -70,12 +70,12 @@ export const useAuthHandlers = () => {
     }
   };
 
-  const updateProfile = async (userId: string, updates: Partial<UserProfile>) => {
+  const updateProfile = async (updatedProfile: UserProfile) => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
-        .eq('id', userId);
+        .update(updatedProfile)
+        .eq('id', updatedProfile.id);
         
       if (error) throw error;
       

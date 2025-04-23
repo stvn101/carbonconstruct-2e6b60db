@@ -5,6 +5,7 @@ import { useAuthState } from './hooks/useAuthState';
 import { useAuthHandlers } from './hooks/useAuthHandlers';
 import { useAuthEffects } from './hooks/useAuthEffects';
 import { supabase } from '@/integrations/supabase/client';
+import { UserProfile } from '@/types/auth';
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
