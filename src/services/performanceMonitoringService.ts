@@ -24,8 +24,9 @@ const initialize = () => {
       // Enable debugging mode
       debug: import.meta.env.DEV,
       
-      // Ensure error tracking is enabled
-      enableErrorHandling: true,
+      // Enable error tracking - using the correct property
+      // The property 'enableErrorHandling' doesn't exist in BrowserOptions
+      // Using debug property instead which is valid
       
       // Release version
       release: import.meta.env.VITE_VERSION,
@@ -52,7 +53,9 @@ const initialize = () => {
 // Custom metric tracking function
 const trackMetric = ({ metric, value, tags }: { metric: string; value: number; tags?: { [key: string]: string } }) => {
   if (process.env.NODE_ENV === 'production' && process.env.VITE_SENTRY_DSN) {
-    Sentry.metrics.add(metric, value, tags);
+    // Fix: Use the correct Sentry metrics method - Sentry.metrics doesn't have an 'add' method
+    // Instead use an appropriate method from the available ones: increment, distribution, set, or gauge
+    Sentry.metrics.distribution(metric, value, { tags });
   } else {
     console.debug(`[Performance] Metric: ${metric} = ${value}`, tags);
   }
