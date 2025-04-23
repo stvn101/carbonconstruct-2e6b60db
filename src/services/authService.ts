@@ -23,7 +23,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       avatar_url: data.avatar_url,
       website: data.website,
       role: data.role,
-      subscription_tier: data.subscription_tier || 'free',
+      subscription_tier: data.subscription_tier,
       had_trial: data.had_trial || false
     };
 
@@ -55,7 +55,7 @@ export async function createUserProfile(profile: UserProfile): Promise<UserProfi
       avatar_url: data.avatar_url,
       website: data.website,
       role: data.role,
-      subscription_tier: data.subscription_tier || 'free',
+      subscription_tier: data.subscription_tier,
       had_trial: data.had_trial || false
     };
 
@@ -88,7 +88,7 @@ export async function updateUserProfile(profile: UserProfile): Promise<UserProfi
       avatar_url: data.avatar_url,
       website: data.website,
       role: data.role,
-      subscription_tier: data.subscription_tier || 'free',
+      subscription_tier: data.subscription_tier,
       had_trial: data.had_trial || false
     };
 
