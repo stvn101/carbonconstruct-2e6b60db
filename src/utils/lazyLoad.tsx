@@ -39,7 +39,8 @@ export function lazyLoad<T extends ComponentType<any>>(
                   </button>
                 </div>
               );
-              return { default: ErrorComponent as any };
+              // Use type assertion to ensure TypeScript knows this is a valid component
+              return { default: ErrorComponent as unknown as T };
             });
         }, 500);
       });
@@ -123,12 +124,12 @@ export function preloadComponents(importFunctions: Array<() => Promise<{ default
  * Safely resolves a module import, with fallbacks for error cases
  * This is useful for ensuring that broken modules don't crash the entire app
  */
-export async function safeImport<T>(
+export async function safeImport<T extends ComponentType<any>>(
   importFunc: () => Promise<{ default: T }>,
   fallbackComponent?: React.ComponentType<any>
 ): Promise<{ default: React.ComponentType<any> }> {
   try {
-    return await importFunc();
+    return await importFunc() as { default: React.ComponentType<any> };
   } catch (error) {
     console.error("Module import failed:", error);
     return { 
