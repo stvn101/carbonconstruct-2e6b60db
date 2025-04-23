@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import NotificationBell from "@/components/navbar/NotificationBell";
 import UserMenu from "@/components/navbar/UserMenu";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 
 const NavbarLinks = () => {
   const { user, profile, logout } = useAuth();
@@ -31,24 +32,29 @@ const NavbarLinks = () => {
   
   return (
     <div className="flex items-center space-x-1">
-      <ErrorBoundary feature="Navigation Links">
+      <ErrorBoundaryWrapper feature="Navigation Links">
         {user ? (
           <div className="flex items-center gap-1">
-            <NotificationBell unreadCount={unreadNotifications} />
-            <UserMenu 
-              profile={profile}
-              isPremiumUser={isPremiumUser}
-              isMobile={isMobile}
-              user={user}
-              onLogout={handleLogout}
-            />
+            <ErrorBoundaryWrapper feature="Notification Bell">
+              <NotificationBell unreadCount={unreadNotifications || 0} />
+            </ErrorBoundaryWrapper>
+            
+            <ErrorBoundaryWrapper feature="User Menu">
+              <UserMenu 
+                profile={profile}
+                isPremiumUser={!!isPremiumUser}
+                isMobile={!!isMobile}
+                user={user}
+                onLogout={handleLogout}
+              />
+            </ErrorBoundaryWrapper>
           </div>
         ) : (
           <Button asChild variant="default" className="bg-carbon-600 hover:bg-carbon-700 text-white" size={isMobile ? "sm" : "default"}>
             <Link to="/auth">Sign In</Link>
           </Button>
         )}
-      </ErrorBoundary>
+      </ErrorBoundaryWrapper>
     </div>
   );
 };

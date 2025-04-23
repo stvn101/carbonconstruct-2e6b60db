@@ -1,7 +1,7 @@
 
 import { useMemo } from 'react';
 import { MATERIAL_FACTORS, EXTENDED_MATERIALS, REGIONS } from '@/lib/materials';
-import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
+import { MaterialOption } from '@/lib/materialTypes';
 
 interface UseMaterialDataProps {
   searchTerm: string;
@@ -17,40 +17,65 @@ export const useMaterialData = ({
   selectedTag
 }: UseMaterialDataProps) => {
   
-  const baseOptions = useMemo(() => Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
-    id: key,
-    name: value.name || key
-  })), []);
+  // Safely create base options
+  const baseOptions = useMemo(() => 
+    Object.entries(MATERIAL_FACTORS || {}).map(([key, value]) => ({
+      id: key,
+      name: value.name || key
+    })), 
+  []);
   
-  const allTags = useMemo(() => Array.from(
-    new Set(
-      Object.values(EXTENDED_MATERIALS)
-        .flatMap(material => material.tags || [])
-    )
-  ).sort(), []);
+  // Safely extract all unique tags
+  const allTags = useMemo(() => {
+    if (!EXTENDED_MATERIALS) return [];
+    
+    return Array.from(
+      new Set(
+        Object.values(EXTENDED_MATERIALS)
+          .flatMap(material => material.tags || [])
+      )
+    ).sort();
+  }, []);
 
-  const materialCount = useMemo(() => Object.keys(EXTENDED_MATERIALS).length, []);
+  // Get material count safely
+  const materialCount = useMemo(() => 
+    EXTENDED_MATERIALS ? Object.keys(EXTENDED_MATERIALS).length : 0, 
+  []);
   
-  const materialsByRegion: Record<string, number> = useMemo(() => {
+  // Compute materials by region safely
+  const materialsByRegion = useMemo(() => {
+    if (!EXTENDED_MATERIALS) return {};
+    
     const result: Record<string, number> = {};
+    
     Object.values(EXTENDED_MATERIALS).forEach(material => {
-      if (material.region) {
+      if (material?.region) {
         const regions = material.region.split(", ");
         regions.forEach(region => {
           result[region] = (result[region] || 0) + 1;
         });
       }
     });
+    
     return result;
   }, []);
 
+  // Filter materials safely
   const filteredMaterials = useMemo(() => {
+    if (!EXTENDED_MATERIALS) return [];
+    
     return Object.entries(EXTENDED_MATERIALS).filter(([key, material]) => {
-      const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!material) return false;
+      
+      const matchesSearch = !searchTerm || 
+        material.name.toLowerCase().includes(searchTerm.toLowerCase());
+      
       const matchesRegion = selectedRegion === "all" || 
         (material.region && material.region.includes(selectedRegion));
+      
       const matchesAlternative = selectedAlternative === "none" || 
         material.alternativeTo === selectedAlternative;
+      
       const matchesTag = selectedTag === "all" ||
         (material.tags && material.tags.includes(selectedTag));
       
@@ -63,7 +88,7 @@ export const useMaterialData = ({
     materialsByRegion,
     allTags,
     baseOptions,
-    allRegions: Array.from(REGIONS),
+    allRegions: REGIONS ? Array.from(REGIONS) : [],
     materialCount
   };
 };
