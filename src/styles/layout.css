@@ -1,3 +1,4 @@
+
 /* ======== LAYOUT & SPACING ======== */
 .content-top-spacing {
   padding-top: calc(var(--navbar-height) + 1rem);
@@ -64,4 +65,30 @@
 /* Mobile grid layouts */
 .grid-cols-responsive {
   @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+}
+
+/* Fix for page scrolling issues */
+html, body {
+  height: 100%;
+  overflow-y: auto;
+}
+
+body {
+  min-height: 100vh;
+  /* Use the viewport height to ensure full height */
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Allow content to scroll within the root element */
+}
+
+/* Ensure calculator content is scrollable */
+.calculator-container {
+  max-height: none !important;
+  overflow-y: visible !important;
 }

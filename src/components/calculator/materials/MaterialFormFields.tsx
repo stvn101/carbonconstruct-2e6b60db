@@ -42,11 +42,13 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
         <Select
           value={material.type}
           onValueChange={(value) => onUpdate("type", value)}
+          name={`material-type-select-${index}`}
         >
           <SelectTrigger 
             id={`material-type-${index}`}
             name={`material-type-${index}`}
             className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+            aria-label="Select material type"
           >
             <SelectValue placeholder="Select material" />
           </SelectTrigger>
@@ -95,6 +97,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
           className="w-full sm:w-auto hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300 text-xs md:text-sm"
           type="button"
           onClick={onRemove}
+          aria-label={`Remove material ${index + 1}`}
         >
           Remove
         </Button>
