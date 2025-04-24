@@ -16,7 +16,13 @@ const CalculatorErrorBoundaryWrapper: React.FC<CalculatorErrorBoundaryWrapperPro
 }) => {
   return (
     <ErrorBoundary 
-      fallback={<ErrorFallback onReset={onResetError} />}
+      fallbackRender={({error, resetErrorBoundary}) => (
+        <ErrorFallback 
+          error={error} 
+          resetErrorBoundary={resetErrorBoundary} 
+          onReset={onResetError} 
+        />
+      )}
       onReset={onResetError}
       resetKeys={resetKeys}
     >
