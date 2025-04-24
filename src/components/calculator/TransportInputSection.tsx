@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Truck, AlertCircle } from "lucide-react";
+import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TransportInput } from "@/lib/carbonTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -35,6 +35,20 @@ const TransportInputSection = ({
     }
   };
   
+  const handlePrevButtonClick = () => {
+    console.log("Transport: Previous button clicked");
+    if (typeof onPrev === 'function') {
+      onPrev();
+    }
+  };
+  
+  const handleNextButtonClick = () => {
+    console.log("Transport: Next button clicked");
+    if (typeof onNext === 'function') {
+      onNext();
+    }
+  };
+  
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="text-md md:text-lg font-medium flex items-center gap-2">
@@ -62,7 +76,7 @@ const TransportInputSection = ({
             type="button" 
             variant="outline" 
             size={isMobile ? "sm" : "default"}
-            onClick={onPrev} 
+            onClick={handlePrevButtonClick} 
             className="w-full sm:w-auto hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300 text-xs md:text-sm"
           >
             Previous
@@ -79,7 +93,7 @@ const TransportInputSection = ({
         <Button 
           type="button" 
           size={isMobile ? "sm" : "default"}
-          onClick={onNext} 
+          onClick={handleNextButtonClick} 
           className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white mt-2 sm:mt-0 text-xs md:text-sm"
         >
           Next: Energy
