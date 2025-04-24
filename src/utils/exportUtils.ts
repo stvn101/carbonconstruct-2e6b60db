@@ -44,12 +44,12 @@ export async function exportProjectToPDF(project: SavedProject): Promise<void> {
       ]),
     });
     
-    // Add Transport table
-    const transportY = doc.lastAutoTable?.finalY || 120;
-    doc.text('Transport', 14, transportY + 15);
+    // Add Transport table - safely access finalY
+    const transportY = (doc.lastAutoTable?.finalY || 120) + 15;
+    doc.text('Transport', 14, transportY);
     
     autoTable(doc, {
-      startY: transportY + 20,
+      startY: transportY + 5,
       head: [['Transport Type', 'Distance (km)', 'Weight (kg)', 'Emissions (kg CO2e)']],
       body: transport.map(item => [
         item.type,
@@ -59,12 +59,12 @@ export async function exportProjectToPDF(project: SavedProject): Promise<void> {
       ]),
     });
     
-    // Add Energy table
-    const energyY = doc.lastAutoTable?.finalY || 180;
-    doc.text('Energy', 14, energyY + 15);
+    // Add Energy table - safely access finalY
+    const energyY = (doc.lastAutoTable?.finalY || 180) + 15;
+    doc.text('Energy', 14, energyY);
     
     autoTable(doc, {
-      startY: energyY + 20,
+      startY: energyY + 5,
       head: [['Energy Type', 'Amount (kWh)', 'Emissions (kg CO2e)']],
       body: energy.map(item => [
         item.type,
@@ -73,12 +73,12 @@ export async function exportProjectToPDF(project: SavedProject): Promise<void> {
       ]),
     });
     
-    // Add summary footer
-    const summaryY = doc.lastAutoTable?.finalY || 240;
-    doc.text('Emissions Summary', 14, summaryY + 15);
+    // Add summary footer - safely access finalY
+    const summaryY = (doc.lastAutoTable?.finalY || 240) + 15;
+    doc.text('Emissions Summary', 14, summaryY);
     
     autoTable(doc, {
-      startY: summaryY + 20,
+      startY: summaryY + 5,
       head: [['Category', 'Total Emissions (kg CO2e)', 'Percentage']],
       body: [
         ['Materials', (result?.materialEmissions || 0).toFixed(2), `${((result?.materialEmissions || 0) / totalEmissions * 100).toFixed(1)}%`],
