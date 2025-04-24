@@ -12,6 +12,7 @@ import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { EmptyProjectsList } from "@/components/projects/EmptyProjectsList";
 import ProjectsHeader from "@/components/projects/ProjectsHeader";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const UserProjects = () => {
   const { projects, deleteProject, exportProjectPDF, exportProjectCSV } = useProjects();
@@ -44,7 +45,7 @@ const UserProjects = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col bg-carbon-50 dark:bg-carbon-900"
+      className="min-h-screen flex flex-col bg-carbon-50 dark:bg-carbon-900 overflow-x-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
@@ -57,38 +58,40 @@ const UserProjects = () => {
         />
       </Helmet>
       <Navbar />
-      <main className="flex-grow pt-24 md:pt-28 px-4 pb-12">
-        <div className="container mx-auto">
-          <ProjectsHeader />
+      <main className="flex-grow pt-24 md:pt-28 px-4 pb-12 overflow-y-auto">
+        <ScrollArea className="h-full w-full">
+          <div className="container mx-auto">
+            <ProjectsHeader />
 
-          <ProjectFilters 
-            allTags={allTags}
-            selectedTag={selectedTag}
-            onTagChange={setSelectedTag}
-            searchQuery={search}
-            onSearchChange={setSearch}
-          />
+            <ProjectFilters 
+              allTags={allTags}
+              selectedTag={selectedTag}
+              onTagChange={setSelectedTag}
+              searchQuery={search}
+              onSearchChange={setSearch}
+            />
 
-          <ErrorBoundary feature="Projects List" ignoreErrors={true}>
-            {filteredProjects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProjects
-                  .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-                  .map((project) => (
-                    <ProjectCard 
-                      key={project.id} 
-                      project={project}
-                      onDelete={() => setProjectToDelete(project)}
-                      onExportPDF={() => exportProjectPDF(project)}
-                      onExportCSV={() => exportProjectCSV(project)}
-                    />
-                  ))}
-              </div>
-            ) : (
-              <EmptyProjectsList hasFilters={!!search || selectedTag !== null} />
-            )}
-          </ErrorBoundary>
-        </div>
+            <ErrorBoundary feature="Projects List" ignoreErrors={true}>
+              {filteredProjects.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredProjects
+                    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                    .map((project) => (
+                      <ProjectCard 
+                        key={project.id} 
+                        project={project}
+                        onDelete={() => setProjectToDelete(project)}
+                        onExportPDF={() => exportProjectPDF(project)}
+                        onExportCSV={() => exportProjectCSV(project)}
+                      />
+                    ))}
+                </div>
+              ) : (
+                <EmptyProjectsList hasFilters={!!search || selectedTag !== null} />
+              )}
+            </ErrorBoundary>
+          </div>
+        </ScrollArea>
       </main>
       <Footer />
 

@@ -101,7 +101,7 @@ const Index = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col mobile-friendly-container bg-white dark:bg-gray-900"
+      className="min-h-screen flex flex-col mobile-friendly-container bg-white dark:bg-gray-900 overflow-x-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -114,65 +114,67 @@ const Index = () => {
         type="website"
       />
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="pt-16 md:pt-16 bg-white dark:bg-gray-900">
-        <HeroSection />
-        <CalculatorDemoVideo />
-        <Suspense fallback={<div className="h-20" />}>
-          <FeaturesSection />
-        </Suspense>
+      <main id="main-content" tabIndex={-1} className="flex-1 pt-16 md:pt-16 bg-white dark:bg-gray-900">
+        <div className="overflow-x-hidden w-full">
+          <HeroSection />
+          <CalculatorDemoVideo />
+          <Suspense fallback={<div className="h-20" />}>
+            <FeaturesSection />
+          </Suspense>
 
-        {/* --- Begin Replacement for TestimonialsSection --- */}
-        <section className="py-8 md:py-16 bg-gray-50 dark:bg-gray-800">
-          <div className="container mx-auto">
-            <div className="text-center max-w-3xl mx-auto mb-8 md:mb-10 px-4">
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                What CarbonConstruct Can Do for Your Company
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground">
-                The all-in-one platform empowering construction companies to meet climate disclosure regulations and build a more sustainable future, starting now.
-              </p>
+          {/* --- Begin Replacement for TestimonialsSection --- */}
+          <section className="py-8 md:py-16 bg-gray-50 dark:bg-gray-800">
+            <div className="container mx-auto">
+              <div className="text-center max-w-3xl mx-auto mb-8 md:mb-10 px-4">
+                <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                  What CarbonConstruct Can Do for Your Company
+                </h2>
+                <p className="text-base md:text-lg text-muted-foreground">
+                  The all-in-one platform empowering construction companies to meet climate disclosure regulations and build a more sustainable future, starting now.
+                </p>
+              </div>
+              <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 md:p-10 space-y-6 border border-carbon-100 dark:border-carbon-800 m-4">
+                <h3 className="text-2xl font-semibold text-carbon-800 dark:text-white mb-2">
+                  Smarter Carbon Tracking, Made for Construction
+                </h3>
+                <p className="text-md text-carbon-700 dark:text-carbon-100">
+                  <strong>CarbonConstruct</strong> is purpose-built for construction professionals—developers, builders, consultants, and contractors—who want to take charge of their carbon emissions. Our platform features the <strong>CarbonCalculator</strong>: an easy-to-use tool that lets you accurately measure, analyze, and reduce emissions from materials, transport, and energy use across your projects. Generate instant reports for Scope 1, 2, and 3 emissions, compare performance, and demonstrate progress to clients and auditors.
+                </p>
+
+                <h3 className="text-xl font-semibold text-carbon-800 dark:text-white mt-2">
+                  Why You Need to Start Now
+                </h3>
+                <ul className="list-disc pl-5 space-y-2 text-carbon-700 dark:text-carbon-200">
+                  <li>The <b>Australian Federal Government</b> has introduced new laws <b>mandating climate-related financial disclosures</b> for large and medium-sized businesses, effective <span className="font-medium text-carbon-900 dark:text-carbon-100">January 1, 2025</span>.</li>
+                  <li>
+                    Under the{' '}
+                    <span className="font-medium text-carbon-900 dark:text-carbon-100">
+                      Treasury Laws Amendment (Financial Market Infrastructure and Other Measures) Bill 2024
+                    </span>
+                    , construction companies must report on climate-related risks, opportunities, and <b>Scope 1, 2, and 3 emissions</b>.
+                  </li>
+                  <li>Start today to streamline compliance, avoid penalties, and enhance your company's reputation as a leader in sustainability.</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold text-carbon-800 dark:text-white mt-4">
+                  Streamline Your Path to Compliance
+                </h3>
+                <p className="text-md text-carbon-700 dark:text-carbon-100">
+                  Instead of scrambling to gather complex data, <strong>CarbonConstruct</strong> simplifies everything—so you can focus on building, not bureaucracy. Our automated reports are audit-ready, aligned with the latest standards, and always up-to-date for regulatory changes. Rest easy knowing your emissions tracking and climate disclosures are handled—all in a secure, central platform made for the construction industry.<br /><br />
+                  Don't wait for the deadline—get started now and turn compliance into a competitive advantage.
+                </p>
+              </div>
             </div>
-            <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 md:p-10 space-y-6 border border-carbon-100 dark:border-carbon-800 m-4">
-              <h3 className="text-2xl font-semibold text-carbon-800 dark:text-white mb-2">
-                Smarter Carbon Tracking, Made for Construction
-              </h3>
-              <p className="text-md text-carbon-700 dark:text-carbon-100">
-                <strong>CarbonConstruct</strong> is purpose-built for construction professionals—developers, builders, consultants, and contractors—who want to take charge of their carbon emissions. Our platform features the <strong>CarbonCalculator</strong>: an easy-to-use tool that lets you accurately measure, analyze, and reduce emissions from materials, transport, and energy use across your projects. Generate instant reports for Scope 1, 2, and 3 emissions, compare performance, and demonstrate progress to clients and auditors.
-              </p>
+          </section>
+          {/* --- End Replacement for TestimonialsSection --- */}
 
-              <h3 className="text-xl font-semibold text-carbon-800 dark:text-white mt-2">
-                Why You Need to Start Now
-              </h3>
-              <ul className="list-disc pl-5 space-y-2 text-carbon-700 dark:text-carbon-200">
-                <li>The <b>Australian Federal Government</b> has introduced new laws <b>mandating climate-related financial disclosures</b> for large and medium-sized businesses, effective <span className="font-medium text-carbon-900 dark:text-carbon-100">January 1, 2025</span>.</li>
-                <li>
-                  Under the{' '}
-                  <span className="font-medium text-carbon-900 dark:text-carbon-100">
-                    Treasury Laws Amendment (Financial Market Infrastructure and Other Measures) Bill 2024
-                  </span>
-                  , construction companies must report on climate-related risks, opportunities, and <b>Scope 1, 2, and 3 emissions</b>.
-                </li>
-                <li>Start today to streamline compliance, avoid penalties, and enhance your company's reputation as a leader in sustainability.</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold text-carbon-800 dark:text-white mt-4">
-                Streamline Your Path to Compliance
-              </h3>
-              <p className="text-md text-carbon-700 dark:text-carbon-100">
-                Instead of scrambling to gather complex data, <strong>CarbonConstruct</strong> simplifies everything—so you can focus on building, not bureaucracy. Our automated reports are audit-ready, aligned with the latest standards, and always up-to-date for regulatory changes. Rest easy knowing your emissions tracking and climate disclosures are handled—all in a secure, central platform made for the construction industry.<br /><br />
-                Don't wait for the deadline—get started now and turn compliance into a competitive advantage.
-              </p>
-            </div>
-          </div>
-        </section>
-        {/* --- End Replacement for TestimonialsSection --- */}
-
-        <Suspense fallback={<div className="h-20" />}>
-          <BenefitsSection />
-        </Suspense>
-        <Suspense fallback={<div className="h-20" />}>
-          <CTASection />
-        </Suspense>
+          <Suspense fallback={<div className="h-20" />}>
+            <BenefitsSection />
+          </Suspense>
+          <Suspense fallback={<div className="h-20" />}>
+            <CTASection />
+          </Suspense>
+        </div>
       </main>
       <div className="fixed bottom-4 right-4 z-40">
         <ThemeToggle />

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { ProjectContextType, SavedProject } from '@/types/project';
@@ -106,19 +107,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return projects.find(p => p.id === id);
   };
 
-  const saveProject = async (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    if (!user) {
-      throw new Error('You must be logged in to save projects');
-    }
-    return projectOperations.saveProject(user.id, project);
-  };
-
   return (
     <ProjectContext.Provider
       value={{
         projects,
         isLoading,
-        saveProject: projectOperations.saveProject,
+        saveProject: (project) => projectOperations.saveProject(user?.id || '', project),
         updateProject: projectOperations.updateProject,
         deleteProject: projectOperations.deleteProject,
         getProject,
