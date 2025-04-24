@@ -99,16 +99,21 @@ export const performDbOperation = async <T>(
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
     // Use a lightweight query to test connection
-    const queryPromise = supabase
-      .from('projects')
-      .select('count(*)', { count: 'exact' })
-      .limit(1);
+    // We need to explicitly execute the query to get a Promise
+    const queryPromise = async () => {
+      const response = await supabase
+        .from('projects')
+        .select('count(*)', { count: 'exact' })
+        .limit(1);
+      
+      return response;
+    };
     
-    // Add our own timeout since the .timeout() method doesn't exist
-    const { data, error } = await withTimeout(queryPromise, 5000);
+    // Now we can use our withTimeout function since queryPromise returns a proper Promise
+    const response = await withTimeout(queryPromise(), 5000);
     
-    if (error) {
-      console.error('Supabase health check failed:', error);
+    if (response.error) {
+      console.error('Supabase health check failed:', response.error);
       return false;
     }
     
