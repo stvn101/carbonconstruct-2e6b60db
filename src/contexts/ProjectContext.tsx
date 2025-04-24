@@ -188,6 +188,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const contextValue = useMemo(() => ({
     projects,
     isLoading,
+    fetchError, // Add this to expose the fetchError
     saveProject: async (project) => {
       try {
         // Add a small delay to show saving indicator
@@ -217,7 +218,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     getProject,
     exportProjectPDF: projectExports.exportProjectPDF,
     exportProjectCSV: projectExports.exportProjectCSV,
-  }), [projects, isLoading, projectOperations, projectExports, getProject, user?.id]);
+  }), [projects, isLoading, fetchError, projectOperations, projectExports, getProject, user?.id]);
 
   return (
     <ProjectContext.Provider value={contextValue}>
