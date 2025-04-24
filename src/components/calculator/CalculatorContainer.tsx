@@ -17,6 +17,8 @@ interface CalculatorContainerProps {
   setProjectName: (name: string) => void;
   authError: string | null;
   setAuthError: (error: string | null) => void;
+  savingError?: string | null;
+  setSavingError?: (error: string | null) => void;
   isSaving: boolean;
   setIsSaving: (isSaving: boolean) => void;
   showSaveDialog: boolean;
@@ -35,6 +37,7 @@ interface CalculatorContainerProps {
 const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
   projectName,
   setProjectName,
+  savingError,
   isSaving,
   setIsSaving,
   showSaveDialog,
@@ -178,6 +181,7 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
             onConfirm={onSaveConfirm}
             onCancel={() => setShowSaveDialog(false)}
             isOverwrite={isExistingProject}
+            error={savingError}
           />
 
           <CalculatorUsageTracker

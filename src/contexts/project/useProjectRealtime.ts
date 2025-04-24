@@ -1,9 +1,11 @@
+
 import { useCallback, useRef } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { SavedProject } from '@/types/project';
 import { supabase } from '@/integrations/supabase/client';
 import { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
+import { isOffline } from '@/utils/errorHandling';
 
 export const useProjectRealtime = (
   userId: string | undefined, 
@@ -11,11 +13,25 @@ export const useProjectRealtime = (
 ) => {
   const retryCount = useRef(0);
   const maxRetries = 3;
+  const channelRef = useRef<RealtimeChannel | null>(null);
   
   const subscribeToProjects = useCallback(() => {
-    if (!userId || retryCount.current >= maxRetries) return null;
+    if (!userId) return null;
+    if (isOffline()) {
+      console.log('Offline detected, skipping realtime subscription');
+      return null;
+    }
+    if (retryCount.current >= maxRetries) {
+      console.warn(`Not attempting realtime subscription after ${maxRetries} failed attempts`);
+      return null;
+    }
 
     try {
+      // Clean up any existing subscription first
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+      
       const projectChannel = supabase.channel(`projects:user_id=eq.${userId}`)
         .on('postgres_changes', { 
           event: 'INSERT', 
@@ -51,17 +67,23 @@ export const useProjectRealtime = (
           toast.info('Project deleted');
         });
 
+      channelRef.current = projectChannel;
+
       projectChannel.subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           retryCount.current = 0;
-        } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+          console.log('Realtime subscription established successfully');
+        } else if (status === 'CHANNEL_ERROR') {
           retryCount.current += 1;
+          console.warn(`Realtime subscription error (attempt ${retryCount.current}/${maxRetries})`);
           
           if (retryCount.current < maxRetries) {
-            console.warn(`Realtime subscription attempt ${retryCount.current} failed, will retry`);
-          } else {
-            console.error(`Failed to establish realtime connection after ${maxRetries} attempts`);
+            // Implement exponential backoff for retries
+            const backoffDelay = Math.min(1000 * Math.pow(2, retryCount.current), 10000);
+            setTimeout(() => subscribeToProjects(), backoffDelay);
           }
+        } else if (status === 'CLOSED') {
+          console.log('Realtime channel closed');
         }
       });
 
@@ -71,7 +93,7 @@ export const useProjectRealtime = (
       retryCount.current += 1;
       return null;
     }
-  }, [userId, setProjects]);
+  }, [userId, setProjects, maxRetries]);
 
   return { subscribeToProjects };
 };

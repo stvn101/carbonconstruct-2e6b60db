@@ -16,6 +16,8 @@ const CarbonCalculator = ({ demoMode = false, isPremiumUser = false }: CarbonCal
     setProjectName,
     authError,
     setAuthError,
+    savingError,
+    setSavingError,
     isSaving,
     setIsSaving,
     showSaveDialog,
@@ -48,6 +50,8 @@ const CarbonCalculator = ({ demoMode = false, isPremiumUser = false }: CarbonCal
         setProjectName={setProjectName}
         authError={authError}
         setAuthError={setAuthError}
+        savingError={savingError}
+        setSavingError={setSavingError}
         isSaving={isSaving}
         setIsSaving={setIsSaving}
         showSaveDialog={showSaveDialog}
