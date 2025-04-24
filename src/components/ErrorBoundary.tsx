@@ -13,6 +13,7 @@ interface Props {
   resetCondition?: any;
   feature?: string;
   className?: string;
+  ignoreErrors?: boolean; // Add option to ignore certain errors
 }
 
 interface State {
@@ -28,11 +29,32 @@ class ErrorBoundary extends Component<Props, State> {
     errorInfo: null
   };
 
+  // Check if the error should be ignored
+  private shouldIgnoreError(error: Error): boolean {
+    if (this.props.ignoreErrors) {
+      // Ignore duplicate key constraint errors
+      if (error.message && (
+        error.message.includes("duplicate key") || 
+        error.message.includes("23505") ||
+        error.message.includes("Failed to fetch")
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Ignore certain errors if the ignoreErrors prop is true
+    if (this.shouldIgnoreError(error)) {
+      this.setState({ hasError: false, error: null, errorInfo: null });
+      return;
+    }
+
     this.setState({
       error,
       errorInfo
@@ -81,6 +103,11 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   public render() {
+    // If the error should be ignored, just render the children
+    if (this.state.hasError && this.state.error && this.shouldIgnoreError(this.state.error)) {
+      return this.props.children;
+    }
+
     if (this.state.hasError) {
       if (this.props.fallback) {
         if (typeof this.props.fallback === 'function') {
