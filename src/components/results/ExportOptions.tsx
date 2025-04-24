@@ -139,14 +139,14 @@ const ExportOptions = ({ result, materials, transport, energy }: ExportOptionsPr
         ]),
       });
       
-      // Transport table
-      let currentY = doc.lastAutoTable?.finalY || 130;
+      // Transport table - safely access finalY
+      const currentY = (doc.lastAutoTable?.finalY || 130) + 15;
       
       doc.setFontSize(14);
-      doc.text("Transport Breakdown", 14, currentY + 15);
+      doc.text("Transport Breakdown", 14, currentY);
       
       autoTable(doc, {
-        startY: currentY + 20,
+        startY: currentY + 5,
         head: [['Transport Type', 'Distance (km)', 'Weight (kg)', 'Emissions (kg CO2e)']],
         body: transport.map(item => [
           item.type, 
@@ -156,14 +156,14 @@ const ExportOptions = ({ result, materials, transport, energy }: ExportOptionsPr
         ]),
       });
       
-      // Energy table
-      currentY = doc.lastAutoTable?.finalY || 180;
+      // Energy table - safely access finalY
+      const energyY = (doc.lastAutoTable?.finalY || 180) + 15;
       
       doc.setFontSize(14);
-      doc.text("Energy Breakdown", 14, currentY + 15);
+      doc.text("Energy Breakdown", 14, energyY);
       
       autoTable(doc, {
-        startY: currentY + 20,
+        startY: energyY + 5,
         head: [['Energy Type', 'Amount (kWh)', 'Emissions (kg CO2e)']],
         body: energy.map(item => [
           item.type, 
