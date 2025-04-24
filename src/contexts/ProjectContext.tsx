@@ -32,7 +32,8 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const { subscribeToProjects } = useProjectRealtime(user?.id, setProjects);
 
-  const loadProjects = useProjectsLoader(
+  // Here's the fix: useProjectsLoader returns an object with loadProjects function and isRetrying boolean
+  const { loadProjects } = useProjectsLoader(
     user,
     setProjects,
     setIsLoading,
@@ -45,6 +46,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let projectChannel;
     
     if (user) {
+      // Now correctly calling the loadProjects function
       loadProjects();
       projectChannel = subscribeToProjects();
     } else {
@@ -65,4 +67,3 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     </ProjectContext.Provider>
   );
 };
-
