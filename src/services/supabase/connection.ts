@@ -5,9 +5,9 @@ import errorTrackingService from '@/services/error/errorTrackingService';
 
 // Maximum retry attempts for operations
 export const MAX_RETRIES = 3;
-// Increased timeout for operations in milliseconds (from 15000 to 20000 for more stability)
+// Increased timeout for operations in milliseconds to provide more stability
 export const OPERATION_TIMEOUT = 20000;
-// Healthcheck timeout in milliseconds (increased from 8000 to 10000)
+// Healthcheck timeout in milliseconds
 export const HEALTHCHECK_TIMEOUT = 10000;
 
 // Cache successful health check result for a short time
@@ -72,14 +72,22 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
  * @returns The promise result or a timeout error
  */
 export const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  let timeoutId: NodeJS.Timeout;
+  
+  // Create a promise that rejects after the timeout period
   const timeoutPromise = new Promise<never>((_, reject) => {
-    const id = setTimeout(() => {
-      clearTimeout(id);
+    timeoutId = setTimeout(() => {
       reject(new Error(`Operation timed out after ${ms}ms`));
     }, ms);
   });
   
-  return Promise.race([promise, timeoutPromise]);
+  try {
+    // Race between the original promise and the timeout
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    // Clean up the timeout to prevent memory leaks
+    clearTimeout(timeoutId!);
+  }
 };
 
 /**
@@ -122,8 +130,10 @@ export const checkSupabaseConnectionWithRetry = async (
     
     attempts++;
     if (attempts <= maxRetries) {
+      // Use the promise-based setTimeout for better accuracy
       await new Promise(resolve => setTimeout(resolve, currentDelay));
-      currentDelay *= 2; // Exponential backoff
+      // Apply exponential backoff with a small random jitter to prevent thundering herd
+      currentDelay = currentDelay * 2 * (0.9 + Math.random() * 0.2);
     }
   }
   

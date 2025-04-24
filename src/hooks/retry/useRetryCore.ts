@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { calculateBackoffDelay, RetryOptions, RetryResult } from './retryUtils';
 
 /**
@@ -14,16 +15,25 @@ export function useRetryCore({
   setRetryCount
 }: RetryOptions): RetryResult {
   const [isRetrying, setIsRetrying] = useState(false);
-  const [retryTimeoutId, setRetryTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
   // Clean up any existing timeout on unmount
   useEffect(() => {
+    // Set mounted flag
+    isMountedRef.current = true;
+    
     return () => {
-      if (retryTimeoutId) {
-        clearTimeout(retryTimeoutId);
+      // Clear flag on unmount to prevent state updates
+      isMountedRef.current = false;
+      
+      // Clean up timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
-  }, [retryTimeoutId]);
+  }, []);
 
   // Handle retry logic when retry count changes
   useEffect(() => {
@@ -33,23 +43,32 @@ export function useRetryCore({
     // Set retrying state
     setIsRetrying(true);
     
+    // Clear any existing timeout first
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    
     try {
       // Calculate delay with exponential backoff
       const delay = calculateBackoffDelay(retryCount);
       
-      // Clear any existing timeout
-      if (retryTimeoutId) {
-        clearTimeout(retryTimeoutId);
-      }
-      
       // Set up the next retry attempt
-      const timeoutId = setTimeout(async () => {
+      timeoutRef.current = setTimeout(async () => {
+        // Check if component is still mounted before proceeding
+        if (!isMountedRef.current) return;
+        
         try {
           await callback();
-          // If successful, reset retry count
-          setRetryCount(0);
-          setIsRetrying(false);
+          // If successful, reset retry count only if still mounted
+          if (isMountedRef.current) {
+            setRetryCount(0);
+            setIsRetrying(false);
+          }
         } catch (error) {
+          // Only proceed if still mounted
+          if (!isMountedRef.current) return;
+          
           // If we've reached max retries, trigger the callback and stop
           if (retryCount >= maxRetries) {
             if (onMaxRetriesReached) {
@@ -62,19 +81,21 @@ export function useRetryCore({
           }
         }
       }, delay);
-      
-      setRetryTimeoutId(timeoutId);
     } catch (error) {
       console.error('Error in retry mechanism:', error);
-      setIsRetrying(false);
       
-      // If an error occurs in the retry mechanism itself, call the max retries callback
-      if (retryCount >= maxRetries && onMaxRetriesReached) {
-        onMaxRetriesReached();
+      // Only update state if still mounted
+      if (isMountedRef.current) {
+        setIsRetrying(false);
+        
+        // If an error occurs in the retry mechanism itself, call the max retries callback
+        if (retryCount >= maxRetries && onMaxRetriesReached) {
+          onMaxRetriesReached();
+        }
       }
     }
     
-    // Only include retryCount in the dependency array so this effect runs when it changes
+    // Include all dependencies to ensure the effect runs when needed
   }, [retryCount, callback, maxRetries, onMaxRetriesReached, setRetryCount]);
 
   return {

@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { loadProjects } from '@/utils/projectLoader';
 import { useRetry } from '@/hooks/useRetry';
@@ -7,7 +7,7 @@ import { useNetworkEffect } from '@/hooks/useNetworkEffect';
 import { SavedProject } from '@/types/project';
 import { clearErrorToasts } from '@/utils/errorHandling';
 
-// Reduced max retries to prevent too many attempts
+// Maximum number of retry attempts
 const MAX_RETRIES = 2;
 
 export const useProjectsLoader = (
@@ -18,17 +18,27 @@ export const useProjectsLoader = (
   retryCount: number,
   setRetryCount: (count: number) => void
 ) => {
+  // Track mounted state to prevent memory leaks
+  const isMountedRef = useRef(true);
+  const initialLoadAttemptedRef = useRef(false);
+  
   // Clear stale errors on component mount
   useEffect(() => {
-    clearErrorToasts(["projects-load-error", "projects-load-failed", "projects-offline"]);
+    const toastIds = ["projects-load-error", "projects-load-failed", "projects-offline"];
+    clearErrorToasts(toastIds);
     
     return () => {
+      // Mark component as unmounted
+      isMountedRef.current = false;
       // Clear toasts when component unmounts to prevent stuck messages
-      clearErrorToasts(["projects-load-error", "projects-load-failed", "projects-offline"]);
+      clearErrorToasts(toastIds);
     };
   }, []);
   
   const loadProjectsCallback = useCallback(async () => {
+    // Skip if component is unmounted
+    if (!isMountedRef.current) return;
+    
     if (!user) {
       setProjects([]);
       setIsLoading(false);
@@ -36,7 +46,9 @@ export const useProjectsLoader = (
       return;
     }
 
+    initialLoadAttemptedRef.current = true;
     setIsLoading(true);
+    
     try {
       await loadProjects(user.id, setProjects, setFetchError);
       
@@ -51,7 +63,10 @@ export const useProjectsLoader = (
       // Error is already handled in loadProjects
       console.error('Project loading failed:', error);
     } finally {
-      setIsLoading(false);
+      // Only update state if still mounted
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [user, retryCount, setProjects, setIsLoading, setFetchError]);
 
@@ -60,6 +75,9 @@ export const useProjectsLoader = (
     callback: loadProjectsCallback,
     maxRetries: MAX_RETRIES,
     onMaxRetriesReached: () => {
+      // Skip if component is unmounted
+      if (!isMountedRef.current) return;
+      
       // Dismiss any retry toasts first
       toast.dismiss("projects-load-retry");
       
@@ -82,15 +100,24 @@ export const useProjectsLoader = (
   useNetworkEffect(
     // When going offline
     () => {
+      // Skip if component is unmounted
+      if (!isMountedRef.current) return;
+      
       // Don't reset retry count when going offline - we'll retry when back online
       setFetchError(new Error("You are currently offline"));
     },
     // When coming back online
     () => {
-      // Reset retry count and immediately attempt to load
-      setRetryCount(0);
-      setFetchError(null);
-      loadProjectsCallback();
+      // Skip if component is unmounted
+      if (!isMountedRef.current) return;
+      
+      // Only attempt to reload if we've already tried loading at least once
+      if (initialLoadAttemptedRef.current) {
+        // Reset retry count and immediately attempt to load
+        setRetryCount(0);
+        setFetchError(null);
+        loadProjectsCallback();
+      }
     }
   );
 

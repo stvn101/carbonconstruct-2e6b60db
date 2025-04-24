@@ -13,12 +13,15 @@ export function useNetworkStatus() {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   // Track consecutive offline detections to increase confidence
   const offlineDetectionCountRef = useRef(0);
+  // Timer for periodic health checks
+  const healthCheckTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounced setter for online status with improved stability
   const setOnlineStatus = useCallback((status: boolean) => {
     // Clear any existing timeout
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
     
     if (status) {
@@ -41,7 +44,7 @@ export function useNetworkStatus() {
       // When going offline, increase the counter and require multiple detections
       offlineDetectionCountRef.current += 1;
       
-      // Only consider offline after 2 consecutive offline detections
+      // Only consider offline after consecutive offline detections
       // This prevents momentary network fluctuations from triggering offline state
       if (offlineDetectionCountRef.current >= 2) {
         debounceTimerRef.current = setTimeout(() => {
@@ -55,7 +58,7 @@ export function useNetworkStatus() {
               duration: 0 // Keep showing until back online
             });
           }
-        }, 2000); // Longer delay for offline status to avoid false positives
+        }, 1500); // Slightly shorter delay for offline status for better UX
       } else {
         // If it's the first offline detection, set a short timeout to check again
         debounceTimerRef.current = setTimeout(() => {
@@ -76,20 +79,25 @@ export function useNetworkStatus() {
     window.addEventListener('offline', handleOffline);
 
     // Periodic health check to detect partial network issues
-    const healthCheckInterval = setInterval(() => {
+    healthCheckTimerRef.current = setInterval(() => {
       // If the browser thinks we're online but connectivity is actually partial,
       // this can trigger a more accurate state
       if (navigator.onLine) {
-        fetch('/favicon.ico', { method: 'HEAD', cache: 'no-store' })
-          .catch(() => {
-            // Only consider offline if we can't reach our own server
-            // and multiple checks fail
-            if (offlineDetectionCountRef.current < 2) {
-              offlineDetectionCountRef.current += 1;
-            } else {
-              setOnlineStatus(false);
-            }
-          });
+        fetch('/favicon.ico', { 
+          method: 'HEAD', 
+          cache: 'no-store',
+          // Add a timeout to prevent hanging requests
+          signal: AbortSignal.timeout(3000)
+        })
+        .catch(() => {
+          // Only consider offline if we can't reach our own server
+          // and multiple checks fail
+          if (offlineDetectionCountRef.current < 2) {
+            offlineDetectionCountRef.current += 1;
+          } else {
+            setOnlineStatus(false);
+          }
+        });
       }
     }, 30000); // Check every 30 seconds
 
@@ -97,7 +105,9 @@ export function useNetworkStatus() {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
-      clearInterval(healthCheckInterval);
+      if (healthCheckTimerRef.current) {
+        clearInterval(healthCheckTimerRef.current);
+      }
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       
