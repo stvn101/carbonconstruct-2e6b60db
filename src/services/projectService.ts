@@ -1,9 +1,8 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
 import { Json } from '@/integrations/supabase/types';
-import { performDbOperation } from './supabseFallbackService';
+import { performDbOperation } from './supabase/fallbackService';
 
 /**
  * Fetch all projects for a user with improved error handling

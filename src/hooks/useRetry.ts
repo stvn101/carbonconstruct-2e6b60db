@@ -2,15 +2,15 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 export const useRetry = (
-  callback: () => Promise<void>,
   options: {
+    callback: () => Promise<void>;
     maxRetries: number;
     onMaxRetriesReached?: () => void;
     retryCount: number;
     setRetryCount: (count: number) => void;
   }
 ) => {
-  const { maxRetries, onMaxRetriesReached, retryCount, setRetryCount } = options;
+  const { callback, maxRetries, onMaxRetriesReached, retryCount, setRetryCount } = options;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export const useRetry = (
       const backoffDelay = Math.min(2000 * Math.pow(2, retryCount), 10000);
       
       timerRef.current = setTimeout(() => {
-        setRetryCount(prev => prev + 1);
+        setRetryCount(retryCount + 1);
         callback();
       }, backoffDelay);
       
