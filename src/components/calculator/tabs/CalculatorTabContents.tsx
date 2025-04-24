@@ -6,6 +6,7 @@ import EnergyInputSection from "../EnergyInputSection";
 import ResultsSection from "../ResultsSection";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
 import { useEffect, useState } from "react";
+import ErrorTrackingService from "@/services/error/errorTrackingService";
 
 interface CalculatorTabContentsProps {
   calculationInput: CalculationInput;
@@ -44,21 +45,60 @@ const CalculatorTabContents = ({
 }: CalculatorTabContentsProps) => {
   const [activeTabValue, setActiveTabValue] = useState<string>("materials");
 
+  // Sync with parent component's active tab value
+  useEffect(() => {
+    const synchTabWithParent = () => {
+      const childTabs = document.querySelectorAll('[role="tab"]');
+      const activeChildTab = document.querySelector('[role="tab"][aria-selected="true"]');
+      
+      if (activeChildTab) {
+        const tabValue = activeChildTab.getAttribute('data-value') || "materials";
+        if (tabValue !== activeTabValue) {
+          console.log(`Syncing tab value from DOM: ${tabValue}`);
+          setActiveTabValue(tabValue);
+        }
+      }
+    };
+
+    // Run on mount and after any tab change
+    synchTabWithParent();
+    
+    // Setup mutation observer to detect tab changes
+    const observer = new MutationObserver(synchTabWithParent);
+    observer.observe(document.body, { 
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['aria-selected']
+    });
+    
+    return () => observer.disconnect();
+  }, [activeTabValue]);
+
   // Function to safely handle navigation between tabs
   const handleNextTab = () => {
     try {
       console.log(`Navigating from ${activeTabValue} to next tab`);
+      let nextTab;
+      
       if (activeTabValue === "materials") {
-        setActiveTabValue("transport");
+        nextTab = "transport";
       } else if (activeTabValue === "transport") {
-        setActiveTabValue("energy");
+        nextTab = "energy";
       } else if (activeTabValue === "energy") {
-        setActiveTabValue("results");
+        nextTab = "results";
+      } else {
+        nextTab = activeTabValue; // Keep current if unknown
       }
+      
+      setActiveTabValue(nextTab);
       
       // Call the parent's onNextTab function to sync state
       onNextTab();
     } catch (error) {
+      ErrorTrackingService.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+        { component: 'CalculatorTabContents', action: 'nextTab' }
+      );
       console.error("Error navigating to next tab:", error);
     }
   };
@@ -66,23 +106,46 @@ const CalculatorTabContents = ({
   const handlePrevTab = () => {
     try {
       console.log(`Navigating from ${activeTabValue} to previous tab`);
+      let prevTab;
+      
       if (activeTabValue === "transport") {
-        setActiveTabValue("materials");
+        prevTab = "materials";
       } else if (activeTabValue === "energy") {
-        setActiveTabValue("transport");
+        prevTab = "transport";
       } else if (activeTabValue === "results") {
-        setActiveTabValue("energy");
+        prevTab = "energy";
+      } else {
+        prevTab = activeTabValue; // Keep current if unknown
       }
+      
+      setActiveTabValue(prevTab);
       
       // Call the parent's onPrevTab function to sync state
       onPrevTab();
     } catch (error) {
+      ErrorTrackingService.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+        { component: 'CalculatorTabContents', action: 'prevTab' }
+      );
       console.error("Error navigating to previous tab:", error);
     }
   };
 
+  // Handle tab change initiated from tab buttons
+  const handleTabChange = (value: string) => {
+    console.log(`Tab value changed to: ${value}`);
+    setActiveTabValue(value);
+    
+    // Notify parent component about tab change for sync
+    if (value === "materials" || activeTabValue === "transport") {
+      onPrevTab();
+    } else {
+      onNextTab();
+    }
+  };
+
   return (
-    <Tabs value={activeTabValue} onValueChange={setActiveTabValue}>
+    <Tabs value={activeTabValue} onValueChange={handleTabChange}>
       <TabsContent value="materials">
         <MaterialsInputSection 
           materials={calculationInput.materials}

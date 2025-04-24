@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchUserProfile, createUserProfile } from '@/services/authService';
 import { AuthState } from '../types';
 import { UserProfile } from '@/types/auth';
+import { toast } from 'sonner';
 
 export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => void) => {
   useEffect(() => {
@@ -41,12 +42,42 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
                   };
                   
                   const createdProfile = await createUserProfile(newProfile);
-                  updateState({ profile: createdProfile });
+                  if (createdProfile) {
+                    updateState({ profile: createdProfile });
+                  } else {
+                    // If profile creation failed due to database issues, still use the profile data
+                    // This allows the app to function in a degraded state
+                    updateState({ 
+                      profile: newProfile,
+                      loading: false,
+                      isLoading: false
+                    });
+                    
+                    toast.warning("Limited functionality due to database connection issues", {
+                      id: "limited-functionality-warning",
+                      duration: 5000
+                    });
+                  }
                 } else {
                   updateState({ profile });
                 }
               } catch (error) {
                 console.error('Error processing user profile:', error);
+                // Allow app to continue with limited functionality
+                updateState({ 
+                  loading: false, 
+                  isLoading: false,
+                  profile: session.user ? {
+                    id: session.user.id,
+                    full_name: session.user.user_metadata?.full_name || null,
+                    company_name: null,
+                    avatar_url: null,
+                    website: null,
+                    role: 'user',
+                    subscription_tier: 'free',
+                    had_trial: false
+                  } : null
+                });
               }
             }, 0);
           } else if (event === 'SIGNED_OUT') {
@@ -85,7 +116,7 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
               
               const createdProfile = await createUserProfile(newProfile);
               updateState({ 
-                profile: createdProfile,
+                profile: createdProfile || newProfile, // Use newProfile if createdProfile is null
                 loading: false,
                 isLoading: false
               });
