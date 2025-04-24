@@ -44,12 +44,13 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
           onValueChange={(value) => onUpdate("type", value)}
         >
           <SelectTrigger 
-            id={`material-type-${index}`} 
+            id={`material-type-${index}`}
+            name={`material-type-${index}`}
             className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
           >
             <SelectValue placeholder="Select material" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-gray-800">
             {Object.entries(MATERIAL_FACTORS).map(([key, value]) => (
               <SelectItem key={key} value={key} className="text-xs md:text-sm">
                 {value.name}
@@ -65,6 +66,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
         </Label>
         <Input
           id={`material-quantity-${index}`}
+          name={`material-quantity-${index}`}
           type="number"
           value={material.quantity === 0 ? '' : material.quantity}
           onChange={(e) => onUpdate("quantity", e.target.value)}
