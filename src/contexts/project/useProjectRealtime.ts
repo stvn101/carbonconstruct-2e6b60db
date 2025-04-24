@@ -1,57 +1,67 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { useCallback } from 'react';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { SavedProject } from '@/types/project';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { Dispatch, SetStateAction } from 'react';
+import { toast } from 'sonner';
+import { handleFetchError } from '@/utils/errorHandling';
 
 export const useProjectRealtime = (
-  userId: string | undefined,
+  userId: string | undefined, 
   setProjects: Dispatch<SetStateAction<SavedProject[]>>
 ) => {
-  const subscribeToProjects = () => {
+  const subscribeToProjects = useCallback(() => {
     if (!userId) return null;
 
-    const projectChannel = supabase
-      .channel('project_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
+    try {
+      const projectChannel = supabase.channel(`projects:user_id=eq.${userId}`)
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
           table: 'projects',
-          filter: `user_id=eq.${userId}`
-        },
-        (payload) => {
-          console.log('Received real-time update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            setProjects((prev) => {
-              const newProject = payload.new as SavedProject;
-              if (prev.some(p => p.id === newProject.id)) {
-                return prev;
-              }
-              return [...prev, newProject];
-            });
-            setTimeout(() => toast.success('New project created'), 0);
-          } 
-          else if (payload.eventType === 'UPDATE') {
-            setProjects((prev) => {
-              const updatedProject = payload.new as SavedProject;
-              return prev.map(p => p.id === updatedProject.id ? updatedProject : p);
-            });
-            setTimeout(() => toast.success('Project updated'), 0);
-          }
-          else if (payload.eventType === 'DELETE') {
-            const deletedId = payload.old.id;
-            setProjects((prev) => prev.filter(p => p.id !== deletedId));
-            setTimeout(() => toast.success('Project deleted'), 0);
-          }
-        }
-      )
-      .subscribe();
+          filter: `user_id=eq.${userId}` 
+        }, (payload) => {
+          const newProject = payload.new as SavedProject;
+          setProjects((prev) => [...prev, newProject]);
+          toast.info('New project added');
+        })
+        .on('postgres_changes', { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'projects',
+          filter: `user_id=eq.${userId}` 
+        }, (payload) => {
+          const updatedProject = payload.new as SavedProject;
+          setProjects((prev) => 
+            prev.map(project => project.id === updatedProject.id ? updatedProject : project)
+          );
+        })
+        .on('postgres_changes', { 
+          event: 'DELETE', 
+          schema: 'public', 
+          table: 'projects',
+          filter: `user_id=eq.${userId}` 
+        }, (payload) => {
+          const deletedId = (payload.old as SavedProject).id;
+          setProjects((prev) => 
+            prev.filter(project => project.id !== deletedId)
+          );
+          toast.info('Project deleted');
+        });
 
-    return projectChannel;
-  };
+      projectChannel.subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to project updates:', status);
+        }
+      });
+
+      return projectChannel;
+    } catch (error) {
+      handleFetchError(error, 'realtime-subscription');
+      return null;
+    }
+  }, [userId, setProjects]);
 
   return { subscribeToProjects };
 };
