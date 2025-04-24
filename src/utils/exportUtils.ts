@@ -1,10 +1,106 @@
 
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { SavedProject } from '@/types/project';
 
 export async function exportProjectToPDF(project: SavedProject): Promise<void> {
   try {
-    // In a real app, we would call an edge function to generate a PDF
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Create a new PDF document
+    const doc = new jsPDF();
+    const { materials, transport, energy, result } = project;
+    
+    // Add project title
+    doc.setFontSize(20);
+    doc.text(`Project: ${project.name}`, 14, 22);
+    
+    // Add creation date
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
+    
+    // Add project description if available
+    if (project.description) {
+      doc.setFontSize(12);
+      doc.text(`Description: ${project.description}`, 14, 40);
+    }
+    
+    // Add total emissions
+    doc.setFontSize(14);
+    doc.setTextColor(0, 102, 51); // Dark green color
+    const totalEmissions = project.total_emissions || 0;
+    doc.text(`Total Emissions: ${totalEmissions.toFixed(2)} kg CO2e`, 14, 55);
+    doc.setTextColor(0, 0, 0); // Reset to black
+    
+    // Add Materials table
+    doc.setFontSize(12);
+    doc.text('Materials', 14, 70);
+    
+    autoTable(doc, {
+      startY: 75,
+      head: [['Material Type', 'Quantity (kg)', 'Emissions (kg CO2e)']],
+      body: materials.map(material => [
+        material.type,
+        material.quantity.toString(),
+        (result?.breakdownByMaterial?.[material.type] || 0).toFixed(2)
+      ]),
+    });
+    
+    // Add Transport table
+    const transportY = doc.lastAutoTable?.finalY || 120;
+    doc.text('Transport', 14, transportY + 15);
+    
+    autoTable(doc, {
+      startY: transportY + 20,
+      head: [['Transport Type', 'Distance (km)', 'Weight (kg)', 'Emissions (kg CO2e)']],
+      body: transport.map(item => [
+        item.type,
+        item.distance.toString(),
+        item.weight.toString(),
+        (result?.breakdownByTransport?.[item.type] || 0).toFixed(2)
+      ]),
+    });
+    
+    // Add Energy table
+    const energyY = doc.lastAutoTable?.finalY || 180;
+    doc.text('Energy', 14, energyY + 15);
+    
+    autoTable(doc, {
+      startY: energyY + 20,
+      head: [['Energy Type', 'Amount (kWh)', 'Emissions (kg CO2e)']],
+      body: energy.map(item => [
+        item.type,
+        item.amount.toString(),
+        (result?.breakdownByEnergy?.[item.type] || 0).toFixed(2)
+      ]),
+    });
+    
+    // Add summary footer
+    const summaryY = doc.lastAutoTable?.finalY || 240;
+    doc.text('Emissions Summary', 14, summaryY + 15);
+    
+    autoTable(doc, {
+      startY: summaryY + 20,
+      head: [['Category', 'Total Emissions (kg CO2e)', 'Percentage']],
+      body: [
+        ['Materials', (result?.materialEmissions || 0).toFixed(2), `${((result?.materialEmissions || 0) / totalEmissions * 100).toFixed(1)}%`],
+        ['Transport', (result?.transportEmissions || 0).toFixed(2), `${((result?.transportEmissions || 0) / totalEmissions * 100).toFixed(1)}%`],
+        ['Energy', (result?.energyEmissions || 0).toFixed(2), `${((result?.energyEmissions || 0) / totalEmissions * 100).toFixed(1)}%`],
+        ['Total', totalEmissions.toFixed(2), '100%']
+      ],
+    });
+    
+    // Add footer with CarbonConstruct branding
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text('CarbonConstruct - Building Greener, Measuring Smarter', 14, 290);
+      doc.text(`Page ${i} of ${pageCount}`, 180, 290);
+    }
+    
+    // Save the PDF
+    const filename = `${project.name.replace(/\s+/g, '_')}_carbon_report.pdf`;
+    doc.save(filename);
+    
     return Promise.resolve();
   } catch (error) {
     console.error('PDF export failed:', error);
