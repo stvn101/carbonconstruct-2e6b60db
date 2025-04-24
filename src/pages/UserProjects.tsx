@@ -11,6 +11,7 @@ import { DeleteProjectDialog } from "@/components/projects/DeleteProjectDialog";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { EmptyProjectsList } from "@/components/projects/EmptyProjectsList";
 import ProjectsHeader from "@/components/projects/ProjectsHeader";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const UserProjects = () => {
   const { projects, deleteProject, exportProjectPDF, exportProjectCSV } = useProjects();
@@ -68,23 +69,25 @@ const UserProjects = () => {
             onSearchChange={setSearch}
           />
 
-          {filteredProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProjects
-                .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-                .map((project) => (
-                  <ProjectCard 
-                    key={project.id} 
-                    project={project}
-                    onDelete={() => setProjectToDelete(project)}
-                    onExportPDF={() => exportProjectPDF(project)}
-                    onExportCSV={() => exportProjectCSV(project)}
-                  />
-                ))}
-            </div>
-          ) : (
-            <EmptyProjectsList hasFilters={!!search || selectedTag !== null} />
-          )}
+          <ErrorBoundary feature="Projects List" ignoreErrors={true}>
+            {filteredProjects.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredProjects
+                  .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                  .map((project) => (
+                    <ProjectCard 
+                      key={project.id} 
+                      project={project}
+                      onDelete={() => setProjectToDelete(project)}
+                      onExportPDF={() => exportProjectPDF(project)}
+                      onExportCSV={() => exportProjectCSV(project)}
+                    />
+                  ))}
+              </div>
+            ) : (
+              <EmptyProjectsList hasFilters={!!search || selectedTag !== null} />
+            )}
+          </ErrorBoundary>
         </div>
       </main>
       <Footer />

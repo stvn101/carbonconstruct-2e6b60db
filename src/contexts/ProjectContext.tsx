@@ -24,22 +24,57 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { user } = useAuth();
   const [projects, setProjects] = useState<SavedProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<Error | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   // Use useCallback for loadProjects to avoid unnecessary re-creations
   const loadProjects = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setProjects([]);
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     try {
       const projectData = await fetchUserProjects(user.id);
       setProjects(projectData);
+      setFetchError(null); // Clear any previous errors
     } catch (error) {
       console.error('Error loading projects:', error);
-      toast.error("Failed to load your projects");
+      setFetchError(error instanceof Error ? error : new Error('Failed to load projects'));
+      // Only show toast for first error, not for retry failures
+      if (retryCount === 0) {
+        toast.error("Failed to load your projects. Retrying...", {
+          duration: 3000,
+          id: "projects-load-error" // Prevent duplicate toasts
+        });
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, retryCount]);
+
+  // Add retry logic
+  useEffect(() => {
+    if (fetchError && retryCount < MAX_RETRIES) {
+      const timer = setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        loadProjects();
+      }, Math.min(2000 * (retryCount + 1), 10000)); // Exponential backoff with max
+      
+      return () => clearTimeout(timer);
+    }
+    
+    // If we've reached max retries and still have an error, show a final message
+    if (fetchError && retryCount >= MAX_RETRIES) {
+      toast.error("Unable to load projects. Please check your connection.", {
+        duration: 5000,
+        id: "projects-load-failed"
+      });
+    }
+  }, [fetchError, retryCount, loadProjects]);
 
   useEffect(() => {
     let projectChannel: RealtimeChannel;
@@ -185,3 +220,4 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     </ProjectContext.Provider>
   );
 };
+

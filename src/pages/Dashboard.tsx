@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/Navbar";
@@ -22,6 +23,7 @@ import { ReportsTab } from "@/components/dashboard/ReportsTab";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { SkeletonContent } from "@/components/ui/skeleton-content";
 import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const Dashboard = () => {
   const { user, profile, loading: authLoading } = useAuth();
@@ -120,36 +122,44 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview">
-              <DashboardStats projectsCount={projects.length} recentProjects={recentProjects} />
-              <EmissionsCharts />
-              <SustainabilityInsights recentProjects={recentProjects} />
-            </TabsContent>
+            <ErrorBoundary feature="Dashboard Overview" ignoreErrors={true}>
+              <TabsContent value="overview">
+                <DashboardStats projectsCount={projects.length} recentProjects={recentProjects} />
+                <EmissionsCharts />
+                <SustainabilityInsights recentProjects={recentProjects} />
+              </TabsContent>
+            </ErrorBoundary>
 
-            <TabsContent value="projects">
-              <ProjectsTab projects={projects} />
-            </TabsContent>
+            <ErrorBoundary feature="Projects Tab" ignoreErrors={true}>
+              <TabsContent value="projects">
+                <ProjectsTab projects={projects} />
+              </TabsContent>
+            </ErrorBoundary>
 
-            <TabsContent value="ai">
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Brain className="h-5 w-5 mr-2 text-carbon-600" />
-                    AI Carbon Assistant
-                  </CardTitle>
-                  <CardDescription>
-                    Use our AI-powered tools to analyze and optimize your construction projects
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <AIFeatures />
-                </CardContent>
-              </Card>
-            </TabsContent>
+            <ErrorBoundary feature="AI Features" ignoreErrors={true}>
+              <TabsContent value="ai">
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Brain className="h-5 w-5 mr-2 text-carbon-600" />
+                      AI Carbon Assistant
+                    </CardTitle>
+                    <CardDescription>
+                      Use our AI-powered tools to analyze and optimize your construction projects
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AIFeatures />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </ErrorBoundary>
 
-            <TabsContent value="reports">
-              <ReportsTab />
-            </TabsContent>
+            <ErrorBoundary feature="Reports Tab" ignoreErrors={true}>
+              <TabsContent value="reports">
+                <ReportsTab />
+              </TabsContent>
+            </ErrorBoundary>
           </Tabs>
         </div>
       </main>
