@@ -1,12 +1,12 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FolderPlus, Calculator, ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
+import { FolderPlus, Calculator, ArrowLeft, RefreshCw, AlertCircle, Wifi, WifiOff } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
 import ProjectsList from "@/components/projects/ProjectsList";
 import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton";
@@ -16,6 +16,7 @@ import PageLoading from '@/components/ui/page-loading';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useOfflineMode } from "@/hooks/useOfflineMode";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { toast } from 'sonner';
 
 const ProjectsBrowser: React.FC = () => {
   const { projects, isLoading, fetchError } = useProjects();
@@ -24,25 +25,55 @@ const ProjectsBrowser: React.FC = () => {
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const [loadAttempts, setLoadAttempts] = useState(0);
   const { isOfflineMode, checkConnection, connectionAttempts, isCheckingConnection } = useOfflineMode();
+  const pageInitializedRef = useRef(false);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Delay setting page loaded status to prevent flickering
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPageLoaded(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    // Only do this once to prevent repeated flashes
+    if (!pageInitializedRef.current) {
+      pageInitializedRef.current = true;
+      const timer = setTimeout(() => {
+        setIsPageLoaded(true);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const handleRetryLoad = useCallback(() => {
+    // Prevent multiple simultaneous retries
+    if (retryTimeoutRef.current) return;
+    
     setLoadAttempts(prev => prev + 1);
+    
+    // Show loading toast
+    toast.loading("Checking connection...", { id: "retry-connection-check" });
+    
     // Check connection first
     checkConnection();
+    
     // Wait a moment then refresh
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    retryTimeoutRef.current = setTimeout(() => {
+      toast.dismiss("retry-connection-check");
+      
+      // Instead of full page refresh, just show loading state again
+      setIsPageLoaded(false);
+      setTimeout(() => {
+        setIsPageLoaded(true);
+        retryTimeoutRef.current = null;
+      }, 300);
+    }, 1500);
   }, [checkConnection]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <motion.div 
@@ -105,15 +136,17 @@ const ProjectsBrowser: React.FC = () => {
                 
                 {/* Connection Error Alert */}
                 {isOfflineMode && (
-                  <Alert className="mb-6 bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800">
-                    <RefreshCw className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                    <AlertTitle className="text-amber-800 dark:text-amber-300">Connection Issue Detected</AlertTitle>
-                    <AlertDescription className="text-amber-700 dark:text-amber-400">
-                      We're having trouble connecting to the server. Your projects will appear when the connection is restored.
+                  <Alert variant="warning" className="mb-6">
+                    {navigator.onLine ? <Wifi className="h-5 w-5" /> : <WifiOff className="h-5 w-5" />}
+                    <AlertTitle>Connection Issue Detected</AlertTitle>
+                    <AlertDescription>
+                      {navigator.onLine 
+                        ? "We're having trouble connecting to our servers. Your projects will appear when the connection is restored."
+                        : "You're currently offline. Please check your internet connection."}
                       <div className="mt-2">
                         <Button 
                           onClick={checkConnection} 
-                          className="bg-amber-600 hover:bg-amber-700 text-white"
+                          variant="outline"
                           size="sm"
                           disabled={isCheckingConnection}
                         >
@@ -126,20 +159,21 @@ const ProjectsBrowser: React.FC = () => {
                 )}
 
                 {/* Persistent Error Alert */}
-                {fetchError && connectionAttempts > 1 && (
-                  <Alert className="mb-6 bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800">
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    <AlertTitle className="text-red-800 dark:text-red-300">Error Loading Projects</AlertTitle>
-                    <AlertDescription className="text-red-700 dark:text-red-400">
+                {fetchError && connectionAttempts > 1 && !isOfflineMode && (
+                  <Alert variant="destructive" className="mb-6">
+                    <AlertCircle className="h-5 w-5" />
+                    <AlertTitle>Error Loading Projects</AlertTitle>
+                    <AlertDescription>
                       We're experiencing technical issues loading your projects. Our team has been notified.
                       <div className="mt-2">
                         <Button 
                           onClick={handleRetryLoad} 
-                          className="bg-red-600 hover:bg-red-700 text-white"
+                          variant="outline"
                           size="sm"
+                          disabled={!!retryTimeoutRef.current}
                         >
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Retry Loading
+                          <RefreshCw className={`h-4 w-4 mr-2 ${retryTimeoutRef.current ? 'animate-spin' : ''}`} />
+                          {retryTimeoutRef.current ? 'Retrying...' : 'Retry Loading'}
                         </Button>
                       </div>
                     </AlertDescription>
@@ -178,9 +212,10 @@ const ProjectsBrowser: React.FC = () => {
                       <Button
                         onClick={handleRetryLoad}
                         variant="secondary"
+                        disabled={!!retryTimeoutRef.current}
                       >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Retry Loading
+                        <RefreshCw className={`h-4 w-4 mr-2 ${retryTimeoutRef.current ? 'animate-spin' : ''}`} />
+                        {retryTimeoutRef.current ? 'Retrying...' : 'Retry Loading'}
                       </Button>
                     </div>
                   </div>

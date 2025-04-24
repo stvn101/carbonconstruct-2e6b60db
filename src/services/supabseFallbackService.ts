@@ -10,9 +10,16 @@ import { withTimeout } from '@/utils/errorHandling';
  */
 
 // Maximum retry attempts for operations
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 2; // Reduced from 3 to 2 to prevent excessive retries
 // Timeout for operations in milliseconds
-const OPERATION_TIMEOUT = 10000;
+const OPERATION_TIMEOUT = 8000; // Reduced from 10000 to 8000 for faster feedback
+// Healthcheck timeout in milliseconds
+const HEALTHCHECK_TIMEOUT = 5000;
+
+// Cache successful health check result for a short time to prevent excessive checks
+let lastHealthCheckResult = false;
+let lastHealthCheckTime = 0;
+const HEALTHCHECK_CACHE_TTL = 10000; // 10 seconds
 
 /**
  * Performs a database operation with automatic retries,
@@ -53,6 +60,9 @@ export const performDbOperation = async <T>(
     throw new Error(`Cannot perform ${operationName} while offline`);
   }
   
+  // Use an exponential backoff strategy
+  const backoff = (attempt: number) => Math.min(1000 * Math.pow(1.5, attempt), 5000);
+  
   while (attempts < retries) {
     try {
       // Add timeout to prevent operations from hanging
@@ -69,16 +79,16 @@ export const performDbOperation = async <T>(
         break;
       }
       
-      // Implement exponential backoff
-      const backoffDelay = Math.min(1000 * Math.pow(2, attempts), 8000);
-      await new Promise(resolve => setTimeout(resolve, backoffDelay));
+      // Wait before trying again
+      await new Promise(resolve => setTimeout(resolve, backoff(attempts)));
     }
   }
   
   // All retries failed
   if (!silentFail) {
     toast.error(`Failed to ${operationName}. Please try again later.`, {
-      id: `db-operation-failed-${operationName}`
+      id: `db-operation-failed-${operationName}`,
+      duration: 5000, // Don't keep error toast forever
     });
   }
   
@@ -99,17 +109,23 @@ export const performDbOperation = async <T>(
 
 /**
  * Performs health check on Supabase connection
+ * with caching to prevent excessive checks
  */
 export const checkSupabaseConnection = async (): Promise<boolean> => {
+  // Use cached result if within TTL
+  const now = Date.now();
+  if (now - lastHealthCheckTime < HEALTHCHECK_CACHE_TTL) {
+    return lastHealthCheckResult;
+  }
+  
   try {
-    // Use a lightweight query to test connection
-    // We need to explicitly execute the query to get a Promise
+    // Use a lightweight query to test connection with timeout
     const queryPromise = async () => {
       try {
         const { data, error } = await supabase
           .from('projects')
-          .select('count(*)', { count: 'exact' })
-          .limit(1);
+          .select('count(*)', { count: 'exact', head: true })
+          .limit(0);
         
         return { data, error };
       } catch (innerError) {
@@ -118,17 +134,22 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
       }
     };
     
-    // Now we can use our withTimeout function since queryPromise returns a proper Promise
-    const response = await withTimeout(queryPromise(), 5000);
+    const response = await withTimeout(queryPromise(), HEALTHCHECK_TIMEOUT);
     
-    if (response.error) {
-      console.error('Supabase health check failed:', response.error);
-      return false;
-    }
+    const isConnected = !response.error;
     
-    return true;
+    // Cache the result
+    lastHealthCheckResult = isConnected;
+    lastHealthCheckTime = now;
+    
+    return isConnected;
   } catch (error) {
     console.error('Supabase health check error:', error);
+    
+    // Cache the failed result
+    lastHealthCheckResult = false;
+    lastHealthCheckTime = now;
+    
     return false;
   }
 };
