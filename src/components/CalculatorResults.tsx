@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { 
@@ -17,7 +16,7 @@ import SummaryCard from "./results/SummaryCard";
 import EmissionsBreakdownChart from "./results/EmissionsBreakdownChart";
 import CategoryBreakdownChart from "./results/CategoryBreakdownChart";
 import SuggestionsSection from "./results/SuggestionsSection";
-import ExportOptions from "./results/ExportOptions";
+import ExportOptions from "./results/export/ExportOptions";
 
 interface CalculatorResultsProps {
   result: CalculationResult;
