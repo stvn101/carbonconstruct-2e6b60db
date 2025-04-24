@@ -1,11 +1,13 @@
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { AuthContextType } from './types';
 import { useAuthState } from './hooks/useAuthState';
 import { useAuthHandlers } from './hooks/useAuthHandlers';
 import { useAuthEffects } from './hooks/useAuthEffects';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
+import { addNetworkListeners } from '@/utils/errorHandling';
+import { toast } from 'sonner';
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -33,6 +35,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { state, updateState } = useAuthState();
   const authHandlers = useAuthHandlers();
   useAuthEffects(updateState);
+
+  // Add network status monitoring
+  useEffect(() => {
+    const cleanupNetworkListeners = addNetworkListeners(
+      // Offline callback
+      () => {
+        toast.error("You're offline. Authentication services may be limited.", {
+          id: "auth-offline-warning",
+          duration: 0
+        });
+      },
+      // Online callback
+      () => {
+        toast.success("You're back online. All authentication services available.", {
+          id: "auth-online-notice"
+        });
+        // Refresh the session when coming back online
+        if (state.user) {
+          supabase.auth.getSession().then(({ data }) => {
+            if (data.session) {
+              updateState({
+                session: data.session,
+                user: data.session.user
+              });
+            }
+          });
+        }
+      }
+    );
+
+    return cleanupNetworkListeners;
+  }, [state.user, updateState]);
 
   const contextValue: AuthContextType = {
     ...state,

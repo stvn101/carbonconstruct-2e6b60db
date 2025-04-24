@@ -9,6 +9,7 @@ import { useProjectOperations } from './project/useProjectOperations';
 import { useProjectExports } from './project/useProjectExports';
 import { useProjectRealtime } from './project/useProjectRealtime';
 import { supabase } from '@/integrations/supabase/client';
+import { handleFetchError, isOffline, addNetworkListeners } from '@/utils/errorHandling';
 
 // Define the MAX_RETRIES constant
 const MAX_RETRIES = 3;
@@ -49,6 +50,16 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
     
+    if (isOffline()) {
+      setFetchError(new Error('You are currently offline'));
+      toast.error("You're offline. Project data will load when you reconnect.", {
+        id: "projects-offline",
+        duration: 0
+      });
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const projectData = await fetchUserProjects(user.id);
@@ -56,7 +67,9 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setFetchError(null);
     } catch (error) {
       console.error('Error loading projects:', error);
-      setFetchError(error instanceof Error ? error : new Error('Failed to load projects'));
+      const handledError = handleFetchError(error, 'loading-projects');
+      setFetchError(handledError);
+      
       if (retryCount === 0) {
         toast.error("Failed to load your projects. Retrying...", {
           duration: 3000,
@@ -67,6 +80,29 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setIsLoading(false);
     }
   }, [user, retryCount, setProjects, setIsLoading, setFetchError]);
+
+  // Network status monitoring
+  useEffect(() => {
+    const cleanup = addNetworkListeners(
+      // Offline callback
+      () => {
+        // We're offline, no need to retry until we're back online
+        if (fetchError) {
+          setRetryCount(MAX_RETRIES); // Stop retry attempts while offline
+        }
+      },
+      // Online callback
+      () => {
+        // We're back online, reset retry count and load projects
+        if (fetchError) {
+          setRetryCount(0); // Reset retry count
+          loadProjects(); // Try loading projects again
+        }
+      }
+    );
+    
+    return cleanup;
+  }, [fetchError, loadProjects, setRetryCount]);
 
   useEffect(() => {
     if (fetchError && retryCount < MAX_RETRIES) {
