@@ -1,7 +1,7 @@
 
 import { ErrorCallback, ErrorMetadata } from './types';
 
-class ErrorStore {
+export class ErrorStore {
   private errorCount: Record<string, number> = {};
   private errorCallbacks: ErrorCallback[] = [];
   private offlineErrors: {error: Error, metadata: ErrorMetadata}[] = [];
@@ -56,5 +56,3 @@ class ErrorStore {
     });
   }
 }
-
-export default new ErrorStore();

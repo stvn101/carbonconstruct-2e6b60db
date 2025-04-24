@@ -1,15 +1,18 @@
 
 import { ErrorMetadata, ErrorTracker } from './types';
-import { formatError, getElementPath, getSessionDuration } from './errorUtils';
-import errorStore from './errorStore';
+import { initializeErrorHandling } from './errorInitializer';
+import { formatError, getElementPath } from './errorUtils';
+import { ErrorStore } from './errorStore';
 
 class ErrorTrackingService implements ErrorTracker {
   private static instance: ErrorTrackingService;
   private isInitialized = false;
   private environment: string;
+  private errorStore: ErrorStore;
   
   private constructor() {
     this.environment = import.meta.env.MODE || 'development';
+    this.errorStore = new ErrorStore();
   }
 
   public static getInstance(): ErrorTrackingService {
@@ -21,46 +24,9 @@ class ErrorTrackingService implements ErrorTracker {
 
   public initialize(): void {
     if (this.isInitialized) return;
-
-    window.addEventListener('error', (event) => {
-      this.captureException(event.error || new Error(event.message), {
-        source: 'window.onerror',
-        lineno: event.lineno,
-        colno: event.colno,
-        filename: event.filename
-      });
-      
-      if (this.environment === 'production') {
-        event.preventDefault();
-      }
-    });
-
-    window.addEventListener('unhandledrejection', (event) => {
-      this.captureException(
-        event.reason instanceof Error ? event.reason : new Error(String(event.reason)), 
-        { source: 'unhandledrejection' }
-      );
-      
-      if (this.environment === 'production') {
-        event.preventDefault();
-      }
-    });
-
-    window.addEventListener('online', () => this.sendOfflineErrors());
-
-    if (navigator.onLine) {
-      this.sendOfflineErrors();
-    }
-
+    initializeErrorHandling(this);
     this.isInitialized = true;
     console.info('Error tracking service initialized');
-  }
-
-  private sendOfflineErrors(): void {
-    const errors = errorStore.getOfflineErrors();
-    errors.forEach(({error, metadata}) => {
-      this.captureException(error, {...metadata, wasOffline: true});
-    });
   }
 
   public captureException(error: Error, metadata: ErrorMetadata = {}): void {
@@ -68,28 +34,25 @@ class ErrorTrackingService implements ErrorTracker {
     
     const errorKey = `${error.name}:${error.message}`;
     
-    if (errorStore.hasReachedLimit(errorKey)) {
-      if (errorStore.incrementErrorCount(errorKey) === errorStore.getMaxErrorsLimit() + 1) {
+    if (this.errorStore.hasReachedLimit(errorKey)) {
+      if (this.errorStore.incrementErrorCount(errorKey) === this.errorStore.getMaxErrorsLimit() + 1) {
         console.warn(`Error "${errorKey}" occurred too many times. Suppressing future logs.`);
       }
       return;
     }
 
-    if (errorStore.shouldThrottleError(errorKey)) {
+    if (this.errorStore.shouldThrottleError(errorKey)) {
       return;
     }
     
     if (!navigator.onLine) {
-      errorStore.storeOfflineError(error, metadata);
+      this.errorStore.storeOfflineError(error, metadata);
       return;
     }
     
     if (this.environment === 'production') {
-      console.error('[Error Tracking]', formatError(error, {
-        ...metadata,
-        sessionDuration: getSessionDuration(),
-      }));
-      errorStore.executeCallbacks(error);
+      console.error('[Error Tracking]', formatError(error, metadata));
+      this.errorStore.executeCallbacks(error);
     } else {
       console.error('[DEV Error]', error, metadata);
     }
@@ -125,6 +88,13 @@ class ErrorTrackingService implements ErrorTracker {
     if (navigator.onLine) {
       this.sendOfflineErrors();
     }
+  }
+
+  private sendOfflineErrors(): void {
+    const errors = this.errorStore.getOfflineErrors();
+    errors.forEach(({error, metadata}) => {
+      this.captureException(error, {...metadata, wasOffline: true});
+    });
   }
 }
 
