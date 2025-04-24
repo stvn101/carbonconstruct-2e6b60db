@@ -91,7 +91,7 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
         energy: calculationInput.energy,
         result: calculationResult,
         tags: ["carbon", "calculation"],
-        status: 'draft',
+        status: 'draft' as const, // Fix type error by using a const assertion
         total_emissions: calculationResult.totalEmissions || 0,
         premium_only: isPremiumUser
       };
