@@ -45,35 +45,6 @@ const CalculatorTabContents = ({
 }: CalculatorTabContentsProps) => {
   const [activeTabValue, setActiveTabValue] = useState<string>("materials");
 
-  // Sync with parent component's active tab value
-  useEffect(() => {
-    const synchTabWithParent = () => {
-      const childTabs = document.querySelectorAll('[role="tab"]');
-      const activeChildTab = document.querySelector('[role="tab"][aria-selected="true"]');
-      
-      if (activeChildTab) {
-        const tabValue = activeChildTab.getAttribute('data-value') || "materials";
-        if (tabValue !== activeTabValue) {
-          console.log(`Syncing tab value from DOM: ${tabValue}`);
-          setActiveTabValue(tabValue);
-        }
-      }
-    };
-
-    // Run on mount and after any tab change
-    synchTabWithParent();
-    
-    // Setup mutation observer to detect tab changes
-    const observer = new MutationObserver(synchTabWithParent);
-    observer.observe(document.body, { 
-      attributes: true,
-      subtree: true,
-      attributeFilter: ['aria-selected']
-    });
-    
-    return () => observer.disconnect();
-  }, [activeTabValue]);
-
   // Function to safely handle navigation between tabs
   const handleNextTab = () => {
     try {
@@ -141,11 +112,11 @@ const CalculatorTabContents = ({
     setActiveTabValue(value);
     
     // Notify parent component about tab change for sync
-    if (value === "materials" || activeTabValue === "transport") {
+    if (value === "materials" || value === "transport" && activeTabValue === "energy") {
       if (typeof onPrev === 'function') {
         onPrev();
       }
-    } else {
+    } else if (value === "energy" || value === "results") {
       if (typeof onNext === 'function') {
         onNext();
       }
