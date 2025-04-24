@@ -41,7 +41,9 @@ export const performDbOperation = async <T>(
   // Check for offline status
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     if (!silentFail) {
-      toast.error("You're offline. Please connect to the internet to access your data.");
+      toast.error("You're offline. Please connect to the internet to access your data.", {
+        id: "offline-db-operation"
+      });
     }
     console.warn(`Can't perform ${operationName} while offline`);
     
@@ -75,7 +77,9 @@ export const performDbOperation = async <T>(
   
   // All retries failed
   if (!silentFail) {
-    toast.error(`Failed to ${operationName}. Please try again later.`);
+    toast.error(`Failed to ${operationName}. Please try again later.`, {
+      id: `db-operation-failed-${operationName}`
+    });
   }
   
   // Track the error
@@ -101,12 +105,17 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     // Use a lightweight query to test connection
     // We need to explicitly execute the query to get a Promise
     const queryPromise = async () => {
-      const response = await supabase
-        .from('projects')
-        .select('count(*)', { count: 'exact' })
-        .limit(1);
-      
-      return response;
+      try {
+        const response = await supabase
+          .from('projects')
+          .select('count(*)', { count: 'exact' })
+          .limit(1);
+        
+        return response;
+      } catch (innerError) {
+        console.error('Inner Supabase health check error:', innerError);
+        return { error: innerError };
+      }
     };
     
     // Now we can use our withTimeout function since queryPromise returns a proper Promise

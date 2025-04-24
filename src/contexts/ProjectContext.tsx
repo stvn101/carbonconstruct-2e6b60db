@@ -53,9 +53,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     if (isOffline()) {
       setFetchError(new Error('You are currently offline'));
+      // Use an ID for the toast to prevent duplicates
       toast.error("You're offline. Project data will load when you reconnect.", {
         id: "projects-offline",
-        duration: 0
+        duration: 5000, // Set a reasonable duration instead of keeping it forever
       });
       setIsLoading(false);
       return;
@@ -67,6 +68,11 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const projectData = await fetchUserProjects(user.id);
       setProjects(projectData);
       setFetchError(null);
+      
+      // Dismiss any existing error toasts when we successfully load data
+      toast.dismiss("projects-load-error");
+      toast.dismiss("projects-offline");
+      toast.dismiss("projects-load-failed");
       
       // Track load performance
       const loadTime = performance.now() - startTime;
@@ -80,6 +86,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const handledError = handleFetchError(error, 'loading-projects');
       setFetchError(handledError);
       
+      // Only show toast on first error to avoid toast spam
       if (retryCount === 0) {
         toast.error("Failed to load your projects. Retrying...", {
           duration: 3000,
@@ -99,11 +106,23 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // We're offline, no need to retry until we're back online
         if (fetchError) {
           setRetryCount(MAX_RETRIES); // Stop retry attempts while offline
+          
+          // Show offline toast when we go offline
+          toast.error("You're offline. Some features may be limited until connection is restored.", {
+            id: "offline-status",
+            duration: 0 // Keep showing until back online
+          });
         }
       },
       // Online callback
       () => {
         // We're back online, reset retry count and load projects
+        toast.dismiss("offline-status"); // Remove offline toast
+        toast.success("You're back online!", { 
+          id: "online-status",
+          duration: 3000
+        });
+        
         if (fetchError) {
           setRetryCount(0); // Reset retry count
           loadProjects(); // Try loading projects again
@@ -114,24 +133,35 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return cleanup;
   }, [fetchError, loadProjects, setRetryCount]);
 
+  // Handle retries with exponential backoff
   useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    
     if (fetchError && retryCount < MAX_RETRIES) {
-      const timer = setTimeout(() => {
+      // Calculate backoff delay - starts at 2s, then 4s, then 8s
+      const backoffDelay = Math.min(2000 * Math.pow(2, retryCount), 10000);
+      
+      timer = setTimeout(() => {
         setRetryCount(prev => prev + 1);
         loadProjects();
-      }, Math.min(2000 * (retryCount + 1), 10000));
+      }, backoffDelay);
       
-      return () => clearTimeout(timer);
+      return () => {
+        if (timer) clearTimeout(timer);
+      };
     }
     
     if (fetchError && retryCount >= MAX_RETRIES) {
-      toast.error("Unable to load projects. Please check your connection.", {
+      toast.error("Unable to load projects. Please check your connection or try again later.", {
         duration: 5000,
         id: "projects-load-failed"
       });
     }
-  }, [fetchError, retryCount, loadProjects]);
+    
+    return undefined;
+  }, [fetchError, retryCount, loadProjects, setRetryCount]);
 
+  // Initial data loading when user changes
   useEffect(() => {
     let projectChannel;
     
@@ -148,7 +178,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         supabase.removeChannel(projectChannel);
       }
     };
-  }, [user, loadProjects, subscribeToProjects]);
+  }, [user, loadProjects, subscribeToProjects, setProjects, setIsLoading]);
 
   const getProject = useCallback((id: string) => {
     return projects.find(p => p.id === id);
@@ -159,12 +189,31 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     projects,
     isLoading,
     saveProject: async (project) => {
-      // Add a small delay to show saving indicator
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return projectOperations.saveProject(user?.id || '', project);
+      try {
+        // Add a small delay to show saving indicator
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return await projectOperations.saveProject(user?.id || '', project);
+      } catch (error) {
+        console.error("Error in saveProject:", error);
+        throw error; // Re-throw to allow handling at component level
+      }
     },
-    updateProject: projectOperations.updateProject,
-    deleteProject: projectOperations.deleteProject,
+    updateProject: async (project) => {
+      try {
+        return await projectOperations.updateProject(project);
+      } catch (error) {
+        console.error("Error in updateProject:", error);
+        throw error;
+      }
+    },
+    deleteProject: async (id) => {
+      try {
+        await projectOperations.deleteProject(id);
+      } catch (error) {
+        console.error("Error in deleteProject:", error);
+        throw error;
+      }
+    },
     getProject,
     exportProjectPDF: projectExports.exportProjectPDF,
     exportProjectCSV: projectExports.exportProjectCSV,

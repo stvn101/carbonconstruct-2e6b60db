@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Home, ChevronLeft } from "lucide-react";
 import errorTrackingService from "@/services/errorTrackingService";
+import { toast } from "sonner";
 
 interface Props {
   children: ReactNode;
@@ -32,11 +33,14 @@ class ErrorBoundary extends Component<Props, State> {
   // Check if the error should be ignored
   private shouldIgnoreError(error: Error): boolean {
     if (this.props.ignoreErrors) {
-      // Ignore duplicate key constraint errors
+      // Ignore duplicate key constraint errors, timeout errors and fetch errors
       if (error.message && (
         error.message.includes("duplicate key") || 
         error.message.includes("23505") ||
-        error.message.includes("Failed to fetch")
+        error.message.includes("Failed to fetch") ||
+        error.message.includes("timed out") ||
+        error.message.includes("timeout") ||
+        error.message.includes("Network request failed")
       )) {
         return true;
       }
@@ -52,6 +56,15 @@ class ErrorBoundary extends Component<Props, State> {
     // Ignore certain errors if the ignoreErrors prop is true
     if (this.shouldIgnoreError(error)) {
       this.setState({ hasError: false, error: null, errorInfo: null });
+      
+      // For timeout errors, display a toast instead of crashing the component
+      if (error.message && (error.message.includes("timed out") || error.message.includes("timeout"))) {
+        toast.error("Operation timed out. Please check your connection and try again.", {
+          id: "timeout-error",
+          duration: 5000
+        });
+      }
+      
       return;
     }
 
@@ -100,6 +113,10 @@ class ErrorBoundary extends Component<Props, State> {
 
   private handleGoHome = () => {
     window.location.href = '/';
+  };
+
+  private handleRefresh = () => {
+    window.location.reload();
   };
 
   public render() {
@@ -156,6 +173,10 @@ class ErrorBoundary extends Component<Props, State> {
                 <Button variant="outline" onClick={this.handleGoBack} className="flex items-center gap-2">
                   <ChevronLeft className="h-4 w-4" />
                   Go Back
+                </Button>
+                <Button variant="secondary" onClick={this.handleRefresh} className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Reload Page
                 </Button>
                 <Button variant="secondary" onClick={this.handleGoHome} className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
