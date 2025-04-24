@@ -49,9 +49,10 @@ try {
     </React.StrictMode>
   );
 
-  // Initialize non-critical services after main render using requestIdleCallback
+  // Initialize non-critical services after main render
+  // Use requestIdleCallback only if it's available
   if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(() => {
+    window.requestIdleCallback(() => {
       performanceMonitoringService.initialize();
     });
   } else {
