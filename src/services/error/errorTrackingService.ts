@@ -69,7 +69,7 @@ class ErrorTrackingService implements ErrorTracker {
     const errorKey = `${error.name}:${error.message}`;
     
     if (errorStore.hasReachedLimit(errorKey)) {
-      if (errorStore.incrementErrorCount(errorKey) === errorStore.MAX_ERRORS_PER_TYPE + 1) {
+      if (errorStore.incrementErrorCount(errorKey) === errorStore.getMaxErrorsLimit() + 1) {
         console.warn(`Error "${errorKey}" occurred too many times. Suppressing future logs.`);
       }
       return;

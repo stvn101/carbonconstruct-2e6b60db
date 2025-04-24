@@ -19,11 +19,21 @@ const CalculatorTabs = ({
   isMobile,
   isPremiumUser = false
 }: CalculatorTabsProps) => {
+  // Function to safely handle tab changes
+  const handleTabChange = (newTab: string) => {
+    if (typeof setActiveTab === 'function') {
+      setActiveTab(newTab);
+      console.log(`Tab changed to: ${newTab}`);
+    } else {
+      console.error("setActiveTab is not a function", setActiveTab);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <Tabs 
         value={activeTab} 
-        onValueChange={setActiveTab} 
+        onValueChange={handleTabChange}
         className="w-full"
       >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-2">
