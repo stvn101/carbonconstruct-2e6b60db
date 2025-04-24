@@ -2,10 +2,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
 import { toast } from 'sonner';
+import { Dispatch, SetStateAction } from 'react';
 
 export const useProjectRealtime = (
   userId: string | undefined,
-  setProjects: (projects: SavedProject[]) => void
+  setProjects: Dispatch<SetStateAction<SavedProject[]>>
 ) => {
   const subscribeToProjects = () => {
     if (!userId) return null;
@@ -24,7 +25,7 @@ export const useProjectRealtime = (
           console.log('Received real-time update:', payload);
           
           if (payload.eventType === 'INSERT') {
-            setProjects((prev: SavedProject[]) => {
+            setProjects((prev) => {
               const newProject = payload.new as SavedProject;
               if (prev.some(p => p.id === newProject.id)) {
                 return prev;
@@ -34,7 +35,7 @@ export const useProjectRealtime = (
             setTimeout(() => toast.success('New project created'), 0);
           } 
           else if (payload.eventType === 'UPDATE') {
-            setProjects((prev: SavedProject[]) => {
+            setProjects((prev) => {
               const updatedProject = payload.new as SavedProject;
               return prev.map(p => p.id === updatedProject.id ? updatedProject : p);
             });
@@ -42,7 +43,7 @@ export const useProjectRealtime = (
           }
           else if (payload.eventType === 'DELETE') {
             const deletedId = payload.old.id;
-            setProjects((prev: SavedProject[]) => prev.filter(p => p.id !== deletedId));
+            setProjects((prev) => prev.filter(p => p.id !== deletedId));
             setTimeout(() => toast.success('Project deleted'), 0);
           }
         }

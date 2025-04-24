@@ -9,6 +9,9 @@ import { useProjectExports } from './project/useProjectExports';
 import { useProjectRealtime } from './project/useProjectRealtime';
 import { supabase } from '@/integrations/supabase/client';
 
+// Define the MAX_RETRIES constant
+const MAX_RETRIES = 3;
+
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export const useProjects = () => {
@@ -115,7 +118,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       value={{
         projects,
         isLoading,
-        saveProject,
+        saveProject: projectOperations.saveProject,
         updateProject: projectOperations.updateProject,
         deleteProject: projectOperations.deleteProject,
         getProject,
