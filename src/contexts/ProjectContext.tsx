@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { ProjectContextType } from '@/types/project';
 import { useProjectProvider } from './project/useProjectProvider';
@@ -38,7 +38,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   
   const { subscribeToProjects } = useProjectRealtime(user?.id, setProjects);
 
-  // Fix: Properly destructure the loadProjects function from the returned object
+  // Properly destructure the loadProjects function from the hook
   const { loadProjects } = useProjectsLoader(
     user,
     setProjects,
@@ -48,63 +48,81 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setRetryCount
   );
 
+  // Initialize connection check and data loading
+  const initializeData = useCallback(async () => {
+    if (!user || hasInitialized) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // First verify we can connect before attempting to load or subscribe
+      const canConnect = await checkSupabaseConnectionWithRetry(2, 1500);
+      
+      if (!canConnect) {
+        toast.error("Unable to connect to the server. Using offline mode.", {
+          id: "offline-mode-notification",
+          duration: 5000
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Load projects data
+      await loadProjects();
+      
+      // Only set up realtime if we have a connection
+      const channel = subscribeToProjects();
+      if (channel) {
+        setProjectChannel(channel);
+      }
+      
+      setHasInitialized(true);
+    } catch (error) {
+      console.error("Error initializing project data:", error);
+      ErrorTrackingService.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+        { component: 'ProjectProvider', action: 'initialize' }
+      );
+      setIsLoading(false);
+      
+      // Show friendly error message to the user
+      toast.error("Unable to load project data. Please try again later.", {
+        id: "project-init-error",
+        duration: 5000
+      });
+    }
+  }, [user, hasInitialized, loadProjects, subscribeToProjects, setProjects, setIsLoading, setRetryCount]);
+
   // Check connection and initialize data
   useEffect(() => {
     let isMounted = true;
     
-    const initializeData = async () => {
-      if (!user || hasInitialized) return;
-      
-      try {
-        // First verify we can connect before attempting to load or subscribe
-        const canConnect = await checkSupabaseConnectionWithRetry(2, 1000);
-        
-        if (!isMounted) return;
-        
-        if (!canConnect) {
-          toast.error("Unable to connect to the server. Using offline mode.", {
-            id: "offline-mode-notification",
-            duration: 5000
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        // Now correctly call the loadProjects function
-        await loadProjects();
-        
-        // Only set up realtime if we have a connection
-        const channel = subscribeToProjects();
-        if (channel) {
-          setProjectChannel(channel);
-        }
-        
-        setHasInitialized(true);
-      } catch (error) {
-        console.error("Error initializing project data:", error);
-        ErrorTrackingService.captureException(
-          error instanceof Error ? error : new Error(String(error)),
-          { component: 'ProjectProvider', action: 'initialize' }
-        );
+    const startInitialization = () => {
+      if (isMounted && user && !hasInitialized) {
+        initializeData();
+      } else if (isMounted && !user) {
+        setProjects([]);
         setIsLoading(false);
+        setHasInitialized(false);
       }
     };
     
-    if (user) {
-      initializeData();
-    } else {
-      setProjects([]);
-      setIsLoading(false);
-      setHasInitialized(false);
-    }
+    // Start with a small delay to ensure auth state is stable
+    const initTimer = setTimeout(startInitialization, 300);
 
     return () => {
       isMounted = false;
+      clearTimeout(initTimer);
+      
       if (projectChannel) {
-        supabase.removeChannel(projectChannel);
+        try {
+          supabase.removeChannel(projectChannel);
+        } catch (err) {
+          console.error("Error removing channel on unmount:", err);
+        }
       }
     };
-  }, [user, loadProjects, subscribeToProjects, setProjects, setIsLoading, hasInitialized, setRetryCount]);
+  }, [user, initializeData, loadProjects, subscribeToProjects, setProjects, setIsLoading, hasInitialized, setRetryCount]);
 
   return (
     <ProjectContext.Provider value={contextValue}>
