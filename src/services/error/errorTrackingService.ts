@@ -75,9 +75,8 @@ class ErrorTrackingService implements ErrorTracker {
   }
   
   public captureAccessibilityIssue(element: HTMLElement, issue: string): void {
-    const elementPath = getElementPath(element);
     this.captureMessage(`Accessibility issue: ${issue}`, {
-      elementPath,
+      elementPath: getElementPath(element),
       elementType: element.tagName,
       elementId: element.id,
       elementClasses: element.className
@@ -86,15 +85,11 @@ class ErrorTrackingService implements ErrorTracker {
 
   public flush(): void {
     if (navigator.onLine) {
-      this.sendOfflineErrors();
+      const errors = this.errorStore.getOfflineErrors();
+      errors.forEach(({error, metadata}) => {
+        this.captureException(error, {...metadata, wasOffline: true});
+      });
     }
-  }
-
-  private sendOfflineErrors(): void {
-    const errors = this.errorStore.getOfflineErrors();
-    errors.forEach(({error, metadata}) => {
-      this.captureException(error, {...metadata, wasOffline: true});
-    });
   }
 }
 
