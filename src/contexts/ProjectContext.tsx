@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { ProjectContextType, SavedProject } from '@/types/project';
 import { fetchUserProjects } from '@/services/projectService';
@@ -10,6 +10,7 @@ import { useProjectExports } from './project/useProjectExports';
 import { useProjectRealtime } from './project/useProjectRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { handleFetchError, isOffline, addNetworkListeners } from '@/utils/errorHandling';
+import { trackMetric } from './performance/metrics';
 
 // Define the MAX_RETRIES constant
 const MAX_RETRIES = 3;
@@ -60,11 +61,20 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
     
+    const startTime = performance.now();
     setIsLoading(true);
     try {
       const projectData = await fetchUserProjects(user.id);
       setProjects(projectData);
       setFetchError(null);
+      
+      // Track load performance
+      const loadTime = performance.now() - startTime;
+      trackMetric({
+        metric: 'projects_load_time',
+        value: loadTime,
+        tags: { count: projectData.length.toString() }
+      });
     } catch (error) {
       console.error('Error loading projects:', error);
       const handledError = handleFetchError(error, 'loading-projects');
@@ -123,10 +133,11 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [fetchError, retryCount, loadProjects]);
 
   useEffect(() => {
-    const projectChannel = subscribeToProjects();
+    let projectChannel;
     
     if (user) {
       loadProjects();
+      projectChannel = subscribeToProjects();
     } else {
       setProjects([]);
       setIsLoading(false);
@@ -139,28 +150,28 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [user, loadProjects, subscribeToProjects]);
 
-  const getProject = (id: string) => {
+  const getProject = useCallback((id: string) => {
     return projects.find(p => p.id === id);
-  };
+  }, [projects]);
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    projects,
+    isLoading,
+    saveProject: async (project) => {
+      // Add a small delay to show saving indicator
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return projectOperations.saveProject(user?.id || '', project);
+    },
+    updateProject: projectOperations.updateProject,
+    deleteProject: projectOperations.deleteProject,
+    getProject,
+    exportProjectPDF: projectExports.exportProjectPDF,
+    exportProjectCSV: projectExports.exportProjectCSV,
+  }), [projects, isLoading, projectOperations, projectExports, getProject, user?.id]);
 
   return (
-    <ProjectContext.Provider
-      value={{
-        projects,
-        isLoading,
-        // Use the optimized saveProject function
-        saveProject: async (project) => {
-          // Add a small delay to show saving indicator
-          await new Promise(resolve => setTimeout(resolve, 100));
-          return projectOperations.saveProject(user?.id || '', project);
-        },
-        updateProject: projectOperations.updateProject,
-        deleteProject: projectOperations.deleteProject,
-        getProject,
-        exportProjectPDF: projectExports.exportProjectPDF,
-        exportProjectCSV: projectExports.exportProjectCSV,
-      }}
-    >
+    <ProjectContext.Provider value={contextValue}>
       {children}
     </ProjectContext.Provider>
   );
