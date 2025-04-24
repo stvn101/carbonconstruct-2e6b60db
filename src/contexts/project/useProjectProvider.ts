@@ -1,0 +1,72 @@
+
+import { useMemo, useCallback } from 'react';
+import { useProjectState } from './useProjectState';
+import { useProjectOperations } from './useProjectOperations';
+import { useProjectExports } from './useProjectExports';
+import { SavedProject } from '@/types/project';
+import { useAuth } from '@/contexts/auth';
+
+export const useProjectProvider = () => {
+  const { user } = useAuth();
+  const {
+    projects,
+    setProjects,
+    isLoading,
+    setIsLoading,
+    fetchError,
+    setFetchError,
+    retryCount,
+    setRetryCount,
+  } = useProjectState();
+
+  const projectOperations = useProjectOperations(setProjects);
+  const projectExports = useProjectExports();
+
+  const getProject = useCallback((id: string) => {
+    return projects.find(p => p.id === id);
+  }, [projects]);
+
+  const contextValue = useMemo(() => ({
+    projects,
+    isLoading,
+    fetchError,
+    saveProject: async (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return await projectOperations.saveProject(user?.id || '', project);
+      } catch (error) {
+        console.error("Error in saveProject:", error);
+        throw error;
+      }
+    },
+    updateProject: async (project: SavedProject) => {
+      try {
+        return await projectOperations.updateProject(project);
+      } catch (error) {
+        console.error("Error in updateProject:", error);
+        throw error;
+      }
+    },
+    deleteProject: async (id: string) => {
+      try {
+        await projectOperations.deleteProject(id);
+      } catch (error) {
+        console.error("Error in deleteProject:", error);
+        throw error;
+      }
+    },
+    getProject,
+    exportProjectPDF: projectExports.exportProjectPDF,
+    exportProjectCSV: projectExports.exportProjectCSV,
+  }), [projects, isLoading, fetchError, projectOperations, projectExports, getProject, user?.id]);
+
+  return {
+    contextValue,
+    setProjects,
+    setIsLoading,
+    setFetchError,
+    retryCount,
+    setRetryCount
+  };
+};
+
