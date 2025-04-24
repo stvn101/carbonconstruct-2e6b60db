@@ -10,6 +10,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 interface SaveProjectConfirmDialogProps {
   isOpen: boolean;
@@ -28,6 +29,21 @@ const SaveProjectConfirmDialog = ({
   onCancel,
   isOverwrite,
 }: SaveProjectConfirmDialogProps) => {
+  // Pre-load navigation destination
+  useEffect(() => {
+    if (isOpen) {
+      // Prefetch the projects page to improve navigation speed
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = '/projects';
+      document.head.appendChild(link);
+      
+      return () => {
+        document.head.removeChild(link);
+      };
+    }
+  }, [isOpen]);
+
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent 
@@ -65,7 +81,7 @@ const SaveProjectConfirmDialog = ({
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                {isOverwrite ? "Updating..." : "Saving..."}
               </>
             ) : (
               isOverwrite ? "Update Project" : "Save Project"

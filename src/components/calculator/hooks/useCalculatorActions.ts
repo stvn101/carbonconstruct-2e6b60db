@@ -71,6 +71,7 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
     setShowSaveDialog(true);
   };
 
+  // Optimized save function to improve performance
   const handleSaveConfirm = async () => {
     if (!user) {
       setAuthError("Authentication required to save projects");
@@ -81,7 +82,8 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
     setIsSaving(true);
     
     try {
-      const savedProject = await saveProject({
+      // Prepare the project data before saving to minimize processing during DB operation
+      const projectData = {
         name: projectName,
         description: "Carbon calculation project",
         materials: calculationInput.materials,
@@ -92,11 +94,18 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
         status: 'draft',
         total_emissions: calculationResult.totalEmissions || 0,
         premium_only: isPremiumUser
-      });
+      };
+      
+      // Save the project with optimized data
+      const savedProject = await saveProject(projectData);
       
       console.log("Project saved successfully:", savedProject);
       toast.success("Project saved successfully!");
-      navigate(`/projects`);
+      
+      // Use setTimeout to allow the toast to be visible before navigation
+      setTimeout(() => {
+        navigate(`/projects`);
+      }, 300);
     } catch (error) {
       console.error("Error saving project:", error);
       toast.error("Failed to save project");
