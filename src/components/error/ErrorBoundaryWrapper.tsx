@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ErrorTrackingService from '@/services/error/errorTrackingService';
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ type ErrorBoundaryWrapperProps = {
   }>;
   className?: string;
   onReset?: () => void;
+  resetCondition?: any; // When this value changes, the error boundary will reset
 };
 
 const ErrorFallback = ({ 
@@ -32,9 +33,10 @@ const ErrorFallback = ({
 }) => {
   const [isChecking, setIsChecking] = useState(false);
   const { isOnline } = useNetworkStatus();
+  const resetAttemptRef = useRef(0);
   
   // Log the error with context
-  React.useEffect(() => {
+  useEffect(() => {
     if (error && feature) {
       ErrorTrackingService.captureException(error, { feature });
     }
@@ -42,6 +44,7 @@ const ErrorFallback = ({
   
   const handleReset = async () => {
     setIsChecking(true);
+    resetAttemptRef.current += 1;
     
     if (!isOnline) {
       toast.error("You're currently offline. Please check your connection.", {
@@ -54,7 +57,7 @@ const ErrorFallback = ({
     
     try {
       // Check if we can connect to the server before resetting
-      const canConnect = await checkSupabaseConnectionWithRetry();
+      const canConnect = await checkSupabaseConnectionWithRetry(2, 1000);
       
       if (!canConnect) {
         toast.error("Cannot connect to the server. Please try again when you have better connectivity.", {
@@ -67,8 +70,16 @@ const ErrorFallback = ({
       
       // If everything looks good, proceed with reset
       resetErrorBoundary();
+      toast.success("Reset successful! Trying again...", {
+        id: "reset-success",
+        duration: 3000,
+      });
     } catch (e) {
       console.error("Error checking connection:", e);
+      toast.error("Something went wrong. Please try again.", {
+        id: "reset-error",
+        duration: 3000,
+      });
     } finally {
       setIsChecking(false);
     }
@@ -80,7 +91,8 @@ const ErrorFallback = ({
     error.message.includes("NetworkError") ||
     error.message.includes("Network Error") ||
     error.message.includes("timed out") ||
-    error.message.includes("connection")
+    error.message.includes("connection") ||
+    !isOnline
   );
   
   return (
@@ -135,7 +147,8 @@ const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({
   feature,
   fallbackComponent,
   className,
-  onReset
+  onReset,
+  resetCondition
 }) => {
   const [key, setKey] = useState(0);
   const FallbackComponent = fallbackComponent || 
@@ -146,6 +159,13 @@ const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({
         feature={feature}
       />
     ));
+
+  // Reset the error boundary when resetCondition changes
+  useEffect(() => {
+    if (resetCondition !== undefined) {
+      setKey(prevKey => prevKey + 1);
+    }
+  }, [resetCondition]);
 
   const handleReset = useCallback(() => {
     // Force a re-render by changing the key

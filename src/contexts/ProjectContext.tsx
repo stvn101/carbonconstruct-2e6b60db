@@ -38,7 +38,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   
   const { subscribeToProjects } = useProjectRealtime(user?.id, setProjects);
 
-  // Here's the fix: useProjectsLoader returns an object with loadProjects function and isRetrying boolean
+  // Fix: Properly destructure the loadProjects function from the returned object
   const { loadProjects } = useProjectsLoader(
     user,
     setProjects,
@@ -70,8 +70,8 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
           return;
         }
 
-        // Now correctly calling the loadProjects function
-        loadProjects();
+        // Now correctly call the loadProjects function
+        await loadProjects();
         
         // Only set up realtime if we have a connection
         const channel = subscribeToProjects();
@@ -104,7 +104,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         supabase.removeChannel(projectChannel);
       }
     };
-  }, [user, loadProjects, subscribeToProjects, setProjects, setIsLoading, hasInitialized]);
+  }, [user, loadProjects, subscribeToProjects, setProjects, setIsLoading, hasInitialized, setRetryCount]);
 
   return (
     <ProjectContext.Provider value={contextValue}>
