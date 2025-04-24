@@ -39,6 +39,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
             id={`energy-type-${index}`}
             name={`energy-type-${index}`}
             className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+            aria-label="Select energy type"
           >
             <SelectValue placeholder="Select energy type" />
           </SelectTrigger>
@@ -103,6 +104,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
           className="w-full sm:w-auto hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300 text-xs md:text-sm"
           type="button"
           onClick={onRemove}
+          aria-label={`Remove energy ${index + 1}`}
         >
           Remove
         </Button>
