@@ -8,7 +8,7 @@ import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
 import { useEffect, useState } from "react";
 import ErrorTrackingService from "@/services/error/errorTrackingService";
 
-interface CalculatorTabContentsProps {
+export interface CalculatorTabContentsProps {
   calculationInput: CalculationInput;
   calculationResult: CalculationResult | null;
   onUpdateMaterial: (index: number, field: string, value: string | number) => void;
@@ -21,8 +21,8 @@ interface CalculatorTabContentsProps {
   onAddEnergy: () => void;
   onRemoveEnergy: (index: number) => void;
   onCalculate: () => void;
-  onPrevTab: () => void;
-  onNextTab: () => void;
+  onPrev: () => void;
+  onNext: () => void;
   demoMode?: boolean;
 }
 
@@ -39,8 +39,8 @@ const CalculatorTabContents = ({
   onAddEnergy,
   onRemoveEnergy,
   onCalculate,
-  onPrevTab,
-  onNextTab,
+  onPrev,
+  onNext,
   demoMode = false
 }: CalculatorTabContentsProps) => {
   const [activeTabValue, setActiveTabValue] = useState<string>("materials");
@@ -92,8 +92,10 @@ const CalculatorTabContents = ({
       
       setActiveTabValue(nextTab);
       
-      // Call the parent's onNextTab function to sync state
-      onNextTab();
+      // Call the parent's onNext function to sync state
+      if (typeof onNext === 'function') {
+        onNext();
+      }
     } catch (error) {
       ErrorTrackingService.captureException(
         error instanceof Error ? error : new Error(String(error)),
@@ -120,8 +122,10 @@ const CalculatorTabContents = ({
       
       setActiveTabValue(prevTab);
       
-      // Call the parent's onPrevTab function to sync state
-      onPrevTab();
+      // Call the parent's onPrev function to sync state
+      if (typeof onPrev === 'function') {
+        onPrev();
+      }
     } catch (error) {
       ErrorTrackingService.captureException(
         error instanceof Error ? error : new Error(String(error)),
@@ -138,9 +142,13 @@ const CalculatorTabContents = ({
     
     // Notify parent component about tab change for sync
     if (value === "materials" || activeTabValue === "transport") {
-      onPrevTab();
+      if (typeof onPrev === 'function') {
+        onPrev();
+      }
     } else {
-      onNextTab();
+      if (typeof onNext === 'function') {
+        onNext();
+      }
     }
   };
 
