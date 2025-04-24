@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for handling errors in a more consistent way
  */
@@ -7,6 +8,10 @@ import errorTrackingService from "@/services/error/errorTrackingService";
 
 // Keep track of shown error toasts to prevent duplicates
 const shownErrorToasts = new Set<string>();
+// Cooldown timers for specific types of toasts
+const toastCooldowns: Record<string, number> = {};
+// Global minimum delay between similar toasts (5 seconds)
+const TOAST_COOLDOWN = 5000;
 
 /**
  * Handles API fetch errors with better user feedback
@@ -17,9 +22,12 @@ export const handleFetchError = (error: unknown, context: string): Error => {
     console.error(`Network error in ${context}:`, error);
     
     const toastId = `network-error-${context}`;
+    const now = Date.now();
     
-    // Prevent showing duplicate toasts
-    if (!shownErrorToasts.has(toastId)) {
+    // Prevent showing duplicate toasts within cooldown period
+    if (!shownErrorToasts.has(toastId) && 
+        (!toastCooldowns[toastId] || now - toastCooldowns[toastId] > TOAST_COOLDOWN)) {
+      
       // Check if error is due to insufficient resources
       if (error.message.includes('INSUFFICIENT_RESOURCES')) {
         toast.error("Database resource limit reached. Some features may be unavailable.", {
@@ -33,8 +41,9 @@ export const handleFetchError = (error: unknown, context: string): Error => {
         });
       }
       
-      // Track that we've shown this toast
+      // Track that we've shown this toast and update cooldown
       shownErrorToasts.add(toastId);
+      toastCooldowns[toastId] = now;
       
       // Remove from tracking after a reasonable time
       setTimeout(() => {
@@ -66,22 +75,30 @@ export const isOffline = (): boolean => {
  */
 export const addNetworkListeners = (
   onOffline: () => void = () => {
-    toast.error("You're offline. Some features may be unavailable.", {
-      id: "global-offline-status",
-      duration: 0 // Keep showing until back online
-    });
+    // Don't show toast if we've already shown one recently
+    if (!shownErrorToasts.has("global-offline-status")) {
+      toast.error("You're offline. Some features may be unavailable.", {
+        id: "global-offline-status",
+        duration: 0 // Keep showing until back online
+      });
+      
+      shownErrorToasts.add("global-offline-status");
+    }
   },
   onOnline: () => void = () => {
     toast.success("You're back online!", {
       id: "global-online-status",
       duration: 3000
     });
+    // Clear the offline toast status when back online
+    shownErrorToasts.delete("global-offline-status");
   }
 ): (() => void) => {
   if (typeof window === 'undefined') return () => {};
   
   let offlineDebounceTimer: NodeJS.Timeout | null = null;
   let onlineDebounceTimer: NodeJS.Timeout | null = null;
+  let offlineDetectionCount = 0;
   
   // Debounced handlers to prevent flashing on quick connectivity changes
   const handleOffline = () => {
@@ -90,16 +107,25 @@ export const addNetworkListeners = (
       onlineDebounceTimer = null;
     }
     
-    // Small delay to prevent flashing
-    if (!offlineDebounceTimer) {
-      offlineDebounceTimer = setTimeout(() => {
-        offlineDebounceTimer = null;
-        onOffline();
-      }, 1000);
+    // Track consecutive offline detections
+    offlineDetectionCount += 1;
+    
+    // Only trigger offline mode after multiple consecutive detections
+    if (offlineDetectionCount >= 2) {
+      // Small delay to prevent flashing
+      if (!offlineDebounceTimer) {
+        offlineDebounceTimer = setTimeout(() => {
+          offlineDebounceTimer = null;
+          onOffline();
+        }, 2000); // Increased from 1000ms to 2000ms
+      }
     }
   };
   
   const handleOnline = () => {
+    // Reset offline detection counter
+    offlineDetectionCount = 0;
+    
     if (offlineDebounceTimer) {
       clearTimeout(offlineDebounceTimer);
       offlineDebounceTimer = null;
@@ -110,9 +136,30 @@ export const addNetworkListeners = (
       onlineDebounceTimer = setTimeout(() => {
         onlineDebounceTimer = null;
         onOnline();
-      }, 1500);
+      }, 2000); // Increased from 1500ms to 2000ms
     }
   };
+  
+  // Perform periodic checks to detect partial network issues
+  const healthCheckInterval = setInterval(() => {
+    if (navigator.onLine) {
+      // If we think we're online, do a quick fetch test
+      fetch('/favicon.ico', { method: 'HEAD', cache: 'no-store' })
+        .then(() => {
+          // If successful and we previously thought we were offline,
+          // trigger the online handler
+          if (offlineDetectionCount > 0) {
+            offlineDetectionCount = 0;
+            handleOnline();
+          }
+        })
+        .catch(() => {
+          // If fetch fails despite navigator.onLine being true,
+          // we may have partial connectivity issues
+          handleOffline();
+        });
+    }
+  }, 30000); // Check every 30 seconds
   
   window.addEventListener('offline', handleOffline);
   window.addEventListener('online', handleOnline);
@@ -121,6 +168,7 @@ export const addNetworkListeners = (
   return () => {
     if (offlineDebounceTimer) clearTimeout(offlineDebounceTimer);
     if (onlineDebounceTimer) clearTimeout(onlineDebounceTimer);
+    clearInterval(healthCheckInterval);
     window.removeEventListener('offline', handleOffline);
     window.removeEventListener('online', handleOnline);
   };
