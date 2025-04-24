@@ -1,11 +1,12 @@
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { SavedProject } from '@/types/project';
 import { supabase } from '@/integrations/supabase/client';
 import { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
 import { isOffline } from '@/utils/errorHandling';
+import { checkSupabaseConnection } from '@/services/supabseFallbackService';
 
 export const useProjectRealtime = (
   userId: string | undefined, 
@@ -14,6 +15,33 @@ export const useProjectRealtime = (
   const retryCount = useRef(0);
   const maxRetries = 3;
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Connection health check
+  useEffect(() => {
+    let mounted = true;
+    const healthCheckInterval = setInterval(async () => {
+      if (!userId || !mounted) return;
+      
+      const isConnected = await checkSupabaseConnection();
+      if (!isConnected && channelRef.current && mounted) {
+        // If health check fails but we think we have a channel, try to reconnect
+        console.log('Health check failed, attempting to reconnect realtime subscription');
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = setTimeout(() => {
+          supabase.removeChannel(channelRef.current!);
+          channelRef.current = null;
+          if (mounted) subscribeToProjects();
+        }, 2000);
+      }
+    }, 30000); // Check every 30 seconds
+    
+    return () => {
+      mounted = false;
+      clearInterval(healthCheckInterval);
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+    };
+  }, [userId]);
   
   const subscribeToProjects = useCallback(() => {
     if (!userId) return null;
@@ -80,7 +108,8 @@ export const useProjectRealtime = (
           if (retryCount.current < maxRetries) {
             // Implement exponential backoff for retries
             const backoffDelay = Math.min(1000 * Math.pow(2, retryCount.current), 10000);
-            setTimeout(() => subscribeToProjects(), backoffDelay);
+            if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+            reconnectTimeoutRef.current = setTimeout(() => subscribeToProjects(), backoffDelay);
           }
         } else if (status === 'CLOSED') {
           console.log('Realtime channel closed');
@@ -94,6 +123,19 @@ export const useProjectRealtime = (
       return null;
     }
   }, [userId, setProjects, maxRetries]);
+
+  // Auto-cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return { subscribeToProjects };
 };

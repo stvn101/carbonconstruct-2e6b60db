@@ -49,15 +49,14 @@ export const useExportHandlers = (
       link.click();
       document.body.removeChild(link);
       
-      toast("Export Successful", {
+      toast.success("Export Successful", {
         description: "Your carbon footprint results have been exported as CSV.",
         duration: 3000,
       });
     } catch (error) {
       console.error("Export error:", error);
-      toast("Export Failed", {
+      toast.error("Export Failed", {
         description: "There was an error exporting your results. Please try again.",
-        variant: "destructive",
         duration: 3000,
       });
     } finally {
@@ -85,15 +84,14 @@ export const useExportHandlers = (
         premium_only: false
       });
       
-      toast("Export Successful", {
+      toast.success("Export Successful", {
         description: "Your carbon footprint results have been exported as PDF.",
         duration: 3000,
       });
     } catch (error) {
       console.error("PDF export error:", error);
-      toast("Export Failed", {
+      toast.error("Export Failed", {
         description: "There was an error exporting your results. Please try again.",
-        variant: "destructive",
         duration: 3000,
       });
     } finally {
