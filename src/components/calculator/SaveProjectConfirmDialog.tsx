@@ -30,7 +30,10 @@ const SaveProjectConfirmDialog = ({
 }: SaveProjectConfirmDialogProps) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
-      <AlertDialogContent className="bg-background text-foreground">
+      <AlertDialogContent 
+        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg 
+                   rounded-lg p-6 backdrop-blur-none opacity-100 !important"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>
             {isOverwrite ? "Update Existing Project?" : "Save Project"}
@@ -48,7 +51,13 @@ const SaveProjectConfirmDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel} disabled={isSaving}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel 
+            onClick={onCancel} 
+            disabled={isSaving}
+            className="bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction 
             onClick={onConfirm}
             disabled={isSaving}
