@@ -16,12 +16,19 @@ export function useOfflineMode(checkBackend: boolean = true) {
   const [checkAttempts, setCheckAttempts] = useState(0);
   const connectionCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Track toast display to prevent toast spam
+  const toastShownRef = useRef({
+    failure: false,
+    success: false,
+    timestamp: 0
+  });
+  
   // Enhanced connection check that's more robust
   const checkBackendConnection = useCallback(async () => {
-    if (!isOnline || !checkBackend) return;
+    if (!isOnline || !checkBackend) return false;
     
     // Prevent multiple simultaneous checks
-    if (isChecking) return;
+    if (isChecking) return backendConnected;
     
     setIsChecking(true);
     try {
@@ -35,44 +42,55 @@ export function useOfflineMode(checkBackend: boolean = true) {
         // Reset check attempts when connection succeeds
         setCheckAttempts(0);
         // Only show success toast if we previously thought we were disconnected
-        if (!backendConnected) {
+        if (!backendConnected && !toastShownRef.current.success) {
           toast.success("Connection restored successfully!", { id: "connection-restored", duration: 3000 });
+          toastShownRef.current.success = true;
+          toastShownRef.current.failure = false;
+          
+          // Reset success toast flag after a reasonable time
+          setTimeout(() => {
+            toastShownRef.current.success = false;
+          }, 10000);
         }
       } else {
         // Increment check attempts
         setCheckAttempts(prev => prev + 1);
         
+        const now = Date.now();
         // Only show error toast on first check or after significant interval
-        if (checkAttempts === 0 || !lastChecked || (new Date().getTime() - lastChecked.getTime() > 30000)) {
+        if (
+          checkAttempts === 0 || 
+          !toastShownRef.current.failure ||
+          (now - toastShownRef.current.timestamp > 30000)
+        ) {
           const message = checkAttempts > 2 
-            ? "Connection issues persist. Some features may be limited until connection is restored."
+            ? "Connection issues persist. Please check your network connection."
             : "Unable to connect to the server. Some features may be unavailable.";
           
           toast.error(message, { 
             id: "connection-check-failed", 
             duration: 5000 
           });
+          
+          toastShownRef.current.failure = true;
+          toastShownRef.current.timestamp = now;
         }
       }
+      
+      return isConnected;
     } catch (error) {
       console.error('Error checking backend connection:', error);
       setBackendConnected(false);
       setCheckAttempts(prev => prev + 1);
       
-      // Only show error toast if we haven't shown one recently
-      if (!lastChecked || (new Date().getTime() - lastChecked.getTime() > 30000)) {
-        toast.error("Connection check failed. Please check your internet connection.", { 
-          id: "connection-check-failed", 
-          duration: 5000 
-        });
-      }
+      return false;
     } finally {
       setIsChecking(false);
       setLastChecked(new Date());
     }
-  }, [isOnline, checkBackend, backendConnected, checkAttempts, lastChecked, isChecking]);
+  }, [isOnline, checkBackend, backendConnected, checkAttempts, isChecking]);
 
-  // Check connectivity on mount and when network status changes
+  // Check connectivity on mount and when network status changes with decreased frequency
   useEffect(() => {
     // Clear any existing timeout
     if (connectionCheckTimeoutRef.current) {
@@ -84,41 +102,35 @@ export function useOfflineMode(checkBackend: boolean = true) {
     connectionCheckTimeoutRef.current = setTimeout(() => {
       connectionCheckTimeoutRef.current = null;
       checkBackendConnection();
-    }, 2000);
+    }, 3000); // Increased from 2000ms to 3000ms for more stability
     
-    // Set up periodic check only if online and after the initial check
-    const intervalCheck = () => {
+    // Set up less frequent periodic checks
+    const checkInterval = checkAttempts > 2 ? 30000 : 60000; // Increased intervals
+    const interval = setInterval(() => {
       if (isOnline && checkBackend) {
-        const checkInterval = checkAttempts > 2 ? 15000 : 30000;
-        const interval = setInterval(() => {
-          checkBackendConnection();
-        }, checkInterval);
-        return interval;
+        checkBackendConnection();
       }
-      return null;
-    };
-    
-    const interval = intervalCheck();
+    }, checkInterval);
     
     return () => {
       if (connectionCheckTimeoutRef.current) {
         clearTimeout(connectionCheckTimeoutRef.current);
       }
-      if (interval) clearInterval(interval);
+      clearInterval(interval);
     };
   }, [isOnline, checkBackend, checkBackendConnection, checkAttempts]);
 
-  // Force a new check when going from offline to online, with debounce
+  // Force a new check when going from offline to online, with longer debounce
   useEffect(() => {
-    if (isOnline && checkBackend) {
-      // Add a small delay to prevent immediate check on connection flicker
+    if (isOnline && checkBackend && !backendConnected) {
+      // Longer delay to prevent immediate check on connection flicker
       const timeout = setTimeout(() => {
         checkBackendConnection();
-      }, 1500);
+      }, 2500); // Increased from 1500ms to 2500ms
       
       return () => clearTimeout(timeout);
     }
-  }, [isOnline, checkBackend, checkBackendConnection]);
+  }, [isOnline, checkBackend, checkBackendConnection, backendConnected]);
 
   return {
     isOfflineMode: !isOnline || !backendConnected,

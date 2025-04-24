@@ -16,6 +16,13 @@ const OPERATION_TIMEOUT = 8000; // Reduced from 10000 to 8000 for faster feedbac
 // Healthcheck timeout in milliseconds
 const HEALTHCHECK_TIMEOUT = 5000;
 
+// Track shown connection toasts to prevent duplicates
+const CONNECTION_TOAST_SHOWN = {
+  failure: false,
+  success: false,
+  timestamp: 0,
+};
+
 // Cache successful health check result for a short time to prevent excessive checks
 let lastHealthCheckResult = false;
 let lastHealthCheckTime = 0;
@@ -47,11 +54,19 @@ export const performDbOperation = async <T>(
   
   // Check for offline status
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    if (!silentFail) {
+    if (!silentFail && !CONNECTION_TOAST_SHOWN.failure) {
       toast.error("You're offline. Please connect to the internet to access your data.", {
         id: "offline-db-operation"
       });
+      CONNECTION_TOAST_SHOWN.failure = true;
+      CONNECTION_TOAST_SHOWN.timestamp = Date.now();
+      
+      // Reset the toast flag after a reasonable time
+      setTimeout(() => {
+        CONNECTION_TOAST_SHOWN.failure = false;
+      }, 10000); // 10 seconds
     }
+    
     console.warn(`Can't perform ${operationName} while offline`);
     
     if (fallbackData !== undefined) {
@@ -67,6 +82,22 @@ export const performDbOperation = async <T>(
     try {
       // Add timeout to prevent operations from hanging
       const result = await withTimeout(operation(), timeout);
+      
+      // Show success toast if we previously showed a failure
+      if (CONNECTION_TOAST_SHOWN.failure && !CONNECTION_TOAST_SHOWN.success) {
+        toast.success("Connection restored successfully!", { 
+          id: "connection-restored", 
+          duration: 3000 
+        });
+        CONNECTION_TOAST_SHOWN.success = true;
+        CONNECTION_TOAST_SHOWN.failure = false;
+        
+        // Reset the success toast flag after a reasonable time
+        setTimeout(() => {
+          CONNECTION_TOAST_SHOWN.success = false;
+        }, 10000);
+      }
+      
       return result;
     } catch (error) {
       attempts++;
@@ -85,11 +116,19 @@ export const performDbOperation = async <T>(
   }
   
   // All retries failed
-  if (!silentFail) {
-    toast.error(`Failed to ${operationName}. Please try again later.`, {
+  if (!silentFail && !CONNECTION_TOAST_SHOWN.failure) {
+    toast.error(`Failed to ${operationName}. Please check your connection and try again later.`, {
       id: `db-operation-failed-${operationName}`,
       duration: 5000, // Don't keep error toast forever
     });
+    
+    CONNECTION_TOAST_SHOWN.failure = true;
+    CONNECTION_TOAST_SHOWN.timestamp = Date.now();
+    
+    // Reset the toast flag after a reasonable time
+    setTimeout(() => {
+      CONNECTION_TOAST_SHOWN.failure = false;
+    }, 10000);
   }
   
   // Track the error
@@ -146,7 +185,7 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
   } catch (error) {
     console.error('Supabase health check error:', error);
     
-    // Cache the failed result
+    // Cache the failed result but for a shorter time
     lastHealthCheckResult = false;
     lastHealthCheckTime = now;
     

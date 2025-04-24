@@ -6,14 +6,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FolderPlus, Calculator, ArrowLeft, RefreshCw, AlertCircle, Wifi, WifiOff } from "lucide-react";
+import { FolderPlus, Calculator, ArrowLeft, RefreshCw } from "lucide-react";
 import { useProjects } from "@/contexts/ProjectContext";
 import ProjectsList from "@/components/projects/ProjectsList";
 import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton";
 import { useAuth } from '@/contexts/auth';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import PageLoading from '@/components/ui/page-loading';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ProjectsErrorState from "@/components/projects/ProjectsErrorState";
 import { useOfflineMode } from "@/hooks/useOfflineMode";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { toast } from 'sonner';
@@ -134,51 +134,12 @@ const ProjectsBrowser: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Connection Error Alert */}
-                {isOfflineMode && (
-                  <Alert variant="warning" className="mb-6">
-                    {navigator.onLine ? <Wifi className="h-5 w-5" /> : <WifiOff className="h-5 w-5" />}
-                    <AlertTitle>Connection Issue Detected</AlertTitle>
-                    <AlertDescription>
-                      {navigator.onLine 
-                        ? "We're having trouble connecting to our servers. Your projects will appear when the connection is restored."
-                        : "You're currently offline. Please check your internet connection."}
-                      <div className="mt-2">
-                        <Button 
-                          onClick={checkConnection} 
-                          variant="outline"
-                          size="sm"
-                          disabled={isCheckingConnection}
-                        >
-                          <RefreshCw className={`h-4 w-4 mr-2 ${isCheckingConnection ? 'animate-spin' : ''}`} />
-                          {isCheckingConnection ? 'Checking...' : 'Check connection'}
-                        </Button>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Persistent Error Alert */}
-                {fetchError && connectionAttempts > 1 && !isOfflineMode && (
-                  <Alert variant="destructive" className="mb-6">
-                    <AlertCircle className="h-5 w-5" />
-                    <AlertTitle>Error Loading Projects</AlertTitle>
-                    <AlertDescription>
-                      We're experiencing technical issues loading your projects. Our team has been notified.
-                      <div className="mt-2">
-                        <Button 
-                          onClick={handleRetryLoad} 
-                          variant="outline"
-                          size="sm"
-                          disabled={!!retryTimeoutRef.current}
-                        >
-                          <RefreshCw className={`h-4 w-4 mr-2 ${retryTimeoutRef.current ? 'animate-spin' : ''}`} />
-                          {retryTimeoutRef.current ? 'Retrying...' : 'Retry Loading'}
-                        </Button>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                )}
+                <ProjectsErrorState 
+                  isOffline={isOfflineMode}
+                  hasError={!!fetchError && connectionAttempts > 1 && !isOfflineMode}
+                  onRetry={handleRetryLoad}
+                  isRetrying={!!retryTimeoutRef.current || isCheckingConnection}
+                />
 
                 {isLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -192,13 +153,6 @@ const ProjectsBrowser: React.FC = () => {
                     <p className="text-muted-foreground mb-6">
                       {user ? "You haven't created any projects yet." : "Please sign in to view your projects."}
                     </p>
-                    {loadAttempts > 0 && (
-                      <Alert className="mb-6 max-w-md mx-auto">
-                        <AlertDescription>
-                          Still having trouble loading your projects? Try refreshing the page or coming back later.
-                        </AlertDescription>
-                      </Alert>
-                    )}
                     <div className="flex justify-center gap-2">
                       <Button 
                         asChild
@@ -208,14 +162,6 @@ const ProjectsBrowser: React.FC = () => {
                           <FolderPlus className="h-4 w-4 mr-2" />
                           Create Your First Project
                         </Link>
-                      </Button>
-                      <Button
-                        onClick={handleRetryLoad}
-                        variant="secondary"
-                        disabled={!!retryTimeoutRef.current}
-                      >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${retryTimeoutRef.current ? 'animate-spin' : ''}`} />
-                        {retryTimeoutRef.current ? 'Retrying...' : 'Retry Loading'}
                       </Button>
                     </div>
                   </div>
