@@ -1,10 +1,13 @@
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import ErrorTrackingService from '@/services/errorTrackingService';
+import ErrorTrackingService from '@/services/error/errorTrackingService';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, WifiOff, Signal } from "lucide-react";
+import { toast } from 'sonner';
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
 type ErrorBoundaryWrapperProps = {
   children: React.ReactNode;
@@ -27,6 +30,9 @@ const ErrorFallback = ({
   resetErrorBoundary: () => void;
   feature?: string;
 }) => {
+  const [isChecking, setIsChecking] = useState(false);
+  const { isOnline } = useNetworkStatus();
+  
   // Log the error with context
   React.useEffect(() => {
     if (error && feature) {
@@ -34,23 +40,91 @@ const ErrorFallback = ({
     }
   }, [error, feature]);
   
+  const handleReset = async () => {
+    setIsChecking(true);
+    
+    if (!isOnline) {
+      toast.error("You're currently offline. Please check your connection.", {
+        id: "offline-reset-error",
+        duration: 5000,
+      });
+      setIsChecking(false);
+      return;
+    }
+    
+    try {
+      // Check if we can connect to the server before resetting
+      const canConnect = await checkSupabaseConnectionWithRetry();
+      
+      if (!canConnect) {
+        toast.error("Cannot connect to the server. Please try again when you have better connectivity.", {
+          id: "connection-reset-error",
+          duration: 5000,
+        });
+        setIsChecking(false);
+        return;
+      }
+      
+      // If everything looks good, proceed with reset
+      resetErrorBoundary();
+    } catch (e) {
+      console.error("Error checking connection:", e);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+  
+  // Determine if this is a network-related error
+  const isNetworkError = error && (
+    error.message.includes("Failed to fetch") ||
+    error.message.includes("NetworkError") ||
+    error.message.includes("Network Error") ||
+    error.message.includes("timed out") ||
+    error.message.includes("connection")
+  );
+  
   return (
     <Card className="p-4 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 rounded-md text-center">
       <div className="flex flex-col items-center p-2">
-        <AlertTriangle className="h-10 w-10 text-red-600 mb-2" aria-hidden="true" />
+        {isNetworkError ? (
+          <WifiOff className="h-10 w-10 text-red-600 mb-2" aria-hidden="true" />
+        ) : (
+          <AlertTriangle className="h-10 w-10 text-red-600 mb-2" aria-hidden="true" />
+        )}
+        
         <h3 className="text-lg font-medium text-red-800 dark:text-red-300">
-          {feature ? `${feature} Error` : 'Something went wrong'}
+          {isNetworkError 
+            ? "Connection Error" 
+            : feature 
+              ? `${feature} Error` 
+              : 'Something went wrong'}
         </h3>
+        
         <p className="mt-2 text-red-700 dark:text-red-400 text-sm">
-          {error?.message || `There was a problem with ${feature || 'this component'}.`}
+          {isNetworkError
+            ? "There was a problem connecting to the server. Please check your internet connection."
+            : error?.message || `There was a problem with ${feature || 'this component'}.`}
         </p>
-        <Button 
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-          onClick={resetErrorBoundary}
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Try Again
-        </Button>
+        
+        <div className="flex gap-2 mt-4">
+          <Button 
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            onClick={handleReset}
+            disabled={isChecking}
+          >
+            {isChecking ? (
+              <>
+                <Signal className="h-4 w-4 mr-2 animate-pulse" />
+                Checking Connection...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </Card>
   );
@@ -63,7 +137,7 @@ const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({
   className,
   onReset
 }) => {
-  const [key, setKey] = React.useState(0);
+  const [key, setKey] = useState(0);
   const FallbackComponent = fallbackComponent || 
     (({ error, resetErrorBoundary }) => (
       <ErrorFallback 
@@ -73,11 +147,14 @@ const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({
       />
     ));
 
-  const handleReset = React.useCallback(() => {
+  const handleReset = useCallback(() => {
     // Force a re-render by changing the key
     setKey(prevKey => prevKey + 1);
     // Call custom reset handler if provided
     if (onReset) onReset();
+    
+    // Dismiss any existing error toasts
+    toast.dismiss();
   }, [onReset]);
 
   return (
