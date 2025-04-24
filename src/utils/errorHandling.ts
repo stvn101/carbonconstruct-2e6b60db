@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for handling errors in a more consistent way
  */
@@ -54,6 +53,32 @@ export const handleFetchError = (error: unknown, context: string): Error => {
     return new Error(`Network connectivity error in ${context}`);
   }
   
+  // Timeout errors
+  if (error instanceof Error && error.message.includes('timed out')) {
+    console.error(`Timeout error in ${context}:`, error);
+    
+    const toastId = `timeout-error-${context}`;
+    const now = Date.now();
+    
+    if (!shownErrorToasts.has(toastId) && 
+        (!toastCooldowns[toastId] || now - toastCooldowns[toastId] > TOAST_COOLDOWN)) {
+      
+      toast.error("Request timed out. Please try again when you have a better connection.", {
+        id: toastId,
+        duration: 5000,
+      });
+      
+      shownErrorToasts.add(toastId);
+      toastCooldowns[toastId] = now;
+      
+      setTimeout(() => {
+        shownErrorToasts.delete(toastId);
+      }, 10000);
+    }
+    
+    return new Error(`Operation timed out in ${context}`);
+  }
+  
   // General error handling
   const actualError = error instanceof Error ? error : new Error(`Unknown error in ${context}`);
   
@@ -68,6 +93,16 @@ export const handleFetchError = (error: unknown, context: string): Error => {
  */
 export const isOffline = (): boolean => {
   return typeof navigator !== 'undefined' && !navigator.onLine;
+};
+
+/**
+ * Clear specific error toasts
+ */
+export const clearErrorToasts = (toastIds: string[]): void => {
+  toastIds.forEach(id => {
+    toast.dismiss(id);
+    shownErrorToasts.delete(id);
+  });
 };
 
 /**
@@ -92,6 +127,7 @@ export const addNetworkListeners = (
     });
     // Clear the offline toast status when back online
     shownErrorToasts.delete("global-offline-status");
+    toast.dismiss("global-offline-status");
   }
 ): (() => void) => {
   if (typeof window === 'undefined') return () => {};
@@ -171,6 +207,10 @@ export const addNetworkListeners = (
     clearInterval(healthCheckInterval);
     window.removeEventListener('offline', handleOffline);
     window.removeEventListener('online', handleOnline);
+    
+    // Clear toasts on unmount to prevent stuck messages
+    toast.dismiss('global-online-status');
+    toast.dismiss('global-offline-status');
   };
 };
 
@@ -224,7 +264,7 @@ export const handleDatabaseResourceError = (error: unknown, context: string): vo
 /**
  * Clear all error toasts
  */
-export const clearErrorToasts = () => {
+export const clearAllErrorToasts = (): void => {
   toast.dismiss();
   shownErrorToasts.clear();
 };

@@ -1,7 +1,7 @@
 
 import { toast } from 'sonner';
 import { fetchUserProjects } from '@/services/projectService';
-import { isOffline, handleFetchError } from '@/utils/errorHandling';
+import { isOffline, handleFetchError, clearErrorToasts } from '@/utils/errorHandling';
 import { trackMetric } from '@/contexts/performance/metrics';
 import { SavedProject } from '@/types/project';
 
@@ -15,11 +15,15 @@ export const loadProjects = async (
     return;
   }
   
+  // Clear any stale error toasts first
+  toast.dismiss("projects-load-error");
+  toast.dismiss("projects-load-failed");
+  
   if (isOffline()) {
     setFetchError(new Error('You are currently offline'));
     toast.error("You're offline. Project data will load when you reconnect.", {
       id: "projects-offline",
-      duration: 5000,
+      duration: 0, // Keep showing until back online
     });
     return;
   }
@@ -31,9 +35,8 @@ export const loadProjects = async (
     setProjects(projectData);
     setFetchError(null);
     
-    toast.dismiss("projects-load-error");
-    toast.dismiss("projects-offline");
-    toast.dismiss("projects-load-failed");
+    // Clear any error toasts on success
+    clearErrorToasts(["projects-load-error", "projects-offline", "projects-load-failed"]);
     
     const loadTime = performance.now() - startTime;
     trackMetric({
