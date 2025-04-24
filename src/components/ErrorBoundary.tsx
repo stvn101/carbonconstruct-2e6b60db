@@ -3,8 +3,8 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, RefreshCw, Home, ChevronLeft } from "lucide-react";
-import errorTrackingService from "@/services/errorTrackingService";
+import { AlertTriangle, RefreshCw, Home, ChevronLeft, Wifi, WifiOff } from "lucide-react";
+import errorTrackingService from "@/services/error/errorTrackingService";
 import { toast } from "sonner";
 
 interface Props {
@@ -33,14 +33,20 @@ class ErrorBoundary extends Component<Props, State> {
   // Check if the error should be ignored
   private shouldIgnoreError(error: Error): boolean {
     if (this.props.ignoreErrors) {
-      // Ignore duplicate key constraint errors, timeout errors and fetch errors
+      // Ignore more edge cases and network-related errors
       if (error.message && (
         error.message.includes("duplicate key") || 
         error.message.includes("23505") ||
         error.message.includes("Failed to fetch") ||
         error.message.includes("timed out") ||
         error.message.includes("timeout") ||
-        error.message.includes("Network request failed")
+        error.message.includes("Network request failed") ||
+        error.message.includes("NetworkError") ||
+        error.message.includes("AbortError") ||
+        error.message.includes("network") ||
+        error.message.includes("Network Error") ||
+        error.message.includes("offline") ||
+        error.message.includes("connection")
       )) {
         return true;
       }
@@ -57,8 +63,18 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.shouldIgnoreError(error)) {
       this.setState({ hasError: false, error: null, errorInfo: null });
       
-      // For timeout errors, display a toast instead of crashing the component
-      if (error.message && (error.message.includes("timed out") || error.message.includes("timeout"))) {
+      // For network errors, display a different toast
+      if (error.message && (
+        error.message.includes("Failed to fetch") || 
+        error.message.includes("Network request failed") || 
+        error.message.includes("NetworkError")
+      )) {
+        toast.error("Network connection issue detected. Please check your internet connection.", {
+          id: "network-error",
+          duration: 5000,
+          icon: <WifiOff className="h-5 w-5" />
+        });
+      } else if (error.message && (error.message.includes("timed out") || error.message.includes("timeout"))) {
         toast.error("Operation timed out. Please check your connection and try again.", {
           id: "timeout-error",
           duration: 5000
@@ -119,6 +135,22 @@ class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
+  private isNetworkRelatedError(): boolean {
+    const error = this.state.error;
+    if (!error) return false;
+    
+    return error.message && (
+      error.message.includes("Failed to fetch") || 
+      error.message.includes("Network request failed") ||
+      error.message.includes("NetworkError") ||
+      error.message.includes("AbortError") ||
+      error.message.includes("network") ||
+      error.message.includes("Network Error") ||
+      error.message.includes("offline") ||
+      error.message.includes("connection")
+    );
+  }
+
   public render() {
     // If the error should be ignored, just render the children
     if (this.state.hasError && this.state.error && this.shouldIgnoreError(this.state.error)) {
@@ -136,16 +168,28 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      const isNetworkError = this.isNetworkRelatedError();
+
       return (
         <div className={`min-h-[200px] flex items-center justify-center p-4 ${this.props.className || ''}`}>
           <Card className="max-w-2xl w-full p-6">
-            <Alert variant="destructive" className="mb-6">
-              <AlertTriangle className="h-5 w-5" />
+            <Alert variant={isNetworkError ? "warning" : "destructive"} className="mb-6">
+              {isNetworkError ? (
+                <Wifi className="h-5 w-5" />
+              ) : (
+                <AlertTriangle className="h-5 w-5" />
+              )}
               <AlertTitle className="mb-2">
-                {this.props.feature ? `${this.props.feature} Error` : 'Something went wrong'}
+                {isNetworkError 
+                  ? "Connection Issue Detected" 
+                  : this.props.feature 
+                    ? `${this.props.feature} Error` 
+                    : 'Something went wrong'}
               </AlertTitle>
               <AlertDescription className="text-sm">
-                We apologize for the inconvenience. This section has encountered an error.
+                {isNetworkError 
+                  ? "We're having trouble connecting to our servers. Please check your internet connection and try again."
+                  : "We apologize for the inconvenience. This section has encountered an error."}
               </AlertDescription>
             </Alert>
 

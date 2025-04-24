@@ -106,15 +106,15 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     // We need to explicitly execute the query to get a Promise
     const queryPromise = async () => {
       try {
-        const response = await supabase
+        const { data, error } = await supabase
           .from('projects')
           .select('count(*)', { count: 'exact' })
           .limit(1);
         
-        return response;
+        return { data, error };
       } catch (innerError) {
         console.error('Inner Supabase health check error:', innerError);
-        return { error: innerError };
+        return { data: null, error: innerError };
       }
     };
     
