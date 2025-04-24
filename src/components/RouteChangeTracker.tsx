@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import performanceMonitoringService from "@/services/performanceMonitoringService";
-import errorTrackingService from "@/services/errorTrackingService";
+import errorTrackingService from "@/services/error/errorTrackingService";
 import { useAuth } from "@/contexts/auth";
 
 export const RouteChangeTracker = () => {
