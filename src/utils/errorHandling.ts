@@ -1,10 +1,9 @@
-
 /**
  * Utility functions for handling errors in a more consistent way
  */
 
 import { toast } from "sonner";
-import errorTrackingService from "@/services/errorTrackingService";
+import errorTrackingService from "@/services/error/errorTrackingService";
 
 /**
  * Handles API fetch errors with better user feedback
