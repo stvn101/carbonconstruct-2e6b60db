@@ -1,12 +1,13 @@
-
 import React, { createContext, useContext, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
-import { ProjectContextType } from '@/types/project';
+import { ProjectContextType, SavedProject } from '@/types/project';
 import { fetchUserProjects } from '@/services/projectService';
 import { toast } from 'sonner';
 import { useProjectState } from './project/useProjectState';
 import { useProjectOperations } from './project/useProjectOperations';
+import { useProjectExports } from './project/useProjectExports';
 import { useProjectRealtime } from './project/useProjectRealtime';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -34,8 +35,8 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   } = useProjectState();
 
   const projectOperations = useProjectOperations(setProjects);
+  const projectExports = useProjectExports();
   const { subscribeToProjects } = useProjectRealtime(user?.id, setProjects);
-  const MAX_RETRIES = 3;
 
   const loadProjects = useCallback(async () => {
     if (!user) {
@@ -118,8 +119,8 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateProject: projectOperations.updateProject,
         deleteProject: projectOperations.deleteProject,
         getProject,
-        exportProjectPDF: projectOperations.exportProjectPDF,
-        exportProjectCSV: projectOperations.exportProjectCSV,
+        exportProjectPDF: projectExports.exportProjectPDF,
+        exportProjectCSV: projectExports.exportProjectCSV,
       }}
     >
       {children}
