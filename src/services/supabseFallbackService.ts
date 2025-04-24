@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
@@ -98,11 +99,13 @@ export const performDbOperation = async <T>(
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
     // Use a lightweight query to test connection
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('projects')
       .select('count(*)', { count: 'exact' })
-      .limit(1)
-      .timeout(5000);
+      .limit(1);
+    
+    // Add our own timeout since the .timeout() method doesn't exist
+    const { data, error } = await withTimeout(queryPromise, 5000);
     
     if (error) {
       console.error('Supabase health check failed:', error);

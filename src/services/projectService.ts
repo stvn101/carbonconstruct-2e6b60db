@@ -14,8 +14,7 @@ export async function fetchUserProjects(userId: string): Promise<SavedProject[]>
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .eq('user_id', userId)
-        .timeout(8000);
+        .eq('user_id', userId);
       
       if (error) throw error;
       
