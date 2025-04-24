@@ -17,6 +17,7 @@ export function useRetryCore({
   const [isRetrying, setIsRetrying] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
+  const attemptRef = useRef(0);
 
   // Clean up any existing timeout on unmount
   useEffect(() => {
@@ -34,6 +35,13 @@ export function useRetryCore({
       }
     };
   }, []);
+
+  // Reset attempt counter when retryCount is reset to 0
+  useEffect(() => {
+    if (retryCount === 0) {
+      attemptRef.current = 0;
+    }
+  }, [retryCount]);
 
   // Handle retry logic when retry count changes
   useEffect(() => {
@@ -58,16 +66,23 @@ export function useRetryCore({
         // Check if component is still mounted before proceeding
         if (!isMountedRef.current) return;
         
+        // Track this attempt
+        attemptRef.current += 1;
+        
         try {
           await callback();
           // If successful, reset retry count only if still mounted
           if (isMountedRef.current) {
             setRetryCount(0);
             setIsRetrying(false);
+            attemptRef.current = 0;
           }
         } catch (error) {
           // Only proceed if still mounted
           if (!isMountedRef.current) return;
+          
+          // Log the error with the current attempt count
+          console.error(`Retry attempt ${attemptRef.current} failed:`, error);
           
           // If we've reached max retries, trigger the callback and stop
           if (retryCount >= maxRetries) {

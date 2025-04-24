@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
@@ -5,15 +6,25 @@ import { Json } from '@/integrations/supabase/types';
 import { performDbOperation } from './supabase/fallbackService';
 
 /**
- * Fetch all projects for a user with improved error handling
+ * Fetch all projects for a user with improved error handling and pagination
  */
-export async function fetchUserProjects(userId: string): Promise<SavedProject[]> {
+export async function fetchUserProjects(
+  userId: string, 
+  page: number = 0, 
+  pageSize: number = 50
+): Promise<SavedProject[]> {
   return performDbOperation(
     async () => {
+      // Calculate range for pagination
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+        .range(from, to);
       
       if (error) throw error;
       

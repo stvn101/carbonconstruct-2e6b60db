@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
-type ErrorBoundaryWrapperProps = {
+interface ErrorBoundaryWrapperProps {
   children: React.ReactNode;
   feature: string;
   fallbackComponent?: React.ComponentType<{ 
@@ -20,7 +20,8 @@ type ErrorBoundaryWrapperProps = {
   className?: string;
   onReset?: () => void;
   resetCondition?: any; // When this value changes, the error boundary will reset
-};
+  ignoreErrors?: boolean; // If true, will still render children even if there's an error
+}
 
 const ErrorFallback = ({ 
   error, 
@@ -148,9 +149,11 @@ const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({
   fallbackComponent,
   className,
   onReset,
-  resetCondition
+  resetCondition,
+  ignoreErrors = false
 }) => {
   const [key, setKey] = useState(0);
+  const [hasError, setHasError] = useState(false);
   const FallbackComponent = fallbackComponent || 
     (({ error, resetErrorBoundary }) => (
       <ErrorFallback 
@@ -162,14 +165,17 @@ const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({
 
   // Reset the error boundary when resetCondition changes
   useEffect(() => {
-    if (resetCondition !== undefined) {
+    if (resetCondition !== undefined && hasError) {
       setKey(prevKey => prevKey + 1);
+      setHasError(false);
     }
-  }, [resetCondition]);
+  }, [resetCondition, hasError]);
 
   const handleReset = useCallback(() => {
     // Force a re-render by changing the key
     setKey(prevKey => prevKey + 1);
+    setHasError(false);
+    
     // Call custom reset handler if provided
     if (onReset) onReset();
     
@@ -177,20 +183,40 @@ const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({
     toast.dismiss();
   }, [onReset]);
 
+  const handleError = (error: Error, info: { componentStack: string }) => {
+    setHasError(true);
+    
+    ErrorTrackingService.captureException(error, { 
+      feature,
+      componentStack: info.componentStack,
+      url: window.location.href,
+      route: window.location.pathname
+    });
+    console.error(`Error in ${feature}:`, error);
+  };
+
+  // If ignoreErrors is true, render both the error boundary and the children
+  if (ignoreErrors && hasError) {
+    return (
+      <div className={className}>
+        <div className="mb-4">
+          <FallbackComponent 
+            error={new Error(`An error occurred in ${feature}`)} 
+            resetErrorBoundary={handleReset}
+            feature={feature}
+          />
+        </div>
+        {React.Children.map(children, child => child)}
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
       <ErrorBoundary
         key={`error-boundary-${feature}-${key}`}
         FallbackComponent={FallbackComponent}
-        onError={(error, info) => {
-          ErrorTrackingService.captureException(error, { 
-            feature,
-            componentStack: info.componentStack,
-            url: window.location.href,
-            route: window.location.pathname
-          });
-          console.error(`Error in ${feature}:`, error);
-        }}
+        onError={handleError}
         onReset={handleReset}
       >
         {children}

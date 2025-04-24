@@ -8,7 +8,7 @@ import { SavedProject } from '@/types/project';
 import { clearErrorToasts } from '@/utils/errorHandling';
 
 // Maximum number of retry attempts
-const MAX_RETRIES = 2;
+const MAX_RETRIES = 3;
 
 export const useProjectsLoader = (
   user: any,
@@ -21,6 +21,7 @@ export const useProjectsLoader = (
   // Track mounted state to prevent memory leaks
   const isMountedRef = useRef(true);
   const initialLoadAttemptedRef = useRef(false);
+  const activeRequestRef = useRef(false);
   
   // Clear stale errors on component mount
   useEffect(() => {
@@ -36,8 +37,8 @@ export const useProjectsLoader = (
   }, []);
   
   const loadProjectsCallback = useCallback(async () => {
-    // Skip if component is unmounted
-    if (!isMountedRef.current) return;
+    // Skip if component is unmounted or if a request is already in progress
+    if (!isMountedRef.current || activeRequestRef.current) return;
     
     if (!user) {
       setProjects([]);
@@ -46,7 +47,11 @@ export const useProjectsLoader = (
       return;
     }
 
+    // Mark that we've attempted to load at least once
     initialLoadAttemptedRef.current = true;
+    
+    // Prevent concurrent requests
+    activeRequestRef.current = true;
     setIsLoading(true);
     
     try {
@@ -59,6 +64,11 @@ export const useProjectsLoader = (
           id: "projects-load-retry"
         });
       }
+      
+      // Clear fetch error if successful
+      if (isMountedRef.current) {
+        setFetchError(null);
+      }
     } catch (error) {
       // Error is already handled in loadProjects
       console.error('Project loading failed:', error);
@@ -66,6 +76,7 @@ export const useProjectsLoader = (
       // Only update state if still mounted
       if (isMountedRef.current) {
         setIsLoading(false);
+        activeRequestRef.current = false;
       }
     }
   }, [user, retryCount, setProjects, setIsLoading, setFetchError]);
@@ -116,6 +127,7 @@ export const useProjectsLoader = (
         // Reset retry count and immediately attempt to load
         setRetryCount(0);
         setFetchError(null);
+        activeRequestRef.current = false; // Clear any stuck active request flag
         loadProjectsCallback();
       }
     }
