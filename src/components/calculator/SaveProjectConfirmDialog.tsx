@@ -31,8 +31,7 @@ const SaveProjectConfirmDialog = ({
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent 
-        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg 
-                   rounded-lg p-6 backdrop-blur-none opacity-100 !important"
+        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg p-6"
       >
         <AlertDialogHeader>
           <AlertDialogTitle>
