@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useCallback, useMemo } from "react";
 import { CalculationInput, CalculationResult, calculateTotalEmissions } from "@/lib/carbonCalculations";
 import { CalculatorContextType } from "./types";
@@ -15,6 +16,7 @@ import {
 import { validateCalculationInput, ValidationError } from "@/utils/calculatorValidation";
 import { toast } from "sonner";
 import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonTypes";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {
   materials: [{ type: "concrete", quantity: 1000 }],
@@ -29,9 +31,19 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<'materials' | 'transport' | 'energy' | 'results'>('materials');
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const { isOnline } = useNetworkStatus();
+
+  useEffect(() => {
+    console.log("Active tab changed to:", activeTab);
+  }, [activeTab]);
 
   const handleCalculate = useCallback(() => {
     try {
+      if (!isOnline) {
+        toast.error("You're offline. Cannot perform calculations.");
+        return;
+      }
+      
       const errors = validateCalculationInput(calculationInput);
       if (errors.length > 0) {
         setValidationErrors(errors);
@@ -53,21 +65,39 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       console.error("Error calculating emissions:", error);
       toast.error("Error calculating emissions. Please check your inputs.");
     }
-  }, [calculationInput]);
+  }, [calculationInput, isOnline]);
 
   const handleNextTab = useCallback(() => {
-    if (activeTab === "materials") setActiveTab("transport");
-    else if (activeTab === "transport") setActiveTab("energy");
+    console.log(`Current tab: ${activeTab}, moving to next tab`);
+    if (activeTab === "materials") {
+      setActiveTab("transport");
+      console.log("Tab set to transport");
+    }
+    else if (activeTab === "transport") {
+      setActiveTab("energy");
+      console.log("Tab set to energy");
+    }
     else if (activeTab === "energy") {
       handleCalculate();
       setActiveTab("results");
+      console.log("Tab set to results");
     }
   }, [activeTab, handleCalculate]);
 
   const handlePrevTab = useCallback(() => {
-    if (activeTab === "transport") setActiveTab("materials");
-    else if (activeTab === "energy") setActiveTab("transport");
-    else if (activeTab === "results") setActiveTab("energy");
+    console.log(`Current tab: ${activeTab}, moving to previous tab`);
+    if (activeTab === "transport") {
+      setActiveTab("materials");
+      console.log("Tab set to materials");
+    }
+    else if (activeTab === "energy") {
+      setActiveTab("transport");
+      console.log("Tab set to transport");
+    }
+    else if (activeTab === "results") {
+      setActiveTab("energy");
+      console.log("Tab set to energy");
+    }
   }, [activeTab]);
 
   const contextValue = useMemo(() => ({

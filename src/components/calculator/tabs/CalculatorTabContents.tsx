@@ -5,6 +5,7 @@ import TransportInputSection from "../TransportInputSection";
 import EnergyInputSection from "../EnergyInputSection";
 import ResultsSection from "../ResultsSection";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
+import { useEffect, useState } from "react";
 
 interface CalculatorTabContentsProps {
   calculationInput: CalculationInput;
@@ -41,15 +42,54 @@ const CalculatorTabContents = ({
   onNextTab,
   demoMode = false
 }: CalculatorTabContentsProps) => {
+  const [activeTabValue, setActiveTabValue] = useState<string>("materials");
+
+  // Function to safely handle navigation between tabs
+  const handleNextTab = () => {
+    try {
+      console.log(`Navigating from ${activeTabValue} to next tab`);
+      if (activeTabValue === "materials") {
+        setActiveTabValue("transport");
+      } else if (activeTabValue === "transport") {
+        setActiveTabValue("energy");
+      } else if (activeTabValue === "energy") {
+        setActiveTabValue("results");
+      }
+      
+      // Call the parent's onNextTab function to sync state
+      onNextTab();
+    } catch (error) {
+      console.error("Error navigating to next tab:", error);
+    }
+  };
+
+  const handlePrevTab = () => {
+    try {
+      console.log(`Navigating from ${activeTabValue} to previous tab`);
+      if (activeTabValue === "transport") {
+        setActiveTabValue("materials");
+      } else if (activeTabValue === "energy") {
+        setActiveTabValue("transport");
+      } else if (activeTabValue === "results") {
+        setActiveTabValue("energy");
+      }
+      
+      // Call the parent's onPrevTab function to sync state
+      onPrevTab();
+    } catch (error) {
+      console.error("Error navigating to previous tab:", error);
+    }
+  };
+
   return (
-    <Tabs defaultValue="materials">
+    <Tabs value={activeTabValue} onValueChange={setActiveTabValue}>
       <TabsContent value="materials">
         <MaterialsInputSection 
           materials={calculationInput.materials}
           onUpdateMaterial={onUpdateMaterial}
           onAddMaterial={onAddMaterial}
           onRemoveMaterial={onRemoveMaterial}
-          onNext={onNextTab}
+          onNext={handleNextTab}
           demoMode={demoMode}
         />
       </TabsContent>
@@ -60,8 +100,8 @@ const CalculatorTabContents = ({
           onUpdateTransport={onUpdateTransport}
           onAddTransport={onAddTransport}
           onRemoveTransport={onRemoveTransport}
-          onNext={onNextTab}
-          onPrev={onPrevTab}
+          onNext={handleNextTab}
+          onPrev={handlePrevTab}
           demoMode={demoMode}
         />
       </TabsContent>
@@ -72,8 +112,8 @@ const CalculatorTabContents = ({
           onUpdateEnergy={onUpdateEnergy}
           onAddEnergy={onAddEnergy}
           onRemoveEnergy={onRemoveEnergy}
-          onCalculate={onNextTab}
-          onPrev={onPrevTab}
+          onCalculate={handleNextTab}
+          onPrev={handlePrevTab}
           demoMode={demoMode}
         />
       </TabsContent>
@@ -85,7 +125,7 @@ const CalculatorTabContents = ({
           transport={calculationInput.transport}
           energy={calculationInput.energy}
           onCalculate={onCalculate}
-          onPrev={onPrevTab}
+          onPrev={handlePrevTab}
           demoMode={demoMode}
         />
       </TabsContent>

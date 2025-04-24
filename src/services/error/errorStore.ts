@@ -25,6 +25,10 @@ class ErrorStore {
     return this.errorCount[errorKey] > this.MAX_ERRORS_PER_TYPE;
   }
 
+  getMaxErrorsLimit(): number {
+    return this.MAX_ERRORS_PER_TYPE;
+  }
+
   addCallback(callback: ErrorCallback): () => void {
     this.errorCallbacks.push(callback);
     return () => {

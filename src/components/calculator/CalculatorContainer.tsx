@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProjectNameCard from "./ProjectNameCard";
@@ -10,7 +11,7 @@ import SaveProjectConfirmDialog from "./SaveProjectConfirmDialog";
 import CalculatorUsageTracker from "./CalculatorUsageTracker";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "react-error-boundary";
-import ErrorTrackingService from "@/services/errorTrackingService";
+import ErrorTrackingService from "@/services/error/errorTrackingService";
 
 export interface CalculatorContainerProps {
   projectName: string;
@@ -77,6 +78,13 @@ const CalculatorContainer = ({
   const [tabError, setTabError] = useState<string | null>(null);
   const [calculatorKey, setCalculatorKey] = useState<number>(0);
   
+  // Sync local state with calculator context
+  useEffect(() => {
+    if (calculatorContext && calculatorContext.activeTab) {
+      console.log(`CalculatorContainer syncing with calculator context tab: ${calculatorContext.activeTab}`);
+    }
+  }, [calculatorContext]);
+  
   if (!calculatorContext) {
     return (
       <div className="p-6 border border-destructive/50 bg-destructive/10 rounded-md text-center">
@@ -136,6 +144,28 @@ const CalculatorContainer = ({
     setCalculatorKey(prev => prev + 1);
     setTabError(null);
   };
+  
+  const handleTabChange = (newTab: string) => {
+    try {
+      console.log(`CalculatorContainer handling tab change to: ${newTab}`);
+      if (typeof setActiveTab === 'function') {
+        setActiveTab(newTab as any);
+      } else {
+        console.error("setActiveTab is not available:", setActiveTab);
+      }
+    } catch (error) {
+      console.error("Error changing tab:", error);
+      ErrorTrackingService.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+        { component: 'Calculator', action: 'change-tab' }
+      );
+    }
+  };
+
+  // Log the current active tab for debugging
+  useEffect(() => {
+    console.log(`CalculatorContainer current tab: ${activeTab}`);
+  }, [activeTab]);
 
   return (
     <TooltipProvider>
@@ -167,7 +197,7 @@ const CalculatorContainer = ({
           
             <CalculatorTabs 
               activeTab={activeTab || "materials"}
-              setActiveTab={setActiveTab}
+              setActiveTab={handleTabChange}
               onCalculate={handleCalculateWithTracking}
               isMobile={!!isMobile}
               isPremiumUser={!!isPremiumUser}
