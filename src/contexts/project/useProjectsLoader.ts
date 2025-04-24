@@ -26,7 +26,7 @@ export const useProjectsLoader = (
     setIsLoading(true);
     try {
       await loadProjects(user.id, setProjects, setFetchError);
-      if (retryCount === 0) {
+      if (retryCount > 0) {
         toast.error("Failed to load your projects. Retrying...", {
           duration: 3000,
           id: "projects-load-error"
