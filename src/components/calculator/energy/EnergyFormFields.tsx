@@ -36,12 +36,13 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
           onValueChange={(value) => onUpdate("type", value)}
         >
           <SelectTrigger 
-            id={`energy-type-${index}`} 
+            id={`energy-type-${index}`}
+            name={`energy-type-${index}`}
             className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
           >
             <SelectValue placeholder="Select energy type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-gray-800">
             {Object.entries(ENERGY_FACTORS).map(([key, value]) => (
               <SelectItem key={key} value={key} className="text-xs md:text-sm">
                 {value.name}
@@ -67,7 +68,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
                   <Info className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
+              <TooltipContent side="top" className="max-w-xs bg-white dark:bg-gray-800">
                 The unit "{ENERGY_FACTORS[energy.type].unit}" represents the measurement unit used for this energy type.
               </TooltipContent>
             </Tooltip>
@@ -75,6 +76,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
         </div>
         <Input
           id={`energy-amount-${index}`}
+          name={`energy-amount-${index}`}
           type="number"
           value={energy.amount === 0 ? '' : energy.amount}
           onChange={(e) => onUpdate("amount", e.target.value)}

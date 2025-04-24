@@ -46,12 +46,13 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
           onValueChange={(value) => onUpdate("type", value)}
         >
           <SelectTrigger 
-            id={`transport-type-${index}`} 
+            id={`transport-type-${index}`}
+            name={`transport-type-${index}`}
             className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
           >
             <SelectValue placeholder="Select transport" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-gray-800">
             {Object.entries(TRANSPORT_FACTORS).map(([key, value]) => (
               <SelectItem key={key} value={key} className="text-xs md:text-sm">
                 {value.name}
@@ -67,6 +68,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
         </Label>
         <Input
           id={`transport-distance-${index}`}
+          name={`transport-distance-${index}`}
           type="number"
           value={transport.distance === 0 ? '' : transport.distance}
           onChange={(e) => onUpdate("distance", e.target.value)}
@@ -94,6 +96,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
         </Label>
         <Input
           id={`transport-weight-${index}`}
+          name={`transport-weight-${index}`}
           type="number"
           value={transport.weight === 0 ? '' : transport.weight}
           onChange={(e) => onUpdate("weight", e.target.value)}
