@@ -6,8 +6,9 @@ import {
   updateProject as updateProjectInDB, 
   deleteProject as deleteProjectInDB 
 } from '@/services/projectService';
+import { Dispatch, SetStateAction } from 'react';
 
-export const useProjectOperations = (setProjects: (projects: SavedProject[]) => void) => {
+export const useProjectOperations = (setProjects: Dispatch<SetStateAction<SavedProject[]>>) => {
   const saveProject = async (userId: string, project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     try {
       const savedProject = await createProject(userId, project);

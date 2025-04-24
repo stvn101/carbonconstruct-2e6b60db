@@ -49,7 +49,7 @@ const AppContent = () => {
   }, []);
   
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <SkipToContent />
       <RouteChangeTracker />
       <ErrorBoundaryWrapper 
@@ -79,7 +79,7 @@ const AppContent = () => {
         </Routes>
       </ErrorBoundaryWrapper>
       <Toaster richColors position="top-right" />
-    </>
+    </div>
   );
 };
 
@@ -109,7 +109,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundaryWrapper 
       feature="Application" 
-      className="h-full min-h-screen"
+      className="min-h-screen flex flex-col overflow-x-hidden"
       onReset={() => {
         // Force page reload on critical error
         window.location.reload();
