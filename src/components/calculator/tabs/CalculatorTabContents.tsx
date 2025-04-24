@@ -1,6 +1,6 @@
 
-import { Tabs } from "@/components/ui/tabs";
-import { useState } from "react";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
 import MaterialsTabContent from "./content/MaterialsTabContent";
 import TransportTabContent from "./content/TransportTabContent";
 import EnergyTabContent from "./content/EnergyTabContent";
@@ -45,55 +45,103 @@ const CalculatorTabContents = ({
   const [activeTabValue, setActiveTabValue] = useState<string>("materials");
 
   const handleTabChange = (value: string) => {
+    console.log(`Tab changed to: ${value}`);
     setActiveTabValue(value);
-    
-    if (value === "materials" || value === "transport" && activeTabValue === "energy") {
-      onPrev();
-    } else if (value === "energy" || value === "results") {
+  };
+
+  // Ensure parent component is notified when tabs change
+  useEffect(() => {
+    console.log(`Tab state updated: ${activeTabValue}`);
+  }, [activeTabValue]);
+
+  // Custom navigation functions to ensure proper tab flow
+  const handleNext = () => {
+    console.log("Next button clicked, current tab:", activeTabValue);
+    if (typeof onNext === "function") {
       onNext();
+    }
+    
+    if (activeTabValue === "materials") {
+      setActiveTabValue("transport");
+      console.log("Moving to transport tab");
+    } else if (activeTabValue === "transport") {
+      setActiveTabValue("energy");
+      console.log("Moving to energy tab");
+    } else if (activeTabValue === "energy") {
+      setActiveTabValue("results");
+      console.log("Moving to results tab");
+      if (typeof onCalculate === "function") {
+        onCalculate();
+      }
+    }
+  };
+
+  const handlePrev = () => {
+    console.log("Previous button clicked, current tab:", activeTabValue);
+    if (typeof onPrev === "function") {
+      onPrev();
+    }
+    
+    if (activeTabValue === "transport") {
+      setActiveTabValue("materials");
+      console.log("Moving back to materials tab");
+    } else if (activeTabValue === "energy") {
+      setActiveTabValue("transport");
+      console.log("Moving back to transport tab");
+    } else if (activeTabValue === "results") {
+      setActiveTabValue("energy");
+      console.log("Moving back to energy tab");
     }
   };
 
   return (
-    <Tabs value={activeTabValue} onValueChange={handleTabChange}>
-      <MaterialsTabContent 
-        materials={calculationInput.materials}
-        onUpdateMaterial={onUpdateMaterial}
-        onAddMaterial={onAddMaterial}
-        onRemoveMaterial={onRemoveMaterial}
-        onNext={onNext}
-        demoMode={demoMode}
-      />
+    <Tabs value={activeTabValue} onValueChange={handleTabChange} className="w-full">
+      <TabsContent value="materials">
+        <MaterialsTabContent 
+          materials={calculationInput.materials}
+          onUpdateMaterial={onUpdateMaterial}
+          onAddMaterial={onAddMaterial}
+          onRemoveMaterial={onRemoveMaterial}
+          onNext={handleNext}
+          demoMode={demoMode}
+        />
+      </TabsContent>
       
-      <TransportTabContent 
-        transportItems={calculationInput.transport}
-        onUpdateTransport={onUpdateTransport}
-        onAddTransport={onAddTransport}
-        onRemoveTransport={onRemoveTransport}
-        onNext={onNext}
-        onPrev={onPrev}
-        demoMode={demoMode}
-      />
+      <TabsContent value="transport">
+        <TransportTabContent 
+          transportItems={calculationInput.transport}
+          onUpdateTransport={onUpdateTransport}
+          onAddTransport={onAddTransport}
+          onRemoveTransport={onRemoveTransport}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          demoMode={demoMode}
+        />
+      </TabsContent>
       
-      <EnergyTabContent 
-        energyItems={calculationInput.energy}
-        onUpdateEnergy={onUpdateEnergy}
-        onAddEnergy={onAddEnergy}
-        onRemoveEnergy={onRemoveEnergy}
-        onCalculate={onNext}
-        onPrev={onPrev}
-        demoMode={demoMode}
-      />
+      <TabsContent value="energy">
+        <EnergyTabContent 
+          energyItems={calculationInput.energy}
+          onUpdateEnergy={onUpdateEnergy}
+          onAddEnergy={onAddEnergy}
+          onRemoveEnergy={onRemoveEnergy}
+          onCalculate={handleNext}
+          onPrev={handlePrev}
+          demoMode={demoMode}
+        />
+      </TabsContent>
       
-      <ResultsTabContent 
-        calculationResult={calculationResult}
-        materials={calculationInput.materials}
-        transport={calculationInput.transport}
-        energy={calculationInput.energy}
-        onCalculate={onCalculate}
-        onPrev={onPrev}
-        demoMode={demoMode}
-      />
+      <TabsContent value="results">
+        <ResultsTabContent 
+          calculationResult={calculationResult}
+          materials={calculationInput.materials}
+          transport={calculationInput.transport}
+          energy={calculationInput.energy}
+          onCalculate={onCalculate}
+          onPrev={handlePrev}
+          demoMode={demoMode}
+        />
+      </TabsContent>
     </Tabs>
   );
 };

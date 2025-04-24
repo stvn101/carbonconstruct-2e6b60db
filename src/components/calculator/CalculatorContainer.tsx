@@ -94,8 +94,26 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
   };
 
   const handleTabChange = (newTab: string) => {
+    console.log(`Container: Tab change request to ${newTab}`);
     if (typeof calculatorContext.setActiveTab === 'function') {
       calculatorContext.setActiveTab(newTab as any);
+      console.log(`Container: Tab set to ${newTab}`);
+    }
+  };
+
+  const handleNextTab = () => {
+    console.log("Container: Next tab request");
+    if (typeof calculatorContext.handleNextTab === 'function') {
+      calculatorContext.handleNextTab();
+      console.log("Container: Next tab function called");
+    }
+  };
+
+  const handlePrevTab = () => {
+    console.log("Container: Previous tab request");
+    if (typeof calculatorContext.handlePrevTab === 'function') {
+      calculatorContext.handlePrevTab();
+      console.log("Container: Previous tab function called");
     }
   };
 
@@ -143,8 +161,8 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
               handleUpdateEnergy={calculatorContext.handleUpdateEnergy}
               handleAddEnergy={calculatorContext.handleAddEnergy}
               handleRemoveEnergy={calculatorContext.handleRemoveEnergy}
-              handlePrevTab={calculatorContext.handlePrevTab}
-              handleNextTab={calculatorContext.handleNextTab}
+              handlePrevTab={handlePrevTab}
+              handleNextTab={handleNextTab}
               demoMode={demoMode}
               tabError={tabError}
               onResetError={() => setTabError(null)}

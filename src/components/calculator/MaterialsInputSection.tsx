@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Leaf, AlertCircle, CheckCircle } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MaterialInput } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -58,6 +58,13 @@ const MaterialsInputSection = ({
         });
         onUpdateMaterial(index, "quantity", numValue);
       }
+    }
+  };
+
+  const handleNextButtonClick = () => {
+    console.log("Materials: Next button clicked");
+    if (typeof onNext === 'function') {
+      onNext();
     }
   };
 
@@ -124,7 +131,7 @@ const MaterialsInputSection = ({
         <Button 
           type="button" 
           size={isMobile ? "sm" : "default"}
-          onClick={onNext} 
+          onClick={handleNextButtonClick}
           className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm"
         >
           Next: Transport

@@ -64,6 +64,20 @@ const EnergyInputSection = ({
     }
   };
 
+  const handlePrevButtonClick = () => {
+    console.log("Energy: Previous button clicked");
+    if (typeof onPrev === 'function') {
+      onPrev();
+    }
+  };
+  
+  const handleCalculateButtonClick = () => {
+    console.log("Energy: Calculate button clicked");
+    if (typeof onCalculate === 'function') {
+      onCalculate();
+    }
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="text-md md:text-lg font-medium flex items-center gap-2">
@@ -97,7 +111,7 @@ const EnergyInputSection = ({
             type="button" 
             variant="outline" 
             size={isMobile ? "sm" : "default"}
-            onClick={onPrev} 
+            onClick={handlePrevButtonClick} 
             className="w-full sm:w-auto hover:bg-carbon-100 hover:text-carbon-800 border-carbon-300 text-xs md:text-sm"
           >
             Previous
@@ -114,7 +128,7 @@ const EnergyInputSection = ({
         <Button 
           type="button" 
           size={isMobile ? "sm" : "default"}
-          onClick={onCalculate} 
+          onClick={handleCalculateButtonClick} 
           className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white mt-2 sm:mt-0 text-xs md:text-sm"
         >
           Calculate Results
