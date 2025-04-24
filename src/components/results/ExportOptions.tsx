@@ -1,9 +1,12 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
 import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
 import { useToast } from "@/hooks/use-toast";
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface ExportOptionsProps {
   result: CalculationResult;
@@ -100,16 +103,103 @@ const ExportOptions = ({ result, materials, transport, energy }: ExportOptionsPr
   const handleExportPDF = () => {
     setIsExporting(true);
     
-    // For now, simulate PDF export with a toast notification
-    // In a real app, you'd use a library like jsPDF to generate a PDF
-    setTimeout(() => {
+    try {
+      // Create a new PDF document
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.text("Carbon Footprint Calculation Results", 14, 20);
+      
+      // Add date
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+      
+      // Add total emissions
+      doc.setFontSize(14);
+      doc.text(`Total Carbon Footprint: ${result.totalEmissions.toFixed(2)} kg CO2e`, 14, 40);
+      
+      // Add breakdown summaries
+      doc.setFontSize(12);
+      doc.text(`Materials: ${result.materialEmissions.toFixed(2)} kg CO2e (${(result.materialEmissions / result.totalEmissions * 100).toFixed(1)}%)`, 20, 55);
+      doc.text(`Transport: ${result.transportEmissions.toFixed(2)} kg CO2e (${(result.transportEmissions / result.totalEmissions * 100).toFixed(1)}%)`, 20, 65);
+      doc.text(`Energy: ${result.energyEmissions.toFixed(2)} kg CO2e (${(result.energyEmissions / result.totalEmissions * 100).toFixed(1)}%)`, 20, 75);
+      
+      // Materials table
+      doc.setFontSize(14);
+      doc.text("Materials Breakdown", 14, 90);
+      
+      autoTable(doc, {
+        startY: 95,
+        head: [['Material', 'Quantity (kg)', 'Emissions (kg CO2e)']],
+        body: materials.map(material => [
+          material.type, 
+          material.quantity.toString(), 
+          (result.breakdownByMaterial[material.type] || 0).toFixed(2)
+        ]),
+      });
+      
+      // Transport table
+      let currentY = doc.lastAutoTable?.finalY || 130;
+      
+      doc.setFontSize(14);
+      doc.text("Transport Breakdown", 14, currentY + 15);
+      
+      autoTable(doc, {
+        startY: currentY + 20,
+        head: [['Transport Type', 'Distance (km)', 'Weight (kg)', 'Emissions (kg CO2e)']],
+        body: transport.map(item => [
+          item.type, 
+          item.distance.toString(), 
+          item.weight.toString(), 
+          (result.breakdownByTransport[item.type] || 0).toFixed(2)
+        ]),
+      });
+      
+      // Energy table
+      currentY = doc.lastAutoTable?.finalY || 180;
+      
+      doc.setFontSize(14);
+      doc.text("Energy Breakdown", 14, currentY + 15);
+      
+      autoTable(doc, {
+        startY: currentY + 20,
+        head: [['Energy Type', 'Amount (kWh)', 'Emissions (kg CO2e)']],
+        body: energy.map(item => [
+          item.type, 
+          item.amount.toString(), 
+          (result.breakdownByEnergy[item.type] || 0).toFixed(2)
+        ]),
+      });
+      
+      // Add footer
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text('CarbonConstruct - Building Greener, Measuring Smarter', 14, 290);
+        doc.text(`Page ${i} of ${pageCount}`, 180, 290);
+      }
+      
+      // Save PDF
+      doc.save("carbon_footprint_results.pdf");
+      
       toast({
-        title: "PDF Export",
-        description: "PDF export functionality will be implemented in the next version.",
+        title: "Export Successful",
+        description: "Your carbon footprint results have been exported as PDF.",
         duration: 3000,
       });
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: "There was an error exporting your results. Please try again.",
+        duration: 3000,
+      });
+    } finally {
       setIsExporting(false);
-    }, 1000);
+    }
   };
   
   return (
