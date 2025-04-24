@@ -1,19 +1,18 @@
 
-import React from 'react';
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ProjectNameCard from "./ProjectNameCard";
-import CalculatorTabs from "./CalculatorTabs";
-import CalculatorTabContents from "./tabs/CalculatorTabContents";
+import { ErrorBoundary } from "react-error-boundary";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import PageLoading from "../ui/page-loading";
 import SaveProjectConfirmDialog from "./SaveProjectConfirmDialog";
 import CalculatorUsageTracker from "./CalculatorUsageTracker";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ErrorBoundary } from "react-error-boundary";
+import ErrorFallback from "./components/CalculatorErrorBoundary";
+import ProjectNameSection from "./components/ProjectNameSection";
+import CalculatorContent from "./components/CalculatorContent";
 import ErrorTrackingService from "@/services/error/errorTrackingService";
 
-export interface CalculatorContainerProps {
+interface CalculatorContainerProps {
   projectName: string;
   setProjectName: (name: string) => void;
   authError: string | null;
@@ -33,33 +32,9 @@ export interface CalculatorContainerProps {
   isPremiumUser?: boolean;
 }
 
-const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => {
-  React.useEffect(() => {
-    ErrorTrackingService.captureException(error, { 
-      component: 'CalculatorContainer', 
-      errorDetails: error.toString() 
-    });
-  }, [error]);
-  
-  return (
-    <div className="p-6 border border-destructive/50 bg-destructive/10 rounded-md text-center" role="alert">
-      <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
-      <p className="text-muted-foreground mb-4">{error?.message || "An error occurred while rendering the calculator"}</p>
-      <button 
-        onClick={resetErrorBoundary}
-        className="px-4 py-2 bg-carbon-600 text-white rounded-md hover:bg-carbon-700"
-      >
-        Try again
-      </button>
-    </div>
-  );
-};
-
-const CalculatorContainer = ({ 
+const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
   projectName,
   setProjectName,
-  authError,
-  setAuthError,
   isSaving,
   setIsSaving,
   showSaveDialog,
@@ -69,22 +44,14 @@ const CalculatorContainer = ({
   setIsCalculating,
   onSaveConfirm,
   onSaveClick,
-  onSignIn,
   isExistingProject,
   calculatorContext,
   isPremiumUser = false
-}: CalculatorContainerProps) => {
+}) => {
   const isMobile = useIsMobile()?.isMobile || false;
   const [tabError, setTabError] = useState<string | null>(null);
   const [calculatorKey, setCalculatorKey] = useState<number>(0);
-  
-  // Sync local state with calculator context
-  useEffect(() => {
-    if (calculatorContext && calculatorContext.activeTab) {
-      console.log(`CalculatorContainer syncing with calculator context tab: ${calculatorContext.activeTab}`);
-    }
-  }, [calculatorContext]);
-  
+
   if (!calculatorContext) {
     return (
       <div className="p-6 border border-destructive/50 bg-destructive/10 rounded-md text-center">
@@ -99,25 +66,6 @@ const CalculatorContainer = ({
       </div>
     );
   }
-  
-  const {
-    calculationInput,
-    calculationResult,
-    activeTab,
-    setActiveTab,
-    handleCalculate,
-    handleAddMaterial,
-    handleUpdateMaterial,
-    handleRemoveMaterial,
-    handleAddTransport,
-    handleUpdateTransport,
-    handleRemoveTransport,
-    handleAddEnergy,
-    handleUpdateEnergy,
-    handleRemoveEnergy,
-    handleNextTab,
-    handlePrevTab
-  } = calculatorContext;
 
   const handleCalculateWithTracking = () => {
     if (isCalculating) return;
@@ -125,7 +73,7 @@ const CalculatorContainer = ({
     setTabError(null);
     
     try {
-      handleCalculate();
+      calculatorContext.handleCalculate();
       setTimeout(() => {
         setIsCalculating(false);
       }, 100);
@@ -144,28 +92,12 @@ const CalculatorContainer = ({
     setCalculatorKey(prev => prev + 1);
     setTabError(null);
   };
-  
+
   const handleTabChange = (newTab: string) => {
-    try {
-      console.log(`CalculatorContainer handling tab change to: ${newTab}`);
-      if (typeof setActiveTab === 'function') {
-        setActiveTab(newTab as any);
-      } else {
-        console.error("setActiveTab is not available:", setActiveTab);
-      }
-    } catch (error) {
-      console.error("Error changing tab:", error);
-      ErrorTrackingService.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        { component: 'Calculator', action: 'change-tab' }
-      );
+    if (typeof calculatorContext.setActiveTab === 'function') {
+      calculatorContext.setActiveTab(newTab as any);
     }
   };
-
-  // Log the current active tab for debugging
-  useEffect(() => {
-    console.log(`CalculatorContainer current tab: ${activeTab}`);
-  }, [activeTab]);
 
   return (
     <TooltipProvider>
@@ -185,62 +117,45 @@ const CalculatorContainer = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="mb-6"
           >
-            <ProjectNameCard
-              projectName={projectName || ""}
-              onProjectNameChange={setProjectName}
+            <ProjectNameSection 
+              projectName={projectName}
+              setProjectName={setProjectName}
               onSave={onSaveClick}
               isSaving={isSaving}
               demoMode={demoMode}
             />
-          
-            <CalculatorTabs 
-              activeTab={activeTab || "materials"}
-              setActiveTab={handleTabChange}
-              onCalculate={handleCalculateWithTracking}
-              isMobile={!!isMobile}
-              isPremiumUser={!!isPremiumUser}
+
+            <CalculatorContent
+              activeTab={calculatorContext.activeTab}
+              handleTabChange={handleTabChange}
+              handleCalculateWithTracking={handleCalculateWithTracking}
+              isMobile={isMobile}
+              isPremiumUser={isPremiumUser}
+              calculationInput={calculatorContext.calculationInput}
+              calculationResult={calculatorContext.calculationResult}
+              handleUpdateMaterial={calculatorContext.handleUpdateMaterial}
+              handleAddMaterial={calculatorContext.handleAddMaterial}
+              handleRemoveMaterial={calculatorContext.handleRemoveMaterial}
+              handleUpdateTransport={calculatorContext.handleUpdateTransport}
+              handleAddTransport={calculatorContext.handleAddTransport}
+              handleRemoveTransport={calculatorContext.handleRemoveTransport}
+              handleUpdateEnergy={calculatorContext.handleUpdateEnergy}
+              handleAddEnergy={calculatorContext.handleAddEnergy}
+              handleRemoveEnergy={calculatorContext.handleRemoveEnergy}
+              handlePrevTab={calculatorContext.handlePrevTab}
+              handleNextTab={calculatorContext.handleNextTab}
+              demoMode={demoMode}
+              tabError={tabError}
+              onResetError={() => setTabError(null)}
             />
           </motion.div>
-          
-          {tabError && (
-            <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4" role="alert">
-              <p className="font-medium">{tabError}</p>
-            </div>
-          )}
-          
-          <ErrorBoundary 
-            FallbackComponent={ErrorFallback}
-            onReset={() => setTabError(null)}
-            resetKeys={[activeTab]}
-          >
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
-              <CalculatorTabContents
-                calculationInput={calculationInput}
-                calculationResult={calculationResult}
-                onUpdateMaterial={handleUpdateMaterial}
-                onAddMaterial={handleAddMaterial}
-                onRemoveMaterial={handleRemoveMaterial}
-                onUpdateTransport={handleUpdateTransport}
-                onAddTransport={handleAddTransport}
-                onRemoveTransport={handleRemoveTransport}
-                onUpdateEnergy={handleUpdateEnergy}
-                onAddEnergy={handleAddEnergy}
-                onRemoveEnergy={handleRemoveEnergy}
-                onCalculate={handleCalculateWithTracking}
-                onPrevTab={handlePrevTab}
-                onNextTab={handleNextTab}
-                demoMode={demoMode}
-              />
-            </div>
-          </ErrorBoundary>
           
           <PageLoading isLoading={isSaving} text="Saving project..." />
 
           <SaveProjectConfirmDialog
             isOpen={showSaveDialog}
-            projectName={projectName || ""}
+            projectName={projectName}
             isSaving={isSaving}
             onConfirm={onSaveConfirm}
             onCancel={() => setShowSaveDialog(false)}
@@ -249,7 +164,7 @@ const CalculatorContainer = ({
 
           <CalculatorUsageTracker
             demoMode={demoMode}
-            isPremiumUser={!!isPremiumUser}
+            isPremiumUser={isPremiumUser}
             onComplete={() => setIsCalculating(false)}
           />
         </div>
