@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { ErrorBoundary } from "react-error-boundary";
 import CalculatorTabs from "../CalculatorTabs";
 import CalculatorTabContents from "../tabs/CalculatorTabContents";
-import ErrorFallback from "./CalculatorErrorBoundary";
+import CalculatorErrorBoundaryWrapper from "./error/CalculatorErrorBoundaryWrapper";
+import TabErrorDisplay from "./error/TabErrorDisplay";
 
 interface CalculatorContentProps {
   activeTab: string;
@@ -54,9 +54,8 @@ const CalculatorContent: React.FC<CalculatorContentProps> = ({
 }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
-      <ErrorBoundary 
-        FallbackComponent={ErrorFallback}
-        onReset={onResetError}
+      <CalculatorErrorBoundaryWrapper 
+        onResetError={onResetError}
         resetKeys={[activeTab]}
       >
         <CalculatorTabs 
@@ -67,11 +66,7 @@ const CalculatorContent: React.FC<CalculatorContentProps> = ({
           isPremiumUser={isPremiumUser}
         />
         
-        {tabError && (
-          <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4" role="alert">
-            <p className="font-medium">{tabError}</p>
-          </div>
-        )}
+        <TabErrorDisplay error={tabError} />
 
         <CalculatorTabContents
           calculationInput={calculationInput}
@@ -90,7 +85,7 @@ const CalculatorContent: React.FC<CalculatorContentProps> = ({
           onNextTab={handleNextTab}
           demoMode={demoMode}
         />
-      </ErrorBoundary>
+      </CalculatorErrorBoundaryWrapper>
     </div>
   );
 };
