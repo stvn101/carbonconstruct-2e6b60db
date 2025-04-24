@@ -4,11 +4,11 @@ import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
 
 // Maximum retry attempts for operations
-export const MAX_RETRIES = 2;
-// Timeout for operations in milliseconds
-export const OPERATION_TIMEOUT = 8000;
+export const MAX_RETRIES = 3;
+// Increased timeout for operations in milliseconds (from 8000 to 15000)
+export const OPERATION_TIMEOUT = 15000;
 // Healthcheck timeout in milliseconds
-export const HEALTHCHECK_TIMEOUT = 5000;
+export const HEALTHCHECK_TIMEOUT = 8000;
 
 // Cache successful health check result for a short time
 let lastHealthCheckResult = false;
