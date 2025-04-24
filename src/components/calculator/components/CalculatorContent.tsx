@@ -1,9 +1,7 @@
 
 import React from 'react';
-import CalculatorTabs from "../CalculatorTabs";
-import CalculatorTabContents from "../tabs/CalculatorTabContents";
 import CalculatorErrorBoundaryWrapper from "./error/CalculatorErrorBoundaryWrapper";
-import TabErrorDisplay from "./error/TabErrorDisplay";
+import CalculatorTabSection from "./tabs/CalculatorTabSection";
 
 interface CalculatorContentProps {
   activeTab: string;
@@ -29,62 +27,14 @@ interface CalculatorContentProps {
   onResetError: () => void;
 }
 
-const CalculatorContent: React.FC<CalculatorContentProps> = ({
-  activeTab,
-  handleTabChange,
-  handleCalculateWithTracking,
-  isMobile,
-  isPremiumUser,
-  calculationInput,
-  calculationResult,
-  handleUpdateMaterial,
-  handleAddMaterial,
-  handleRemoveMaterial,
-  handleUpdateTransport,
-  handleAddTransport,
-  handleRemoveTransport,
-  handleUpdateEnergy,
-  handleAddEnergy,
-  handleRemoveEnergy,
-  handlePrevTab,
-  handleNextTab,
-  demoMode,
-  tabError,
-  onResetError
-}) => {
+const CalculatorContent: React.FC<CalculatorContentProps> = (props) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
       <CalculatorErrorBoundaryWrapper 
-        onResetError={onResetError}
-        resetKeys={[activeTab]}
+        onResetError={props.onResetError}
+        resetKeys={[props.activeTab]}
       >
-        <CalculatorTabs 
-          activeTab={activeTab}
-          setActiveTab={handleTabChange}
-          onCalculate={handleCalculateWithTracking}
-          isMobile={isMobile}
-          isPremiumUser={isPremiumUser}
-        />
-        
-        <TabErrorDisplay error={tabError} />
-
-        <CalculatorTabContents
-          calculationInput={calculationInput}
-          calculationResult={calculationResult}
-          onUpdateMaterial={handleUpdateMaterial}
-          onAddMaterial={handleAddMaterial}
-          onRemoveMaterial={handleRemoveMaterial}
-          onUpdateTransport={handleUpdateTransport}
-          onAddTransport={handleAddTransport}
-          onRemoveTransport={handleRemoveTransport}
-          onUpdateEnergy={handleUpdateEnergy}
-          onAddEnergy={handleAddEnergy}
-          onRemoveEnergy={handleRemoveEnergy}
-          onCalculate={handleCalculateWithTracking}
-          onPrevTab={handlePrevTab}
-          onNextTab={handleNextTab}
-          demoMode={demoMode}
-        />
+        <CalculatorTabSection {...props} />
       </CalculatorErrorBoundaryWrapper>
     </div>
   );
