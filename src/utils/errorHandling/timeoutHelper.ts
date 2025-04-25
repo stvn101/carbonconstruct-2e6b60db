@@ -40,17 +40,11 @@ export const isNetworkError = (error: unknown): boolean => {
 
 /**
  * More conservative retry utility with exponential backoff and jitter
- * 
- * @param operation Function to execute and potentially retry
- * @param maxRetries Maximum number of retry attempts
- * @param initialDelay Initial delay in ms
- * @param options Additional options
- * @returns Result of the operation
  */
 export const retryWithBackoff = async <T>(
   operation: () => Promise<T>,
-  maxRetries: number = 2, // Reduced from 3 to 2
-  initialDelay: number = 4000, // Increased from 3000
+  maxRetries: number = 2,
+  initialDelay: number = 4000,
   options: {
     onRetry?: (attempt: number) => void;
     shouldRetry?: (error: unknown) => boolean;
@@ -61,8 +55,8 @@ export const retryWithBackoff = async <T>(
   const { 
     onRetry, 
     shouldRetry = isNetworkError,
-    maxDelay = 60000,   // Cap at 1 minute
-    factor = 1.5        // More conservative than 2
+    maxDelay = 60000,
+    factor = 1.5
   } = options;
   
   let attempt = 0;
@@ -73,18 +67,15 @@ export const retryWithBackoff = async <T>(
     } catch (error) {
       attempt++;
       
-      // If we've reached max retries, or if we shouldn't retry this error type, throw
       if (attempt >= maxRetries || !shouldRetry(error)) {
         throw error;
       }
       
-      // Calculate delay with jitter
       const baseDelay = Math.min(
         initialDelay * Math.pow(factor, attempt - 1),
         maxDelay
       );
       
-      // Add jitter (±25%) to prevent thundering herd problem
       const jitterFactor = 0.25 * (Math.random() * 2 - 1);
       const delay = Math.floor(baseDelay * (1 + jitterFactor));
       
@@ -92,13 +83,12 @@ export const retryWithBackoff = async <T>(
         onRetry(attempt);
       }
       
-      // Check if we're offline before retrying
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         throw new Error('Network offline');
       }
       
-      // Wait before retrying
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 };
+
