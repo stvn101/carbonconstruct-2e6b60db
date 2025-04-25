@@ -1,5 +1,4 @@
 
-
 /**
  * Creates a timeout promise that rejects after specified milliseconds
  */
