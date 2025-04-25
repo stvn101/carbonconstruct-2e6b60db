@@ -1,121 +1,148 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { toast } from 'sonner';
+import { checkNetworkStatus, showErrorToast, showSuccessToast } from '@/utils/errorHandling/networkStatusHelper';
 
-export function useNetworkStatus() {
+/**
+ * Improved hook for detecting network status with better reliability for unstable connections
+ */
+export function useNetworkStatus(options = { showToasts: true }) {
+  // Start with navigator.onLine but consider it's not always accurate
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
   
-  // Use ref to track the last state to prevent duplicate toasts
+  // Use refs to track state between renders and prevent memory leaks
   const wasOnlineRef = useRef(isOnline);
-  // Debounce timer to prevent flashing on quick network changes
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  // Track consecutive offline detections to increase confidence
-  const offlineDetectionCountRef = useRef(0);
-  // Timer for periodic health checks
   const healthCheckTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Debounced setter for online status with improved stability
+  const mountedRef = useRef(true);
+  const offlineDetectionCountRef = useRef(0);
+  
+  // Improved debounced status setter with better reliability
   const setOnlineStatus = useCallback((status: boolean) => {
-    // Clear any existing timeout
+    // Skip updates after unmount
+    if (!mountedRef.current) return;
+    
+    // Clear any pending status changes
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
     
+    // Status hasn't changed, no need to update
+    if (wasOnlineRef.current === status) return;
+    
     if (status) {
-      // When going online, reset the counter and apply change more quickly
+      // When going online:
+      // 1. Reset detection counter
+      // 2. Update status relatively quickly
+      // 3. Show toast if needed
       offlineDetectionCountRef.current = 0;
+      
+      // Increased debounce from 500ms to 2000ms (2s)
+      // This helps ensure we're truly online before updating UI
       debounceTimerRef.current = setTimeout(() => {
-        if (wasOnlineRef.current !== status) {
+        if (!mountedRef.current) return;
+        
+        setIsOnline(status);
+        wasOnlineRef.current = status;
+        
+        // Only show toast if configured and we were previously offline
+        if (options.showToasts) {
+          showSuccessToast("Connection restored! You're back online.", 'network-online');
+          // Remove any offline toasts
+          showErrorToast("", 'network-offline', { duration: 1 });
+        }
+      }, 2000);
+    } else {
+      // When going offline:
+      // 1. Increment the detection counter
+      // 2. Only update after multiple detections
+      // 3. Use longer debounce to prevent flickering
+      offlineDetectionCountRef.current += 1;
+      
+      // Require multiple consecutive offline detections
+      // This prevents momentary network blips from triggering offline state
+      if (offlineDetectionCountRef.current >= 3) {
+        // Increased debounce from 1500ms to 3000ms (3s)
+        debounceTimerRef.current = setTimeout(() => {
+          if (!mountedRef.current) return;
+          
           setIsOnline(status);
           wasOnlineRef.current = status;
           
-          // Show toast only if we were previously offline
-          toast.dismiss('network-offline');
-          toast.success("Connection restored! You're back online.", {
-            id: 'network-online',
-            duration: 3000
-          });
-        }
-      }, 500); // Shorter delay for online status for better responsiveness
-    } else {
-      // When going offline, increase the counter and require multiple detections
-      offlineDetectionCountRef.current += 1;
-      
-      // Only consider offline after consecutive offline detections
-      // This prevents momentary network fluctuations from triggering offline state
-      if (offlineDetectionCountRef.current >= 2) {
-        debounceTimerRef.current = setTimeout(() => {
-          if (wasOnlineRef.current !== status) {
-            setIsOnline(status);
-            wasOnlineRef.current = status;
-            
-            toast.dismiss('network-online');
-            toast.error("You're offline. Some features may be unavailable.", { 
-              id: 'network-offline',
-              duration: 0 // Keep showing until back online
+          // Show toast if configured
+          if (options.showToasts) {
+            showErrorToast("You're offline. Some features may be unavailable.", 'network-offline', {
+              persistent: true
             });
           }
-        }, 1500); // Slightly shorter delay for offline status for better UX
+        }, 3000);
       } else {
-        // If it's the first offline detection, set a short timeout to check again
+        // First/second offline detection, wait before confirming
         debounceTimerRef.current = setTimeout(() => {
-          // If we're back online by now, reset the counter
+          // Reset counter if we're now online
           if (navigator.onLine) {
             offlineDetectionCountRef.current = 0;
           }
-        }, 1000);
+        }, 2000);
       }
     }
-  }, []);
+  }, [options.showToasts]);
 
+  // Effect for listening to network events and performing health checks
   useEffect(() => {
-    const handleOnline = () => setOnlineStatus(true);
-    const handleOffline = () => setOnlineStatus(false);
+    mountedRef.current = true;
+    
+    const handleOnline = async () => {
+      // Verify we're really online with a health check
+      const reallyOnline = await checkNetworkStatus();
+      setOnlineStatus(reallyOnline);
+    };
+    
+    const handleOffline = () => {
+      setOnlineStatus(false);
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Periodic health check to detect partial network issues
-    healthCheckTimerRef.current = setInterval(() => {
-      // If the browser thinks we're online but connectivity is actually partial,
-      // this can trigger a more accurate state
-      if (navigator.onLine) {
-        fetch('/favicon.ico', { 
-          method: 'HEAD', 
-          cache: 'no-store',
-          // Add a timeout to prevent hanging requests
-          signal: AbortSignal.timeout(3000)
-        })
-        .catch(() => {
-          // Only consider offline if we can't reach our own server
-          // and multiple checks fail
-          if (offlineDetectionCountRef.current < 2) {
-            offlineDetectionCountRef.current += 1;
-          } else {
-            setOnlineStatus(false);
-          }
-        });
+    // Check current status when component mounts
+    const checkCurrentStatus = async () => {
+      if (!mountedRef.current) return;
+      
+      const status = await checkNetworkStatus();
+      
+      // Only update if different from current state
+      if (status !== isOnline) {
+        setOnlineStatus(status);
       }
-    }, 30000); // Check every 30 seconds
+    };
+    
+    // Initial check with slight delay
+    const initialCheckTimer = setTimeout(checkCurrentStatus, 1000);
+    
+    // Periodically check network status (60s instead of 30s)
+    // This will help catch cases where browser thinks we're online but we're not
+    healthCheckTimerRef.current = setInterval(checkCurrentStatus, 60000);
 
     return () => {
+      mountedRef.current = false;
+      
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
       if (healthCheckTimerRef.current) {
         clearInterval(healthCheckTimerRef.current);
       }
+      clearTimeout(initialCheckTimer);
+      
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      
-      // Clear toasts on unmount to prevent stuck messages
-      toast.dismiss('network-online');
-      toast.dismiss('network-offline');
     };
-  }, [setOnlineStatus]);
+  }, [isOnline, setOnlineStatus]);
 
   return { isOnline };
 }
+
+export default useNetworkStatus;

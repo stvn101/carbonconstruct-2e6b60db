@@ -1,11 +1,14 @@
-
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { calculateBackoffDelay, RetryOptions, RetryResult } from './retryUtils';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 /**
- * Hook for implementing retry logic with exponential backoff
- * @param options Retry configuration options
- * @returns Retry state and control functions
+ * Improved hook for implementing retry logic with exponential backoff
+ * Adds:
+ * - Network status awareness to avoid retries when offline
+ * - Better timeout management
+ * - More reliable memory leak prevention
+ * - Improved attempt tracking
  */
 export function useRetryCore({
   callback,
@@ -18,6 +21,7 @@ export function useRetryCore({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
   const attemptRef = useRef(0);
+  const { isOnline } = useNetworkStatus({ showToasts: false });
 
   // Clean up any existing timeout on unmount
   useEffect(() => {
@@ -47,6 +51,16 @@ export function useRetryCore({
   useEffect(() => {
     // Skip if we're not in a retry state or if we've reached max retries
     if (retryCount === 0 || retryCount > maxRetries) return;
+    
+    // Skip retries when offline - no point trying if we know we're offline
+    if (!isOnline) {
+      // If we're offline, don't increment retry count, but trigger max retries callback
+      if (onMaxRetriesReached) {
+        onMaxRetriesReached();
+      }
+      setIsRetrying(false);
+      return;
+    }
 
     // Set retrying state
     setIsRetrying(true);
@@ -58,21 +72,37 @@ export function useRetryCore({
     }
     
     try {
-      // Calculate delay with exponential backoff
-      const delay = calculateBackoffDelay(retryCount);
+      // Calculate delay with improved exponential backoff
+      // Now using a more conservative growth curve (1.8 instead of 2)
+      // This slows down retry attempts more gradually
+      const delay = calculateBackoffDelay(retryCount, 1.8, 2000, 45000);
+      
+      console.info(`Scheduling retry attempt ${retryCount}/${maxRetries} in ${delay}ms`);
       
       // Set up the next retry attempt
       timeoutRef.current = setTimeout(async () => {
         // Check if component is still mounted before proceeding
         if (!isMountedRef.current) return;
         
+        // Skip if we're now offline
+        if (!isOnline) {
+          setIsRetrying(false);
+          if (onMaxRetriesReached) {
+            onMaxRetriesReached();
+          }
+          return;
+        }
+        
         // Track this attempt
         attemptRef.current += 1;
         
         try {
+          console.info(`Executing retry attempt ${attemptRef.current}`);
           await callback();
+          
           // If successful, reset retry count only if still mounted
           if (isMountedRef.current) {
+            console.info(`Retry attempt ${attemptRef.current} succeeded`);
             setRetryCount(0);
             setIsRetrying(false);
             attemptRef.current = 0;
@@ -86,12 +116,14 @@ export function useRetryCore({
           
           // If we've reached max retries, trigger the callback and stop
           if (retryCount >= maxRetries) {
+            console.warn(`Max retries (${maxRetries}) reached`);
             if (onMaxRetriesReached) {
               onMaxRetriesReached();
             }
             setIsRetrying(false);
           } else {
             // Otherwise, increment retry count for the next attempt
+            console.info(`Scheduling next retry (${retryCount + 1}/${maxRetries})`);
             setRetryCount(retryCount + 1);
           }
         }
@@ -111,7 +143,7 @@ export function useRetryCore({
     }
     
     // Include all dependencies to ensure the effect runs when needed
-  }, [retryCount, callback, maxRetries, onMaxRetriesReached, setRetryCount]);
+  }, [retryCount, callback, maxRetries, onMaxRetriesReached, setRetryCount, isOnline]);
 
   return {
     isRetrying,
