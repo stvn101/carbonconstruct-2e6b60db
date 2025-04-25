@@ -1,9 +1,8 @@
-
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
 import { toast } from 'sonner';
-import { handleFetchError, isOffline } from '@/utils/errorHandling';
+import { handleNetworkError, isOffline } from '@/utils/errorHandling';
 
 export const useAuthHandlers = () => {
   const login = async (email: string, password: string) => {
@@ -28,7 +27,7 @@ export const useAuthHandlers = () => {
       toast.success("Signed in successfully!");
     } catch (error: any) {
       console.error("Login error:", error.message);
-      handleFetchError(error, 'login');
+      handleNetworkError(error, 'login');
       throw error;
     }
   };
@@ -44,7 +43,7 @@ export const useAuthHandlers = () => {
       await supabase.auth.signOut();
     } catch (error: any) {
       console.error("Logout error:", error.message);
-      handleFetchError(error, 'logout');
+      handleNetworkError(error, 'logout');
       throw error;
     }
   };
@@ -73,7 +72,7 @@ export const useAuthHandlers = () => {
       toast.success("Registration successful! Please check your email to verify your account.");
     } catch (error: any) {
       console.error("Registration error:", error.message);
-      handleFetchError(error, 'register');
+      handleNetworkError(error, 'register');
       throw error;
     }
   };
@@ -97,7 +96,7 @@ export const useAuthHandlers = () => {
       if (error) throw error;
     } catch (error: any) {
       console.error("GitHub login error:", error.message);
-      handleFetchError(error, 'github-login');
+      handleNetworkError(error, 'github-login');
       throw error;
     }
   };
@@ -125,7 +124,7 @@ export const useAuthHandlers = () => {
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Profile update error:", error.message);
-      handleFetchError(error, 'profile-update');
+      handleNetworkError(error, 'profile-update');
       toast.error("Failed to update profile");
       throw error;
     }

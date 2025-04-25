@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { loadProjects } from '@/utils/projectLoader';
@@ -9,7 +8,7 @@ import {
   clearErrorToasts, 
   showErrorToast,
   showSuccessToast
-} from '@/utils/errorHandling/networkStatusHelper';
+} from '@/utils/errorHandling';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
 // Number of retry attempts for project loading
