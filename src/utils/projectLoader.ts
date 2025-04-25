@@ -5,7 +5,7 @@ import {
   isOffline, 
   showErrorToast, 
   clearErrorToasts 
-} from '@/utils/errorHandling';
+} from '@/utils/errorHandling/networkStatusHelper';
 import { trackMetric } from '@/contexts/performance/metrics';
 import { SavedProject } from '@/types/project';
 import { retryWithBackoff } from '@/utils/errorHandling/timeoutHelper';

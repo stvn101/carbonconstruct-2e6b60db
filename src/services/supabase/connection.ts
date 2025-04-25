@@ -138,75 +138,46 @@ export const withTimeout = async <T>(
 /**
  * Calculate backoff delay with jitter to prevent thundering herd
  */
-const calculateBackoffDelay = (attempt: number, baseDelay: number = 1000, maxDelay: number = 30000): number => {
-  // More conservative exponential backoff (base * 1.5^attempt instead of 2^attempt)
-  // This gives a gentler curve: 1s, 1.5s, 2.25s, 3.37s, 5.06s, etc.
-  const delay = Math.min(baseDelay * Math.pow(1.5, attempt), maxDelay);
+export const calculateBackoffDelay = (attempt: number, baseDelay: number = 1000, maxDelay: number = 15000): number => {
+  // Base delay with exponential factor (1.5 instead of 2 for more gradual increase)
+  const factor = 1.5;
   
-  // Add jitter to prevent thundering herd problem (±15%)
+  // Calculate exponential delay
+  const delay = Math.min(baseDelay * Math.pow(factor, attempt - 1), maxDelay);
+  
+  // Add jitter (±15%) to prevent thundering herd problem
   const jitter = delay * 0.15 * (Math.random() * 2 - 1);
   
   return Math.floor(delay + jitter);
 };
 
 /**
- * Retryable version of checkSupabaseConnection
+ * Check Supabase connection with retries
+ * @param maxRetries Maximum number of retry attempts
+ * @param timeout Timeout in milliseconds for each attempt
+ * @returns Promise that resolves to boolean indicating connection status
  */
 export const checkSupabaseConnectionWithRetry = async (
-  maxRetries = 2, 
-  initialDelay = 2000 // Increased from 1s to 2s
+  maxRetries: number = 2, 
+  timeout: number = HEALTHCHECK_TIMEOUT
 ): Promise<boolean> => {
-  let attempts = 0;
-  
-  while (attempts <= maxRetries) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const isConnected = await checkSupabaseConnection();
-      if (isConnected) return true;
-    } catch (error) {
-      console.warn(`Connection check attempt ${attempts + 1} failed:`, error);
-    }
-    
-    attempts++;
-    if (attempts <= maxRetries) {
-      // Wait before next attempt using improved backoff
-      await new Promise(resolve => setTimeout(resolve, calculateBackoffDelay(attempts - 1, initialDelay)));
+      // For retries, use increased timeout
+      return await withTimeout(() => checkSupabaseConnection(), timeout);
+    } catch (err) {
+      console.warn(`Connection check failed (attempt ${attempt + 1}/${maxRetries})`, err);
+      
+      // If this is the last attempt, return false
+      if (attempt === maxRetries - 1) {
+        return false;
+      }
+      
+      // Wait before retrying
+      const delay = calculateBackoffDelay(attempt + 1);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   
   return false;
-};
-
-/**
- * Gets an AbortController for Supabase operations
- * Performs a health check first and aborts if unhealthy
- */
-export const getAbortControllerWithHealthCheck = async (
-  timeout: number = OPERATION_TIMEOUT
-): Promise<AbortController> => {
-  const controller = new AbortController();
-  
-  // Add timeout signal to abort after specified time
-  setTimeout(() => {
-    if (!controller.signal.aborted) {
-      controller.abort(new DOMException('Timeout', 'TimeoutError'));
-    }
-  }, timeout);
-  
-  try {
-    // Only check connection if we don't have a recent health check
-    const now = Date.now();
-    if (now - lastHealthCheckTime > HEALTHCHECK_CACHE_TTL) {
-      const isConnected = await checkSupabaseConnection();
-      if (!isConnected) {
-        controller.abort(new DOMException('Connection unavailable', 'NetworkError'));
-      }
-    } else if (!lastHealthCheckResult) {
-      controller.abort(new DOMException('Connection unavailable', 'NetworkError'));
-    }
-  } catch (error) {
-    console.error('Health check failed during abort controller creation', error);
-    controller.abort(new DOMException('Health check failed', 'NetworkError'));
-  }
-  
-  return controller;
 };

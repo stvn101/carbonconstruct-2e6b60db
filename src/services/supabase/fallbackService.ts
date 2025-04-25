@@ -6,7 +6,7 @@ import {
   OPERATION_TIMEOUT, 
   MAX_RETRIES, 
   withTimeout,
-  calculateBackoffDelay
+  calculateBackoffDelay as connectionCalculateBackoffDelay
 } from './connection';
 import OfflineStorage from './offlineStorage';
 import { showErrorToast, showSuccessToast, isOffline } from '@/utils/errorHandling/networkStatusHelper';
@@ -116,7 +116,7 @@ export const performDbOperation = async <T>(
       }
       
       // Wait before retry with improved backoff calculation
-      const backoffDelay = calculateBackoffDelay(attempts);
+      const backoffDelay = fallbackCalculateBackoffDelay(attempts);
       console.info(`Retrying ${operationName} in ${backoffDelay}ms...`);
       await new Promise(resolve => setTimeout(resolve, backoffDelay));
     }
@@ -182,7 +182,7 @@ export const withOfflineFallback = async <T>(
 };
 
 // Helper function for calculating backoff delay with jitter
-export const calculateBackoffDelay = (attempt: number): number => {
+export const fallbackCalculateBackoffDelay = (attempt: number): number => {
   // Base delay starts at 2 seconds (increased from previous value)
   const baseDelay = 2000;
   // More conservative exponential factor (1.5 instead of 2)
