@@ -20,7 +20,8 @@ import {
 import { 
   timeoutPromise, 
   withTimeout,
-  retryWithBackoff
+  retryWithBackoff,
+  isNetworkError
 } from './timeoutHelper';
 
 /**
@@ -57,5 +58,6 @@ export {
   addNetworkListeners,
   timeoutPromise,
   withTimeout,
-  retryWithBackoff
+  retryWithBackoff,
+  isNetworkError
 };
