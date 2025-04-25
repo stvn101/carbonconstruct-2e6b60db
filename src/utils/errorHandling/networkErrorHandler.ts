@@ -1,7 +1,6 @@
-
 import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
-import { showErrorToast } from './networkStatusHelper';
+import { showErrorToast } from './toastHelpers';
 
 // Keep track of shown network errors to prevent duplicates
 const shownNetworkErrors = new Set<string>();
