@@ -39,7 +39,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
       // 3. Show toast if needed
       offlineDetectionCountRef.current = 0;
       
-      // Increased debounce from 2000ms to 5000ms (5s)
+      // Increased debounce from 5000ms to 6000ms (6s)
       // This helps ensure we're truly online before updating UI
       debounceTimerRef.current = setTimeout(() => {
         if (!mountedRef.current) return;
@@ -53,7 +53,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
           // Remove any offline toasts
           showErrorToast("", 'network-offline', { duration: 1 });
         }
-      }, 5000);
+      }, 6000);
     } else {
       // When going offline:
       // 1. Increment the detection counter
@@ -64,7 +64,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
       // Require multiple consecutive offline detections
       // This prevents momentary network blips from triggering offline state
       if (offlineDetectionCountRef.current >= 3) {
-        // Increased debounce from 3000ms to 6000ms (6s)
+        // Increased debounce from 6000ms to 8000ms (8s)
         debounceTimerRef.current = setTimeout(() => {
           if (!mountedRef.current) return;
           
@@ -77,7 +77,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
               persistent: true
             });
           }
-        }, 6000);
+        }, 8000);
       } else {
         // First/second offline detection, wait before confirming
         debounceTimerRef.current = setTimeout(() => {
@@ -126,10 +126,10 @@ export function useNetworkStatus(options = { showToasts: true }) {
     // Initial check with slight delay
     const initialCheckTimer = setTimeout(checkCurrentStatus, 1000);
     
-    // Periodically check network status (90s instead of 60s)
+    // Periodically check network status (120s instead of 90s)
     // This will help catch cases where browser thinks we're online but we're not
     // while reducing battery usage and network traffic
-    healthCheckTimerRef.current = setInterval(checkCurrentStatus, 90000);
+    healthCheckTimerRef.current = setInterval(checkCurrentStatus, 120000);
 
     return () => {
       mountedRef.current = false;

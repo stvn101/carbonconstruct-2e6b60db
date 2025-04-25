@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 // Keep track of shown error toasts to prevent duplicates
@@ -240,8 +239,8 @@ export const addNetworkListeners = (
   };
   
   // Set up listeners for standard browser events
-  window.addEventListener('offline', handleOffline);
   window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
   
   // Set up listener for custom app:offline event
   window.addEventListener('app:offline', handleOffline);
