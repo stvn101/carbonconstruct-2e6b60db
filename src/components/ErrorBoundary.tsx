@@ -1,4 +1,3 @@
-
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,8 @@ import { Card } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Home, ChevronLeft, Wifi, WifiOff } from "lucide-react";
 import errorTrackingService from "@/services/error/errorTrackingService";
 import { toast } from "sonner";
-import { checkNetworkStatus } from "@/utils/errorHandling/networkStatusHelper";
-import { checkSupabaseConnectionWithRetry } from "@/services/supabase/connection";
+import { checkNetworkStatus } from '@/utils/errorHandling';
+import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
 interface Props {
   children: ReactNode;
