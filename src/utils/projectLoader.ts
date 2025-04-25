@@ -4,11 +4,11 @@ import { fetchUserProjects } from '@/services/projectService';
 import { 
   isOffline, 
   showErrorToast, 
-  clearErrorToasts 
+  clearErrorToasts,
+  retryWithBackoff 
 } from '@/utils/errorHandling';
 import { trackMetric } from '@/contexts/performance/metrics';
 import { SavedProject } from '@/types/project';
-import { retryWithBackoff } from '@/utils/errorHandling';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
 /**

@@ -9,7 +9,7 @@ import {
   calculateBackoffDelay as connectionCalculateBackoffDelay
 } from './connection';
 import OfflineStorage from './offlineStorage';
-import { showErrorToast, showSuccessToast, isOffline } from '@/utils/errorHandling/networkStatusHelper';
+import { showErrorToast, showSuccessToast, isOffline } from '@/utils/errorHandling';
 
 // Track connection notification state
 const CONNECTION_TOAST_SHOWN = {
@@ -181,7 +181,7 @@ export const withOfflineFallback = async <T>(
   });
 };
 
-// Helper function for calculating backoff delay with jitter
+// Helper function for calculating backoff delay with jitter (renamed to prevent conflict)
 export const fallbackCalculateBackoffDelay = (attempt: number): number => {
   // Base delay starts at 2 seconds (increased from previous value)
   const baseDelay = 2000;

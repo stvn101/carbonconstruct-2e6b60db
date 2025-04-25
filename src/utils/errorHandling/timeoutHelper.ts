@@ -49,8 +49,8 @@ export const isNetworkError = (error: unknown): boolean => {
  */
 export const retryWithBackoff = async <T>(
   operation: () => Promise<T>,
-  maxRetries: number = 3,
-  initialDelay: number = 3000, // Increased from 2000
+  maxRetries: number = 2, // Reduced from 3 to 2
+  initialDelay: number = 4000, // Increased from 3000
   options: {
     onRetry?: (attempt: number) => void;
     shouldRetry?: (error: unknown) => boolean;
@@ -61,7 +61,7 @@ export const retryWithBackoff = async <T>(
   const { 
     onRetry, 
     shouldRetry = isNetworkError,
-    maxDelay = 60000,   // Increased from 30000
+    maxDelay = 60000,   // Cap at 1 minute
     factor = 1.5        // More conservative than 2
   } = options;
   
@@ -90,6 +90,11 @@ export const retryWithBackoff = async <T>(
       
       if (onRetry) {
         onRetry(attempt);
+      }
+      
+      // Check if we're offline before retrying
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Network offline');
       }
       
       // Wait before retrying

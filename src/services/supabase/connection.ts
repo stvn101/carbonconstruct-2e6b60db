@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
-import { showErrorToast, showSuccessToast } from '@/utils/errorHandling/networkStatusHelper';
+import { showErrorToast, showSuccessToast } from '@/utils/errorHandling';
 
 // Configuration constants (adjusted values)
 export const MAX_RETRIES = 2; // Reduced from 3 to 2 for less aggressive retrying
@@ -138,6 +138,7 @@ export const withTimeout = async <T>(
 
 /**
  * Calculate backoff delay with jitter to prevent thundering herd
+ * This function is properly exported to be used elsewhere
  */
 export const calculateBackoffDelay = (attempt: number, baseDelay: number = 3000, maxDelay: number = 30000): number => {
   // Base delay with exponential factor (1.5 instead of 2 for more gradual increase)
@@ -174,7 +175,7 @@ export const checkSupabaseConnectionWithRetry = async (
         return false;
       }
       
-      // Wait before retrying
+      // Wait before retrying using the exported calculateBackoffDelay function
       const delay = calculateBackoffDelay(attempt + 1);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
