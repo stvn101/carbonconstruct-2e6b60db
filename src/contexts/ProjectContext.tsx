@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { ProjectContextType } from '@/types/project';
@@ -12,8 +13,9 @@ import {
 } from '@/services/supabase/connection';
 import { 
   showErrorToast,
-  showSuccessToast 
-} from '@/utils/errorHandling/networkStatusHelper';
+  showSuccessToast,
+  isOffline
+} from '@/utils/errorHandling';
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -41,6 +43,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [hasInitialized, setHasInitialized] = useState(false);
   const [projectChannel, setProjectChannel] = useState<any | null>(null);
   const [initializationAttempts, setInitializationAttempts] = useState(0);
+  const [connectionRetries, setConnectionRetries] = useState(0);
   
   const { subscribeToProjects } = useProjectRealtime(user?.id, setProjects);
 
@@ -60,23 +63,44 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setIsLoading(true);
       setInitializationAttempts(prev => prev + 1);
       
-      const canConnect = await checkSupabaseConnectionWithRetry(1, 3000);
+      // Check if we're offline first
+      if (isOffline()) {
+        showErrorToast(
+          "You're offline. Project data will load when you reconnect.", 
+          "project-offline-mode",
+          { persistent: true }
+        );
+        setIsLoading(false);
+        return;
+      }
+      
+      // Improved connection check with longer timeout for initial load
+      const canConnect = await checkSupabaseConnectionWithRetry(
+        Math.min(initializationAttempts + 1, 3), // More retries on subsequent attempts
+        8000 // Longer timeout for connection check
+      );
       
       if (!canConnect) {
+        // First attempt should not show an error toast, but subsequent ones should
         if (initializationAttempts > 0) {
           showErrorToast(
             "Unable to connect to the server. Using offline mode.", 
             "offline-mode-notification",
-            { duration: 8000 }
+            { duration: 10000 }
           );
+          
+          // Schedule a retry with backoff
+          setConnectionRetries(prev => prev + 1);
         }
         
         setIsLoading(false);
         return;
       }
 
+      // Load the projects with better error handling
       await loadProjects();
       
+      // Only attempt subscription if we successfully loaded projects
       try {
         const channel = subscribeToProjects();
         if (channel) {
@@ -84,10 +108,14 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       } catch (subscribeError) {
         console.warn("Failed to set up realtime subscription:", subscribeError);
+        // Non-critical error, continue without realtime updates
       }
       
+      // Mark as initialized and reset connection retries
       setHasInitialized(true);
+      setConnectionRetries(0);
       
+      // Show a success message if we previously had connection issues
       if (initializationAttempts > 1) {
         showSuccessToast(
           "Connection restored! Your data is now up-to-date.", 
@@ -102,6 +130,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       );
       setIsLoading(false);
       
+      // Only show error message after multiple attempts
       if (initializationAttempts > 1) {
         showErrorToast(
           "Unable to load project data. Please try again later.", 
@@ -109,9 +138,20 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
           { duration: 8000 }
         );
       }
+      
+      // Schedule a retry with backoff
+      setConnectionRetries(prev => prev + 1);
     }
-  }, [user, hasInitialized, loadProjects, subscribeToProjects, initializationAttempts, setIsLoading, setRetryCount]);
+  }, [
+    user, 
+    hasInitialized, 
+    loadProjects, 
+    subscribeToProjects, 
+    initializationAttempts, 
+    setIsLoading
+  ]);
 
+  // Effect for initial load and handling user changes
   useEffect(() => {
     let isMounted = true;
     
@@ -119,19 +159,23 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (isMounted && user && !hasInitialized) {
         initializeData();
       } else if (isMounted && !user) {
+        // Reset state when user logs out
         setProjects([]);
         setIsLoading(false);
         setHasInitialized(false);
         setInitializationAttempts(0);
+        setConnectionRetries(0);
       }
     };
     
-    const initTimer = setTimeout(startInitialization, 800);
+    // Delay initial load slightly to allow auth to settle
+    const initTimer = setTimeout(startInitialization, 1000);
 
     return () => {
       isMounted = false;
       clearTimeout(initTimer);
       
+      // Clean up subscription on unmount
       if (projectChannel) {
         try {
           supabase.removeChannel(projectChannel);
@@ -140,23 +184,54 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       }
     };
-  }, [user, initializeData, hasInitialized, loadProjects, subscribeToProjects, setProjects, setIsLoading, setRetryCount]);
+  }, [user, initializeData, hasInitialized, setProjects, setIsLoading]);
 
+  // Effect for connection retries with exponential backoff
   useEffect(() => {
-    if (!user || hasInitialized || initializationAttempts === 0) {
+    if (!user || hasInitialized || connectionRetries === 0) {
       return;
     }
     
-    const interval = initializationAttempts === 1 ? 10000 :
-                     initializationAttempts === 2 ? 30000 :
-                     initializationAttempts === 3 ? 60000 : 120000;
+    // Use exponential backoff for retries with longer intervals
+    // First retry: 15s, second: 45s, third: 90s, subsequent: 3min
+    const getRetryInterval = () => {
+      if (connectionRetries === 1) return 15000;
+      if (connectionRetries === 2) return 45000;
+      if (connectionRetries === 3) return 90000;
+      return 180000; // 3 minutes for subsequent retries
+    };
+    
+    const interval = getRetryInterval();
+    console.log(`Scheduling retry attempt in ${interval/1000}s (retry #${connectionRetries})`);
     
     const timer = setTimeout(() => {
-      initializeData();
+      if (!hasInitialized) {
+        initializeData();
+      }
     }, interval);
     
     return () => clearTimeout(timer);
-  }, [user, hasInitialized, initializationAttempts, initializeData]);
+  }, [user, hasInitialized, connectionRetries, initializeData]);
+
+  // Listen for online status changes to trigger reconnection
+  useEffect(() => {
+    const handleOnline = () => {
+      if (user && !hasInitialized) {
+        // Reset connection retries when network comes back
+        setConnectionRetries(0);
+        // Small delay to let connection stabilize
+        setTimeout(() => {
+          initializeData();
+        }, 2000);
+      }
+    };
+    
+    window.addEventListener('online', handleOnline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [user, hasInitialized, initializeData]);
 
   return (
     <ProjectContext.Provider value={contextValue}>

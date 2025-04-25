@@ -5,12 +5,12 @@ import errorTrackingService from '@/services/error/errorTrackingService';
 import { showErrorToast, showSuccessToast } from '@/utils/errorHandling/networkStatusHelper';
 
 // Configuration constants (adjusted values)
-export const MAX_RETRIES = 3; // Keep at 3 but use better backoff
-export const OPERATION_TIMEOUT = 30000; // Increased from 20s to 30s
-export const HEALTHCHECK_TIMEOUT = 15000; // Increased from 10s to 15s
+export const MAX_RETRIES = 2; // Reduced from 3 to 2 for less aggressive retrying
+export const OPERATION_TIMEOUT = 40000; // Increased from 30s to 40s
+export const HEALTHCHECK_TIMEOUT = 20000; // Increased from 15s to 20s
 
 // Health check cache to prevent excessive checks
-const HEALTHCHECK_CACHE_TTL = 20000; // Increased from 10s to 20s
+const HEALTHCHECK_CACHE_TTL = 30000; // Increased from 20s to 30s
 let lastHealthCheckResult = false;
 let lastHealthCheckTime = 0;
 
@@ -43,7 +43,8 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
         // This avoids loading actual data and is more efficient
         const { count, error } = await supabase
           .from('projects')
-          .select('*', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true })
+          .limit(1);
           
         return { data: count, error };
       } catch (innerError) {
@@ -69,7 +70,7 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
       // Auto-reset the success state after a delay
       setTimeout(() => {
         CONNECTION_NOTIFICATIONS.success = false;
-      }, 60000);
+      }, 60000); // 1 minute
     }
     
     return isConnected;
@@ -83,9 +84,9 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     // Show error message if enough time has passed
     if (!CONNECTION_NOTIFICATIONS.failure || now - CONNECTION_NOTIFICATIONS.timestamp > 60000) {
       showErrorToast(
-        'Unable to connect to the database. Some features may be unavailable.',
+        'Unable to connect to the server. Some features may be unavailable.',
         'supabase-connection-error',
-        { duration: 8000 }
+        { duration: 10000 }
       );
       
       CONNECTION_NOTIFICATIONS.failure = true;
@@ -138,15 +139,15 @@ export const withTimeout = async <T>(
 /**
  * Calculate backoff delay with jitter to prevent thundering herd
  */
-export const calculateBackoffDelay = (attempt: number, baseDelay: number = 1000, maxDelay: number = 15000): number => {
+export const calculateBackoffDelay = (attempt: number, baseDelay: number = 3000, maxDelay: number = 30000): number => {
   // Base delay with exponential factor (1.5 instead of 2 for more gradual increase)
   const factor = 1.5;
   
   // Calculate exponential delay
   const delay = Math.min(baseDelay * Math.pow(factor, attempt - 1), maxDelay);
   
-  // Add jitter (±15%) to prevent thundering herd problem
-  const jitter = delay * 0.15 * (Math.random() * 2 - 1);
+  // Add jitter (±20%) to prevent thundering herd problem
+  const jitter = delay * 0.2 * (Math.random() * 2 - 1);
   
   return Math.floor(delay + jitter);
 };

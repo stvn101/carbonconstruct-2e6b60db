@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { checkNetworkStatus, showErrorToast, showSuccessToast } from '@/utils/errorHandling/networkStatusHelper';
+import { checkNetworkStatus, showErrorToast, showSuccessToast } from '@/utils/errorHandling';
 
 /**
  * Improved hook for detecting network status with better reliability for unstable connections
@@ -39,7 +39,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
       // 3. Show toast if needed
       offlineDetectionCountRef.current = 0;
       
-      // Increased debounce from 500ms to 2000ms (2s)
+      // Increased debounce from 2000ms to 5000ms (5s)
       // This helps ensure we're truly online before updating UI
       debounceTimerRef.current = setTimeout(() => {
         if (!mountedRef.current) return;
@@ -53,7 +53,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
           // Remove any offline toasts
           showErrorToast("", 'network-offline', { duration: 1 });
         }
-      }, 2000);
+      }, 5000);
     } else {
       // When going offline:
       // 1. Increment the detection counter
@@ -64,7 +64,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
       // Require multiple consecutive offline detections
       // This prevents momentary network blips from triggering offline state
       if (offlineDetectionCountRef.current >= 3) {
-        // Increased debounce from 1500ms to 3000ms (3s)
+        // Increased debounce from 3000ms to 6000ms (6s)
         debounceTimerRef.current = setTimeout(() => {
           if (!mountedRef.current) return;
           
@@ -77,7 +77,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
               persistent: true
             });
           }
-        }, 3000);
+        }, 6000);
       } else {
         // First/second offline detection, wait before confirming
         debounceTimerRef.current = setTimeout(() => {
@@ -85,7 +85,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
           if (navigator.onLine) {
             offlineDetectionCountRef.current = 0;
           }
-        }, 2000);
+        }, 4000);
       }
     }
   }, [options.showToasts]);
@@ -104,8 +104,12 @@ export function useNetworkStatus(options = { showToasts: true }) {
       setOnlineStatus(false);
     };
 
+    // Listen for standard browser events
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    
+    // Listen for custom app:offline event
+    window.addEventListener('app:offline', handleOffline);
 
     // Check current status when component mounts
     const checkCurrentStatus = async () => {
@@ -122,9 +126,10 @@ export function useNetworkStatus(options = { showToasts: true }) {
     // Initial check with slight delay
     const initialCheckTimer = setTimeout(checkCurrentStatus, 1000);
     
-    // Periodically check network status (60s instead of 30s)
+    // Periodically check network status (90s instead of 60s)
     // This will help catch cases where browser thinks we're online but we're not
-    healthCheckTimerRef.current = setInterval(checkCurrentStatus, 60000);
+    // while reducing battery usage and network traffic
+    healthCheckTimerRef.current = setInterval(checkCurrentStatus, 90000);
 
     return () => {
       mountedRef.current = false;
@@ -139,6 +144,7 @@ export function useNetworkStatus(options = { showToasts: true }) {
       
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('app:offline', handleOffline);
     };
   }, [isOnline, setOnlineStatus]);
 

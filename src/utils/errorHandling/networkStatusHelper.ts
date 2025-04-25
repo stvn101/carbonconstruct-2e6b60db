@@ -5,10 +5,10 @@ import { toast } from "sonner";
 const shownErrorToasts = new Set<string>();
 // Toast cooldowns to prevent spam
 const toastCooldowns: Record<string, number> = {};
-// Minimum time between similar toasts (10 seconds - increased from 5s)
-const TOAST_COOLDOWN = 10000;
-// Health check cache duration (20 seconds - increased from previous)
-const HEALTH_CHECK_CACHE_DURATION = 20000;
+// Minimum time between similar toasts (increased to 20 seconds)
+const TOAST_COOLDOWN = 20000;
+// Health check cache duration (increased to 30 seconds)
+const HEALTH_CHECK_CACHE_DURATION = 30000;
 // Last health check result and timestamp
 let lastHealthCheckResult = true;
 let lastHealthCheckTimestamp = 0;
@@ -21,8 +21,8 @@ export const isOffline = (): boolean => {
 };
 
 /**
- * Performs a network health check with improved reliability
- * Uses caching to avoid excessive checks
+ * Performs a network health check with improved reliability and caching
+ * This is the central source of truth for all network status checks
  */
 export const checkNetworkStatus = async (): Promise<boolean> => {
   // If browser says we're offline, trust it
@@ -30,18 +30,18 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
     return false;
   }
   
-  // Use cached result if recent enough
+  // Use cached result if recent enough to reduce unnecessary checks
   const now = Date.now();
   if (now - lastHealthCheckTimestamp < HEALTH_CHECK_CACHE_DURATION) {
     return lastHealthCheckResult;
   }
   
   try {
-    // Use fetch with a short timeout to check connectivity
-    // Use favicon.ico as it's likely to be cached and a small file
+    // Use a more reliable health check approach with a longer timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // Extended timeout
     
+    // Try to fetch a small file that's likely to be cached
     const response = await fetch('/favicon.ico', { 
       method: 'HEAD',
       cache: 'no-store',
@@ -60,6 +60,12 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
     lastHealthCheckResult = false;
     lastHealthCheckTimestamp = now;
     
+    // Let network status listeners know about the issue
+    if (typeof window !== 'undefined') {
+      const offlineEvent = new Event('app:offline');
+      window.dispatchEvent(offlineEvent);
+    }
+    
     return false;
   }
 };
@@ -76,6 +82,15 @@ export const clearErrorToasts = (toastIds: string[]): void => {
 };
 
 /**
+ * Clear all error toasts
+ */
+export const clearAllErrorToasts = (): void => {
+  toast.dismiss();
+  shownErrorToasts.clear();
+  Object.keys(toastCooldowns).forEach(key => delete toastCooldowns[key]);
+};
+
+/**
  * Show an error toast with deduplication and cooldown
  */
 export const showErrorToast = (
@@ -86,6 +101,12 @@ export const showErrorToast = (
     persistent?: boolean 
   } = {}
 ): void => {
+  // Skip if message is empty (used to dismiss toasts)
+  if (!message) {
+    toast.dismiss(id);
+    return;
+  }
+
   const now = Date.now();
   
   // Skip if we've shown this recently
@@ -146,7 +167,7 @@ export const showSuccessToast = (
 };
 
 /**
- * Add network status listeners with improved debouncing to prevent flashing
+ * Add network status listeners with improved stability
  */
 export const addNetworkListeners = (
   onOffline: () => void = () => {
@@ -168,7 +189,7 @@ export const addNetworkListeners = (
   let offlineDetectionCount = 0;
   let healthCheckTimer: NodeJS.Timeout | null = null;
   
-  // Debounced handlers with increased timers to prevent flashing
+  // Debounced handlers with increased timers for improved stability
   const handleOffline = () => {
     if (onlineDebounceTimer) {
       clearTimeout(onlineDebounceTimer);
@@ -179,13 +200,14 @@ export const addNetworkListeners = (
     offlineDetectionCount += 1;
     
     // Only trigger offline mode after multiple consecutive detections
-    if (offlineDetectionCount >= 2) {
-      // Increased delay to prevent flashing (3.5s instead of 2s)
+    // This prevents momentary network blips from triggering offline mode
+    if (offlineDetectionCount >= 3) {
+      // Increased delay to prevent flashing (5s instead of 3.5s)
       if (!offlineDebounceTimer) {
         offlineDebounceTimer = setTimeout(() => {
           offlineDebounceTimer = null;
           onOffline();
-        }, 3500);
+        }, 5000);
       }
     }
   };
@@ -208,20 +230,23 @@ export const addNetworkListeners = (
       return;
     }
     
-    // Increased delay to ensure connection is stable (3.5s instead of 2s)
+    // Increased delay to ensure connection is stable (5s instead of 3.5s)
     if (!onlineDebounceTimer) {
       onlineDebounceTimer = setTimeout(() => {
         onlineDebounceTimer = null;
         onOnline();
-      }, 3500);
+      }, 5000);
     }
   };
   
-  // Set up listeners
+  // Set up listeners for standard browser events
   window.addEventListener('offline', handleOffline);
   window.addEventListener('online', handleOnline);
   
-  // Add better health checking with higher interval (45s instead of 30s)
+  // Set up listener for custom app:offline event
+  window.addEventListener('app:offline', handleOffline);
+  
+  // Add better health checking with higher interval (60s instead of 45s)
   // to reduce battery impact on mobile
   healthCheckTimer = setInterval(async () => {
     if (navigator.onLine) {
@@ -241,7 +266,7 @@ export const addNetworkListeners = (
         handleOnline();
       }
     }
-  }, 45000);
+  }, 60000);
   
   // Return cleanup function
   return () => {
@@ -250,6 +275,7 @@ export const addNetworkListeners = (
     if (healthCheckTimer) clearInterval(healthCheckTimer);
     window.removeEventListener('offline', handleOffline);
     window.removeEventListener('online', handleOnline);
+    window.removeEventListener('app:offline', handleOffline);
     
     // Clear any lingering toasts on unmount
     toast.dismiss('global-online-status');
@@ -257,11 +283,8 @@ export const addNetworkListeners = (
   };
 };
 
-/**
- * Clear all error toasts
- */
-export const clearAllErrorToasts = (): void => {
-  toast.dismiss();
-  shownErrorToasts.clear();
-  Object.keys(toastCooldowns).forEach(key => delete toastCooldowns[key]);
+// Export everything for central access
+export {
+  TOAST_COOLDOWN,
+  HEALTH_CHECK_CACHE_DURATION
 };

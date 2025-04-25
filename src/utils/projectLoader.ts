@@ -5,14 +5,14 @@ import {
   isOffline, 
   showErrorToast, 
   clearErrorToasts 
-} from '@/utils/errorHandling/networkStatusHelper';
+} from '@/utils/errorHandling';
 import { trackMetric } from '@/contexts/performance/metrics';
 import { SavedProject } from '@/types/project';
-import { retryWithBackoff } from '@/utils/errorHandling/timeoutHelper';
+import { retryWithBackoff } from '@/utils/errorHandling';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
 /**
- * Loads projects with optimized pagination and retries
+ * Loads projects with optimized pagination, retries, and improved connection handling
  */
 export const loadProjects = async (
   userId: string | undefined,
@@ -44,14 +44,14 @@ export const loadProjects = async (
     return [];
   }
   
-  // Check database connection before attempting to load
-  const canConnect = await checkSupabaseConnectionWithRetry(1);
+  // Check database connection before attempting to load with improved reliability
+  const canConnect = await checkSupabaseConnectionWithRetry(2, 10000);
   if (!canConnect) {
     setFetchError(new Error("Unable to connect to the database"));
     showErrorToast(
       "Unable to connect to the server. Using offline mode.", 
       "projects-db-offline", 
-      { duration: 8000 }
+      { duration: 10000 }
     );
     return [];
   }
@@ -63,7 +63,7 @@ export const loadProjects = async (
     const projectData = await retryWithBackoff(
       () => fetchUserProjects(userId, page, limit),
       2, // Max retries (reduced from 3 to 2)
-      2000, // Initial delay (increased from 1000ms to 2000ms)
+      5000, // Initial delay (increased from 2000ms to 5000ms)
       {
         onRetry: (attempt) => {
           console.info(`Retrying project fetch (${attempt}/2)...`);
@@ -75,9 +75,13 @@ export const loadProjects = async (
             !isOffline() && 
             (error instanceof TypeError || 
              (error instanceof Error && 
-              (error.message.includes('timeout') || error.message.includes('network'))))
+              (error.message.includes('timeout') || 
+               error.message.includes('network') ||
+               error.message.includes('connection'))))
           );
-        }
+        },
+        maxDelay: 30000, // Cap delay at 30 seconds
+        factor: 1.5     // Use a more conservative growth factor
       }
     );
     
@@ -120,11 +124,11 @@ export const loadProjects = async (
     setFetchError(new Error(errorMessage));
     
     // Show a helpful error toast if it's not just a network issue
-    if (!isOffline() && !(error instanceof TypeError && error.message.includes('fetch'))) {
+    if (!isOffline()) {
       showErrorToast(
         "Unable to load your projects. Please try again later.", 
         "projects-load-error", 
-        { duration: 5000 }
+        { duration: 8000 }
       );
     }
     
