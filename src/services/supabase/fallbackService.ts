@@ -1,10 +1,17 @@
 
 import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
-import { checkSupabaseConnection, OPERATION_TIMEOUT, MAX_RETRIES, withTimeout } from './connection';
+import { 
+  checkSupabaseConnection, 
+  OPERATION_TIMEOUT, 
+  MAX_RETRIES, 
+  withTimeout,
+  calculateBackoffDelay
+} from './connection';
 import OfflineStorage from './offlineStorage';
+import { showErrorToast, showSuccessToast, isOffline } from '@/utils/errorHandling/networkStatusHelper';
 
-// Track shown connection toasts to prevent duplicates
+// Track connection notification state
 const CONNECTION_TOAST_SHOWN = {
   failure: false,
   success: false,
@@ -12,6 +19,10 @@ const CONNECTION_TOAST_SHOWN = {
   id: '',
 };
 
+/**
+ * Enhanced database operation handler with better retry logic,
+ * timeout management, and user feedback
+ */
 export const performDbOperation = async <T>(
   operation: () => Promise<T>,
   operationName: string,
@@ -29,26 +40,29 @@ export const performDbOperation = async <T>(
     silentFail = false
   } = options;
   
-  let attempts = 0;
-  let lastError: Error | null = null;
-  
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+  // Check network connectivity first
+  if (isOffline()) {
     // Clear any stale error toasts
     toast.dismiss("db-operation-failed");
     
+    // Show offline toast if not already shown and not in silent mode
     if (!silentFail && !CONNECTION_TOAST_SHOWN.failure) {
       const toastId = "offline-db-operation";
-      toast.error("You're offline. Please connect to the internet to access your data.", {
-        id: toastId,
-        duration: 0 // Keep showing until back online
-      });
+      
+      showErrorToast(
+        "You're offline. Please connect to the internet to access your data.", 
+        toastId, 
+        { persistent: true }
+      );
+      
       CONNECTION_TOAST_SHOWN.failure = true;
       CONNECTION_TOAST_SHOWN.timestamp = Date.now();
       CONNECTION_TOAST_SHOWN.id = toastId;
       
+      // Auto-reset after delay
       setTimeout(() => {
         CONNECTION_TOAST_SHOWN.failure = false;
-      }, 10000);
+      }, 20000); // Extended from 10s to 20s
     }
     
     console.warn(`Can't perform ${operationName} while offline`);
@@ -59,16 +73,14 @@ export const performDbOperation = async <T>(
     throw new Error(`Cannot perform ${operationName} while offline`);
   }
   
-  // Use exponential backoff with jitter for more resilient retries
-  const backoff = (attempt: number) => {
-    const base = Math.min(1000 * Math.pow(2, attempt), 8000);
-    const jitter = Math.random() * 1000; // Add random jitter to prevent thundering herd
-    return base + jitter;
-  };
+  let attempts = 0;
+  let lastError: Error | null = null;
   
+  // Improved retry loop with better backoff and error handling
   while (attempts < retries) {
     try {
-      const result = await withTimeout(operation(), timeout);
+      // Wrap the operation with a timeout
+      const result = await withTimeout(() => operation(), timeout);
       
       // If previous failure was shown and we're now successful
       if (CONNECTION_TOAST_SHOWN.failure && !CONNECTION_TOAST_SHOWN.success) {
@@ -76,16 +88,14 @@ export const performDbOperation = async <T>(
         toast.dismiss("db-operation-failed");
         toast.dismiss(CONNECTION_TOAST_SHOWN.id);
         
-        toast.success("Connection restored successfully!", { 
-          id: "connection-restored", 
-          duration: 3000 
-        });
+        showSuccessToast("Connection restored successfully!", "connection-restored");
+        
         CONNECTION_TOAST_SHOWN.success = true;
         CONNECTION_TOAST_SHOWN.failure = false;
         
         setTimeout(() => {
           CONNECTION_TOAST_SHOWN.success = false;
-        }, 10000);
+        }, 20000); // Extended from 10s to 20s
       }
       
       return result;
@@ -99,8 +109,16 @@ export const performDbOperation = async <T>(
         break;
       }
       
-      // Wait longer between retries with exponential backoff
-      await new Promise(resolve => setTimeout(resolve, backoff(attempts)));
+      // Check if we're offline after an error to fail faster
+      if (isOffline()) {
+        console.warn(`Network went offline during ${operationName}. Aborting retries.`);
+        break;
+      }
+      
+      // Wait before retry with improved backoff calculation
+      const backoffDelay = calculateBackoffDelay(attempts);
+      console.info(`Retrying ${operationName} in ${backoffDelay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, backoffDelay));
     }
   }
   
@@ -109,27 +127,29 @@ export const performDbOperation = async <T>(
     const now = Date.now();
     const toastId = `db-operation-failed-${operationName}`;
     
-    // Prevent duplicate toasts within short period
+    // Prevent duplicate toasts within short period (extended from 10s to 30s)
     if (!CONNECTION_TOAST_SHOWN.failure || 
-        now - CONNECTION_TOAST_SHOWN.timestamp > 10000 ||
+        now - CONNECTION_TOAST_SHOWN.timestamp > 30000 ||
         CONNECTION_TOAST_SHOWN.id !== toastId) {
         
       // Clear any previous error toasts first
       toast.dismiss("db-operation-failed");
       toast.dismiss(CONNECTION_TOAST_SHOWN.id);
       
-      toast.error(`Failed to ${operationName}. Please check your connection and try again later.`, {
-        id: toastId,
-        duration: 5000,
-      });
+      showErrorToast(
+        `Failed to ${operationName}. Please check your connection and try again later.`,
+        toastId,
+        { duration: 8000 }
+      );
       
       CONNECTION_TOAST_SHOWN.failure = true;
       CONNECTION_TOAST_SHOWN.timestamp = now;
       CONNECTION_TOAST_SHOWN.id = toastId;
       
+      // Auto-reset after delay
       setTimeout(() => {
         CONNECTION_TOAST_SHOWN.failure = false;
-      }, 15000);
+      }, 30000); // Extended from 15s to 30s
     }
   }
   
@@ -147,6 +167,9 @@ export const performDbOperation = async <T>(
   throw lastError || new Error(`Failed to ${operationName} after ${retries} attempts`);
 };
 
+/**
+ * Wrapper for database operations with offline fallback
+ */
 export const withOfflineFallback = async <T>(
   operation: () => Promise<T>,
   operationName: string,
@@ -158,5 +181,29 @@ export const withOfflineFallback = async <T>(
   });
 };
 
-// Re-export everything needed from the service
-export { checkSupabaseConnection, OfflineStorage };
+// Helper function for calculating backoff delay with jitter
+export const calculateBackoffDelay = (attempt: number): number => {
+  // Base delay starts at 2 seconds (increased from previous value)
+  const baseDelay = 2000;
+  // More conservative exponential factor (1.5 instead of 2)
+  // This makes retry delays: 2s, 3s, 4.5s, 6.75s, etc.
+  // Instead of: 2s, 4s, 8s, 16s, etc.
+  const factor = 1.5;
+  // Maximum delay capped at 15 seconds
+  const maxDelay = 15000;
+  
+  // Calculate exponential delay
+  const delay = Math.min(baseDelay * Math.pow(factor, attempt - 1), maxDelay);
+  
+  // Add jitter (±15%) to prevent thundering herd problem
+  const jitter = delay * 0.15 * (Math.random() * 2 - 1);
+  
+  return Math.floor(delay + jitter);
+};
+
+// Re-export for convenience
+export { 
+  checkSupabaseConnection, 
+  OfflineStorage,
+  isOffline 
+};

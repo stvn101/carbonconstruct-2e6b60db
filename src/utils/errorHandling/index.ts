@@ -1,11 +1,27 @@
 
-export * from './networkErrorHandler';
+// Export all error handling utilities from this central file
 export * from './networkStatusHelper';
+export * from './networkErrorHandler';
 export * from './timeoutHelper';
 
+// This is the main public API for the error handling system
 import { toast } from "sonner";
 import errorTrackingService from "@/services/error/errorTrackingService";
 import { handleNetworkError } from './networkErrorHandler';
+import { 
+  showErrorToast, 
+  showSuccessToast,
+  clearErrorToasts,
+  isOffline,
+  checkNetworkStatus,
+  addNetworkListeners,
+  clearAllErrorToasts
+} from './networkStatusHelper';
+import { 
+  timeoutPromise, 
+  withTimeout,
+  retryWithBackoff
+} from './timeoutHelper';
 
 /**
  * Handles API fetch errors with better user feedback
@@ -22,18 +38,24 @@ export const handleDatabaseResourceError = (error: unknown, context: string): vo
       (error.message.includes('INSUFFICIENT_RESOURCES') || 
        (error.toString().includes('INSUFFICIENT_RESOURCES')))) {
     
-    const toastId = "database-resource-error";
-    
-    toast.error("Database resource limit reached. Some features may be unavailable.", {
-      id: toastId,
-      duration: 10000,
-    });
+    showErrorToast(
+      "Database resource limit reached. Some features may be unavailable.", 
+      "database-resource-error",
+      { duration: 10000 }
+    );
   }
 };
 
-/**
- * Clear all error toasts
- */
-export const clearAllErrorToasts = (): void => {
-  toast.dismiss();
+// Re-export all used functions to maintain the public API
+export {
+  showErrorToast,
+  showSuccessToast,
+  clearErrorToasts,
+  clearAllErrorToasts,
+  isOffline,
+  checkNetworkStatus,
+  addNetworkListeners,
+  timeoutPromise,
+  withTimeout,
+  retryWithBackoff
 };

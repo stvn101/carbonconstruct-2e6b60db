@@ -1,47 +1,163 @@
+
 import { toast } from "sonner";
 
 // Keep track of shown error toasts to prevent duplicates
 const shownErrorToasts = new Set<string>();
+// Toast cooldowns to prevent spam
+const toastCooldowns: Record<string, number> = {};
+// Minimum time between similar toasts (10 seconds - increased from 5s)
+const TOAST_COOLDOWN = 10000;
+// Health check cache duration (20 seconds - increased from previous)
+const HEALTH_CHECK_CACHE_DURATION = 20000;
+// Last health check result and timestamp
+let lastHealthCheckResult = true;
+let lastHealthCheckTimestamp = 0;
 
 /**
- * Check if the device is offline
+ * Check if the device is offline based on browser API
  */
 export const isOffline = (): boolean => {
   return typeof navigator !== 'undefined' && !navigator.onLine;
 };
 
 /**
- * Clear specific error toasts
+ * Performs a network health check with improved reliability
+ * Uses caching to avoid excessive checks
+ */
+export const checkNetworkStatus = async (): Promise<boolean> => {
+  // If browser says we're offline, trust it
+  if (isOffline()) {
+    return false;
+  }
+  
+  // Use cached result if recent enough
+  const now = Date.now();
+  if (now - lastHealthCheckTimestamp < HEALTH_CHECK_CACHE_DURATION) {
+    return lastHealthCheckResult;
+  }
+  
+  try {
+    // Use fetch with a short timeout to check connectivity
+    // Use favicon.ico as it's likely to be cached and a small file
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
+    const response = await fetch('/favicon.ico', { 
+      method: 'HEAD',
+      cache: 'no-store',
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    // Update cache
+    lastHealthCheckResult = response.ok;
+    lastHealthCheckTimestamp = now;
+    
+    return response.ok;
+  } catch (error) {
+    // Update cache - we're offline or having connectivity issues
+    lastHealthCheckResult = false;
+    lastHealthCheckTimestamp = now;
+    
+    return false;
+  }
+};
+
+/**
+ * Clear specific error toasts with improved cleanup
  */
 export const clearErrorToasts = (toastIds: string[]): void => {
   toastIds.forEach(id => {
     toast.dismiss(id);
     shownErrorToasts.delete(id);
+    delete toastCooldowns[id];
   });
 };
 
 /**
- * Add network status listeners with debounce to prevent flashing
+ * Show an error toast with deduplication and cooldown
+ */
+export const showErrorToast = (
+  message: string, 
+  id: string, 
+  options: { 
+    duration?: number,
+    persistent?: boolean 
+  } = {}
+): void => {
+  const now = Date.now();
+  
+  // Skip if we've shown this recently
+  if (shownErrorToasts.has(id) && 
+      toastCooldowns[id] && 
+      now - toastCooldowns[id] < TOAST_COOLDOWN) {
+    return;
+  }
+  
+  // Show the toast
+  toast.error(message, {
+    id,
+    duration: options.persistent ? 0 : (options.duration || 5000)
+  });
+  
+  // Track that we've shown this toast
+  shownErrorToasts.add(id);
+  toastCooldowns[id] = now;
+  
+  // Auto-cleanup for non-persistent toasts
+  if (!options.persistent) {
+    setTimeout(() => {
+      shownErrorToasts.delete(id);
+    }, TOAST_COOLDOWN + 5000);
+  }
+};
+
+/**
+ * Show a success toast with deduplication
+ */
+export const showSuccessToast = (
+  message: string, 
+  id: string, 
+  duration: number = 3000
+): void => {
+  const now = Date.now();
+  
+  // Skip if we've shown this recently
+  if (shownErrorToasts.has(id) && 
+      toastCooldowns[id] && 
+      now - toastCooldowns[id] < TOAST_COOLDOWN) {
+    return;
+  }
+  
+  toast.success(message, {
+    id,
+    duration
+  });
+  
+  // Track that we've shown this toast
+  shownErrorToasts.add(id);
+  toastCooldowns[id] = now;
+  
+  // Auto-cleanup
+  setTimeout(() => {
+    shownErrorToasts.delete(id);
+  }, TOAST_COOLDOWN);
+};
+
+/**
+ * Add network status listeners with improved debouncing to prevent flashing
  */
 export const addNetworkListeners = (
   onOffline: () => void = () => {
-    // Don't show toast if we've already shown one recently
-    if (!shownErrorToasts.has("global-offline-status")) {
-      toast.error("You're offline. Some features may be unavailable.", {
-        id: "global-offline-status",
-        duration: 0 // Keep showing until back online
-      });
-      
-      shownErrorToasts.add("global-offline-status");
-    }
+    showErrorToast(
+      "You're offline. Some features may be unavailable.", 
+      "global-offline-status", 
+      { persistent: true }
+    );
   },
   onOnline: () => void = () => {
-    toast.success("You're back online!", {
-      id: "global-online-status",
-      duration: 3000
-    });
-    // Clear the offline toast status when back online
-    shownErrorToasts.delete("global-offline-status");
+    showSuccessToast("You're back online!", "global-online-status");
     toast.dismiss("global-offline-status");
   }
 ): (() => void) => {
@@ -50,8 +166,9 @@ export const addNetworkListeners = (
   let offlineDebounceTimer: NodeJS.Timeout | null = null;
   let onlineDebounceTimer: NodeJS.Timeout | null = null;
   let offlineDetectionCount = 0;
+  let healthCheckTimer: NodeJS.Timeout | null = null;
   
-  // Debounced handlers to prevent flashing on quick connectivity changes
+  // Debounced handlers with increased timers to prevent flashing
   const handleOffline = () => {
     if (onlineDebounceTimer) {
       clearTimeout(onlineDebounceTimer);
@@ -63,17 +180,17 @@ export const addNetworkListeners = (
     
     // Only trigger offline mode after multiple consecutive detections
     if (offlineDetectionCount >= 2) {
-      // Small delay to prevent flashing
+      // Increased delay to prevent flashing (3.5s instead of 2s)
       if (!offlineDebounceTimer) {
         offlineDebounceTimer = setTimeout(() => {
           offlineDebounceTimer = null;
           onOffline();
-        }, 2500); // Increased to 2.5 seconds for more stability
+        }, 3500);
       }
     }
   };
   
-  const handleOnline = () => {
+  const handleOnline = async () => {
     // Reset offline detection counter
     offlineDetectionCount = 0;
     
@@ -82,12 +199,21 @@ export const addNetworkListeners = (
       offlineDebounceTimer = null;
     }
     
-    // Small delay to ensure connection is stable
+    // Verify with a real health check before showing online status
+    // This prevents false "back online" messages
+    const isReallyOnline = await checkNetworkStatus();
+    
+    if (!isReallyOnline) {
+      // If health check failed, we're not really online
+      return;
+    }
+    
+    // Increased delay to ensure connection is stable (3.5s instead of 2s)
     if (!onlineDebounceTimer) {
       onlineDebounceTimer = setTimeout(() => {
         onlineDebounceTimer = null;
         onOnline();
-      }, 2500); // Increased to 2.5 seconds for more stability
+      }, 3500);
     }
   };
   
@@ -95,41 +221,47 @@ export const addNetworkListeners = (
   window.addEventListener('offline', handleOffline);
   window.addEventListener('online', handleOnline);
   
-  // Perform more reliable connectivity check
-  const healthCheckInterval = setInterval(() => {
+  // Add better health checking with higher interval (45s instead of 30s)
+  // to reduce battery impact on mobile
+  healthCheckTimer = setInterval(async () => {
     if (navigator.onLine) {
-      // If we think we're online, do a quick fetch test with a shorter timeout
-      fetch('/favicon.ico', { 
-        method: 'HEAD', 
-        cache: 'no-store',
-        signal: AbortSignal.timeout(3000)  // 3-second timeout is reasonable for a small favicon
-      })
-        .then(() => {
-          // If successful and we previously thought we were offline,
-          // trigger the online handler
-          if (offlineDetectionCount > 0) {
-            offlineDetectionCount = 0;
-            handleOnline();
-          }
-        })
-        .catch(() => {
-          // If fetch fails despite navigator.onLine being true,
-          // we may have partial connectivity issues
+      // Only do a health check if we think we're online
+      const isHealthy = await checkNetworkStatus();
+      
+      if (!isHealthy && navigator.onLine) {
+        // Browser thinks we're online but health check failed
+        // This catches partial connectivity issues
+        offlineDetectionCount += 1;
+        if (offlineDetectionCount >= 2) {
           handleOffline();
-        });
+        }
+      } else if (isHealthy && !navigator.onLine) {
+        // Browser thinks we're offline but health check succeeded
+        // This is unusual but can happen
+        handleOnline();
+      }
     }
-  }, 30000); // Check every 30 seconds
+  }, 45000);
   
   // Return cleanup function
   return () => {
     if (offlineDebounceTimer) clearTimeout(offlineDebounceTimer);
     if (onlineDebounceTimer) clearTimeout(onlineDebounceTimer);
-    clearInterval(healthCheckInterval);
+    if (healthCheckTimer) clearInterval(healthCheckTimer);
     window.removeEventListener('offline', handleOffline);
     window.removeEventListener('online', handleOnline);
     
-    // Clear toasts on unmount to prevent stuck messages
+    // Clear any lingering toasts on unmount
     toast.dismiss('global-online-status');
     toast.dismiss('global-offline-status');
   };
+};
+
+/**
+ * Clear all error toasts
+ */
+export const clearAllErrorToasts = (): void => {
+  toast.dismiss();
+  shownErrorToasts.clear();
+  Object.keys(toastCooldowns).forEach(key => delete toastCooldowns[key]);
 };
