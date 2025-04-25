@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 
 // Keep track of shown error toasts to prevent duplicates
@@ -181,7 +182,105 @@ export const addNetworkListeners = (
     toast.dismiss("global-offline-status");
   }
 ): (() => void) => {
-  return () => {};
+  if (typeof window === 'undefined') return () => {};
+  
+  let offlineDebounceTimer: NodeJS.Timeout | null = null;
+  let onlineDebounceTimer: NodeJS.Timeout | null = null;
+  let offlineDetectionCount = 0;
+  let healthCheckTimer: NodeJS.Timeout | null = null;
+  
+  // Debounced handlers with increased timers for improved stability
+  const handleOffline = () => {
+    if (onlineDebounceTimer) {
+      clearTimeout(onlineDebounceTimer);
+      onlineDebounceTimer = null;
+    }
+    
+    // Track consecutive offline detections
+    offlineDetectionCount += 1;
+    
+    // Only trigger offline mode after multiple consecutive detections
+    // This prevents momentary network blips from triggering offline mode
+    if (offlineDetectionCount >= 3) {
+      // Increased delay to prevent flashing (5s instead of 3.5s)
+      if (!offlineDebounceTimer) {
+        offlineDebounceTimer = setTimeout(() => {
+          offlineDebounceTimer = null;
+          onOffline();
+        }, 5000);
+      }
+    }
+  };
+  
+  const handleOnline = async () => {
+    // Reset offline detection counter
+    offlineDetectionCount = 0;
+    
+    if (offlineDebounceTimer) {
+      clearTimeout(offlineDebounceTimer);
+      offlineDebounceTimer = null;
+    }
+    
+    // Verify with a real health check before showing online status
+    // This prevents false "back online" messages
+    const isReallyOnline = await checkNetworkStatus();
+    
+    if (!isReallyOnline) {
+      // If health check failed, we're not really online
+      return;
+    }
+    
+    // Increased delay to ensure connection is stable (5s instead of 3.5s)
+    if (!onlineDebounceTimer) {
+      onlineDebounceTimer = setTimeout(() => {
+        onlineDebounceTimer = null;
+        onOnline();
+      }, 5000);
+    }
+  };
+  
+  // Set up listeners for standard browser events
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  
+  // Set up listener for custom app:offline event
+  window.addEventListener('app:offline', handleOffline);
+  
+  // Add better health checking with higher interval (60s instead of 45s)
+  // to reduce battery impact on mobile
+  healthCheckTimer = setInterval(async () => {
+    if (navigator.onLine) {
+      // Only do a health check if we think we're online
+      const isHealthy = await checkNetworkStatus();
+      
+      if (!isHealthy && navigator.onLine) {
+        // Browser thinks we're online but health check failed
+        // This catches partial connectivity issues
+        offlineDetectionCount += 1;
+        if (offlineDetectionCount >= 2) {
+          handleOffline();
+        }
+      } else if (isHealthy && !navigator.onLine) {
+        // Browser thinks we're offline but health check succeeded
+        // This is unusual but can happen
+        handleOnline();
+      }
+    }
+  }, 60000);
+  
+  // Return cleanup function
+  return () => {
+    if (offlineDebounceTimer) clearTimeout(offlineDebounceTimer);
+    if (onlineDebounceTimer) clearTimeout(onlineDebounceTimer);
+    if (healthCheckTimer) clearInterval(healthCheckTimer);
+    window.removeEventListener('offline', handleOffline);
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('app:offline', handleOffline);
+    
+    // Clear any lingering toasts on unmount
+    toast.dismiss('global-online-status');
+    toast.dismiss('global-offline-status');
+  };
 };
 
 // Export everything for central access
