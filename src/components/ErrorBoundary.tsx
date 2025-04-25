@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Home, ChevronLeft, Wifi, WifiOff } from "lucide-react";
 import errorTrackingService from "@/services/error/errorTrackingService";
 import { toast } from "sonner";
-import { checkNetworkStatus } from "@/utils/errorHandling";
+import { checkNetworkStatus } from "@/utils/errorHandling/networkStatusHelper";
 import { checkSupabaseConnectionWithRetry } from "@/services/supabase/connection";
 
 interface Props {
