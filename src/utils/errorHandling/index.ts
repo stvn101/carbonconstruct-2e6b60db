@@ -14,14 +14,13 @@ import {
   addNetworkListeners,
   clearAllErrorToasts
 } from './networkStatusHelper';
-import { handleNetworkError } from './networkErrorHandler';
+import { handleNetworkError, handleDatabaseResourceError } from './networkErrorHandler';
 import { 
   timeoutPromise, 
   withTimeout,
   retryWithBackoff,
   isNetworkError
 } from './timeoutHelper';
-import { handleDatabaseResourceError } from './networkErrorHandler';
 
 export {
   showErrorToast,

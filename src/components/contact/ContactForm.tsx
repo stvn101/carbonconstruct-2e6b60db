@@ -16,6 +16,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { sendEmail } from "@/utils/email/emailService";
 
 const contactFormSchema = z.object({
   name: z.string().min(2, {
@@ -48,25 +49,61 @@ const ContactForm = () => {
     },
   });
 
-  function onSubmit(data: ContactFormValues) {
+  async function onSubmit(data: ContactFormValues) {
     setIsSubmitting(true);
     
-    // Prepare email data
-    const emailData = {
-      ...data,
-      recipient: 'contact@carbonconstruct.net'
-    };
-    
-    // Simulate API call to send email
-    setTimeout(() => {
-      console.log('Sending email to contact@carbonconstruct.net', emailData);
-      setIsSubmitting(false);
+    try {
+      // Format email content
+      const htmlContent = `
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        ${data.company ? `<p><strong>Company:</strong> ${data.company}</p>` : ''}
+        ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
+        <p><strong>Message:</strong></p>
+        <p>${data.message.replace(/\n/g, '<br>')}</p>
+      `;
+      
+      // Send email to admin
+      await sendEmail({
+        to: 'contact@stvn.carbonconstruct.net',
+        subject: `CarbonConstruct Contact: ${data.name}`,
+        html: htmlContent
+      });
+      
+      // Send confirmation email to user
+      await sendEmail({
+        to: data.email,
+        subject: 'Thank you for contacting CarbonConstruct',
+        html: `
+          <h2>Thank you for reaching out to CarbonConstruct!</h2>
+          <p>Hello ${data.name},</p>
+          <p>We've received your message and will get back to you as soon as possible.</p>
+          <p>Here's a copy of your message:</p>
+          <blockquote style="border-left: 3px solid #4CAF50; padding-left: 15px; margin-left: 10px;">
+            ${data.message.replace(/\n/g, '<br>')}
+          </blockquote>
+          <p>If you have any urgent matters, please call us at <a href="tel:+61413413613">+61 413 413 613</a>.</p>
+          <p>Best regards,<br>The CarbonConstruct Team</p>
+        `
+      });
+      
       toast({
         title: "Message sent!",
         description: "We'll get back to you as soon as possible.",
       });
+      
       form.reset();
-    }, 1500);
+    } catch (error) {
+      console.error("Error sending contact form:", error);
+      toast({
+        title: "Error sending message",
+        description: "Please try again or email us directly.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (

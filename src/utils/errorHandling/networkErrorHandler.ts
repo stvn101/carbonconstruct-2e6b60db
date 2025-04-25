@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
 import { showErrorToast } from './networkStatusHelper';
@@ -94,4 +95,22 @@ export const handleNetworkError = (error: unknown, context: string): Error => {
   
   // Return the error with context
   return new Error(`Error in ${context}: ${errorObj.message}`);
+};
+
+/**
+ * Utility to handle database resource limitations
+ */
+export const handleDatabaseResourceError = (error: unknown, context: string): void => {
+  if (error instanceof Error && 
+      (error.message.includes('INSUFFICIENT_RESOURCES') || 
+       (error.toString().includes('INSUFFICIENT_RESOURCES')))) {
+    
+    const errorId = `db-resources-${context}`;
+    
+    showErrorToast(
+      "Database resource limit reached. Some features may be unavailable.", 
+      errorId,
+      { duration: 10000 }
+    );
+  }
 };
