@@ -1,46 +1,30 @@
 
-import React, { useEffect } from 'react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import React from 'react';
+import { WifiOff, AlertTriangle, RefreshCw, ChevronLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, RefreshCw, Home, ChevronLeft, WifiOff } from "lucide-react";
-import errorTrackingService from "@/services/error/errorTrackingService";
-import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useConnectionHandlers } from "./hooks/useConnectionHandlers";
 
 interface ErrorFallbackProps {
   error: Error;
   resetErrorBoundary: () => void;
   feature?: string;
-  isNetworkError: boolean;
-  isChecking: boolean;
-  onReset: () => void;
-  onGoBack: () => void;
-  onGoHome: () => void;
-  onRefresh: () => void;
+  className?: string;
 }
 
-const ErrorFallback: React.FC<ErrorFallbackProps> = ({
+export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   error,
   resetErrorBoundary,
   feature,
-  isNetworkError,
-  isChecking,
-  onReset,
-  onGoBack,
-  onGoHome,
-  onRefresh
+  className
 }) => {
-  useEffect(() => {
-    errorTrackingService.captureException(error, {
-      componentStack: error.stack,
-      source: feature || 'ErrorBoundary',
-      url: window.location.href,
-      route: window.location.pathname
-    });
-  }, [error, feature]);
+  const { isNetworkError, isChecking } = useNetworkStatus(error);
+  const { handleReset, handleGoBack, handleGoHome, handleRefresh } = useConnectionHandlers(resetErrorBoundary);
 
   return (
-    <div className="min-h-[200px] flex items-center justify-center p-4">
+    <div className={`min-h-[200px] flex items-center justify-center p-4 ${className || ''}`}>
       <Card className="max-w-2xl w-full p-6">
         <Alert variant={isNetworkError ? "warning" : "destructive"} className="mb-6">
           {isNetworkError ? (
@@ -72,22 +56,22 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Button 
-              onClick={onReset} 
+              onClick={handleReset} 
               className="flex items-center gap-2"
               disabled={isChecking}
             >
               <RefreshCw className={`h-4 w-4 ${isChecking ? 'animate-spin' : ''}`} />
               {isChecking ? 'Checking Connection...' : 'Try Again'}
             </Button>
-            <Button variant="outline" onClick={onGoBack} className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleGoBack} className="flex items-center gap-2">
               <ChevronLeft className="h-4 w-4" />
               Go Back
             </Button>
-            <Button variant="secondary" onClick={onRefresh} className="flex items-center gap-2">
+            <Button variant="secondary" onClick={handleRefresh} className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4" />
               Reload Page
             </Button>
-            <Button variant="secondary" onClick={onGoHome} className="flex items-center gap-2">
+            <Button variant="secondary" onClick={handleGoHome} className="flex items-center gap-2">
               <Home className="h-4 w-4" />
               Return Home
             </Button>
@@ -97,5 +81,3 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     </div>
   );
 };
-
-export default ErrorFallback;
