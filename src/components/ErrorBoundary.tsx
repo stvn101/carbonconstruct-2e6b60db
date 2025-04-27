@@ -1,8 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { AlertTriangle, RefreshCw, Home, ChevronLeft, Wifi, WifiOff } from "lucide-react";
+import ErrorFallback from "./error/ErrorFallback";
+import { useErrorBoundary } from "./error/useErrorBoundary";
 import errorTrackingService from "@/services/error/errorTrackingService";
 import { toast } from "sonner";
 import { checkNetworkStatus } from '@/utils/errorHandling';
