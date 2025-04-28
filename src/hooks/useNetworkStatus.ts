@@ -2,9 +2,23 @@
 import { useState, useEffect } from 'react';
 import { isNetworkError } from '@/utils/errorHandling/isNetworkError';
 
-export const useNetworkStatus = (error: Error) => {
+export const useNetworkStatus = (error?: Error) => {
   const [isChecking, setIsChecking] = useState(false);
-  const networkError = isNetworkError(error);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const networkError = error ? isNetworkError(error) : false;
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (networkError) {
@@ -16,6 +30,7 @@ export const useNetworkStatus = (error: Error) => {
 
   return {
     isNetworkError: networkError,
-    isChecking
+    isChecking,
+    isOnline
   };
 };

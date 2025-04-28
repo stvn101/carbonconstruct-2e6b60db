@@ -1,4 +1,3 @@
-
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -8,6 +7,7 @@ import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/auth';
 import { ProjectProvider } from './contexts/ProjectContext';
 import { CalculatorProvider } from './contexts/calculator';
+import { NetworkProvider } from './contexts/network/NetworkContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import ErrorBoundaryWrapper from './components/error/ErrorBoundaryWrapper';
 import PageLoading from './components/ui/page-loading';
@@ -117,8 +117,8 @@ const App: React.FC = () => {
     >
       <HelmetProvider>
         <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
-          <RegionProvider>
-            <Router>
+          <NetworkProvider>
+            <RegionProvider>
               <AuthProvider>
                 <ErrorBoundaryWrapper feature="Project Data">
                   <ProjectProvider>
@@ -130,8 +130,8 @@ const App: React.FC = () => {
                   </ProjectProvider>
                 </ErrorBoundaryWrapper>
               </AuthProvider>
-            </Router>
-          </RegionProvider>
+            </RegionProvider>
+          </NetworkProvider>
         </ThemeProvider>
       </HelmetProvider>
     </ErrorBoundaryWrapper>
