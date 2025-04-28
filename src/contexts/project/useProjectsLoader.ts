@@ -1,217 +1,241 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useContext, createContext } from 'react';
 import { toast } from 'sonner';
-import { loadProjects } from '@/utils/projectLoader';
-import { useRetry } from '@/hooks/useRetry';
-import { useNetworkStatus } from '@/hooks/useNetworkStatus';
-import { SavedProject } from '@/types/project';
+import { fetchUserProjects, createProject as apiCreateProject, updateProject as apiUpdateProject, deleteProject as apiDeleteProject } from '@/services/projectService';
 import { 
-  clearErrorToasts, 
-  showErrorToast,
-  showSuccessToast
+  isOffline, 
+  showErrorToast, 
+  clearErrorToasts,
+  retryWithBackoff 
 } from '@/utils/errorHandling';
+import { trackMetric } from '@/contexts/performance/metrics';
+import { SavedProject, NewProject, ProjectResult } from '@/types/project';
+import { useAuth } from '@/contexts/auth';
+import { useCalculator } from '@/contexts/calculator';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
-// Number of retry attempts for project loading
-const MAX_RETRIES = 2; // Reduced from 3 to 2
+interface ProjectsContextType {
+  projects: SavedProject[];
+  isLoading: boolean;
+  fetchError: Error | null;
+  createProject: (project: NewProject) => Promise<SavedProject | null>;
+  updateProject: (project: SavedProject) => Promise<SavedProject | null>;
+  deleteProject: (projectId: string) => Promise<boolean>;
+  loadProjects: () => Promise<SavedProject[] | undefined>;
+}
 
-export const useProjectsLoader = (
-  user: any,
-  setProjects: (projects: SavedProject[]) => void,
-  setIsLoading: (loading: boolean) => void,
-  setFetchError: (error: Error | null) => void,
-  retryCount: number,
-  setRetryCount: (count: number) => void
-) => {
-  // Track mounted state to prevent memory leaks
-  const isMountedRef = useRef(true);
-  const initialLoadAttemptedRef = useRef(false);
-  const activeRequestRef = useRef(false);
-  const { isOnline } = useNetworkStatus();
-  
-  // Clear stale errors on component mount
-  useEffect(() => {
-    const toastIds = ["projects-load-error", "projects-load-failed", "projects-offline"];
-    clearErrorToasts(toastIds);
-    
-    return () => {
-      // Mark component as unmounted
-      isMountedRef.current = false;
-      // Clear toasts when component unmounts to prevent stuck messages
-      clearErrorToasts(toastIds);
-    };
-  }, []);
+const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
+
+export const ProjectsProvider = ({ children }: { children: React.ReactNode }) => {
+  const [projects, setProjects] = useState<SavedProject[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<Error | null>(null);
+  const { user } = useAuth();
+  const { resetCalculator } = useCalculator();
   
   /**
-   * Enhanced load projects function with connection checks and better error handling
+   * Load projects with optimized pagination, retries, and improved connection handling
    */
-  const loadProjectsCallback = useCallback(async () => {
-    // Skip if component is unmounted or if a request is already in progress
-    if (!isMountedRef.current || activeRequestRef.current) return;
-    
-    if (!user) {
+  const loadProjects = useCallback(async () => {
+    if (!user?.id) {
       setProjects([]);
-      setIsLoading(false);
-      setFetchError(null); // Clear any previous error state
+      setFetchError(null);
       return;
     }
-
-    // Mark that we've attempted to load at least once
-    initialLoadAttemptedRef.current = true;
     
-    // Prevent concurrent requests
-    activeRequestRef.current = true;
     setIsLoading(true);
+    setFetchError(null);
     
-    // Check if we're online first
-    if (!isOnline) {
-      if (isMountedRef.current) {
-        setFetchError(new Error("You are currently offline"));
-        setIsLoading(false);
-        activeRequestRef.current = false;
-        
-        // Show offline toast
-        showErrorToast(
-          "You're offline. Project data will load when you reconnect.", 
-          "projects-offline", 
-          { persistent: true }
-        );
-      }
-      return;
-    }
+    // Clear any stale error toasts first
+    clearErrorToasts([
+      "projects-load-error", 
+      "projects-load-failed", 
+      "projects-offline"
+    ]);
     
-    // Check database connection before attempting to load
-    const canConnect = await checkSupabaseConnectionWithRetry(1);
-    if (!canConnect) {
-      if (isMountedRef.current) {
-        setFetchError(new Error("Unable to connect to the database"));
-        setIsLoading(false);
-        activeRequestRef.current = false;
-        
-        // Only show toast for non-initial loads to prevent duplicate messages
-        if (retryCount > 0) {
-          showErrorToast(
-            "Unable to connect to the server. Using offline mode.", 
-            "projects-db-offline", 
-            { duration: 8000 }
-          );
-        }
-      }
-      return;
-    }
-    
-    try {
-      await loadProjects(user.id, setProjects, setFetchError);
-      
-      // Only show retry toast for retry attempts, not the initial load
-      if (retryCount > 0) {
-        showErrorToast(
-          "Retrying connection... Please wait.", 
-          "projects-load-retry", 
-          { duration: 3000 }
-        );
-      }
-      
-      // Clear fetch error if successful
-      if (isMountedRef.current) {
-        setFetchError(null);
-        
-        // Show success toast only on recovery from error state
-        if (retryCount > 0) {
-          showSuccessToast("Projects loaded successfully!", "projects-load-success");
-        }
-      }
-    } catch (error) {
-      // Error is already handled in loadProjects
-      console.error('Project loading failed:', error);
-      
-      // Additional error handling can go here if needed
-    } finally {
-      // Only update state if still mounted
-      if (isMountedRef.current) {
-        setIsLoading(false);
-        activeRequestRef.current = false;
-      }
-    }
-  }, [user, retryCount, isOnline, setProjects, setIsLoading, setFetchError]);
-
-  // Use the retry mechanism with improved options
-  const retryResult = useRetry({
-    callback: loadProjectsCallback,
-    maxRetries: MAX_RETRIES,
-    onMaxRetriesReached: () => {
-      // Skip if component is unmounted
-      if (!isMountedRef.current) return;
-      
-      // Dismiss any retry toasts first
-      toast.dismiss("projects-load-retry");
-      
-      // Don't show the failure toast if we're offline - that's expected
-      if (isOnline && retryCount > 0) {
-        showErrorToast(
-          "Unable to load projects. Please check your connection or try again later.", 
-          "projects-load-failed", 
-          { duration: 8000 }
-        );
-      }
-      
-      // Set error state for UI to show appropriate message
-      setFetchError(new Error("Failed to load projects after multiple attempts"));
-    },
-    retryCount,
-    setRetryCount
-  });
-
-  const { isRetrying } = retryResult;
-
-  // Handle network status changes
-  useNetworkStatus();
-  
-  // Effect for handling online/offline status changes
-  useEffect(() => {
-    if (!isMountedRef.current) return;
-    
-    // When going offline
-    if (!isOnline) {
-      setFetchError(new Error("You are currently offline"));
-      
-      // Don't reset retry count when going offline - we'll retry when back online
+    if (isOffline()) {
+      setFetchError(new Error('You are currently offline'));
       showErrorToast(
         "You're offline. Project data will load when you reconnect.", 
         "projects-offline", 
         { persistent: true }
       );
-    } 
-    // When coming back online
-    else if (initialLoadAttemptedRef.current) {
-      // Clear offline error toast
-      toast.dismiss("projects-offline");
-      
-      // Reset retry count and immediately attempt to load
-      setRetryCount(0);
-      setFetchError(null);
-      activeRequestRef.current = false; // Clear any stuck active request flag
-      
-      // Small delay before reloading to let network stabilize
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          loadProjectsCallback();
-        }
-      }, 1000);
+      setIsLoading(false);
+      return [];
     }
-  }, [isOnline, loadProjectsCallback, setRetryCount, setFetchError]);
-
-  return {
-    loadProjects: loadProjectsCallback,
-    isRetrying
+    
+    // Check database connection before attempting to load with improved reliability
+    const canConnect = await checkSupabaseConnectionWithRetry(2, 10000);
+    if (!canConnect) {
+      setFetchError(new Error("Unable to connect to the database"));
+      showErrorToast(
+        "Unable to connect to the server. Using offline mode.", 
+        "projects-db-offline", 
+        { duration: 10000 }
+      );
+      setIsLoading(false);
+      return [];
+    }
+    
+    const startTime = performance.now();
+    
+    try {
+      // Use the retryWithBackoff utility with more conservative settings
+      const projectData = await retryWithBackoff(
+        () => fetchUserProjects(user.id),
+        2, // Max retries (reduced from 3 to 2)
+        5000, // Initial delay (increased from 2000ms to 5000ms)
+        {
+          onRetry: (attempt) => {
+            console.info(`Retrying project fetch (${attempt}/2)...`);
+          },
+          shouldRetry: (error) => {
+            // Only retry network/timeout errors, not permission or other errors
+            // and don't retry if we're now offline
+            return (
+              !isOffline() && 
+              (error instanceof TypeError || 
+               (error instanceof Error && 
+                (error.message.includes('timeout') || 
+                 error.message.includes('network') ||
+                 error.message.includes('connection'))))
+            );
+          },
+          maxDelay: 30000, // Cap delay at 30 seconds
+          factor: 1.5     // Use a more conservative growth factor
+        }
+      );
+      
+      // Check for undefined or null before setting
+      if (projectData) {
+        setProjects(projectData);
+        setFetchError(null);
+        
+        // Clear any error toasts on success
+        clearErrorToasts([
+          "projects-load-error", 
+          "projects-offline", 
+          "projects-load-failed",
+          "projects-db-offline"
+        ]);
+        
+        const loadTime = performance.now() - startTime;
+        trackMetric({
+          metric: 'projects_load_time',
+          value: loadTime,
+          tags: { count: projectData.length.toString() }
+        });
+        
+        setIsLoading(false);
+        return projectData;
+      } else {
+        // Handle empty response gracefully
+        setProjects([]);
+        setFetchError(null);
+        console.warn('No project data returned, but no error occurred');
+        setIsLoading(false);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      
+      // Set appropriate error for user display
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Failed to load projects';
+      
+      setFetchError(new Error(errorMessage));
+      
+      // Show a helpful error toast if it's not just a network issue
+      if (!isOffline()) {
+        showErrorToast(
+          "Unable to load your projects. Please try again later.", 
+          "projects-load-error", 
+          { duration: 8000 }
+        );
+      }
+      setIsLoading(false);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+  
+  useEffect(() => {
+    if (user?.id) {
+      loadProjects();
+    } else {
+      setProjects([]);
+    }
+  }, [user?.id, loadProjects]);
+  
+  const createProject = async (project: NewProject): Promise<SavedProject | null> => {
+    if (!user?.id) {
+      toast.error("You must be logged in to create a project.");
+      return null;
+    }
+    
+    try {
+      const newProject = await apiCreateProject(user.id, project);
+      setProjects(prevProjects => [...prevProjects, newProject]);
+      toast.success("Project created successfully!");
+      return newProject;
+    } catch (error) {
+      console.error("Error creating project:", error);
+      showErrorToast("Failed to create project. Please try again.");
+      return null;
+    }
   };
+  
+  const updateProject = async (project: SavedProject): Promise<SavedProject | null> => {
+    try {
+      const updatedProject = await apiUpdateProject(project);
+      setProjects(prevProjects =>
+        prevProjects.map(p => (p.id === project.id ? updatedProject : p))
+      );
+      toast.success("Project updated successfully!");
+      return updatedProject;
+    } catch (error) {
+      console.error("Error updating project:", error);
+      showErrorToast("Failed to update project. Please try again.");
+      return null;
+    }
+  };
+  
+  const deleteProject = async (projectId: string): Promise<boolean> => {
+    try {
+      await apiDeleteProject(projectId);
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+      toast.success("Project deleted successfully!");
+      resetCalculator();
+      return true;
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      showErrorToast("Failed to delete project. Please try again.");
+      return false;
+    }
+  };
+  
+  const value: ProjectsContextType = {
+    projects,
+    isLoading,
+    fetchError,
+    createProject,
+    updateProject,
+    deleteProject,
+    loadProjects,
+  };
+  
+  return (
+    <ProjectsContext.Provider value={value}>
+      {children}
+    </ProjectsContext.Provider>
+  );
 };
 
-export const fetchProjectsWithErrorHandling = async (supabase: any, showToasts: boolean = true): Promise<any[]> => {
-  try {
-    return await supabase.from('projects').select('*');
-  } catch (error) {
-    const customError = error as Error;
-    console.error('Failed to fetch projects:', customError);
-    throw customError;
+export const useProjects = (): ProjectsContextType => {
+  const context = useContext(ProjectsContext);
+  if (context === undefined) {
+    throw new Error("useProjects must be used within a ProjectsProvider");
   }
+  return context;
 };

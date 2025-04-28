@@ -91,6 +91,7 @@ export function useRetryCore<T>(options: RetryOptions<T>) {
 
   const handleError = (error: unknown) => {
     const customError = error instanceof Error ? error : new Error(String(error));
+    // Use isNetworkError utility function since isOffline is no longer available
     const shouldShowToasts = isNetworkError(customError) && !isOfflineMode;
     
     if (shouldShowToasts) {
