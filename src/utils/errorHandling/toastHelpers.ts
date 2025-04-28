@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 // Keep track of shown error toasts to prevent duplicates
-const shownErrorToasts = new Set<string>();
+export const shownErrorToasts = new Set<string>();
 // Toast cooldowns to prevent spam
 const toastCooldowns: Record<string, number> = {};
 // Minimum time between similar toasts (20 seconds)
