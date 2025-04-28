@@ -16,6 +16,7 @@ import {
   showSuccessToast,
   isOffline
 } from '@/utils/errorHandling';
+import { CalculatorProvider } from '@/contexts/calculator/CalculatorContext';
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -47,8 +48,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   
   const { subscribeToProjects } = useProjectRealtime(user?.id, setProjects);
 
-  // Get the Provider component from ProjectsProvider
-  const { Provider } = ProjectsProvider({ children });
+  // Ensure we have a CalculatorProvider to wrap the ProjectsProvider
+  const wrappedProvider = (
+    <CalculatorProvider>
+      {ProjectsProvider({ children }).Provider({ children })}
+    </CalculatorProvider>
+  );
   
   const initializeData = useCallback(async () => {
     if (!user || hasInitialized) return;
@@ -91,7 +96,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
 
-      // Load the projects with better error handling
       // First attempt to correctly use the Provider component returned from ProjectsProvider
       // Here we're trying to establish realtime connection as well
       try {
