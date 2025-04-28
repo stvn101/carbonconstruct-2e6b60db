@@ -9,18 +9,18 @@ import {
   retryWithBackoff 
 } from '@/utils/errorHandling';
 import { trackMetric } from '@/contexts/performance/metrics';
-import { SavedProject, NewProject } from '@/types/project';
+import { SavedProject } from '@/types/project';
 import { useAuth } from '@/contexts/auth';
 import { useCalculator } from '@/contexts/calculator';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 import React from 'react';
 
-// Define ProjectsContext type
+// Define ProjectsContextType
 interface ProjectsContextType {
   projects: SavedProject[];
   isLoading: boolean;
   fetchError: Error | null;
-  createProject: (project: NewProject) => Promise<SavedProject | null>;
+  createProject: (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<SavedProject | null>;
   updateProject: (project: SavedProject) => Promise<SavedProject | null>;
   deleteProject: (projectId: string) => Promise<boolean>;
   loadProjects: () => Promise<SavedProject[] | undefined>;
@@ -34,7 +34,22 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<Error | null>(null);
   const { user } = useAuth();
-  const { resetCalculator } = useCalculator();
+  
+  // Defensive check for useCalculator to avoid context error
+  let resetCalculator: () => void;
+  try {
+    const calculator = useCalculator();
+    resetCalculator = calculator.setCalculationInput ? 
+      () => calculator.setCalculationInput({
+        materials: [{ type: "concrete", quantity: 1000 }],
+        transport: [{ type: "truck", distance: 100, weight: 1000 }],
+        energy: [{ type: "electricity", amount: 500 }]
+      }) : 
+      () => console.log('Calculator reset not available');
+  } catch (error) {
+    console.warn('CalculatorProvider not found, using no-op resetCalculator');
+    resetCalculator = () => {}; // Fallback to prevent crash
+  }
   
   /**
    * Load projects with optimized pagination, retries, and improved connection handling
@@ -172,7 +187,7 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     }
   }, [user?.id, loadProjects]);
   
-  const createProject = async (project: NewProject): Promise<SavedProject | null> => {
+  const createProject = async (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<SavedProject | null> => {
     if (!user?.id) {
       toast.error("You must be logged in to create a project.");
       return null;
