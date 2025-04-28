@@ -13,7 +13,9 @@ import { SavedProject, NewProject } from '@/types/project';
 import { useAuth } from '@/contexts/auth';
 import { useCalculator } from '@/contexts/calculator';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
+import React from 'react';
 
+// Define ProjectsContext type
 interface ProjectsContextType {
   projects: SavedProject[];
   isLoading: boolean;
@@ -24,7 +26,8 @@ interface ProjectsContextType {
   loadProjects: () => Promise<SavedProject[] | undefined>;
 }
 
-const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
+// Create a context with a default null value
+const ProjectsContext = createContext<ProjectsContextType>(null as any);
 
 export const ProjectsProvider = ({ children }: { children: React.ReactNode }) => {
   const [projects, setProjects] = useState<SavedProject[]>([]);
@@ -226,21 +229,25 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     loadProjects,
   };
   
-  // Return a plain object with Provider property instead of JSX directly
+  // Return an object with a Provider function
+  // Critical: We avoid direct JSX here and defer it to a function
   return {
     Provider: function ProjectsContextProvider({ children }: { children: React.ReactNode }) {
-      return (
-        <ProjectsContext.Provider value={value}>
-          {children}
-        </ProjectsContext.Provider>
+      // The actual JSX will be rendered in the ProjectContext.tsx file
+      // that imports this function
+      const element = React.createElement(
+        ProjectsContext.Provider,
+        { value },
+        children
       );
+      return element;
     }
   };
 };
 
 export const useProjects = (): ProjectsContextType => {
   const context = useContext(ProjectsContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useProjects must be used within a ProjectsProvider");
   }
   return context;
