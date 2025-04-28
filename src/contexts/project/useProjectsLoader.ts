@@ -26,7 +26,7 @@ export const useProjectsLoader = (
   const isMountedRef = useRef(true);
   const initialLoadAttemptedRef = useRef(false);
   const activeRequestRef = useRef(false);
-  const { isOnline } = useNetworkStatus({ showToasts: false });
+  const { isOnline } = useNetworkStatus();
   
   // Clear stale errors on component mount
   useEffect(() => {
@@ -135,7 +135,7 @@ export const useProjectsLoader = (
   }, [user, retryCount, isOnline, setProjects, setIsLoading, setFetchError]);
 
   // Use the retry mechanism with improved options
-  const { isRetrying } = useRetry({
+  const retryResult = useRetry({
     callback: loadProjectsCallback,
     maxRetries: MAX_RETRIES,
     onMaxRetriesReached: () => {
@@ -160,6 +160,8 @@ export const useProjectsLoader = (
     retryCount,
     setRetryCount
   });
+
+  const { isRetrying } = retryResult;
 
   // Handle network status changes
   useNetworkStatus();

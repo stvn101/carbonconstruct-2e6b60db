@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { isNetworkError } from '@/utils/errorHandling';
@@ -34,7 +35,7 @@ export function useRetryCore<T>(options: RetryOptions<T>) {
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const { isOffline } = useOfflineMode();
+  const { isOfflineMode } = useOfflineMode();
   const attemptRef = useRef(0);
   const isMounted = useRef(false);
 
@@ -86,11 +87,11 @@ export function useRetryCore<T>(options: RetryOptions<T>) {
     };
 
     await attempt();
-  }, [fn, retries, delay, successMessage, errorMessage, onSuccess, onError, shouldRetry, isOffline]);
+  }, [fn, retries, delay, successMessage, errorMessage, onSuccess, onError, shouldRetry, isOfflineMode]);
 
   const handleError = (error: unknown) => {
     const customError = error instanceof Error ? error : new Error(String(error));
-    const shouldShowToasts = isNetworkError(customError) && !isOffline;
+    const shouldShowToasts = isNetworkError(customError) && !isOfflineMode;
     
     if (shouldShowToasts) {
       toast.error(getErrorMessage(customError));
@@ -104,6 +105,7 @@ export function useRetryCore<T>(options: RetryOptions<T>) {
     error, 
     loading, 
     attempts, 
-    execute 
+    execute,
+    isRetrying: attempts > 0 && loading
   };
 }
