@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { ProjectContextType } from '@/types/project';
 import { useProjectProvider } from './project/useProjectProvider';
-import { useProjectsLoader } from './project/useProjectsLoader';
+import { ProjectsProvider } from './project/useProjectsLoader';
 import { useProjectRealtime } from './project/useProjectRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -233,6 +232,9 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [user, hasInitialized, initializeData]);
 
+  // Use the Provider property returned by ProjectsProvider
+  const { Provider } = ProjectsProvider({ children });
+  
   return (
     <ProjectContext.Provider value={contextValue}>
       {children}
