@@ -203,3 +203,13 @@ export const useProjectsLoader = (
     isRetrying
   };
 };
+
+export const fetchProjectsWithErrorHandling = async (supabase: any, showToasts: boolean = true): Promise<any[]> => {
+  try {
+    return await supabase.from('projects').select('*');
+  } catch (error) {
+    const customError = error as Error;
+    console.error('Failed to fetch projects:', customError);
+    throw customError;
+  }
+};
