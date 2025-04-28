@@ -226,14 +226,15 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     loadProjects,
   };
   
-  // This is a regular JavaScript function, not a React component
-  // so we don't need JSX syntax here
+  // Return a plain object with Provider property instead of JSX directly
   return {
-    Provider: ({ children }: { children: React.ReactNode }) => (
-      <ProjectsContext.Provider value={value}>
-        {children}
-      </ProjectsContext.Provider>
-    )
+    Provider: function ProjectsContextProvider({ children }: { children: React.ReactNode }) {
+      return (
+        <ProjectsContext.Provider value={value}>
+          {children}
+        </ProjectsContext.Provider>
+      );
+    }
   };
 };
 
