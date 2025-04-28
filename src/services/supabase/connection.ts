@@ -1,183 +1,49 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import errorTrackingService from '@/services/error/errorTrackingService';
-import { showErrorToast, showSuccessToast } from '@/utils/errorHandling';
-
-// Configuration constants (adjusted values)
-export const MAX_RETRIES = 2; // Reduced from 3 to 2 for less aggressive retrying
-export const OPERATION_TIMEOUT = 40000; // Increased from 30s to 40s
-export const HEALTHCHECK_TIMEOUT = 20000; // Increased from 15s to 20s
-
-// Health check cache to prevent excessive checks
-const HEALTHCHECK_CACHE_TTL = 30000; // Increased from 20s to 30s
-let lastHealthCheckResult = false;
-let lastHealthCheckTime = 0;
-
-// Track connection notification states
-const CONNECTION_NOTIFICATIONS = {
-  failure: false,
-  success: false,
-  timestamp: 0,
-  id: ''
-};
-
 /**
- * Checks if the Supabase connection is working
- * Uses improved caching to reduce unnecessary checks
+ * Supabase connection utilities
  */
-export const checkSupabaseConnection = async (): Promise<boolean> => {
-  const now = Date.now();
-  
-  // Use cached result if recent enough
-  if (now - lastHealthCheckTime < HEALTHCHECK_CACHE_TTL) {
-    return lastHealthCheckResult;
-  }
-  
-  try {
-    // Perform a lightweight query to check connection
-    // Use a timeout to prevent hanging
-    const response = await withTimeout(async () => {
-      try {
-        // Changed to use count head query for faster response
-        // This avoids loading actual data and is more efficient
-        const { count, error } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .limit(1);
-          
-        return { data: count, error };
-      } catch (innerError) {
-        console.error('Inner Supabase health check error:', innerError);
-        return { data: null, error: innerError };
-      }
-    }, HEALTHCHECK_TIMEOUT);
-    
-    // Update cache
-    const isConnected = !response.error;
-    lastHealthCheckResult = isConnected;
-    lastHealthCheckTime = now;
-    
-    // Show success message if we were previously disconnected
-    if (isConnected && !lastHealthCheckResult && CONNECTION_NOTIFICATIONS.failure) {
-      showSuccessToast('Database connection restored!', 'supabase-connection-restored');
-      
-      // Reset notification state
-      CONNECTION_NOTIFICATIONS.failure = false;
-      CONNECTION_NOTIFICATIONS.success = true;
-      CONNECTION_NOTIFICATIONS.timestamp = now;
-      
-      // Auto-reset the success state after a delay
-      setTimeout(() => {
-        CONNECTION_NOTIFICATIONS.success = false;
-      }, 60000); // 1 minute
-    }
-    
-    return isConnected;
-  } catch (error) {
-    console.error('Supabase health check error:', error);
-    
-    // Update cache
-    lastHealthCheckResult = false;
-    lastHealthCheckTime = now;
-    
-    // Show error message if enough time has passed
-    if (!CONNECTION_NOTIFICATIONS.failure || now - CONNECTION_NOTIFICATIONS.timestamp > 60000) {
-      showErrorToast(
-        'Unable to connect to the server. Some features may be unavailable.',
-        'supabase-connection-error',
-        { duration: 10000 }
-      );
-      
-      CONNECTION_NOTIFICATIONS.failure = true;
-      CONNECTION_NOTIFICATIONS.success = false;
-      CONNECTION_NOTIFICATIONS.timestamp = now;
-      CONNECTION_NOTIFICATIONS.id = 'supabase-connection-error';
-      
-      // Log to error tracking service
-      errorTrackingService.captureException(
-        error instanceof Error ? error : new Error('Supabase connection failed'),
-        { context: 'checkSupabaseConnection' }
-      );
-    }
-    
+import { checkNetworkStatus } from '@/utils/errorHandling/networkChecker';
+
+// Basic check if Supabase is accessible with retry logic
+export const checkSupabaseConnectionWithRetry = async (
+  attempts: number = 3, 
+  delayMs: number = 500
+): Promise<boolean> => {
+  // First check if we're online at all
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
     return false;
   }
-};
-
-/**
- * Wraps a promise with a timeout
- * @param promise The function that returns a promise
- * @param ms Timeout in milliseconds
- * @returns The promise result or a timeout error
- */
-export const withTimeout = async <T>(
-  promiseFn: () => Promise<T>, 
-  ms: number
-): Promise<T> => {
-  const timeoutError = new Error(`Operation timed out after ${ms}ms`);
   
-  return new Promise<T>((resolve, reject) => {
-    // Set up timeout to reject after specified milliseconds
-    const timeoutId = setTimeout(() => {
-      reject(timeoutError);
-    }, ms);
-    
-    // Execute the promise function
-    promiseFn()
-      .then(result => {
-        clearTimeout(timeoutId);
-        resolve(result);
-      })
-      .catch(error => {
-        clearTimeout(timeoutId);
-        reject(error);
-      });
-  });
-};
-
-/**
- * Calculate backoff delay with jitter to prevent thundering herd
- * This function is properly exported to be used elsewhere
- */
-export const calculateBackoffDelay = (attempt: number, baseDelay: number = 3000, maxDelay: number = 30000): number => {
-  // Base delay with exponential factor (1.5 instead of 2 for more gradual increase)
-  const factor = 1.5;
+  const isNetworkAvailable = await checkNetworkStatus();
+  if (!isNetworkAvailable) {
+    return false;
+  }
   
-  // Calculate exponential delay
-  const delay = Math.min(baseDelay * Math.pow(factor, attempt - 1), maxDelay);
-  
-  // Add jitter (±20%) to prevent thundering herd problem
-  const jitter = delay * 0.2 * (Math.random() * 2 - 1);
-  
-  return Math.floor(delay + jitter);
-};
-
-/**
- * Check Supabase connection with retries
- * @param maxRetries Maximum number of retry attempts
- * @param timeout Timeout in milliseconds for each attempt
- * @returns Promise that resolves to boolean indicating connection status
- */
-export const checkSupabaseConnectionWithRetry = async (
-  maxRetries: number = 2, 
-  timeout: number = HEALTHCHECK_TIMEOUT
-): Promise<boolean> => {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
+  for (let i = 0; i < attempts; i++) {
     try {
-      // For retries, use increased timeout
-      return await withTimeout(() => checkSupabaseConnection(), timeout);
-    } catch (err) {
-      console.warn(`Connection check failed (attempt ${attempt + 1}/${maxRetries})`, err);
+      if (i > 0) {
+        // Wait between retry attempts
+        await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(1.5, i)));
+      }
+
+      // Use fetch to check if we can reach the Supabase API
+      // This is a lightweight check without requiring credentials
+      const response = await fetch('https://api.supabase.co/status', {
+        method: 'HEAD',
+        cache: 'no-store',
+        mode: 'cors',
+        // Use AbortController for timeout
+        signal: AbortSignal.timeout(3000) // 3 second timeout
+      });
       
-      // If this is the last attempt, return false
-      if (attempt === maxRetries - 1) {
+      return response.ok;
+    } catch (error) {
+      console.error(`Connection check attempt ${i+1} failed:`, error);
+      
+      // On last attempt, give up
+      if (i === attempts - 1) {
         return false;
       }
-      
-      // Wait before retrying using the exported calculateBackoffDelay function
-      const delay = calculateBackoffDelay(attempt + 1);
-      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   
