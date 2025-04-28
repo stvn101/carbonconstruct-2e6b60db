@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useContext, createContext } from 'react';
 import { toast } from 'sonner';
 import { fetchUserProjects, createProject as apiCreateProject, updateProject as apiUpdateProject, deleteProject as apiDeleteProject } from '@/services/projectService';
@@ -8,7 +9,7 @@ import {
   retryWithBackoff 
 } from '@/utils/errorHandling';
 import { trackMetric } from '@/contexts/performance/metrics';
-import { SavedProject, NewProject, ProjectResult } from '@/types/project';
+import { SavedProject, NewProject } from '@/types/project';
 import { useAuth } from '@/contexts/auth';
 import { useCalculator } from '@/contexts/calculator';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
@@ -225,11 +226,15 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     loadProjects,
   };
   
-  return (
-    <ProjectsContext.Provider value={value}>
-      {children}
-    </ProjectsContext.Provider>
-  );
+  // This is a regular JavaScript function, not a React component
+  // so we don't need JSX syntax here
+  return {
+    Provider: ({ children }: { children: React.ReactNode }) => (
+      <ProjectsContext.Provider value={value}>
+        {children}
+      </ProjectsContext.Provider>
+    )
+  };
 };
 
 export const useProjects = (): ProjectsContextType => {
