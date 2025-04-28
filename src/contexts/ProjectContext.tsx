@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { ProjectContextType } from '@/types/project';
@@ -46,15 +47,9 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   
   const { subscribeToProjects } = useProjectRealtime(user?.id, setProjects);
 
-  const { loadProjects } = useProjectsLoader(
-    user,
-    setProjects,
-    setIsLoading,
-    setFetchError,
-    retryCount,
-    setRetryCount
-  );
-
+  // Get the Provider component from ProjectsProvider
+  const { Provider } = ProjectsProvider({ children });
+  
   const initializeData = useCallback(async () => {
     if (!user || hasInitialized) return;
     
@@ -97,9 +92,8 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       // Load the projects with better error handling
-      await loadProjects();
-      
-      // Only attempt subscription if we successfully loaded projects
+      // First attempt to correctly use the Provider component returned from ProjectsProvider
+      // Here we're trying to establish realtime connection as well
       try {
         const channel = subscribeToProjects();
         if (channel) {
@@ -144,7 +138,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [
     user, 
     hasInitialized, 
-    loadProjects, 
     subscribeToProjects, 
     initializationAttempts, 
     setIsLoading
@@ -232,9 +225,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [user, hasInitialized, initializeData]);
 
-  // Use the Provider property returned by ProjectsProvider
-  const { Provider } = ProjectsProvider({ children });
-  
   return (
     <ProjectContext.Provider value={contextValue}>
       {children}
