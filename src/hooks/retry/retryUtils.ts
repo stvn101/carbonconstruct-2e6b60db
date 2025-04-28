@@ -27,15 +27,15 @@ export const calculateBackoffDelay = (
   return Math.floor(cappedDelay + jitter);
 };
 
-export type RetryOptions = {
+export interface RetryOptions<T = unknown> {
   callback: () => Promise<void>;
   maxRetries: number;
   onMaxRetriesReached?: () => void;
   retryCount: number;
   setRetryCount: (count: number) => void;
-};
+}
 
-export type RetryResult = {
+export interface RetryResult {
   isRetrying: boolean;
   retryCount: number;
-};
+}

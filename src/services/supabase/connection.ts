@@ -4,6 +4,25 @@
  */
 import { checkNetworkStatus } from '@/utils/errorHandling/networkChecker';
 
+// Export the checkSupabaseConnection function for use in other modules
+export const checkSupabaseConnection = async (): Promise<boolean> => {
+  try {
+    // Use fetch to check if we can reach the Supabase API
+    // This is a lightweight check without requiring credentials
+    const response = await fetch('https://api.supabase.co/status', {
+      method: 'HEAD',
+      cache: 'no-store',
+      mode: 'cors',
+      signal: AbortSignal.timeout(3000) // 3 second timeout
+    });
+    
+    return response.ok;
+  } catch (error) {
+    console.error(`Connection check failed:`, error);
+    return false;
+  }
+};
+
 // Basic check if Supabase is accessible with retry logic
 export const checkSupabaseConnectionWithRetry = async (
   attempts: number = 3, 
@@ -26,17 +45,7 @@ export const checkSupabaseConnectionWithRetry = async (
         await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(1.5, i)));
       }
 
-      // Use fetch to check if we can reach the Supabase API
-      // This is a lightweight check without requiring credentials
-      const response = await fetch('https://api.supabase.co/status', {
-        method: 'HEAD',
-        cache: 'no-store',
-        mode: 'cors',
-        // Use AbortController for timeout
-        signal: AbortSignal.timeout(3000) // 3 second timeout
-      });
-      
-      return response.ok;
+      return await checkSupabaseConnection();
     } catch (error) {
       console.error(`Connection check attempt ${i+1} failed:`, error);
       

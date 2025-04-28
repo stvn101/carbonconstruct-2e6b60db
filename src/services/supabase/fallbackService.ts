@@ -4,40 +4,7 @@
  * Provides functionality for when the app is disconnected from Supabase
  */
 
-// Check connection status with retry logic
-export const checkSupabaseConnectionWithRetry = async (
-  attempts: number = 3, 
-  delayMs: number = 500
-): Promise<boolean> => {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      if (i > 0) {
-        // Wait between retry attempts
-        await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(1.5, i)));
-      }
-
-      // Use fetch to check if we can reach the Supabase API
-      // This is a lightweight check without requiring credentials
-      const response = await fetch('https://api.supabase.co/status', {
-        method: 'HEAD',
-        cache: 'no-store',
-        mode: 'cors',
-        signal: AbortSignal.timeout(3000) // Abort after 3 seconds
-      });
-      
-      return response.ok;
-    } catch (error) {
-      console.error(`Connection check attempt ${i+1} failed:`, error);
-      
-      // On last attempt, give up
-      if (i === attempts - 1) {
-        return false;
-      }
-    }
-  }
-  
-  return false;
-};
+export { checkSupabaseConnection, checkSupabaseConnectionWithRetry } from './connection';
 
 // Simple offline fallback for data that should be cached
 export const getFallbackData = (key: string): any => {
@@ -69,5 +36,35 @@ export const clearFallbackData = (key: string): boolean => {
   } catch (error) {
     console.error('Failed to clear fallback data:', error);
     return false;
+  }
+};
+
+/**
+ * Database operation handler with fallback support
+ */
+export const performDbOperation = async <T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  options: {
+    fallbackData?: T;
+    silentFail?: boolean;
+  } = {}
+): Promise<T> => {
+  try {
+    return await operation();
+  } catch (error) {
+    console.error(`Error in ${operationName}:`, error);
+    
+    // If fallback data is provided, return it when operation fails
+    if (options.fallbackData !== undefined) {
+      return options.fallbackData;
+    }
+    
+    // Re-throw the error if not set to silent fail
+    if (!options.silentFail) {
+      throw error;
+    }
+    
+    throw new Error(`Operation ${operationName} failed`);
   }
 };

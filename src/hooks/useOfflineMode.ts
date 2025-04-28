@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNetworkStatus } from './useNetworkStatus';
-import { checkSupabaseConnection } from '@/services/supabase/fallbackService';
+import { checkSupabaseConnection } from '@/services/supabase/connection';
 import { toast } from 'sonner';
 
 /**
