@@ -26,7 +26,7 @@ export const useProjectOperations = (
       return newProject;
     } catch (error) {
       console.error("Error creating project:", error);
-      showErrorToast("Failed to create project. Please try again.");
+      showErrorToast("Failed to create project. Please try again.", "project-create-error");
       return null;
     }
   };
@@ -46,7 +46,7 @@ export const useProjectOperations = (
       return updatedProject;
     } catch (error) {
       console.error("Error updating project:", error);
-      showErrorToast("Failed to update project. Please try again.");
+      showErrorToast("Failed to update project. Please try again.", "project-update-error");
       return null;
     }
   };
@@ -65,7 +65,7 @@ export const useProjectOperations = (
       return true;
     } catch (error) {
       console.error("Error deleting project:", error);
-      showErrorToast("Failed to delete project. Please try again.");
+      showErrorToast("Failed to delete project. Please try again.", "project-delete-error");
       return false;
     }
   };
