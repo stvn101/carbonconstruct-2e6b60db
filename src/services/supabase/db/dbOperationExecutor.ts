@@ -3,14 +3,8 @@ import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
 import { isOffline } from '@/utils/errorHandling';
 import { showErrorToast, showSuccessToast } from '@/utils/errorHandling/toastHelpers';
-
-// Track connection notification state
-const CONNECTION_TOAST_STATE = {
-  failure: false,
-  success: false,
-  timestamp: 0,
-  id: '',
-};
+import { CONNECTION_TOAST_STATE, updateToastState, shouldThrottleToast } from '@/utils/errorHandling/connectionToast';
+import { calculateBackoffDelay } from '@/utils/errorHandling/retryUtils';
 
 /**
  * Enhanced database operation handler with better retry logic,
@@ -48,13 +42,7 @@ export const performDbOperation = async <T>(
         { persistent: true }
       );
       
-      CONNECTION_TOAST_STATE.failure = true;
-      CONNECTION_TOAST_STATE.timestamp = Date.now();
-      CONNECTION_TOAST_STATE.id = toastId;
-      
-      setTimeout(() => {
-        CONNECTION_TOAST_STATE.failure = false;
-      }, 20000);
+      updateToastState('failure', toastId);
     }
     
     if (fallbackData !== undefined) {
@@ -76,12 +64,7 @@ export const performDbOperation = async <T>(
         
         showSuccessToast("Connection restored successfully!", "connection-restored");
         
-        CONNECTION_TOAST_STATE.success = true;
-        CONNECTION_TOAST_STATE.failure = false;
-        
-        setTimeout(() => {
-          CONNECTION_TOAST_STATE.success = false;
-        }, 20000);
+        updateToastState('success', 'connection-restored');
       }
       
       return result;
@@ -103,7 +86,7 @@ export const performDbOperation = async <T>(
     const toastId = `db-operation-failed-${operationName}`;
     
     if (!CONNECTION_TOAST_STATE.failure || 
-        now - CONNECTION_TOAST_STATE.timestamp > 30000 ||
+        !shouldThrottleToast() ||
         CONNECTION_TOAST_STATE.id !== toastId) {
         
       toast.dismiss("db-operation-failed");
@@ -115,13 +98,7 @@ export const performDbOperation = async <T>(
         { duration: 8000 }
       );
       
-      CONNECTION_TOAST_STATE.failure = true;
-      CONNECTION_TOAST_STATE.timestamp = now;
-      CONNECTION_TOAST_STATE.id = toastId;
-      
-      setTimeout(() => {
-        CONNECTION_TOAST_STATE.failure = false;
-      }, 30000);
+      updateToastState('failure', toastId);
     }
   }
   
@@ -135,16 +112,4 @@ export const performDbOperation = async <T>(
   }
   
   throw lastError || new Error(`Failed to ${operationName} after ${retries} attempts`);
-};
-
-// Helper function for calculating backoff delay with jitter
-const calculateBackoffDelay = (attempt: number): number => {
-  const baseDelay = 2000;
-  const factor = 1.5;
-  const maxDelay = 15000;
-  
-  const delay = Math.min(baseDelay * Math.pow(factor, attempt - 1), maxDelay);
-  const jitter = delay * 0.15 * (Math.random() * 2 - 1);
-  
-  return Math.floor(delay + jitter);
 };
