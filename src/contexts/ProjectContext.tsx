@@ -5,7 +5,6 @@ import { ProjectContextType } from '@/types/project';
 import { useProjectProvider } from './project/useProjectProvider';
 import { ProjectsProvider } from './project/useProjectsLoader';
 import { useProjectRealtime } from './project/useProjectRealtime';
-import { supabase } from '@/integrations/supabase/client';
 import { useProjectInitialization } from './project/useProjectInitialization';
 import { CalculatorProvider } from '@/contexts/calculator/CalculatorContext';
 
@@ -40,7 +39,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     console.log("Project data initialization complete");
   };
   
-  // Use our new initialization hook
+  // Use our initialization hook
   const { projectChannel } = useProjectInitialization({
     user,
     setProjects,
