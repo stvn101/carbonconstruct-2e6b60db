@@ -5,14 +5,13 @@ import { fetchUserProjects, createProject as apiCreateProject, updateProject as 
 import { 
   isOffline, 
   showErrorToast, 
-  clearErrorToasts,
-  retryWithBackoff 
+  clearErrorToasts
 } from '@/utils/errorHandling';
-import { trackMetric } from '@/contexts/performance/metrics';
 import { SavedProject } from '@/types/project';
 import { useAuth } from '@/contexts/auth';
 import { useCalculator } from '@/contexts/calculator';
-import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
+import { loadProjects } from '@/utils/projectLoader';
+import { useProjectOperations } from './useProjectOperations';
 import React from 'react';
 
 // Define ProjectsContextType
@@ -52,9 +51,9 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
   }
   
   /**
-   * Load projects with optimized pagination, retries, and improved connection handling
+   * Wrapper for the loadProjects utility function
    */
-  const loadProjects = useCallback(async () => {
+  const loadProjectsWrapper = useCallback(async () => {
     if (!user?.id) {
       setProjects([]);
       setFetchError(null);
@@ -62,177 +61,36 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     }
     
     setIsLoading(true);
-    setFetchError(null);
-    
-    // Clear any stale error toasts first
-    clearErrorToasts([
-      "projects-load-error", 
-      "projects-load-failed", 
-      "projects-offline"
-    ]);
-    
-    if (isOffline()) {
-      setFetchError(new Error('You are currently offline'));
-      showErrorToast(
-        "You're offline. Project data will load when you reconnect.", 
-        "projects-offline", 
-        { persistent: true }
-      );
-      setIsLoading(false);
-      return [];
-    }
-    
-    // Check database connection before attempting to load with improved reliability
-    const canConnect = await checkSupabaseConnectionWithRetry(2, 10000);
-    if (!canConnect) {
-      setFetchError(new Error("Unable to connect to the database"));
-      showErrorToast(
-        "Unable to connect to the server. Using offline mode.", 
-        "projects-db-offline", 
-        { duration: 10000 }
-      );
-      setIsLoading(false);
-      return [];
-    }
-    
-    const startTime = performance.now();
     
     try {
-      // Use the retryWithBackoff utility with more conservative settings
-      const projectData = await retryWithBackoff(
-        () => fetchUserProjects(user.id),
-        2, // Max retries (reduced from 3 to 2)
-        5000, // Initial delay (increased from 2000ms to 5000ms)
-        {
-          onRetry: (attempt) => {
-            console.info(`Retrying project fetch (${attempt}/2)...`);
-          },
-          shouldRetry: (error) => {
-            // Only retry network/timeout errors, not permission or other errors
-            // and don't retry if we're now offline
-            return (
-              !isOffline() && 
-              (error instanceof TypeError || 
-               (error instanceof Error && 
-                (error.message.includes('timeout') || 
-                 error.message.includes('network') ||
-                 error.message.includes('connection'))))
-            );
-          },
-          maxDelay: 30000, // Cap delay at 30 seconds
-          factor: 1.5     // Use a more conservative growth factor
-        }
+      const projectData = await loadProjects(
+        user.id, 
+        setProjects, 
+        setFetchError
       );
       
-      // Check for undefined or null before setting
-      if (projectData) {
-        setProjects(projectData);
-        setFetchError(null);
-        
-        // Clear any error toasts on success
-        clearErrorToasts([
-          "projects-load-error", 
-          "projects-offline", 
-          "projects-load-failed",
-          "projects-db-offline"
-        ]);
-        
-        const loadTime = performance.now() - startTime;
-        trackMetric({
-          metric: 'projects_load_time',
-          value: loadTime,
-          tags: { count: projectData.length.toString() }
-        });
-        
-        setIsLoading(false);
-        return projectData;
-      } else {
-        // Handle empty response gracefully
-        setProjects([]);
-        setFetchError(null);
-        console.warn('No project data returned, but no error occurred');
-        setIsLoading(false);
-        return [];
-      }
+      setIsLoading(false);
+      return projectData;
     } catch (error) {
-      console.error('Error loading projects:', error);
-      
-      // Set appropriate error for user display
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Failed to load projects';
-      
-      setFetchError(new Error(errorMessage));
-      
-      // Show a helpful error toast if it's not just a network issue
-      if (!isOffline()) {
-        showErrorToast(
-          "Unable to load your projects. Please try again later.", 
-          "projects-load-error", 
-          { duration: 8000 }
-        );
-      }
       setIsLoading(false);
       return [];
-    } finally {
-      setIsLoading(false);
     }
   }, [user?.id]);
   
   useEffect(() => {
     if (user?.id) {
-      loadProjects();
+      loadProjectsWrapper();
     } else {
       setProjects([]);
     }
-  }, [user?.id, loadProjects]);
+  }, [user?.id, loadProjectsWrapper]);
   
-  const createProject = async (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<SavedProject | null> => {
-    if (!user?.id) {
-      toast.error("You must be logged in to create a project.");
-      return null;
-    }
-    
-    try {
-      const newProject = await apiCreateProject(user.id, project);
-      setProjects(prevProjects => [...prevProjects, newProject]);
-      toast.success("Project created successfully!");
-      return newProject;
-    } catch (error) {
-      console.error("Error creating project:", error);
-      showErrorToast("Failed to create project. Please try again.");
-      return null;
-    }
-  };
-  
-  const updateProject = async (project: SavedProject): Promise<SavedProject | null> => {
-    try {
-      const updatedProject = await apiUpdateProject(project);
-      setProjects(prevProjects =>
-        prevProjects.map(p => (p.id === project.id ? updatedProject : p))
-      );
-      toast.success("Project updated successfully!");
-      return updatedProject;
-    } catch (error) {
-      console.error("Error updating project:", error);
-      showErrorToast("Failed to update project. Please try again.");
-      return null;
-    }
-  };
-  
-  const deleteProject = async (projectId: string): Promise<boolean> => {
-    try {
-      await apiDeleteProject(projectId);
-      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-      toast.success("Project deleted successfully!");
-      resetCalculator();
-      return true;
-    } catch (error) {
-      console.error("Error deleting project:", error);
-      showErrorToast("Failed to delete project. Please try again.");
-      return false;
-    }
-  };
+  // Use the extracted project operations hook
+  const { createProject, updateProject, deleteProject } = useProjectOperations(
+    user?.id, 
+    setProjects, 
+    resetCalculator
+  );
   
   const value: ProjectsContextType = {
     projects,
@@ -241,21 +99,18 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     createProject,
     updateProject,
     deleteProject,
-    loadProjects,
+    loadProjects: loadProjectsWrapper,
   };
   
-  // Return an object with a Provider function
-  // Critical: We avoid direct JSX here and defer it to a function
+  // Return an object with a Provider function to avoid JSX in .ts file
   return {
     Provider: function ProjectsContextProvider({ children }: { children: React.ReactNode }) {
-      // The actual JSX will be rendered in the ProjectContext.tsx file
-      // that imports this function
-      const element = React.createElement(
+      // Use React.createElement to avoid JSX in .ts file
+      return React.createElement(
         ProjectsContext.Provider,
         { value },
         children
       );
-      return element;
     }
   };
 };

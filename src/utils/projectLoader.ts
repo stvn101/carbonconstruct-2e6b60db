@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { fetchUserProjects } from '@/services/projectService';
 import { 
@@ -9,23 +10,18 @@ import {
 import { trackMetric } from '@/contexts/performance/metrics';
 import { SavedProject } from '@/types/project';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
+import { Dispatch, SetStateAction } from 'react';
 
 /**
  * Loads projects with optimized pagination, retries, and improved connection handling
  */
 export const loadProjects = async (
-  userId: string | undefined,
-  setProjects: (projects: SavedProject[]) => void,
-  setFetchError: (error: Error | null) => void,
+  userId: string,
+  setProjects: Dispatch<SetStateAction<SavedProject[]>>,
+  setFetchError: Dispatch<SetStateAction<Error | null>>,
   page: number = 0,
   limit: number = 50 // Default to a reasonable batch size
-) => {
-  if (!userId) {
-    setProjects([]);
-    setFetchError(null);
-    return [];
-  }
-  
+): Promise<SavedProject[]> => {
   // Clear any stale error toasts first
   clearErrorToasts([
     "projects-load-error", 
@@ -34,7 +30,8 @@ export const loadProjects = async (
   ]);
   
   if (isOffline()) {
-    setFetchError(new Error('You are currently offline'));
+    const error = new Error('You are currently offline');
+    setFetchError(error);
     showErrorToast(
       "You're offline. Project data will load when you reconnect.", 
       "projects-offline", 
@@ -46,7 +43,8 @@ export const loadProjects = async (
   // Check database connection before attempting to load with improved reliability
   const canConnect = await checkSupabaseConnectionWithRetry(2, 10000);
   if (!canConnect) {
-    setFetchError(new Error("Unable to connect to the database"));
+    const error = new Error("Unable to connect to the database");
+    setFetchError(error);
     showErrorToast(
       "Unable to connect to the server. Using offline mode.", 
       "projects-db-offline", 
