@@ -1,98 +1,77 @@
 
 import { toast } from 'sonner';
 import { SavedProject } from '@/types/project';
-import { 
-  createProject, 
-  updateProject as updateProjectInDB, 
-  deleteProject as deleteProjectInDB 
-} from '@/services/projectService';
+import { createProject as apiCreateProject, updateProject as apiUpdateProject, deleteProject as apiDeleteProject } from '@/services/projectService';
+import { showErrorToast } from '@/utils/errorHandling';
 import { Dispatch, SetStateAction } from 'react';
-import { withTimeout, isOffline } from '@/utils/errorHandling';
+import { isOffline } from '@/utils/errorHandling';
 
-export const useProjectOperations = (setProjects: Dispatch<SetStateAction<SavedProject[]>>) => {
-  const saveProject = async (userId: string, project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    if (isOffline()) {
-      toast.error("You're offline. Please check your connection and try again.");
-      throw new Error("Network offline");
+export const useProjectOperations = (
+  userId: string | undefined,
+  setProjects: Dispatch<SetStateAction<SavedProject[]>>,
+  resetCalculator: () => void
+) => {
+  const createProject = async (
+    project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+  ): Promise<SavedProject | null> => {
+    if (!userId) {
+      toast.error("You must be logged in to create a project.");
+      return null;
     }
     
     try {
-      // Use a timeout to prevent hanging indefinitely
-      const savedProject = await withTimeout(
-        createProject(userId, project),
-        15000 // 15 second timeout
-      );
-      
-      toast.success("Project saved successfully");
-      return savedProject;
+      const newProject = await apiCreateProject(userId, project);
+      setProjects(prevProjects => [...prevProjects, newProject]);
+      toast.success("Project created successfully!");
+      return newProject;
     } catch (error) {
-      console.error('Error saving project:', error);
-      
-      if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error("Saving project timed out. Please try again when you have a better connection.");
-      } else {
-        toast.error("Failed to save project. Please check your connection and try again.");
-      }
-      
-      throw error;
+      console.error("Error creating project:", error);
+      showErrorToast("Failed to create project. Please try again.");
+      return null;
     }
   };
-
-  const updateProject = async (project: SavedProject) => {
-    if (isOffline()) {
-      toast.error("You're offline. Please check your connection and try again.");
-      throw new Error("Network offline");
-    }
-    
+  
+  const updateProject = async (project: SavedProject): Promise<SavedProject | null> => {
     try {
-      const updatedProject = await withTimeout(
-        updateProjectInDB(project),
-        15000 // 15 second timeout
-      );
+      if (isOffline()) {
+        toast.error("You're offline. Please check your connection and try again.");
+        return null;
+      }
       
-      toast.success("Project updated successfully");
+      const updatedProject = await apiUpdateProject(project);
+      setProjects(prevProjects =>
+        prevProjects.map(p => (p.id === project.id ? updatedProject : p))
+      );
+      toast.success("Project updated successfully!");
       return updatedProject;
     } catch (error) {
-      console.error('Update project error:', error);
-      
-      if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error("Updating project timed out. Please try again when you have a better connection.");
-      } else {
-        toast.error("Failed to update project. Please check your connection and try again.");
-      }
-      
-      throw error;
+      console.error("Error updating project:", error);
+      showErrorToast("Failed to update project. Please try again.");
+      return null;
     }
   };
-
-  const deleteProject = async (id: string) => {
-    if (isOffline()) {
-      toast.error("You're offline. Please check your connection and try again.");
-      throw new Error("Network offline");
-    }
-    
+  
+  const deleteProject = async (projectId: string): Promise<boolean> => {
     try {
-      await withTimeout(
-        deleteProjectInDB(id),
-        10000 // 10 second timeout
-      );
-      
-      toast.success("Project deleted successfully");
-    } catch (error) {
-      console.error('Delete project error:', error);
-      
-      if (error instanceof Error && error.message.includes('timeout')) {
-        toast.error("Deleting project timed out. Please try again when you have a better connection.");
-      } else {
-        toast.error("Failed to delete project. Please check your connection and try again.");
+      if (isOffline()) {
+        toast.error("You're offline. Please check your connection and try again.");
+        return false;
       }
       
-      throw error;
+      await apiDeleteProject(projectId);
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+      toast.success("Project deleted successfully!");
+      resetCalculator();
+      return true;
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      showErrorToast("Failed to delete project. Please try again.");
+      return false;
     }
   };
 
   return {
-    saveProject,
+    createProject,
     updateProject,
     deleteProject,
   };

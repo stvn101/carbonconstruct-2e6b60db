@@ -19,7 +19,7 @@ export const useProjectProvider = () => {
     setRetryCount,
   } = useProjectState();
 
-  const projectOperations = useProjectOperations(setProjects);
+  const projectOperations = useProjectOperations(user?.id, setProjects, () => {});
   const projectExports = useProjectExports();
 
   const getProject = useCallback((id: string) => {
@@ -33,7 +33,7 @@ export const useProjectProvider = () => {
     saveProject: async (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       try {
         await new Promise(resolve => setTimeout(resolve, 100));
-        return await projectOperations.saveProject(user?.id || '', project);
+        return await projectOperations.createProject(project);
       } catch (error) {
         console.error("Error in saveProject:", error);
         throw error;
@@ -69,4 +69,3 @@ export const useProjectProvider = () => {
     setRetryCount
   };
 };
-
