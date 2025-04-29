@@ -1,5 +1,5 @@
 
-import { performDbOperation } from '../db/dbOperationHandler';
+import { performDbOperation } from '../db/dbOperationExecutor';
 
 /**
  * Wrapper for database operations with offline fallback
