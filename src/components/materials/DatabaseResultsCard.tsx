@@ -2,9 +2,10 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import MaterialTable from './MaterialTable';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 
 interface DatabaseResultsCardProps {
-  filteredMaterials: [string, any][];
+  filteredMaterials: ExtendedMaterialData[];
   resetFilters: () => void;
   materialCount: number;
 }

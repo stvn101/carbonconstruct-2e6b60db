@@ -23,7 +23,7 @@ import {
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 
 interface MaterialTableProps {
-  filteredMaterials: Array<[string, ExtendedMaterialData]>;
+  filteredMaterials: ExtendedMaterialData[];
   resetFilters: () => void;
 }
 
@@ -56,12 +56,12 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ filteredMaterials, resetF
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredMaterials.map(([key, material]) => {
+          {filteredMaterials.map((material, index) => {
             if (!material) return null;
             
             return (
               <TableRow 
-                key={key} 
+                key={material.name + '-' + index} 
                 className={material.region?.includes("Australia") 
                   ? "bg-carbon-50 dark:bg-carbon-800/20" 
                   : ""}
