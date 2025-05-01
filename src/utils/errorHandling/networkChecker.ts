@@ -1,6 +1,6 @@
 
-// Health check cache duration (15 seconds - reduced from 30s for more frequent checks)
-export const HEALTH_CHECK_CACHE_DURATION = 15000;
+// Health check cache duration (30 seconds - balanced approach)
+export const HEALTH_CHECK_CACHE_DURATION = 30000;
 // Last health check result and timestamp
 let lastHealthCheckResult = true;
 let lastHealthCheckTimestamp = 0;
@@ -13,7 +13,7 @@ export const isOffline = (): boolean => {
 };
 
 /**
- * Performs a network health check with improved reliability and caching
+ * Performs a network health check with improved reliability and less aggressive caching
  */
 export const checkNetworkStatus = async (): Promise<boolean> => {
   // If browser says we're offline, trust it
@@ -29,11 +29,16 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
   
   try {
     // First, try a simple favicon fetch which is very lightweight
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
     const response = await fetch('/favicon.ico', { 
       method: 'HEAD',
       cache: 'no-store',
-      signal: AbortSignal.timeout(2000) // Short timeout to fail fast
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (response.ok) {
       // Update cache with success
@@ -45,13 +50,18 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
     // Continue to fallback checks
   }
   
-  // Try Google's favicon as a reliable fallback
+  // Try Google's favicon as a reliable fallback with longer timeout
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
     const response = await fetch('https://www.google.com/favicon.ico', { 
       method: 'HEAD',
       cache: 'no-store',
-      signal: AbortSignal.timeout(3000)
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (response.ok) {
       // Update cache with success
