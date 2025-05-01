@@ -23,6 +23,30 @@ const LoadingFallback = () => (
   </div>
 );
 
+// Initialize theme before rendering to prevent flickering
+const initializeTheme = () => {
+  // Check localStorage first
+  const storedTheme = localStorage.getItem('carbon-construct-theme');
+  
+  if (storedTheme) {
+    if (storedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+    return;
+  }
+  
+  // If no stored theme, check system preference
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (prefersDark) {
+    document.documentElement.classList.add('dark');
+  }
+};
+
+// Run theme initialization immediately
+if (typeof window !== 'undefined') {
+  initializeTheme();
+}
+
 const App: React.FC = () => {
   useEffect(() => {
     // Initialize error tracking on app mount
@@ -56,7 +80,7 @@ const App: React.FC = () => {
       }}
     >
       <HelmetProvider>
-        <ThemeProvider defaultTheme="light" storageKey="carbon-construct-theme">
+        <ThemeProvider defaultTheme="system" storageKey="carbon-construct-theme">
           <BrowserRouter>
             <NetworkProvider>
               <RegionProvider>
@@ -66,6 +90,11 @@ const App: React.FC = () => {
                       <CalculatorProvider>
                         <Suspense fallback={<LoadingFallback />}>
                           <AppContent />
+                          <Toaster 
+                            closeButton 
+                            theme="system" 
+                            className="dark:bg-gray-800 dark:text-carbon-200" 
+                          />
                         </Suspense>
                       </CalculatorProvider>
                     </ProjectProvider>

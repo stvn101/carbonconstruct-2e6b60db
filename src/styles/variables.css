@@ -20,28 +20,28 @@
   }
 
   .dark {
-    /* Dark mode colors - restored to original darker theme */
+    /* Dark mode colors - improved darker theme */
     --background: 220 14% 10%; /* Deeper dark background with blue tint */
     --foreground: 123 30% 92%; /* Brighter text for better contrast */
     --card: 220 14% 13%; /* Slightly lighter card background */
     --card-foreground: 123 30% 92%;
     --popover: 220 14% 13%; /* Match card for consistency */
     --popover-foreground: 123 30% 92%;
-    --primary: 123 47% 60%;
+    --primary: 123 47% 42%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 220 10% 20%; /* Darker secondary for better contrast */
+    --secondary: 220 10% 16%; /* Darker secondary for better contrast */
     --secondary-foreground: 123 30% 92%;
-    --muted: 220 10% 20%;
+    --muted: 220 10% 16%;
     --muted-foreground: 123 20% 80%; /* Brighter muted text */
-    --accent: 220 10% 20%;
+    --accent: 220 10% 16%;
     --accent-foreground: 123 30% 92%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 123 30% 92%;
-    --border: 220 10% 25%; /* Stronger borders */
-    --input: 220 10% 25%;
+    --border: 220 10% 20%; /* Stronger borders */
+    --input: 220 10% 20%;
     --ring: 123 47% 42%;
     
-    /* Carbon theme dark mode colors - restored to original */
+    /* Carbon theme dark mode colors - improved contrast */
     --carbon-50: 130 45% 12%; /* Slightly brighter for visibility */
     --carbon-100: 127 42% 18%;
     --carbon-200: 126 52% 22%;
