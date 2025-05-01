@@ -4,7 +4,7 @@ import { checkNetworkStatus } from './networkChecker';
 import { pingSupabaseConnection } from '@/services/supabase/connection';
 
 /**
- * Add network status listeners with improved stability and automatic recovery
+ * Add network status listeners with improved stability
  */
 export const addNetworkListeners = (
   onOffline: () => void = () => {
@@ -25,43 +25,8 @@ export const addNetworkListeners = (
   let onlineDebounceTimer: NodeJS.Timeout | null = null;
   let offlineDetectionCount = 0;
   let healthCheckTimer: NodeJS.Timeout | null = null;
-  let recoveryAttempts = 0;
-  let isRecoveryInProgress = false;
   
-  // Handles automatic recovery attempts when offline
-  const startRecoveryAttempts = () => {
-    if (isRecoveryInProgress) return;
-    isRecoveryInProgress = true;
-    
-    const attemptRecovery = async () => {
-      if (!isRecoveryInProgress) return;
-      
-      const isNetworkAvailable = await checkNetworkStatus();
-      if (isNetworkAvailable) {
-        // Try to ping Supabase as well
-        const canReachSupabase = await pingSupabaseConnection();
-        
-        if (canReachSupabase) {
-          // We're back online!
-          isRecoveryInProgress = false;
-          recoveryAttempts = 0;
-          handleOnline();
-          return;
-        }
-      }
-      
-      // Still offline, schedule another attempt with exponential backoff
-      recoveryAttempts++;
-      const delay = Math.min(2000 * Math.pow(1.5, recoveryAttempts), 30000);
-      
-      setTimeout(attemptRecovery, delay);
-    };
-    
-    // Start first recovery attempt
-    attemptRecovery();
-  };
-  
-  // Debounced handlers with increased timers for improved stability
+  // Debounced handlers with increased thresholds to prevent flapping
   const handleOffline = () => {
     if (onlineDebounceTimer) {
       clearTimeout(onlineDebounceTimer);
@@ -72,14 +37,12 @@ export const addNetworkListeners = (
     offlineDetectionCount += 1;
     
     // Only trigger offline mode after multiple consecutive detections
-    if (offlineDetectionCount >= 2) {
+    if (offlineDetectionCount >= 3) {
       if (!offlineDebounceTimer) {
         offlineDebounceTimer = setTimeout(() => {
           offlineDebounceTimer = null;
           onOffline();
-          // Start recovery attempts
-          startRecoveryAttempts();
-        }, 2000); // Reduced to respond faster
+        }, 3000); // Increased to 3s to avoid incorrect offline detections
       }
     }
   };
@@ -87,7 +50,6 @@ export const addNetworkListeners = (
   const handleOnline = async () => {
     // Reset offline detection counter
     offlineDetectionCount = 0;
-    isRecoveryInProgress = false;
     
     if (offlineDebounceTimer) {
       clearTimeout(offlineDebounceTimer);
@@ -105,8 +67,6 @@ export const addNetworkListeners = (
     const canReachSupabase = await pingSupabaseConnection();
     
     if (!canReachSupabase) {
-      // We're online but can't reach Supabase - start recovery process
-      startRecoveryAttempts();
       return;
     }
     
@@ -114,23 +74,22 @@ export const addNetworkListeners = (
       onlineDebounceTimer = setTimeout(() => {
         onlineDebounceTimer = null;
         onOnline();
-      }, 1000); // Respond faster when back online
+      }, 2000); // Debounce online events to avoid flapping
     }
   };
   
   // Set up listeners
   window.addEventListener('online', handleOnline);
   window.addEventListener('offline', handleOffline);
-  window.addEventListener('app:offline', handleOffline);
   
-  // Add health checking with 30s interval
+  // Add health checking with reduced frequency (45s interval)
   healthCheckTimer = setInterval(async () => {
     if (navigator.onLine) {
       const isHealthy = await checkNetworkStatus();
       
       if (!isHealthy && navigator.onLine) {
         offlineDetectionCount += 1;
-        if (offlineDetectionCount >= 2) {
+        if (offlineDetectionCount >= 3) { // Require more confirmations
           handleOffline();
         }
       } else if (isHealthy && !navigator.onLine) {
@@ -138,7 +97,7 @@ export const addNetworkListeners = (
       }
     } else {
       // If navigator says we're offline, occasionally check if that's actually true
-      const attemptRecovery = Math.random() < 0.3; // 30% chance to check
+      const attemptRecovery = Math.random() < 0.2; // 20% chance to check
       if (attemptRecovery) {
         const isActuallyOnline = await checkNetworkStatus();
         if (isActuallyOnline) {
@@ -146,7 +105,7 @@ export const addNetworkListeners = (
         }
       }
     }
-  }, 30000); // Check every 30 seconds
+  }, 45000); // Check less often (45s) to reduce unnecessary network traffic
   
   // Return cleanup function
   return () => {
@@ -155,30 +114,15 @@ export const addNetworkListeners = (
     if (healthCheckTimer) clearInterval(healthCheckTimer);
     window.removeEventListener('offline', handleOffline);
     window.removeEventListener('online', handleOnline);
-    window.removeEventListener('app:offline', handleOffline);
     
     // Clear any lingering toasts on unmount
     showErrorToast("", 'global-online-status');
     showErrorToast("", 'global-offline-status');
-    
-    isRecoveryInProgress = false;
   };
 };
 
-// Export helper to manually trigger recovery
+// Simpler recovery function
 export const triggerConnectionRecovery = async (): Promise<boolean> => {
-  try {
-    // First check general network connectivity
-    const isNetworkAvailable = await checkNetworkStatus();
-    if (!isNetworkAvailable) {
-      return false;
-    }
-    
-    // Then check Supabase specifically
-    const canReachSupabase = await pingSupabaseConnection();
-    return canReachSupabase;
-  } catch (error) {
-    console.error('Error during connection recovery:', error);
-    return false;
-  }
+  // Just check basic connectivity
+  return navigator.onLine && await checkNetworkStatus();
 };

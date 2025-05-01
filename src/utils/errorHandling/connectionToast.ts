@@ -13,13 +13,13 @@ export const CONNECTION_TOAST_STATE = {
   retries: 0, // Track retries to avoid excessive notifications
 };
 
-// Minimum time between connection toasts (increased to reduce notification spam)
-const MIN_TOAST_INTERVAL = 45000; // 45 seconds
+// Minimum time between connection toasts (60 seconds to significantly reduce notification spam)
+const MIN_TOAST_INTERVAL = 60000; // 60 seconds
 
 /**
  * Resets the connection toast state after a specified delay
  */
-export const resetToastState = (type: 'failure' | 'success', delayMs: number = 30000): void => {
+export const resetToastState = (type: 'failure' | 'success', delayMs: number = 60000): void => {
   setTimeout(() => {
     CONNECTION_TOAST_STATE[type] = false;
     // Reset retries on success
@@ -47,15 +47,14 @@ export const updateToastState = (type: 'failure' | 'success', id: string): void 
 };
 
 /**
- * Checks if a connection toast should be throttled based on time since last toast
- * and the number of recent retries to prevent toast spam
+ * Checks if a connection toast should be throttled to prevent spam
  */
 export const shouldThrottleToast = (): boolean => {
   const now = Date.now();
   
-  // Apply progressive throttling based on recent failures
+  // Apply more aggressive throttling based on recent failures
   const retryFactor = Math.min(CONNECTION_TOAST_STATE.retries, 3);
-  const throttleDuration = MIN_TOAST_INTERVAL * Math.pow(1.5, retryFactor);
+  const throttleDuration = MIN_TOAST_INTERVAL * Math.pow(2, retryFactor);
   
   return CONNECTION_TOAST_STATE.failure && 
          (now - CONNECTION_TOAST_STATE.timestamp < throttleDuration);

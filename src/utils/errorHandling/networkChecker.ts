@@ -14,7 +14,6 @@ export const isOffline = (): boolean => {
 
 /**
  * Performs a network health check with improved reliability and caching
- * Uses multiple fallback URLs to ensure connectivity can be verified
  */
 export const checkNetworkStatus = async (): Promise<boolean> => {
   // If browser says we're offline, trust it
@@ -29,60 +28,47 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
   }
   
   try {
-    // Try multiple endpoints for better reliability
-    const endpoints = [
-      '/favicon.ico', // Local favicon
-      'https://www.google.com/favicon.ico', // Google's favicon (very reliable)
-      'https://jaqzoyouuzhchuyzafii.supabase.co/rest/v1/' // Supabase endpoint
-    ];
+    // First, try a simple favicon fetch which is very lightweight
+    const response = await fetch('/favicon.ico', { 
+      method: 'HEAD',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2000) // Short timeout to fail fast
+    });
     
-    // Try each endpoint until one succeeds
-    for (const url of endpoints) {
-      try {
-        // Use a reasonable timeout that won't block the UI for too long
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
-        const response = await fetch(url, { 
-          method: 'HEAD',
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          // Update cache with success
-          lastHealthCheckResult = true;
-          lastHealthCheckTimestamp = now;
-          return true;
-        }
-      } catch (endpointError) {
-        // Individual endpoint error, try the next one
-        console.log(`Health check endpoint ${url} failed:`, endpointError);
-      }
+    if (response.ok) {
+      // Update cache with success
+      lastHealthCheckResult = true;
+      lastHealthCheckTimestamp = now;
+      return true;
     }
-    
-    // All endpoints failed
-    // Update cache - we're offline or having connectivity issues
-    lastHealthCheckResult = false;
-    lastHealthCheckTimestamp = now;
-    
-    // Let network status listeners know about the issue
-    if (typeof window !== 'undefined') {
-      const offlineEvent = new Event('app:offline');
-      window.dispatchEvent(offlineEvent);
-    }
-    
-    return false;
   } catch (error) {
-    // Handle unexpected errors
-    console.error('Network check failed with error:', error);
-    
-    // Update cache - assume offline on error
-    lastHealthCheckResult = false;
-    lastHealthCheckTimestamp = now;
-    
-    return false;
+    // Continue to fallback checks
   }
+  
+  // Try Google's favicon as a reliable fallback
+  try {
+    const response = await fetch('https://www.google.com/favicon.ico', { 
+      method: 'HEAD',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(3000)
+    });
+    
+    if (response.ok) {
+      // Update cache with success
+      lastHealthCheckResult = true;
+      lastHealthCheckTimestamp = now;
+      return true;
+    }
+  } catch (error) {
+    // Final fallback will be attempted
+  }
+  
+  // Use navigator.onLine as final fallback
+  const isOnline = navigator.onLine;
+  
+  // Update cache with result
+  lastHealthCheckResult = isOnline;
+  lastHealthCheckTimestamp = now;
+  
+  return isOnline;
 };
