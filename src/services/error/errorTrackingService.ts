@@ -1,96 +1,50 @@
 
-import { ErrorMetadata, ErrorTracker } from './types';
-import { initializeErrorHandling } from './errorInitializer';
-import { formatError, getElementPath } from './errorUtils';
-import { ErrorStore } from './errorStore';
+interface ErrorContext {
+  [key: string]: any;
+}
 
-class ErrorTrackingService implements ErrorTracker {
-  private static instance: ErrorTrackingService;
-  private isInitialized = false;
-  private environment: string;
-  private errorStore: ErrorStore;
+/**
+ * Simple error tracking service for the application
+ */
+class ErrorTrackingService {
+  private enabled: boolean = process.env.NODE_ENV === 'production';
   
-  private constructor() {
-    this.environment = import.meta.env.MODE || 'development';
-    this.errorStore = new ErrorStore();
-  }
-
-  public static getInstance(): ErrorTrackingService {
-    if (!ErrorTrackingService.instance) {
-      ErrorTrackingService.instance = new ErrorTrackingService();
-    }
-    return ErrorTrackingService.instance;
-  }
-
-  public initialize(): void {
-    if (this.isInitialized) return;
-    initializeErrorHandling(this);
-    this.isInitialized = true;
-    console.info('Error tracking service initialized');
-  }
-
-  public captureException(error: Error, metadata: ErrorMetadata = {}): void {
-    if (!error) return;
+  /**
+   * Capture and log an exception
+   */
+  captureException(error: Error, context: ErrorContext = {}): void {
+    // Log to console in all environments
+    console.error(`[ErrorTracker] Error:`, error, 'Context:', context);
     
-    const errorKey = `${error.name}:${error.message}`;
-    
-    if (this.errorStore.hasReachedLimit(errorKey)) {
-      if (this.errorStore.incrementErrorCount(errorKey) === this.errorStore.getMaxErrorsLimit() + 1) {
-        console.warn(`Error "${errorKey}" occurred too many times. Suppressing future logs.`);
+    // In production, we could send to a proper error tracking service
+    if (this.enabled) {
+      // Here you could integrate with Sentry, LogRocket, etc.
+      try {
+        // Example placeholder for integration with error tracking
+        this.sendToErrorService(error, context);
+      } catch (sendError) {
+        // Fail silently if error tracking itself fails
+        console.error('Failed to send error to tracking service', sendError);
       }
-      return;
     }
-
-    if (this.errorStore.shouldThrottleError(errorKey)) {
-      return;
-    }
-    
-    if (!navigator.onLine) {
-      this.errorStore.storeOfflineError(error, metadata);
-      return;
-    }
-    
-    if (this.environment === 'production') {
-      console.error('[Error Tracking]', formatError(error, metadata));
-      this.errorStore.executeCallbacks(error);
-    } else {
-      console.error('[DEV Error]', error, metadata);
-    }
-  }
-
-  public captureMessage(message: string, metadata: ErrorMetadata = {}): void {
-    if (this.environment === 'production') {
-      console.warn('[Error Tracking] Message:', message, metadata);
-    } else {
-      console.warn('[DEV Message]', message, metadata);
-    }
-  }
-
-  public setUser(userId: string, email?: string): void {
-    console.info('Set user context:', { userId, email });
-  }
-
-  public clearUser(): void {
-    console.info('User context cleared');
   }
   
-  public captureAccessibilityIssue(element: HTMLElement, issue: string): void {
-    this.captureMessage(`Accessibility issue: ${issue}`, {
-      elementPath: getElementPath(element),
-      elementType: element.tagName,
-      elementId: element.id,
-      elementClasses: element.className
-    });
+  /**
+   * Placeholder for sending to an actual error service
+   */
+  private sendToErrorService(error: Error, context: ErrorContext): void {
+    // In a real implementation, this would send to Sentry, LogRocket, etc.
+    // For now, we're just logging to console
   }
-
-  public flush(): void {
-    if (navigator.onLine) {
-      const errors = this.errorStore.getOfflineErrors();
-      errors.forEach(({error, metadata}) => {
-        this.captureException(error, {...metadata, wasOffline: true});
-      });
-    }
+  
+  /**
+   * Enable or disable error tracking
+   */
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
   }
 }
 
-export default ErrorTrackingService.getInstance();
+// Export a singleton instance
+const errorTrackingService = new ErrorTrackingService();
+export default errorTrackingService;

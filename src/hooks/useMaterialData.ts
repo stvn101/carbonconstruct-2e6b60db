@@ -1,8 +1,10 @@
 
-import { useMemo, useCallback } from 'react';
-import { MATERIAL_FACTORS, EXTENDED_MATERIALS, REGIONS } from '@/lib/materials';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { fetchMaterials, SupabaseMaterial } from '@/services/materialService';
+import { MATERIAL_FACTORS, REGIONS } from '@/lib/materials';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MaterialOption } from '@/lib/materialTypes';
-import ErrorTrackingService from '@/services/errorTrackingService';
+import errorTrackingService from '@/services/error/errorTrackingService';
 
 interface UseMaterialDataProps {
   searchTerm: string;
@@ -17,6 +19,32 @@ export const useMaterialData = ({
   selectedAlternative,
   selectedTag
 }: UseMaterialDataProps) => {
+  const [materials, setMaterials] = useState<ExtendedMaterialData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  // Fetch materials from Supabase
+  useEffect(() => {
+    const loadMaterials = async () => {
+      try {
+        setLoading(true);
+        const fetchedMaterials = await fetchMaterials();
+        setMaterials(fetchedMaterials);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading materials:', err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        errorTrackingService.captureException(
+          err instanceof Error ? err : new Error(String(err)),
+          { component: 'useMaterialData', action: 'fetchMaterials' }
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadMaterials();
+  }, []);
   
   // Safely create base options
   const baseOptions = useMemo(() => {
@@ -32,7 +60,7 @@ export const useMaterialData = ({
       }));
     } catch (error) {
       console.error('Error creating base options:', error);
-      ErrorTrackingService.captureException(
+      errorTrackingService.captureException(
         error instanceof Error ? error : new Error(String(error)),
         { component: 'useMaterialData', action: 'baseOptions' }
       );
@@ -40,56 +68,44 @@ export const useMaterialData = ({
     }
   }, []);
   
-  // Safely extract all unique tags
+  // Extract all unique tags from materials
   const allTags = useMemo(() => {
     try {
-      if (!EXTENDED_MATERIALS) {
-        console.warn('EXTENDED_MATERIALS is undefined, returning empty array');
+      if (!materials || materials.length === 0) {
         return [];
       }
       
       return Array.from(
         new Set(
-          Object.values(EXTENDED_MATERIALS)
-            .flatMap(material => material?.tags || [])
-            .filter(Boolean) // Filter out undefined/null tags
+          materials.flatMap(material => material?.tags || [])
+            .filter(Boolean)
         )
       ).sort();
     } catch (error) {
       console.error('Error extracting tags:', error);
-      ErrorTrackingService.captureException(
+      errorTrackingService.captureException(
         error instanceof Error ? error : new Error(String(error)),
         { component: 'useMaterialData', action: 'allTags' }
       );
       return [];
     }
-  }, []);
+  }, [materials]);
 
   // Get material count safely
   const materialCount = useMemo(() => {
-    try {
-      return EXTENDED_MATERIALS ? Object.keys(EXTENDED_MATERIALS).length : 0;
-    } catch (error) {
-      console.error('Error getting material count:', error);
-      ErrorTrackingService.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        { component: 'useMaterialData', action: 'materialCount' }
-      );
-      return 0;
-    }
-  }, []);
+    return materials ? materials.length : 0;
+  }, [materials]);
   
-  // Compute materials by region safely
+  // Compute materials by region
   const materialsByRegion = useMemo(() => {
     try {
-      if (!EXTENDED_MATERIALS) {
-        console.warn('EXTENDED_MATERIALS is undefined, returning empty object');
+      if (!materials || materials.length === 0) {
         return {};
       }
       
       const result: Record<string, number> = {};
       
-      Object.values(EXTENDED_MATERIALS).forEach(material => {
+      materials.forEach(material => {
         if (material?.region) {
           const regions = material.region.split(", ");
           regions.forEach(region => {
@@ -103,28 +119,26 @@ export const useMaterialData = ({
       return result;
     } catch (error) {
       console.error('Error computing materials by region:', error);
-      ErrorTrackingService.captureException(
+      errorTrackingService.captureException(
         error instanceof Error ? error : new Error(String(error)),
         { component: 'useMaterialData', action: 'materialsByRegion' }
       );
       return {};
     }
-  }, []);
+  }, [materials]);
 
-  // Filter materials safely with error handling and memoization
+  // Filter materials based on search and selections
   const filteredMaterials = useMemo(() => {
     try {
-      if (!EXTENDED_MATERIALS) {
-        console.warn('EXTENDED_MATERIALS is undefined, returning empty array');
+      if (!materials || materials.length === 0) {
         return [];
       }
       
       const lowerSearchTerm = searchTerm?.toLowerCase() || '';
       
-      return Object.entries(EXTENDED_MATERIALS).filter(([key, material]) => {
+      return materials.filter(material => {
         if (!material) return false;
         
-        // Safe string checks
         const materialName = material.name || '';
         const materialRegion = material.region || '';
         const materialAltTo = material.alternativeTo || '';
@@ -146,21 +160,21 @@ export const useMaterialData = ({
       });
     } catch (error) {
       console.error('Error filtering materials:', error);
-      ErrorTrackingService.captureException(
+      errorTrackingService.captureException(
         error instanceof Error ? error : new Error(String(error)),
         { component: 'useMaterialData', action: 'filteredMaterials' }
       );
       return [];
     }
-  }, [searchTerm, selectedRegion, selectedAlternative, selectedTag]);
+  }, [materials, searchTerm, selectedRegion, selectedAlternative, selectedTag]);
 
-  // Safely get all regions
+  // Get all regions
   const allRegions = useMemo(() => {
     try {
       return REGIONS ? Array.from(REGIONS) : [];
     } catch (error) {
       console.error('Error getting regions:', error);
-      ErrorTrackingService.captureException(
+      errorTrackingService.captureException(
         error instanceof Error ? error : new Error(String(error)),
         { component: 'useMaterialData', action: 'allRegions' }
       );
@@ -170,10 +184,13 @@ export const useMaterialData = ({
 
   return {
     filteredMaterials,
+    materials,
     materialsByRegion,
     allTags,
     baseOptions,
     allRegions,
-    materialCount
+    materialCount,
+    loading,
+    error
   };
 };

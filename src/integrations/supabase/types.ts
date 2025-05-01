@@ -72,6 +72,30 @@ export type Database = {
         }
         Relationships: []
       }
+      materials: {
+        Row: {
+          carbon_footprint_kgco2e_kg: number | null
+          carbon_footprint_kgco2e_tonne: number | null
+          category: string | null
+          id: string
+          name: string | null
+        }
+        Insert: {
+          carbon_footprint_kgco2e_kg?: number | null
+          carbon_footprint_kgco2e_tonne?: number | null
+          category?: string | null
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          carbon_footprint_kgco2e_kg?: number | null
+          carbon_footprint_kgco2e_tonne?: number | null
+          category?: string | null
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
