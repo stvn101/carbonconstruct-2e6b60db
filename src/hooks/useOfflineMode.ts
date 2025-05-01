@@ -14,6 +14,7 @@ export function useOfflineMode(checkBackend: boolean = true) {
   const [backendConnected, setBackendConnected] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
   const mountedRef = useRef(true);
   
   // Track toast display to prevent spam
@@ -56,17 +57,18 @@ export function useOfflineMode(checkBackend: boolean = true) {
     };
   }, []);
   
-  // Connection check with simplified logic
+  // Connection check with simplified logic and reduced frequency
   const checkBackendConnection = useCallback(async () => {
     if (!isOnline || !checkBackend || !mountedRef.current || isChecking) {
       return backendConnected;
     }
     
     setIsChecking(true);
+    setConnectionAttempts(prev => prev + 1);
     let isConnected = false;
     
     try {
-      // Try the ping approach for more reliable connectivity checks
+      // Simplified connection check with longer timeout
       isConnected = await pingSupabaseConnection();
       
       if (mountedRef.current) {
@@ -76,6 +78,7 @@ export function useOfflineMode(checkBackend: boolean = true) {
           const now = Date.now();
           
           if (!isConnected && !toastShownRef.current.failure) {
+            // Reduce frequency of offline toasts
             toast.error("Unable to connect to the server. Using offline mode.", { 
               id: "connection-check-failed", 
               duration: 5000 
@@ -92,12 +95,13 @@ export function useOfflineMode(checkBackend: boolean = true) {
             toastShownRef.current.success = true;
             toastShownRef.current.failure = false;
             
-            // Reset success toast flag after a reasonable time
+            // Reset toast flags after a reasonable time
             setTimeout(() => {
               if (mountedRef.current) {
                 toastShownRef.current.success = false;
+                toastShownRef.current.failure = false; // Reset failure flag too to allow future notifications
               }
-            }, 30000);
+            }, 60000); // 1 minute cooldown
           }
         }
         
@@ -116,7 +120,7 @@ export function useOfflineMode(checkBackend: boolean = true) {
     }
   }, [isOnline, checkBackend, backendConnected, isChecking]);
 
-  // Check connectivity on mount and when network status changes with reasonable frequency
+  // Check connectivity less frequently to reduce unnecessary network traffic
   useEffect(() => {
     if (!mountedRef.current) return;
     
@@ -127,12 +131,12 @@ export function useOfflineMode(checkBackend: boolean = true) {
       }
     }, 3000);
     
-    // Periodic checks every 60s - reduced frequency to avoid unnecessary network traffic
+    // Perform checks less frequently (every 2 minutes instead of every minute)
     const intervalTimer = setInterval(() => {
       if (mountedRef.current && isOnline && checkBackend) {
         checkBackendConnection();
       }
-    }, 60000);
+    }, 120000); // 2 minutes
     
     return () => {
       clearTimeout(initialTimer);
@@ -159,6 +163,7 @@ export function useOfflineMode(checkBackend: boolean = true) {
     isOfflineMode: !isOnline || !backendConnected,
     isCheckingConnection: isChecking,
     lastConnectionCheck: lastChecked,
+    connectionAttempts,
     checkConnection: checkBackendConnection
   };
 }
