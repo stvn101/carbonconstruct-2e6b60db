@@ -41,16 +41,27 @@ export function ThemeProvider({
         ? "dark"
         : "light";
       root.classList.add(systemTheme);
+      
+      // Apply dark mode to body when using system preference
+      if (systemTheme === "dark") {
+        document.body.classList.add("dark-mode-body");
+      } else {
+        document.body.classList.remove("dark-mode-body");
+      }
       return;
     }
 
     root.classList.add(theme);
 
-    // Ensure body and html get background color too
+    // Apply consistent dark mode styling to body
     if (theme === "dark") {
       document.body.classList.add("dark-mode-body");
+      document.body.style.backgroundColor = "hsl(220, 14%, 10%)";
+      document.body.style.color = "hsl(123, 30%, 92%)";
     } else {
       document.body.classList.remove("dark-mode-body");
+      document.body.style.backgroundColor = "";
+      document.body.style.color = "";
     }
   }, [theme]);
 
@@ -58,16 +69,21 @@ export function ThemeProvider({
   useEffect(() => {
     if (theme === "system") {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      
       const handleChange = () => {
         const root = window.document.documentElement;
         if (mediaQuery.matches) {
           root.classList.remove("light");
           root.classList.add("dark");
           document.body.classList.add("dark-mode-body");
+          document.body.style.backgroundColor = "hsl(220, 14%, 10%)";
+          document.body.style.color = "hsl(123, 30%, 92%)";
         } else {
           root.classList.remove("dark");
           root.classList.add("light");
           document.body.classList.remove("dark-mode-body");
+          document.body.style.backgroundColor = "";
+          document.body.style.color = "";
         }
       };
       

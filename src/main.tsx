@@ -7,6 +7,22 @@ import performanceMonitoringService from './services/performanceMonitoringServic
 import { CachedCalculationsProvider } from './contexts/CachedCalculationsContext';
 import './index.css';
 
+// Prevent theme flickering by setting initial theme before render
+const setInitialTheme = () => {
+  const storedTheme = localStorage.getItem('carbon-construct-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = storedTheme === 'dark' || (storedTheme === 'system' && prefersDark) || (!storedTheme && prefersDark);
+  
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+    document.body.style.backgroundColor = 'hsl(220, 14%, 10%)';
+    document.body.style.color = 'hsl(123, 30%, 92%)';
+  }
+};
+
+// Execute immediately
+setInitialTheme();
+
 // Error handler for React 18+ root errors
 const handleRootError = (error: Error) => {
   console.error('React root error:', error);

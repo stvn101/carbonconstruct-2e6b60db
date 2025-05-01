@@ -1,6 +1,7 @@
 
 /* Dark mode background styles */
 
+/* Basic backgrounds */
 .dark .bg-carbon-50, .dark .bg-carbon-100 {
   @apply text-carbon-50 bg-gray-800;
 }
@@ -33,19 +34,7 @@
   backdrop-filter: none !important;
 }
 
-[class*="bg-white/"], 
-[class*="bg-gray-800/"],
-[class*="bg-background/"],
-[class*="bg-secondary/"],
-[class*="opacity-"],
-[class*="backdrop-"],
-.bg-opacity,
-.backdrop-blur {
-  @apply bg-white dark:bg-gray-800 opacity-100 !important;
-  backdrop-filter: none !important;
-}
-
-/* Force all cards to be opaque */
+/* Force all cards to be opaque - no transparency */
 .dark .card,
 .dark [class*="card"],
 .dark [data-radix-popper-content-wrapper] > * {
