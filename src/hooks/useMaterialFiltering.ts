@@ -80,10 +80,10 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
-    setSelectedRegion(globalRegion !== "Australia" ? globalRegion : "all");
+    setSelectedRegion("all");
     setSelectedAlternative("none");
     setSelectedTag("all");
-  }, [globalRegion]);
+  }, []);
 
   // Extract base material options for the dropdown
   const baseOptions = useMemo(() => {
