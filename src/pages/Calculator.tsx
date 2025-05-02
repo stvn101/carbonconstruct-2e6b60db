@@ -134,7 +134,7 @@ function Calculator() {
               <Suspense fallback={<CalculatorLoading />}>
                 {calculatorReady ? (
                   <CarbonCalculator 
-                    demoMode={!user || demoMode || !isOffline} 
+                    demoMode={!user || demoMode || isOffline} 
                   />
                 ) : (
                   <CalculatorLoading />
