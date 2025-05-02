@@ -65,13 +65,8 @@ function Calculator() {
   });
   
   useEffect(() => {
-    // Check if we're in demo mode from navigation state
-    if (location.state?.demoMode) {
-      setDemoMode(true);
-    } else if (!user) {
-      // If not explicitly in demo mode and not logged in, default to demo mode
-      setDemoMode(true);
-    }
+    // Check if we're in demo mode from navigation state or if user is not logged in
+    setDemoMode(location.state?.demoMode || !user);
     
     // Check if we've been redirected from authentication
     if (location.state?.fromAuth && user) {
@@ -97,14 +92,8 @@ function Calculator() {
     }, 100);
   };
 
-  // Debug logs to help pinpoint issues
-  console.log("Calculator rendering state:", { 
-    user: !!user, 
-    demoMode, 
-    isOffline, 
-    calculatorReady,
-    effectiveDemoMode: !user || demoMode || isOffline
-  });
+  // Determine effective demo mode (user not logged in, explicit demo mode, or offline)
+  const effectiveDemoMode = !user || demoMode || isOffline;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -142,9 +131,7 @@ function Calculator() {
             >
               <Suspense fallback={<CalculatorLoading />}>
                 {calculatorReady ? (
-                  <CarbonCalculator 
-                    demoMode={!user || demoMode || isOffline} 
-                  />
+                  <CarbonCalculator demoMode={effectiveDemoMode} />
                 ) : (
                   <CalculatorLoading />
                 )}
