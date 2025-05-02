@@ -10,7 +10,7 @@ const Dashboard = lazyLoad(() => import('@/pages/Dashboard'),
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-carbon-600"></div>
   </div>
 );
-const MaterialBrowser = lazyLoad(() => import('@/pages/MaterialBrowser'));
+const MaterialDatabase = lazyLoad(() => import('@/pages/MaterialDatabase'));
 const Notifications = lazyLoad(() => import('@/pages/Notifications'));
 const UserProfile = lazyLoad(() => import('@/pages/UserProfile'));
 
@@ -25,7 +25,7 @@ export const protectedRoutes = (
     } />
     <Route path="/materials" element={
       <ErrorBoundary feature="Materials">
-        <MaterialBrowser />
+        <MaterialDatabase />
       </ErrorBoundary>
     } />
     <Route path="/notifications" element={
