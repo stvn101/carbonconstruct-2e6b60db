@@ -51,7 +51,9 @@ export const calculateMaterialEmissions = (materials: MaterialInput[]): number =
       
       // Ensure quantity is a number
       const quantity = Number(material.quantity) || 0;
-      return total + (MATERIAL_FACTORS[material.type].factor * quantity);
+      const emission = MATERIAL_FACTORS[material.type].factor * quantity;
+      console.log(`Material: ${material.type}, Quantity: ${quantity}, Factor: ${MATERIAL_FACTORS[material.type].factor}, Emission: ${emission}`);
+      return total + emission;
     }, 0);
   } catch (error) {
     console.error("Error calculating material emissions:", error);
@@ -146,48 +148,84 @@ export const calculateTotalEmissions = (input: CalculationInput): CalculationRes
     
     const totalEmissions = materialEmissions + transportEmissions + energyEmissions;
 
-    // Create material breakdown
-    const breakdownByMaterial: Record<Material, number> = {} as Record<Material, number>;
+    // Create material breakdown - ensure breakdownByMaterial is properly populated
+    const breakdownByMaterial: Record<string, number> = {};
+    
     materials.forEach(material => {
-      if (material && material.type && MATERIAL_FACTORS[material.type]) {
-        const quantity = Number(material.quantity) || 0;
-        const emissions = MATERIAL_FACTORS[material.type].factor * quantity;
-        breakdownByMaterial[material.type] = (breakdownByMaterial[material.type] || 0) + emissions;
+      if (material && material.type) {
+        const materialType = material.type as Material;
+        const factor = MATERIAL_FACTORS[materialType]?.factor || 0;
+        
+        if (factor) {
+          const quantity = Number(material.quantity) || 0;
+          const emissions = factor * quantity;
+          
+          // Make sure we convert the type to string to avoid issues with object keys
+          const typeKey = String(materialType);
+          console.log(`Adding to breakdownByMaterial: type=${typeKey}, emissions=${emissions}`);
+          
+          breakdownByMaterial[typeKey] = (breakdownByMaterial[typeKey] || 0) + emissions;
+        } else {
+          console.warn(`Missing factor for material type: ${materialType}`);
+        }
       }
     });
 
+    // Log the breakdown to verify it's populated
+    console.log("Material breakdown:", breakdownByMaterial);
+    console.log("Breakdown keys:", Object.keys(breakdownByMaterial));
+
     // Create transport breakdown
-    const breakdownByTransport: Record<Transport, number> = {} as Record<Transport, number>;
+    const breakdownByTransport: Record<string, number> = {};
+    
     transport.forEach(transport => {
-      if (transport && transport.type && TRANSPORT_FACTORS[transport.type]) {
-        const distance = Number(transport.distance) || 0;
-        const weight = Number(transport.weight) || 0;
-        const tonneKm = (weight / 1000) * distance;
-        const emissions = TRANSPORT_FACTORS[transport.type].factor * tonneKm;
-        breakdownByTransport[transport.type] = (breakdownByTransport[transport.type] || 0) + emissions;
+      if (transport && transport.type) {
+        const transportType = transport.type as Transport;
+        const factor = TRANSPORT_FACTORS[transportType]?.factor || 0;
+        
+        if (factor) {
+          const distance = Number(transport.distance) || 0;
+          const weight = Number(transport.weight) || 0;
+          const tonneKm = (weight / 1000) * distance;
+          const emissions = factor * tonneKm;
+          
+          const typeKey = String(transportType);
+          breakdownByTransport[typeKey] = (breakdownByTransport[typeKey] || 0) + emissions;
+        }
       }
     });
 
     // Create energy breakdown
-    const breakdownByEnergy: Record<Energy, number> = {} as Record<Energy, number>;
+    const breakdownByEnergy: Record<string, number> = {};
+    
     energy.forEach(energy => {
-      if (energy && energy.type && ENERGY_FACTORS[energy.type]) {
-        const amount = Number(energy.amount) || 0;
-        const emissions = ENERGY_FACTORS[energy.type].factor * amount;
-        breakdownByEnergy[energy.type] = (breakdownByEnergy[energy.type] || 0) + emissions;
+      if (energy && energy.type) {
+        const energyType = energy.type as Energy;
+        const factor = ENERGY_FACTORS[energyType]?.factor || 0;
+        
+        if (factor) {
+          const amount = Number(energy.amount) || 0;
+          const emissions = factor * amount;
+          
+          const typeKey = String(energyType);
+          breakdownByEnergy[typeKey] = (breakdownByEnergy[typeKey] || 0) + emissions;
+        }
       }
     });
     
     console.log("Calculation completed successfully");
+    console.log("Final breakdown keys - Materials:", Object.keys(breakdownByMaterial).length);
+    console.log("Final breakdown keys - Transport:", Object.keys(breakdownByTransport).length);
+    console.log("Final breakdown keys - Energy:", Object.keys(breakdownByEnergy).length);
 
     return {
       materialEmissions,
       transportEmissions,
       energyEmissions,
       totalEmissions,
-      breakdownByMaterial,
-      breakdownByTransport,
-      breakdownByEnergy
+      breakdownByMaterial: breakdownByMaterial as Record<Material, number>,
+      breakdownByTransport: breakdownByTransport as Record<Transport, number>,
+      breakdownByEnergy: breakdownByEnergy as Record<Energy, number>
     };
   } catch (error) {
     console.error("Error in calculateTotalEmissions:", error);

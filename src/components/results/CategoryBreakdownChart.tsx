@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalculationResult, Material, Transport, Energy, MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from "@/lib/carbonCalculations";
 import { Progress } from "@/components/ui/progress";
+import { useCallback, useEffect, useMemo } from "react";
+import { Bug } from "lucide-react";
 
 interface CategoryBreakdownChartProps {
   result: CalculationResult;
@@ -11,53 +13,96 @@ interface CategoryBreakdownChartProps {
 }
 
 const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProps) => {
-  let chartData = [];
-  let categoryTitle = "";
-  let categoryDescription = "";
-  let fillColor = "";
-  let totalCategoryEmissions = 0;
+  // Use useMemo to prepare chart data only when inputs change
+  const { chartData, categoryTitle, categoryDescription, fillColor, totalCategoryEmissions } = useMemo(() => {
+    console.log(`Preparing chart data for ${category} category`);
+    console.log(`Result for ${category}:`, category === 'material' ? result.breakdownByMaterial : 
+                                          category === 'transport' ? result.breakdownByTransport : 
+                                          result.breakdownByEnergy);
+    
+    let chartData: Array<{name: string, value: number}> = [];
+    let categoryTitle = "";
+    let categoryDescription = "";
+    let fillColor = "";
+    let totalCategoryEmissions = 0;
 
-  switch (category) {
-    case 'material':
-      chartData = Object.entries(result.breakdownByMaterial)
-        .map(([key, value]) => ({
-          name: MATERIAL_FACTORS[key as Material].name,
-          value: Number(value.toFixed(2))
-        }))
-        .sort((a, b) => b.value - a.value);
-      categoryTitle = "Material Emissions";
-      categoryDescription = "Carbon footprint by material type";
-      fillColor = "#3e9847";
-      totalCategoryEmissions = result.materialEmissions;
-      break;
-    case 'transport':
-      chartData = Object.entries(result.breakdownByTransport)
-        .map(([key, value]) => ({
-          name: TRANSPORT_FACTORS[key as Transport].name,
-          value: Number(value.toFixed(2))
-        }))
-        .sort((a, b) => b.value - a.value);
-      categoryTitle = "Transport Emissions";
-      categoryDescription = "Carbon footprint by transport method";
-      fillColor = "#25612d";
-      totalCategoryEmissions = result.transportEmissions;
-      break;
-    case 'energy':
-      chartData = Object.entries(result.breakdownByEnergy)
-        .map(([key, value]) => ({
-          name: ENERGY_FACTORS[key as Energy].name,
-          value: Number(value.toFixed(2))
-        }))
-        .sort((a, b) => b.value - a.value);
-      categoryTitle = "Energy Emissions";
-      categoryDescription = "Carbon footprint by energy source";
-      fillColor = "#214d28";
-      totalCategoryEmissions = result.energyEmissions;
-      break;
-  }
+    try {
+      switch (category) {
+        case 'material':
+          if (!result.breakdownByMaterial || Object.keys(result.breakdownByMaterial).length === 0) {
+            console.warn("Empty or invalid breakdownByMaterial data:", result.breakdownByMaterial);
+          } else {
+            console.log("Material factors available:", Object.keys(MATERIAL_FACTORS).length);
+            
+            chartData = Object.entries(result.breakdownByMaterial)
+              .map(([key, value]) => {
+                const materialName = MATERIAL_FACTORS[key as Material]?.name || key;
+                console.log(`Material ${key} -> ${materialName}: ${value}`);
+                return {
+                  name: materialName,
+                  value: Number(value.toFixed(2))
+                };
+              })
+              .filter(item => item.value > 0)
+              .sort((a, b) => b.value - a.value);
+          }
+          categoryTitle = "Material Emissions";
+          categoryDescription = "Carbon footprint by material type";
+          fillColor = "#3e9847";
+          totalCategoryEmissions = result.materialEmissions;
+          break;
+          
+        case 'transport':
+          chartData = Object.entries(result.breakdownByTransport)
+            .map(([key, value]) => ({
+              name: TRANSPORT_FACTORS[key as Transport]?.name || key,
+              value: Number(value.toFixed(2))
+            }))
+            .filter(item => item.value > 0)
+            .sort((a, b) => b.value - a.value);
+          categoryTitle = "Transport Emissions";
+          categoryDescription = "Carbon footprint by transport method";
+          fillColor = "#25612d";
+          totalCategoryEmissions = result.transportEmissions;
+          break;
+          
+        case 'energy':
+          chartData = Object.entries(result.breakdownByEnergy)
+            .map(([key, value]) => ({
+              name: ENERGY_FACTORS[key as Energy]?.name || key,
+              value: Number(value.toFixed(2))
+            }))
+            .filter(item => item.value > 0)
+            .sort((a, b) => b.value - a.value);
+          categoryTitle = "Energy Emissions";
+          categoryDescription = "Carbon footprint by energy source";
+          fillColor = "#214d28";
+          totalCategoryEmissions = result.energyEmissions;
+          break;
+      }
+      
+      console.log(`Generated ${chartData.length} chart items for ${category}`);
+    } catch (error) {
+      console.error(`Error generating chart data for ${category}:`, error);
+      chartData = [];
+    }
 
-  // Filter out any items with zero or extremely small values
-  const filteredChartData = chartData.filter(item => item.value > 0.01);
+    // Filter out any items with zero or extremely small values
+    const filteredChartData = chartData.filter(item => item.value > 0.01);
+    
+    return { 
+      chartData: filteredChartData, 
+      categoryTitle, 
+      categoryDescription, 
+      fillColor, 
+      totalCategoryEmissions 
+    };
+  }, [result, category]);
+
+  // Log when the component renders
+  useEffect(() => {
+    console.log(`CategoryBreakdownChart for ${category} rendering with ${chartData.length} items`);
+  }, [category, chartData.length]);
 
   // Animation variants with staggered children
   const containerVariants = {
@@ -83,7 +128,7 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
     }
   };
 
-  const CustomTooltip = ({active, payload, label}: any) => {
+  const CustomTooltip = useCallback(({active, payload, label}: any) => {
     if (active && payload && payload.length) {
       const percentage = ((payload[0].value / totalCategoryEmissions) * 100).toFixed(1);
       return (
@@ -96,7 +141,26 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
       );
     }
     return null;
-  };
+  }, [totalCategoryEmissions]);
+
+  // If no data, show empty state
+  if (!chartData || chartData.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{categoryTitle}</CardTitle>
+          <CardDescription>{categoryDescription}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72 flex flex-col items-center justify-center text-muted-foreground">
+            <Bug className="h-8 w-8 mb-4 text-muted" />
+            <p>No {category} emission data available</p>
+            <p className="text-sm mt-1">Check your inputs and try recalculating</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <motion.div
@@ -112,11 +176,11 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredChartData.length > 0 ? (
+          {chartData.length > 0 ? (
             <>
               <motion.div className="h-72" variants={chartVariants}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={filteredChartData} margin={{ right: 10, left: 0 }}>
+                  <BarChart data={chartData} margin={{ right: 10, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis 
                       dataKey="name" 
@@ -156,7 +220,7 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
 
               {/* Add progress bars for each item */}
               <div className="mt-6 space-y-3">
-                {filteredChartData.map((item, index) => {
+                {chartData.map((item, index) => {
                   const percentage = (item.value / totalCategoryEmissions) * 100;
                   return (
                     <motion.div 

@@ -12,8 +12,9 @@ import CalculatorResults from "../CalculatorResults";
 import RecommendationsSection from "../RecommendationsSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateSuggestions } from "@/lib/sustainabilitySuggestions";
-import { Loader } from "lucide-react";
+import { Loader, Info, AlertCircle } from "lucide-react";
 import { useCalculator } from "@/contexts/calculator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ResultsSectionProps {
   calculationResult: CalculationResult | null;
@@ -43,6 +44,26 @@ const ResultsSection = ({
     transport,
     energy
   };
+  
+  // Check if data is valid for results
+  const hasValidMaterials = materials?.some(m => Number(m.quantity) > 0) || false;
+  const hasValidTransport = transport?.some(t => Number(t.distance) > 0 && Number(t.weight) > 0) || false;
+  const hasValidEnergy = energy?.some(e => Number(e.amount) > 0) || false;
+  
+  // Check if calculation result has any data
+  const hasEmptyResult = calculationResult && 
+    calculationResult.totalEmissions === 0 &&
+    Object.keys(calculationResult.breakdownByMaterial || {}).length === 0 &&
+    Object.keys(calculationResult.breakdownByTransport || {}).length === 0 &&
+    Object.keys(calculationResult.breakdownByEnergy || {}).length === 0;
+
+  console.log("ResultsSection rendering:");
+  console.log("- isCalculating:", isCalculating);
+  console.log("- calculationResult:", calculationResult);
+  console.log("- hasValidMaterials:", hasValidMaterials);
+  console.log("- hasValidTransport:", hasValidTransport);
+  console.log("- hasValidEnergy:", hasValidEnergy);
+  console.log("- materials breakdown:", calculationResult?.breakdownByMaterial);
   
   // Generate suggestions based on the result
   const suggestions = calculationResult ? generateSuggestions(calculationResult) : [];
@@ -79,14 +100,55 @@ const ResultsSection = ({
             <Button variant="outline" onClick={onPrev}>
               Previous Step
             </Button>
-            <Button onClick={onCalculate} className="bg-carbon-600 hover:bg-carbon-700 text-white">
+            <Button 
+              onClick={onCalculate} 
+              className="bg-carbon-600 hover:bg-carbon-700 text-white"
+              disabled={!hasValidMaterials && !hasValidTransport && !hasValidEnergy}
+            >
               Calculate Now
             </Button>
           </div>
+          
+          {!hasValidMaterials && !hasValidTransport && !hasValidEnergy && (
+            <Alert className="mt-6 max-w-md mx-auto">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                You need to add at least one material, transport, or energy input with values greater than zero.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       )}
       
-      {!isCalculating && calculationResult && (
+      {!isCalculating && hasEmptyResult && (
+        <div className="text-center p-8">
+          <AlertCircle className="h-16 w-16 mx-auto mb-4 text-yellow-500" />
+          <h3 className="text-xl font-medium mb-2">No Results Found</h3>
+          <p className="mb-6 text-muted-foreground">
+            Your calculation didn't produce any emissions data. Please check your inputs and try again.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-2">
+            <Button variant="outline" onClick={onPrev}>
+              Check Inputs
+            </Button>
+            <Button 
+              onClick={onCalculate} 
+              className="bg-carbon-600 hover:bg-carbon-700 text-white"
+            >
+              Recalculate
+            </Button>
+          </div>
+          
+          <Alert className="mt-8 max-w-lg mx-auto bg-amber-50 border-amber-200">
+            <Info className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              Make sure your materials, transport, and energy inputs have appropriate quantities and valid types.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      
+      {!isCalculating && calculationResult && !hasEmptyResult && (
         <div>
           {/* Added space on top to separate tabs from previous content */}
           <Tabs defaultValue="results" className="mt-16 sm:mt-20 md:mt-16"> 
