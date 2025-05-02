@@ -6,10 +6,9 @@ import CalculatorContainer from "./calculator/CalculatorContainer";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
-  isPremiumUser?: boolean;
 }
 
-const CarbonCalculator = ({ demoMode = false, isPremiumUser = false }: CarbonCalculatorProps) => {
+const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
   const {
     error,
     projectName,
@@ -29,7 +28,7 @@ const CarbonCalculator = ({ demoMode = false, isPremiumUser = false }: CarbonCal
     handleSignIn,
     isExistingProject,
     calculatorContext
-  } = useCalculatorActions({ demoMode, isPremiumUser });
+  } = useCalculatorActions({ demoMode });
 
   // Handle error gracefully
   if (error || !calculatorContext) {
@@ -64,7 +63,6 @@ const CarbonCalculator = ({ demoMode = false, isPremiumUser = false }: CarbonCal
         onSignIn={handleSignIn}
         isExistingProject={isExistingProject}
         calculatorContext={calculatorContext}
-        isPremiumUser={isPremiumUser}
       />
     </div>
   );
