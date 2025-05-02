@@ -25,6 +25,7 @@ interface CalculatorTabSectionProps {
   calculatorContext: CalculatorContextType;
   isSaving: boolean;
   onSaveClick: () => void;
+  isCalculating?: boolean;
 }
 
 const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
@@ -46,7 +47,8 @@ const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
   tabError,
   calculatorContext,
   isSaving,
-  onSaveClick
+  onSaveClick,
+  isCalculating = false
 }) => {
   return (
     <>
@@ -55,7 +57,7 @@ const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
         onCalculate={handleCalculateWithTracking}
         onSave={onSaveClick}
         isSaving={isSaving}
-        isCalculating={false}
+        isCalculating={isCalculating}
         demoMode={demoMode}
       />
       

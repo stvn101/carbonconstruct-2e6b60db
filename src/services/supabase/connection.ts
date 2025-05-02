@@ -2,7 +2,7 @@
 /**
  * Supabase connection utilities with improved reliability
  */
-import { checkNetworkStatus, isOffline } from '@/utils/errorHandling/networkChecker';
+import { isOffline } from '@/utils/errorHandling/networkChecker';
 
 // Simplified connection check with improved reliability and longer timeout
 export const checkSupabaseConnection = async (): Promise<boolean> => {
@@ -53,12 +53,7 @@ export const pingSupabaseConnection = async (): Promise<boolean> => {
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
-    // Better error classification
-    if (error.name === 'AbortError') {
-      console.warn('Supabase connection check timed out after 10 seconds');
-    } else {
-      console.error('Supabase connection check failed:', error);
-    }
+    console.error('Supabase connection check failed:', error);
     return false;
   }
 };

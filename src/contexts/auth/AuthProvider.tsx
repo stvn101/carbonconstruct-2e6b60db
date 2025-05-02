@@ -6,8 +6,8 @@ import { useAuthHandlers } from './hooks/useAuthHandlers';
 import { useAuthEffects } from './hooks/useAuthEffects';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
-import { addNetworkListeners } from '@/utils/errorHandling';
 import { toast } from 'sonner';
+import { useSimpleOfflineMode } from '@/hooks/useSimpleOfflineMode';
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -35,43 +35,50 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { state, updateState } = useAuthState();
   const authHandlers = useAuthHandlers();
   useAuthEffects(updateState);
+  const { isOffline, checkConnection } = useSimpleOfflineMode();
 
-  // Add network status monitoring
+  // Monitor offline status for auth
   useEffect(() => {
-    const cleanupNetworkListeners = addNetworkListeners(
-      // Offline callback
-      () => {
-        toast.error("You're offline. Authentication services may be limited.", {
-          id: "auth-offline-warning",
-          duration: 0
-        });
-      },
-      // Online callback
-      () => {
-        toast.success("You're back online. All authentication services available.", {
-          id: "auth-online-notice"
-        });
-        // Refresh the session when coming back online
-        if (state.user) {
-          supabase.auth.getSession().then(({ data }) => {
-            if (data.session) {
-              updateState({
-                session: data.session,
-                user: data.session.user
-              });
-            }
-          });
+    if (isOffline && state.user) {
+      toast.info("You're offline. Authentication state will be maintained, but some actions may be limited.", {
+        id: "auth-offline-info",
+        duration: 5000
+      });
+    }
+  }, [isOffline, state.user]);
+  
+  // Refresh session when coming back online
+  useEffect(() => {
+    if (!isOffline && state.user) {
+      const refreshSession = async () => {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            updateState({
+              session: data.session,
+              user: data.session.user
+            });
+          }
+        } catch (error) {
+          console.error("Error refreshing session:", error);
         }
-      }
-    );
-
-    return cleanupNetworkListeners;
-  }, [state.user, updateState]);
+      };
+      
+      refreshSession();
+    }
+  }, [isOffline, state.user, updateState]);
 
   const contextValue: AuthContextType = {
     ...state,
     signUp: async (email: string, password: string, captchaToken: string | null) => {
       try {
+        if (isOffline) {
+          toast.error("Cannot sign up while offline. Please check your connection.", {
+            id: "offline-signup-error"
+          });
+          throw new Error("Network unavailable");
+        }
+        
         const options = captchaToken ? { captchaToken } : undefined;
         const { error } = await supabase.auth.signUp({ email, password, options });
         if (error) throw error;
@@ -82,6 +89,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     },
     signIn: async (email: string, password: string, captchaToken: string | null) => {
       try {
+        if (isOffline) {
+          toast.error("Cannot sign in while offline. Please check your connection.", {
+            id: "offline-signin-error"
+          });
+          throw new Error("Network unavailable");
+        }
+        
         const options = captchaToken ? { captchaToken } : undefined;
         const { error } = await supabase.auth.signInWithPassword({ email, password, options });
         if (error) throw error;
@@ -92,6 +106,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     },
     signOut: async () => {
       try {
+        if (isOffline) {
+          toast.warning("You're offline. You'll be signed out locally but server session may remain active.", {
+            id: "offline-signout-warning"
+          });
+          
+          // We can at least clear local storage
+          localStorage.removeItem('supabase.auth.token');
+          updateState({
+            user: null,
+            session: null,
+            profile: null
+          });
+          return;
+        }
+        
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
       } catch (error: any) {

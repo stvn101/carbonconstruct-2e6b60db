@@ -8,7 +8,6 @@ import DatabaseResultsCard from './DatabaseResultsCard';
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 import { AlertCircle, Loader2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Pagination from "@/components/ui/pagination";
 import { getCacheMetadata } from "@/services/materialCache";
 
 const MaterialDatabase = () => {
@@ -28,8 +27,6 @@ const MaterialDatabase = () => {
     totalMaterials,
     loading,
     error,
-    pagination,
-    handlePaginationChange,
     refreshCache,
     isCategoriesLoading,
     cacheStats
@@ -45,9 +42,6 @@ const MaterialDatabase = () => {
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
-
-  // Calculate total pages for pagination
-  const totalPages = Math.ceil(materialCount / (pagination?.pageSize || 50));
 
   if (loading && filteredMaterials.length === 0) {
     return (
@@ -129,18 +123,6 @@ const MaterialDatabase = () => {
             totalCount={totalMaterials || 0}
             loading={loading && filteredMaterials.length > 0}
           />
-          
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex justify-center">
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={totalPages}
-                onPageChange={handlePaginationChange}
-                siblingCount={1}
-              />
-            </div>
-          )}
         </div>
       </div>
     </ErrorBoundaryWrapper>
