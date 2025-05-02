@@ -10,45 +10,34 @@ import { AlertCircle, Loader2 } from "lucide-react";
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [selectedAlternative, setSelectedAlternative] = useState<string>("none");
   const [selectedTag, setSelectedTag] = useState<string>("all");
-  const { selectedRegion: globalRegion } = useRegion();
+  const { selectedRegion } = useRegion();
   
-  // Setup data using our hook
+  // Setup data using our hook - always use Australia as the region
   const {
     filteredMaterials,
     materialsByRegion,
     allTags,
-    allRegions,
     baseOptions,
     materialCount,
     loading,
     error
   } = useMaterialData({
     searchTerm,
-    selectedRegion,
+    selectedRegion: "Australia", // Always Australia
     selectedAlternative,
     selectedTag
   });
-  
-  // Set the default filter to the global region
-  useEffect(() => {
-    if (globalRegion && globalRegion !== "National" && selectedRegion === "all") {
-      setSelectedRegion(globalRegion);
-    }
-  }, [globalRegion]);
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion(globalRegion && globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
 
   console.log("Materials data loaded:", {
     count: filteredMaterials?.length || 0,
-    regions: allRegions,
     tags: allTags
   });
 
@@ -93,21 +82,18 @@ const MaterialDatabase = () => {
       <div className="container mx-auto px-4 py-8 content-top-spacing">
         <div className="max-w-5xl mx-auto">
           <DatabaseHeader 
-            globalRegion={globalRegion || "National"}
+            globalRegion="Australia"
             materialsByRegion={materialsByRegion || {}}
           />
           
           <DatabaseFilterCard
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
-            selectedRegion={selectedRegion}
-            setSelectedRegion={setSelectedRegion}
             selectedAlternative={selectedAlternative}
             setSelectedAlternative={setSelectedAlternative}
             selectedTag={selectedTag}
             setSelectedTag={setSelectedTag}
             allTags={allTags || []}
-            allRegions={allRegions || []} 
             baseOptions={baseOptions || []}
           />
           
