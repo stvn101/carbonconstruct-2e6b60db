@@ -4,11 +4,11 @@ import { Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CalculatorTabTriggersProps {
-  isMobile: boolean;
+  isMobile?: boolean;
   isPremiumUser?: boolean;
 }
 
-const CalculatorTabTriggers = ({ isMobile, isPremiumUser = false }: CalculatorTabTriggersProps) => {
+const CalculatorTabTriggers = ({ isMobile = false, isPremiumUser = false }: CalculatorTabTriggersProps) => {
   const renderAdvancedTrigger = (value: string, label: string) => {
     if (isPremiumUser) {
       return (

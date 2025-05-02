@@ -1,40 +1,70 @@
 
-import { useState, useEffect } from 'react';
-import { showErrorToast, showSuccessToast } from '@/utils/errorHandling/simpleToastHandler';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 
 /**
- * Simplified hook to detect offline status
+ * A simplified hook to determine if the app is currently offline
+ * with reduced complexity and network calls
  */
 export function useSimpleOfflineMode() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   
+  // Simple connection check that doesn't make network requests 
+  // unless explicitly called
+  const checkConnection = useCallback(async () => {
+    // Just use navigator.onLine as a base check
+    const isOnline = navigator.onLine;
+    
+    if (isOnline !== !isOffline) {
+      setIsOffline(!isOnline);
+      
+      // Show appropriate toast based on current status
+      if (isOnline) {
+        toast.success("Connection restored!", {
+          id: "connection-restored",
+          duration: 3000
+        });
+      } else {
+        toast.error("You're offline. Some features may be limited.", {
+          id: "offline-mode", 
+          duration: 5000
+        });
+      }
+    }
+    
+    return isOnline;
+  }, [isOffline]);
+
+  // Basic event listeners for online/offline events
   useEffect(() => {
-    function handleOnline() {
+    const handleOnline = () => {
       setIsOffline(false);
-      showSuccessToast("You're back online!");
-    }
+      toast.success("Connection restored!", {
+        id: "connection-restored",
+        duration: 3000
+      });
+    };
     
-    function handleOffline() {
+    const handleOffline = () => {
       setIsOffline(true);
-      showErrorToast("You're offline. Some features may be unavailable.", 5000);
-    }
+      toast.error("You're offline. Some features may be limited.", {
+        id: "offline-mode",
+        duration: 5000
+      });
+    };
     
-    // Set up listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     
-    // Initial check
-    setIsOffline(!navigator.onLine);
-    
-    // Cleanup on unmount
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      
+      // Clean up any toasts
+      toast.dismiss("offline-mode");
+      toast.dismiss("connection-restored");
     };
   }, []);
-  
-  return {
-    isOffline,
-    checkConnection: () => setIsOffline(!navigator.onLine)
-  };
+
+  return { isOffline, checkConnection };
 }

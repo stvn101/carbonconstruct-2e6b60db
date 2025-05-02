@@ -1,9 +1,9 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { fetchMaterials } from '@/services/materialService';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MATERIAL_FACTORS } from '@/lib/materials';
 import { getCacheMetadata, clearMaterialsCache } from '@/services/materialService';
+import { toast } from 'sonner';
 
 // Simplified material cache hook - no pagination or complex options
 export const useMaterialCache = () => {
@@ -14,10 +14,27 @@ export const useMaterialCache = () => {
   // Refresh cache handler - forces fresh data fetch
   const refreshCache = useCallback(async () => {
     try {
+      setLoading(true);
+      toast.info("Refreshing material data...");
+      
       await clearMaterialsCache();
-      loadMaterials(true);
+      const fetchedMaterials = await fetchMaterials();
+      
+      setMaterials(fetchedMaterials);
+      setError(null);
+      
+      toast.success("Material data refreshed successfully!");
     } catch (err) {
       console.error('Failed to refresh cache:', err);
+      toast.error("Failed to refresh material data. Using cached data.");
+      
+      if (err instanceof Error) {
+        setError(err);
+      } else {
+        setError(new Error(String(err)));
+      }
+    } finally {
+      setLoading(false);
     }
   }, []);
   
@@ -26,31 +43,57 @@ export const useMaterialCache = () => {
     try {
       setLoading(true);
       
-      const fetchedMaterials = await fetchMaterials();
-      setMaterials(fetchedMaterials);
-      setError(null);
+      const fetchedMaterials = await fetchMaterials(forceRefresh);
+      
+      // Only update if we have materials (otherwise keep what we have)
+      if (fetchedMaterials.length > 0) {
+        setMaterials(fetchedMaterials);
+        setError(null);
+      } else if (materials.length === 0) {
+        // If we don't have any materials yet, use static fallback
+        const staticMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+          name: value.name || key,
+          factor: value.factor,
+          unit: value.unit || 'kg',
+          region: 'Australia',
+          tags: ['construction'],
+          sustainabilityScore: 70,
+          recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
+          alternativeTo: undefined,
+          notes: ''
+        }));
+        
+        setMaterials(staticMaterials);
+      }
     } catch (err) {
       console.error('Error loading materials:', err);
-      setError(err instanceof Error ? err : new Error(String(err)));
       
-      // Fallback to static materials
-      const staticMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
-        name: value.name || key,
-        factor: value.factor,
-        unit: value.unit || 'kg',
-        region: 'Australia',
-        tags: ['construction'],
-        sustainabilityScore: 70,
-        recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
-        alternativeTo: undefined,
-        notes: ''
-      }));
+      if (err instanceof Error) {
+        setError(err);
+      } else {
+        setError(new Error(String(err)));
+      }
       
-      setMaterials(staticMaterials);
+      // Fallback to static materials only if we don't have any materials yet
+      if (materials.length === 0) {
+        const staticMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+          name: value.name || key,
+          factor: value.factor,
+          unit: value.unit || 'kg',
+          region: 'Australia',
+          tags: ['construction'],
+          sustainabilityScore: 70,
+          recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
+          alternativeTo: undefined,
+          notes: ''
+        }));
+        
+        setMaterials(staticMaterials);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [materials]);
   
   // Cache statistics information
   const [cacheStats, setCacheStats] = useState<{

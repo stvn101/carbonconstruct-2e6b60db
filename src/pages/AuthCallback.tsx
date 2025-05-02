@@ -1,10 +1,15 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
   
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -14,6 +19,8 @@ const AuthCallback = () => {
       
       // Process the OAuth callback
       try {
+        setIsProcessing(true);
+        
         // Handle the redirect automatically
         const { data, error } = await supabase.auth.getSession();
         
@@ -22,20 +29,60 @@ const AuthCallback = () => {
         }
         
         if (data?.session) {
-          // Successfully logged in, redirect to dashboard
-          navigate("/dashboard");
+          // Check if we have a returnUrl in the session storage
+          const returnUrl = sessionStorage.getItem('authReturnUrl');
+          sessionStorage.removeItem('authReturnUrl'); // Clean up
+          
+          // Successfully logged in, redirect to dashboard or return URL
+          const redirectTo = returnUrl || "/dashboard";
+          navigate(redirectTo, { 
+            state: { fromAuth: true },
+            replace: true
+          });
         } else {
-          // No session found, redirect to auth page
-          navigate("/auth");
+          // Check queryParams for error message
+          const errorMsg = queryParams.get('error_description');
+          
+          if (errorMsg) {
+            setError(errorMsg);
+            setIsProcessing(false);
+          } else {
+            // No session found, redirect to auth page
+            navigate("/auth", { replace: true });
+          }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Auth callback error:", error);
-        navigate("/auth");
+        setError(error.message || "Authentication failed. Please try again.");
+        setIsProcessing(false);
       }
     };
     
     handleAuthCallback();
   }, [navigate]);
+  
+  const handleRetry = () => {
+    navigate("/auth", { replace: true });
+  };
+  
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <div>
+              <h3 className="font-medium">Authentication Error</h3>
+              <p className="text-sm">{error}</p>
+            </div>
+          </Alert>
+          <Button onClick={handleRetry} className="w-full">
+            Return to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">

@@ -28,10 +28,11 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
   }
   
   try {
-    // First, try a simple favicon fetch which is very lightweight
+    // Simplified check with a short timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     
+    // Try to fetch a small resource from the same origin
     const response = await fetch('/favicon.ico', { 
       method: 'HEAD',
       cache: 'no-store',
@@ -40,45 +41,16 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
     
     clearTimeout(timeoutId);
     
-    if (response.ok) {
-      // Update cache with success
-      lastHealthCheckResult = true;
-      lastHealthCheckTimestamp = now;
-      return true;
-    }
+    // Update cache with success
+    lastHealthCheckResult = response.ok;
+    lastHealthCheckTimestamp = now;
+    
+    return response.ok;
   } catch (error) {
-    // Continue to fallback checks
+    // If that fails, use navigator.onLine as fallback
+    lastHealthCheckResult = navigator.onLine;
+    lastHealthCheckTimestamp = now;
+    
+    return navigator.onLine;
   }
-  
-  // Try Google's favicon as a reliable fallback with longer timeout
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-    
-    const response = await fetch('https://www.google.com/favicon.ico', { 
-      method: 'HEAD',
-      cache: 'no-store',
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (response.ok) {
-      // Update cache with success
-      lastHealthCheckResult = true;
-      lastHealthCheckTimestamp = now;
-      return true;
-    }
-  } catch (error) {
-    // Final fallback will be attempted
-  }
-  
-  // Use navigator.onLine as final fallback
-  const isOnline = navigator.onLine;
-  
-  // Update cache with result
-  lastHealthCheckResult = isOnline;
-  lastHealthCheckTimestamp = now;
-  
-  return isOnline;
 };
