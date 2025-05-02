@@ -1,6 +1,8 @@
 
-export { TooltipContent, type TooltipContentProps } from './components/TooltipContent';
-export { TooltipItem } from './components/TooltipItem';
+export { ChartTooltip } from './ChartTooltip';
+export { TooltipContent } from './components/TooltipContent';
 export { TooltipLabel } from './components/TooltipLabel';
 export { getPayloadConfigFromPayload } from './utils/getPayloadConfig';
-export { ChartTooltip } from './ChartTooltip';
+
+// For backward compatibility
+export type { TooltipContentProps } from './components/TooltipContent';
