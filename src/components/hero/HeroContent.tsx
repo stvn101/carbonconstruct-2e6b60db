@@ -13,7 +13,13 @@ const HeroContent = () => {
   const { scrollToElement } = useScrollTo();
 
   const handleLearnMore = () => {
-    scrollToElement('features')();
+    console.log("Learn More button clicked, attempting to scroll to features section");
+    // Use enhanced scrollToElement with multiple attempts and delay
+    scrollToElement('features', { 
+      offset: 90, // Increased offset to account for the fixed header
+      attempts: 5, // Try up to 5 times
+      delay: 200 // Longer initial delay for lazy-loaded components to render
+    })();
   };
 
   const handleTryCalculator = () => {
