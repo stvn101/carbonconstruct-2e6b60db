@@ -1,10 +1,9 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchMaterials, SupabaseMaterial } from '@/services/materialService';
 import { MATERIAL_FACTORS, REGIONS } from '@/lib/materials';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MaterialOption } from '@/lib/materialTypes';
-import errorTrackingService from '@/services/error/errorTrackingService';
+import { useMaterialCache } from './useMaterialCache';
 
 interface UseMaterialDataProps {
   searchTerm: string;
@@ -19,32 +18,8 @@ export const useMaterialData = ({
   selectedAlternative,
   selectedTag
 }: UseMaterialDataProps) => {
-  const [materials, setMaterials] = useState<ExtendedMaterialData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  
-  // Fetch materials from Supabase
-  useEffect(() => {
-    const loadMaterials = async () => {
-      try {
-        setLoading(true);
-        const fetchedMaterials = await fetchMaterials();
-        setMaterials(fetchedMaterials);
-        setError(null);
-      } catch (err) {
-        console.error('Error loading materials:', err);
-        setError(err instanceof Error ? err : new Error(String(err)));
-        errorTrackingService.captureException(
-          err instanceof Error ? err : new Error(String(err)),
-          { component: 'useMaterialData', action: 'fetchMaterials' }
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadMaterials();
-  }, []);
+  // Use the centralized material cache
+  const { materials, loading, error } = useMaterialCache();
   
   // Safely create base options
   const baseOptions = useMemo(() => {
@@ -60,10 +35,6 @@ export const useMaterialData = ({
       }));
     } catch (error) {
       console.error('Error creating base options:', error);
-      errorTrackingService.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        { component: 'useMaterialData', action: 'baseOptions' }
-      );
       return [];
     }
   }, []);
@@ -83,10 +54,6 @@ export const useMaterialData = ({
       ).sort();
     } catch (error) {
       console.error('Error extracting tags:', error);
-      errorTrackingService.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        { component: 'useMaterialData', action: 'allTags' }
-      );
       return [];
     }
   }, [materials]);
@@ -119,10 +86,6 @@ export const useMaterialData = ({
       return result;
     } catch (error) {
       console.error('Error computing materials by region:', error);
-      errorTrackingService.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        { component: 'useMaterialData', action: 'materialsByRegion' }
-      );
       return {};
     }
   }, [materials]);
@@ -160,10 +123,6 @@ export const useMaterialData = ({
       });
     } catch (error) {
       console.error('Error filtering materials:', error);
-      errorTrackingService.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        { component: 'useMaterialData', action: 'filteredMaterials' }
-      );
       return [];
     }
   }, [materials, searchTerm, selectedRegion, selectedAlternative, selectedTag]);
@@ -174,10 +133,6 @@ export const useMaterialData = ({
       return REGIONS ? Array.from(REGIONS) : [];
     } catch (error) {
       console.error('Error getting regions:', error);
-      errorTrackingService.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        { component: 'useMaterialData', action: 'allRegions' }
-      );
       return [];
     }
   }, []);

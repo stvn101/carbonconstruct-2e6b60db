@@ -1,9 +1,9 @@
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
-import { EXTENDED_MATERIALS, MATERIAL_TYPES } from '@/lib/materials';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { useDebounce } from './useDebounce';
+import { useMaterialCache } from './useMaterialCache';
 
 export interface MaterialFilterOptions {
   searchTerm: string;
@@ -14,25 +14,15 @@ export interface MaterialFilterOptions {
 
 export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptions> = {}) => {
   const [searchTerm, setSearchTerm] = useState(initialOptions.searchTerm || "");
-  const [selectedRegion, setSelectedRegion] = useState<string>(initialOptions.selectedRegion || "all");
   const [selectedAlternative, setSelectedAlternative] = useState<string>(initialOptions.selectedAlternative || "none");
   const [selectedTag, setSelectedTag] = useState<string>(initialOptions.selectedTag || "all");
-  const { selectedRegion: globalRegion } = useRegion();
+  const { selectedRegion } = useRegion();
   
   // Debounce the search term to prevent excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
-  // Set the default filter to the global region when component mounts
-  useEffect(() => {
-    if (globalRegion !== "Australia") {
-      setSelectedRegion(globalRegion);
-    }
-  }, [globalRegion]);
-
-  // Use EXTENDED_MATERIALS directly
-  const allMaterials = useMemo(() => {
-    return Object.entries(EXTENDED_MATERIALS).map(([key, material]) => material);
-  }, []);
+  // Use the cached materials
+  const { materials: allMaterials, loading, error } = useMaterialCache();
 
   // Memoized filter function
   const filterPredicate = useCallback((material: ExtendedMaterialData) => {
@@ -80,7 +70,6 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
-    setSelectedRegion("all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   }, []);
@@ -114,7 +103,6 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     searchTerm,
     setSearchTerm,
     selectedRegion,
-    setSelectedRegion,
     selectedAlternative,
     setSelectedAlternative,
     selectedTag,
@@ -129,5 +117,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     resetFilters,
     materialCount: stats.totalCount,
     totalMaterials,
+    loading,
+    error
   };
 };
