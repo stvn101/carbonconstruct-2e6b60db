@@ -41,6 +41,120 @@ export function useCalculatorSave({
   const { user } = useAuth();
   const navigate = useNavigate();
   
+  /**
+   * Check if user is authenticated and handle auth errors
+   */
+  const checkAuthentication = useCallback(() => {
+    if (!user) {
+      setAuthError(new Error("Authentication required to save projects"));
+      setShowSaveDialog(false);
+      return false;
+    }
+    return true;
+  }, [user, setAuthError, setShowSaveDialog]);
+  
+  /**
+   * Check if user is online and handle offline state
+   */
+  const checkOnlineStatus = useCallback(() => {
+    if (!navigator.onLine) {
+      showErrorToast("You're offline. Please connect to the internet to save projects.");
+      setShowSaveDialog(false);
+      return false;
+    }
+    return true;
+  }, [setShowSaveDialog]);
+  
+  /**
+   * Verify project context availability
+   */
+  const verifyProjectContext = useCallback(() => {
+    if (!hasProjectsContext || !saveProject) {
+      setSavingError(new Error("Project saving is not available in this mode"));
+      setShowSaveDialog(false);
+      return false;
+    }
+    return true;
+  }, [hasProjectsContext, saveProject, setSavingError, setShowSaveDialog]);
+  
+  /**
+   * Set up save timeout to prevent hanging operations
+   */
+  const setupSaveTimeout = useCallback(() => {
+    clearSaveTimeout();
+    
+    const timeout = setTimeout(() => {
+      console.error("Save operation timed out");
+      setIsSaving(false);
+      setSavingError(new Error("Save operation timed out. Please try again."));
+      setShowSaveDialog(false);
+      toast.error("Save operation timed out. Please try again.");
+    }, 20000); // 20 second timeout
+    
+    setSaveTimeout(timeout);
+  }, [clearSaveTimeout, setSaveTimeout, setIsSaving, setSavingError, setShowSaveDialog]);
+  
+  /**
+   * Prepare project data for saving
+   */
+  const prepareProjectData = useCallback(() => {
+    if (!calculationResult) {
+      throw new Error("Missing calculation result. Please calculate before saving.");
+    }
+    
+    return {
+      name: projectName,
+      description: "Carbon calculation project",
+      materials: calculationInput?.materials,
+      transport: calculationInput?.transport,
+      energy: calculationInput?.energy,
+      result: calculationResult,
+      tags: ["carbon", "calculation"],
+      status: 'draft' as const,
+      total_emissions: calculationResult.totalEmissions || 0,
+      premium_only: false
+    };
+  }, [projectName, calculationInput, calculationResult]);
+  
+  /**
+   * Handle successful save operation
+   */
+  const handleSaveSuccess = useCallback((savedProject: any) => {
+    console.log("Project saved successfully:", savedProject);
+    
+    clearSaveTimeout();
+    setIsSaving(false);
+    setShowSaveDialog(false);
+    toast.success("Project saved successfully!");
+    
+    // Navigate after a short delay
+    setTimeout(() => {
+      navigate(`/projects`);
+    }, 300);
+  }, [clearSaveTimeout, setIsSaving, setShowSaveDialog, navigate]);
+  
+  /**
+   * Handle save error
+   */
+  const handleSaveError = useCallback((error: unknown) => {
+    console.error("Error saving project:", error);
+    
+    clearSaveTimeout();
+    
+    if (error instanceof Error) {
+      setSavingError(error);
+    } else {
+      setSavingError(new Error("Unknown error occurred while saving"));
+    }
+    
+    setIsSaving(false);
+    setShowSaveDialog(false);
+    toast.error(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }, [clearSaveTimeout, setSavingError, setIsSaving, setShowSaveDialog]);
+
+  /**
+   * Handle save button click
+   */
   const handleSaveClick = useCallback(() => {
     setAuthError(null);
     setSavingError(null);
@@ -68,97 +182,39 @@ export function useCalculatorSave({
     setShowSaveDialog(true);
   }, [user, calculationInput, calculationResult, hasProjectsContext, setAuthError, setSavingError, setShowSaveDialog]);
 
-  // Simplified save function with proper error handling and timeout
+  /**
+   * Handle save confirmation
+   */
   const handleSaveConfirm = useCallback(async () => {
-    if (!user) {
-      setAuthError(new Error("Authentication required to save projects"));
-      setShowSaveDialog(false);
-      return;
-    }
+    // Perform validation checks
+    if (!checkAuthentication()) return;
+    if (!checkOnlineStatus()) return;
+    if (!verifyProjectContext()) return;
     
-    if (!navigator.onLine) {
-      showErrorToast("You're offline. Please connect to the internet to save projects.");
-      setShowSaveDialog(false);
-      return;
-    }
-
-    if (!hasProjectsContext || !saveProject) {
-      setSavingError(new Error("Project saving is not available in this mode"));
-      setShowSaveDialog(false);
-      return;
-    }
-    
+    // Start saving process
     setIsSaving(true);
     setSavingError(null);
-    clearSaveTimeout();
-    
-    // Set a timeout to prevent hanging indefinitely
-    const timeout = setTimeout(() => {
-      console.error("Save operation timed out");
-      setIsSaving(false);
-      setSavingError(new Error("Save operation timed out. Please try again."));
-      setShowSaveDialog(false);
-      toast.error("Save operation timed out. Please try again.");
-    }, 20000); // 20 second timeout
-    
-    setSaveTimeout(timeout);
+    setupSaveTimeout();
     
     try {
-      // Ensure we have a valid calculation result
-      if (!calculationResult) {
-        throw new Error("Missing calculation result. Please calculate before saving.");
-      }
-      
-      // Prepare the project data
-      const projectData = {
-        name: projectName,
-        description: "Carbon calculation project",
-        materials: calculationInput?.materials,
-        transport: calculationInput?.transport,
-        energy: calculationInput?.energy,
-        result: calculationResult,
-        tags: ["carbon", "calculation"],
-        status: 'draft' as const,
-        total_emissions: calculationResult.totalEmissions || 0,
-        premium_only: false
-      };
-      
-      // Save the project - safety check already performed above
-      const savedProject = await saveProject(projectData);
-      
-      console.log("Project saved successfully:", savedProject);
-      
-      // Clear timeout since operation completed successfully
-      clearSaveTimeout();
-      
-      setIsSaving(false);
-      setShowSaveDialog(false);
-      toast.success("Project saved successfully!");
-      
-      // Navigate after a short delay
-      setTimeout(() => {
-        navigate(`/projects`);
-      }, 300);
+      // Prepare and save the project data
+      const projectData = prepareProjectData();
+      const savedProject = await saveProject!(projectData);
+      handleSaveSuccess(savedProject);
     } catch (error) {
-      console.error("Error saving project:", error);
-      
-      // Clear timeout since operation completed (with error)
-      clearSaveTimeout();
-      
-      if (error instanceof Error) {
-        setSavingError(error);
-      } else {
-        setSavingError(new Error("Unknown error occurred while saving"));
-      }
-      
-      setIsSaving(false);
-      setShowSaveDialog(false);
-      toast.error(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      handleSaveError(error);
     }
   }, [
-    user, projectName, calculationInput, calculationResult, navigate, saveProject, 
-    clearSaveTimeout, hasProjectsContext, setAuthError, setSavingError, 
-    setIsSaving, setShowSaveDialog, setSaveTimeout
+    checkAuthentication,
+    checkOnlineStatus,
+    verifyProjectContext,
+    setIsSaving,
+    setSavingError,
+    setupSaveTimeout,
+    prepareProjectData,
+    saveProject,
+    handleSaveSuccess,
+    handleSaveError
   ]);
 
   const handleSignIn = useCallback(() => {

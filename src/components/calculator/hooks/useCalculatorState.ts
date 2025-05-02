@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { Error } from '@/types/project';
 
 export function useCalculatorState() {
   const [projectName, setProjectName] = useState("New Carbon Project");
