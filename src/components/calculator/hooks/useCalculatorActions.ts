@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useCalculator } from '@/contexts/calculator';
 import { useProjects } from '@/contexts/ProjectContext';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [authError, setAuthError] = useState<Error | null>(null);
   const [savingError, setSavingError] = useState<Error | null>(null);
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Access calculator context
   let calculatorContext;
@@ -55,7 +56,14 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     p => p.name.toLowerCase() === projectName.toLowerCase()
   );
 
-  const handleSaveClick = () => {
+  const clearSaveTimeout = useCallback(() => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+      setSaveTimeout(null);
+    }
+  }, [saveTimeout]);
+
+  const handleSaveClick = useCallback(() => {
     setAuthError(null);
     setSavingError(null);
     
@@ -75,10 +83,10 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     }
 
     setShowSaveDialog(true);
-  };
+  }, [user, calculationInput, calculationResult]);
 
-  // Simplified save function
-  const handleSaveConfirm = async () => {
+  // Simplified save function with proper error handling and timeout
+  const handleSaveConfirm = useCallback(async () => {
     if (!user) {
       setAuthError(new Error("Authentication required to save projects"));
       setShowSaveDialog(false);
@@ -93,6 +101,18 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     
     setIsSaving(true);
     setSavingError(null);
+    clearSaveTimeout();
+    
+    // Set a timeout to prevent hanging indefinitely
+    const timeout = setTimeout(() => {
+      console.error("Save operation timed out");
+      setIsSaving(false);
+      setSavingError(new Error("Save operation timed out. Please try again."));
+      setShowSaveDialog(false);
+      toast.error("Save operation timed out. Please try again.");
+    }, 20000); // 20 second timeout
+    
+    setSaveTimeout(timeout);
     
     try {
       // Ensure we have a valid calculation result
@@ -111,13 +131,19 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
         tags: ["carbon", "calculation"],
         status: 'draft' as const,
         total_emissions: calculationResult.totalEmissions || 0,
-        premium_only: false // Adding the missing field
+        premium_only: false
       };
       
       // Save the project
       const savedProject = await saveProject(projectData);
       
       console.log("Project saved successfully:", savedProject);
+      
+      // Clear timeout since operation completed successfully
+      clearSaveTimeout();
+      
+      setIsSaving(false);
+      setShowSaveDialog(false);
       toast.success("Project saved successfully!");
       
       // Navigate after a short delay
@@ -127,6 +153,9 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     } catch (error) {
       console.error("Error saving project:", error);
       
+      // Clear timeout since operation completed (with error)
+      clearSaveTimeout();
+      
       if (error instanceof Error) {
         setSavingError(error);
       } else {
@@ -135,12 +164,20 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
       
       setIsSaving(false);
       setShowSaveDialog(false);
+      toast.error(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  };
+  }, [user, projectName, calculationInput, calculationResult, navigate, saveProject, clearSaveTimeout]);
   
-  const handleSignIn = () => {
+  const handleSignIn = useCallback(() => {
     navigate("/auth", { state: { returnTo: "/calculator" } });
-  };
+  }, [navigate]);
+
+  // Clean up timeouts when component unmounts
+  useCallback(() => {
+    return () => {
+      clearSaveTimeout();
+    };
+  }, [clearSaveTimeout]);
 
   return {
     error: false,

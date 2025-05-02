@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2, AlertTriangle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 interface SaveProjectConfirmDialogProps {
@@ -33,34 +33,48 @@ const SaveProjectConfirmDialog = ({
   error = null,
 }: SaveProjectConfirmDialogProps) => {
   const { isOnline } = useNetworkStatus();
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [showSavingTooLong, setShowSavingTooLong] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const maxSaveTimeRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Clean up function to clear all timeouts
+  const clearAllTimeouts = () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    
+    if (maxSaveTimeRef.current) {
+      clearTimeout(maxSaveTimeRef.current);
+      maxSaveTimeRef.current = null;
+    }
+  };
 
   // Set a timeout to show a warning if saving takes too long
   useEffect(() => {
-    if (isOpen && isSaving && !saveTimeout) {
-      const timeout = setTimeout(() => {
+    if (isOpen && isSaving && !saveTimeoutRef.current) {
+      // Show warning after 5 seconds
+      saveTimeoutRef.current = setTimeout(() => {
         setShowSavingTooLong(true);
-      }, 5000); // Show after 5 seconds of saving
+      }, 5000);
       
-      setSaveTimeout(timeout);
+      // Auto-cancel after 30 seconds to prevent indefinite saving
+      maxSaveTimeRef.current = setTimeout(() => {
+        if (isSaving) {
+          console.error("Save operation timed out after 30 seconds");
+          onCancel();
+        }
+      }, 30000);
     }
     
-    // Clear the timeout when the dialog closes or saving completes
+    // Clear the timeouts when the dialog closes or saving completes
     if (!isOpen || !isSaving) {
-      if (saveTimeout) {
-        clearTimeout(saveTimeout);
-        setSaveTimeout(null);
-      }
+      clearAllTimeouts();
       setShowSavingTooLong(false);
     }
     
-    return () => {
-      if (saveTimeout) {
-        clearTimeout(saveTimeout);
-      }
-    };
-  }, [isOpen, isSaving, saveTimeout]);
+    return clearAllTimeouts;
+  }, [isOpen, isSaving, onCancel]);
 
   // Pre-load navigation destination
   useEffect(() => {
@@ -72,13 +86,22 @@ const SaveProjectConfirmDialog = ({
       document.head.appendChild(link);
       
       return () => {
-        document.head.removeChild(link);
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
       };
     }
   }, [isOpen]);
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+    <AlertDialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        if (!open) {
+          onCancel();
+        }
+      }}
+    >
       <AlertDialogContent 
         className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg p-6"
       >

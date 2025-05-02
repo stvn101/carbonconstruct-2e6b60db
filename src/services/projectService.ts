@@ -51,7 +51,7 @@ export async function fetchUserProjects(
       }));
     },
     'load user projects',
-    { fallbackData: [] }
+    { fallbackData: [], timeout: 15000 }
   );
 }
 
@@ -120,7 +120,8 @@ export async function createProject(
         premium_only: false // Default to false as the database doesn't have this field yet
       };
     },
-    'create project'
+    'create project',
+    { timeout: 20000 } // Increase timeout for save operations
   );
 }
 
@@ -154,7 +155,8 @@ export async function updateProject(project: SavedProject): Promise<SavedProject
         updated_at: new Date().toISOString() 
       };
     },
-    'update project'
+    'update project',
+    { timeout: 20000 } // Increase timeout for save operations
   );
 }
 
@@ -171,6 +173,7 @@ export async function deleteProject(id: string): Promise<void> {
 
       if (error) throw error;
     },
-    'delete project'
+    'delete project',
+    { timeout: 15000 }
   );
 }
