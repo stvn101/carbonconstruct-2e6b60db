@@ -1,8 +1,10 @@
 
+import React from 'react';
 import { useCalculatorActions } from './calculator/hooks/useCalculatorActions';
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorAlerts from "./calculator/CalculatorAlerts";
 import CalculatorContainer from "./calculator/CalculatorContainer";
+import { ErrorBoundary } from "react-error-boundary";
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -53,26 +55,31 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
         onSignIn={handleSignIn}
       />
       
-      <CalculatorContainer
-        projectName={projectName}
-        setProjectName={setProjectName}
-        authError={authError}
-        setAuthError={setAuthError}
-        savingError={savingError}
-        setSavingError={setSavingError}
-        isSaving={isSaving}
-        setIsSaving={setIsSaving}
-        showSaveDialog={showSaveDialog}
-        setShowSaveDialog={setShowSaveDialog}
-        demoMode={demoMode}
-        isCalculating={calculatorContext.isCalculating}
-        setIsCalculating={calculatorContext.setIsCalculating}
-        onSaveConfirm={handleSaveConfirm}
-        onSaveClick={handleSaveClick}
-        onSignIn={handleSignIn}
-        isExistingProject={isExistingProject}
-        calculatorContext={calculatorContext}
-      />
+      <ErrorBoundary 
+        fallback={<CalculatorError />}
+        onError={(error) => console.error("Calculator component error:", error)}
+      >
+        <CalculatorContainer
+          projectName={projectName}
+          setProjectName={setProjectName}
+          authError={authError}
+          setAuthError={setAuthError}
+          savingError={savingError}
+          setSavingError={setSavingError}
+          isSaving={isSaving}
+          setIsSaving={setIsSaving}
+          showSaveDialog={showSaveDialog}
+          setShowSaveDialog={setShowSaveDialog}
+          demoMode={demoMode}
+          isCalculating={calculatorContext.isCalculating}
+          setIsCalculating={calculatorContext.setIsCalculating}
+          onSaveConfirm={handleSaveConfirm}
+          onSaveClick={handleSaveClick}
+          onSignIn={handleSignIn}
+          isExistingProject={isExistingProject}
+          calculatorContext={calculatorContext}
+        />
+      </ErrorBoundary>
     </div>
   );
 };

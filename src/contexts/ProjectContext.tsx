@@ -49,7 +49,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     initializeData
   });
 
-  // Properly wrap children with both context providers
+  // Properly wrap children with context provider
   return (
     <ProjectContext.Provider value={contextValue}>
       {children}

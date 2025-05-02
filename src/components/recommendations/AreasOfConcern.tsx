@@ -8,6 +8,17 @@ interface AreasOfConcernProps {
 }
 
 export const AreasOfConcern: React.FC<AreasOfConcernProps> = ({ calculationResult }) => {
+  // Make sure calculationResult is valid before accessing properties
+  if (!calculationResult) {
+    return null;
+  }
+
+  // Add safety checks for all properties we're accessing
+  const materialsEmissions = calculationResult.materialsEmissions || 0;
+  const transportEmissions = calculationResult.transportEmissions || 0;
+  const energyEmissions = calculationResult.energyEmissions || 0;
+  const totalEmissions = calculationResult.totalEmissions || 0;
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -18,7 +29,7 @@ export const AreasOfConcern: React.FC<AreasOfConcernProps> = ({ calculationResul
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {calculationResult.materialEmissions > calculationResult.totalEmissions * 0.7 && (
+          {materialsEmissions > totalEmissions * 0.7 && (
             <div className="p-3 border-l-4 border-l-amber-500 bg-amber-50 rounded-r-lg">
               <h4 className="font-medium mb-1">High Material Emissions</h4>
               <p className="text-sm">
@@ -28,7 +39,7 @@ export const AreasOfConcern: React.FC<AreasOfConcernProps> = ({ calculationResul
             </div>
           )}
           
-          {calculationResult.transportEmissions > calculationResult.totalEmissions * 0.3 && (
+          {transportEmissions > totalEmissions * 0.3 && (
             <div className="p-3 border-l-4 border-l-amber-500 bg-amber-50 rounded-r-lg">
               <h4 className="font-medium mb-1">High Transport Emissions</h4>
               <p className="text-sm">
@@ -38,7 +49,7 @@ export const AreasOfConcern: React.FC<AreasOfConcernProps> = ({ calculationResul
             </div>
           )}
           
-          {calculationResult.energyEmissions > calculationResult.totalEmissions * 0.25 && (
+          {energyEmissions > totalEmissions * 0.25 && (
             <div className="p-3 border-l-4 border-l-amber-500 bg-amber-50 rounded-r-lg">
               <h4 className="font-medium mb-1">High Energy Emissions</h4>
               <p className="text-sm">
@@ -48,7 +59,7 @@ export const AreasOfConcern: React.FC<AreasOfConcernProps> = ({ calculationResul
             </div>
           )}
           
-          {calculationResult.totalEmissions > 10000 && (
+          {totalEmissions > 10000 && (
             <div className="p-3 border-l-4 border-l-amber-500 bg-amber-50 rounded-r-lg">
               <h4 className="font-medium mb-1">High Overall Emissions</h4>
               <p className="text-sm">
@@ -58,10 +69,10 @@ export const AreasOfConcern: React.FC<AreasOfConcernProps> = ({ calculationResul
             </div>
           )}
           
-          {calculationResult.materialEmissions <= calculationResult.totalEmissions * 0.7 &&
-           calculationResult.transportEmissions <= calculationResult.totalEmissions * 0.3 &&
-           calculationResult.energyEmissions <= calculationResult.totalEmissions * 0.25 &&
-           calculationResult.totalEmissions <= 10000 && (
+          {materialsEmissions <= totalEmissions * 0.7 &&
+           transportEmissions <= totalEmissions * 0.3 &&
+           energyEmissions <= totalEmissions * 0.25 &&
+           totalEmissions <= 10000 && (
             <div className="p-3 border-l-4 border-l-green-500 bg-green-50 rounded-r-lg">
               <h4 className="font-medium mb-1">Good Carbon Performance</h4>
               <p className="text-sm">
