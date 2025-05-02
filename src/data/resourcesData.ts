@@ -15,7 +15,7 @@ export const resourcesData: ResourceItem[] = [
   { 
     title: "2024 NCC Compliance Guide", 
     description: "Learn how to meet Australia's National Construction Code 2024 updates for carbon reduction requirements.",
-    url: "https://ncc.abcb.gov.au/ncc-online/ncc",
+    url: "https://ncc.abcb.gov.au/",
     date: "May 2, 2024",
     type: "guide",
     tags: ["regulation", "compliance", "NCC", "building code"]
@@ -23,7 +23,7 @@ export const resourcesData: ResourceItem[] = [
   { 
     title: "Carbon Neutral Materials Selection", 
     description: "A comprehensive guide to selecting carbon neutral and net-zero materials for 2024 and beyond.",
-    url: "https://www.worldgbc.org/advancing-net-zero",
+    url: "https://www.worldgbc.org/",
     date: "April 18, 2024",
     type: "guide",
     tags: ["materials", "net-zero", "carbon neutral"]
@@ -49,7 +49,7 @@ export const resourcesData: ResourceItem[] = [
   { 
     title: "Managing Material EPDs in 2024", 
     description: "Learn how to interpret and leverage Environmental Product Declarations for your construction projects.",
-    url: "https://www.thefifthestate.com.au/innovation/materials/what-are-environmental-product-declarations-and-why-do-they-matter/",
+    url: "https://www.thefifthestate.com.au/",
     date: "May 15, 2024",
     type: "webinar",
     tags: ["EPD", "materials", "documentation"]
@@ -65,7 +65,7 @@ export const resourcesData: ResourceItem[] = [
   { 
     title: "NABERS for New Buildings", 
     description: "Understanding the May 2024 updates to NABERS ratings for new construction in Australia.",
-    url: "https://www.nabers.gov.au/new-building-ratings",
+    url: "https://www.nabers.gov.au/",
     date: "May 5, 2024",
     type: "webinar",
     tags: ["NABERS", "rating", "certification"]
@@ -83,7 +83,7 @@ export const resourcesData: ResourceItem[] = [
   { 
     title: "Construction Emissions Report 2024", 
     description: "Comprehensive analysis of construction carbon emissions in Australia for the first quarter of 2024.",
-    url: "https://www.climateworkscentre.org/resource/net-zero-momentum-tracker-property-sector-report/",
+    url: "https://www.climateworkscentre.org/",
     date: "April 30, 2024",
     type: "research",
     tags: ["emissions", "statistics", "analysis"]
@@ -99,7 +99,7 @@ export const resourcesData: ResourceItem[] = [
   { 
     title: "Low-Carbon Concrete Innovations", 
     description: "The latest research on geopolymer and other low-carbon concrete technologies from 2024.",
-    url: "https://www.cement.org/sustainability/cement-concrete-carbon-footprint",
+    url: "https://www.cement.org/",
     date: "February 8, 2024",
     type: "research",
     tags: ["concrete", "innovation", "materials"]
@@ -107,7 +107,7 @@ export const resourcesData: ResourceItem[] = [
   { 
     title: "Climate Resilient Building Materials", 
     description: "2024 study on materials that can withstand increasing climate challenges while reducing carbon footprint.",
-    url: "https://www.wbdg.org/resources/climate-change-adaptation",
+    url: "https://www.wbdg.org/",
     date: "January 25, 2024",
     type: "research",
     tags: ["resilience", "climate change", "materials"]

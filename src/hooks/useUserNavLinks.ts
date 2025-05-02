@@ -13,6 +13,7 @@ export const useUserNavLinks = () => {
     { title: "Pricing", path: "/pricing" },
     { title: "About", path: "/about" },
     { title: "Contact", path: "/contact" },
+    { title: "Resources", path: "/resources" },
     { title: "Blog", path: "/blog" },
   ];
   
@@ -24,6 +25,7 @@ export const useUserNavLinks = () => {
     { title: "Material DB", path: "/materials", premium: true },
     { title: "Analytics", path: "/analytics", premium: true },
     { title: "About", path: "/about" },
+    { title: "Resources", path: "/resources" },
     { title: "Blog", path: "/blog" },
   ];
   

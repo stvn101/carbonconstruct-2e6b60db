@@ -11,6 +11,7 @@ import { Book, FileText, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useScrollTo } from '@/hooks/useScrollTo';
 import { resourcesData } from '@/data/resourcesData';
+import { toast } from "sonner";
 
 const Resources = () => {
   const navigate = useNavigate();
@@ -25,10 +26,18 @@ const Resources = () => {
   const handleViewResource = (resource: any) => {
     // Navigate to the resource URL or handle viewing the resource
     if (resource.url) {
-      window.open(resource.url, '_blank');
+      try {
+        window.open(resource.url, '_blank');
+        // Show toast confirmation that the link was opened
+        toast.success(`Opening ${resource.title}`);
+      } catch (error) {
+        console.error('Error opening resource URL:', error);
+        toast.error("Couldn't open the resource. Please try again later.");
+      }
     } else {
       // Handle internal navigation if needed
       console.log('Viewing resource:', resource.title);
+      toast.error("Resource URL not available");
     }
   };
 
