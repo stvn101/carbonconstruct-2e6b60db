@@ -11,7 +11,7 @@ import { CloudOff, RefreshCw, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalculatorHeader from "@/components/calculator/CalculatorHeader";
 import { useA11y } from "@/hooks/useA11y";
-import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useSimpleOfflineMode } from '@/hooks/useSimpleOfflineMode';
 import { CalculatorProvider } from "@/contexts/calculator";
 import { ProjectProvider } from "@/contexts/ProjectContext";
 import { ErrorBoundary } from "react-error-boundary";
@@ -55,7 +55,7 @@ function Calculator() {
   const { user } = useAuth();
   const [demoMode, setDemoMode] = useState(false);
   const [calculatorReady, setCalculatorReady] = useState(false);
-  const { isOnline } = useOnlineStatus();
+  const { isOffline } = useSimpleOfflineMode();
   
   // Set page title and a11y features
   useA11y({
@@ -103,7 +103,7 @@ function Calculator() {
       <main className="flex-grow container mx-auto px-4 pt-24 pb-12" id="main-content" tabIndex={-1}>
         <CalculatorHeader />
         
-        {!isOnline && (
+        {!isOffline ? null : (
           <Alert className="mb-6 bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800">
             <CloudOff className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
             <AlertTitle className="text-amber-800 dark:text-amber-300">You're Offline</AlertTitle>
@@ -129,12 +129,12 @@ function Calculator() {
             <ErrorBoundary 
               FallbackComponent={CalculatorLoadError}
               onReset={handleResetCalculatorError}
-              resetKeys={[location.key, isOnline]}
+              resetKeys={[location.key, isOffline]}
             >
               <Suspense fallback={<CalculatorLoading />}>
                 {calculatorReady ? (
                   <CarbonCalculator 
-                    demoMode={!user || demoMode || !isOnline} 
+                    demoMode={!user || demoMode || !isOffline} 
                   />
                 ) : (
                   <CalculatorLoading />

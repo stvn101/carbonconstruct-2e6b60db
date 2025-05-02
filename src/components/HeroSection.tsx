@@ -16,7 +16,7 @@ const HeroSection = () => {
     
     // Also preload essential calculator components
     preloadComponent(() => import("@/components/CarbonCalculator"));
-    // Fix: Use a component that has a default export instead of a named export
+    // Use the default export from calculator index
     preloadComponent(() => import("@/contexts/calculator"));
   }, []);
 
