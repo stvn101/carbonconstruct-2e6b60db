@@ -1,10 +1,9 @@
 
 // Re-export Chart Tooltip components from their individual files
-export { 
-  ChartTooltip,
-  TooltipContent,
-  getPayloadConfigFromPayload
-} from './tooltip';
+import { ChartTooltip } from './tooltip/ChartTooltip';
+import { TooltipContent } from './tooltip/components/TooltipContent';
+import { getPayloadConfigFromPayload } from './tooltip/utils/getPayloadConfig';
 
 // For backward compatibility
-export const ChartTooltipContent = TooltipContent;
+export { ChartTooltip, TooltipContent, getPayloadConfigFromPayload };
+

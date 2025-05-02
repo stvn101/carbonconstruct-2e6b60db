@@ -1,9 +1,8 @@
 
 // Re-export Chart Legend components from their individual files
-export { 
-  ChartLegend,
-  LegendContent
-} from './legend';
+import { ChartLegend } from './legend/ChartLegend';
+import { LegendContent } from './legend/components/LegendContent';
 
 // For backward compatibility
-export const ChartLegendContent = LegendContent;
+export { ChartLegend, LegendContent };
+
