@@ -44,13 +44,7 @@ const CalculatorTabContents = ({
   demoMode = false
 }: CalculatorTabContentsProps) => {
   // Use the global calculator context to sync the tab value
-  const { activeTab, setActiveTab } = useCalculator();
-
-  // Ensure tab changes in the context update the UI
-  const handleTabChange = (value: string) => {
-    console.log(`Tab changed to: ${value}`);
-    setActiveTab(value as any);
-  };
+  const { activeTab } = useCalculator();
 
   // Debug logging
   console.log("CalculatorTabContents rendering with activeTab:", activeTab);
@@ -60,7 +54,7 @@ const CalculatorTabContents = ({
   console.log("Has calculation result:", calculationResult ? "Yes" : "No");
 
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-4">
+    <Tabs value={activeTab} className="w-full mt-4">
       <TabsContent value="materials" className="mt-6">
         <MaterialsTabContent 
           materials={calculationInput.materials}
