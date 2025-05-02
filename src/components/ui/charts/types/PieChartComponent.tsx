@@ -2,13 +2,9 @@
 import * as React from "react"
 import { Cell } from "../ChartComponents"
 import { Pie } from "../ChartComponents"
-import { ChartTooltip } from "../ChartTooltip"
-import { ChartLegend } from "../ChartLegend"
+import { ChartTooltip } from "../tooltip/ChartTooltip"
+import { ChartLegend } from "../legend/ChartLegend"
 import { ChartTypeProps } from "./ChartTypeProps"
-
-// Memoized tooltip and legend contents
-const MemoizedTooltipContent = React.memo(ChartTooltip.Content);
-const MemoizedLegendContent = React.memo(ChartLegend.Content);
 
 export const PieChartComponent: React.FC<ChartTypeProps> = ({ 
   data, categories, index, colors, valueFormatter, showLegend 
@@ -17,14 +13,14 @@ export const PieChartComponent: React.FC<ChartTypeProps> = ({
     <Pie.Chart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
       <ChartTooltip 
         content={
-          <MemoizedTooltipContent 
+          <ChartTooltip.Content 
             formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
           />
         }
         wrapperStyle={{ zIndex: 1000 }}
       />
       {showLegend && <ChartLegend 
-        content={<MemoizedLegendContent />} 
+        content={<ChartLegend.Content />} 
         wrapperStyle={{ fontSize: '10px' }} 
         verticalAlign="bottom" 
       />}
