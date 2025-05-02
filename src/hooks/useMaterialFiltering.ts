@@ -24,7 +24,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
   
   // Set the default filter to the global region when component mounts
   useEffect(() => {
-    if (globalRegion !== "National" && selectedRegion === "all") {
+    if (globalRegion !== "Australia") {
       setSelectedRegion(globalRegion);
     }
   }, [globalRegion]);
@@ -80,7 +80,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
-    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
+    setSelectedRegion(globalRegion !== "Australia" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   }, [globalRegion]);
