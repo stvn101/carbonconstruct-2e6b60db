@@ -35,7 +35,7 @@ const RegionSelector = () => {
             <SelectItem 
               key={region} 
               value={region}
-              className={`${region === "National" ? "font-medium text-carbon-600" : ""}`}
+              className="font-medium text-carbon-600"
             >
               <span className="inline-flex items-center">
                 🇦🇺 {region}

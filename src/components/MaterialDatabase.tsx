@@ -21,16 +21,9 @@ import { Helmet } from "react-helmet-async";
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedRegion, setSelectedRegion] = React.useState<string>("all");
   const [selectedAlternative, setSelectedAlternative] = React.useState<string>("none");
   const [selectedTag, setSelectedTag] = React.useState<string>("all");
-  const { selectedRegion: globalRegion } = useRegion();
-  
-  React.useEffect(() => {
-    if (globalRegion !== "National" && selectedRegion === "all") {
-      setSelectedRegion(globalRegion);
-    }
-  }, [globalRegion]);
+  const { selectedRegion } = useRegion();
   
   const {
     filteredMaterials,
@@ -48,7 +41,6 @@ const MaterialDatabase = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedRegion(globalRegion !== "National" ? globalRegion : "all");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
@@ -80,13 +72,11 @@ const MaterialDatabase = () => {
               </div>
             </div>
             <h1 className="text-3xl font-bold mb-2">
-              {globalRegion === "National" 
-                ? "Material Database" 
-                : `${globalRegion} Material Database`}
+              Australian Material Database
             </h1>
             <p className="text-lg text-muted-foreground">
               Explore our comprehensive database of construction materials with accurate carbon coefficients
-              {globalRegion !== "National" && ` for ${globalRegion}`}
+              for Australia
             </p>
             
             <RegionStats materialsByRegion={materialsByRegion} />
@@ -99,21 +89,18 @@ const MaterialDatabase = () => {
                 Search and Filter
               </CardTitle>
               <CardDescription>
-                Find specific materials or filter by region, alternatives and tags
+                Find specific materials or filter by alternatives and tags
               </CardDescription>
             </CardHeader>
             <CardContent>
               <MaterialFilters 
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
-                selectedRegion={selectedRegion}
-                setSelectedRegion={setSelectedRegion}
                 selectedAlternative={selectedAlternative}
                 setSelectedAlternative={setSelectedAlternative}
                 selectedTag={selectedTag}
                 setSelectedTag={setSelectedTag}
                 allTags={allTags}
-                allRegions={allRegions}
                 baseOptions={baseOptions}
               />
             </CardContent>
