@@ -1,65 +1,83 @@
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChartLegend } from '../ChartLegend';
 import { ChartContainer } from '../../ChartContainer';
+import { describe, test, expect } from 'vitest';
 
 describe('ChartLegend Component', () => {
-  // We need to use ChartContainer to provide context for the legend
-  const mockConfig = {
-    sales: { label: 'Sales' },
-    revenue: { label: 'Revenue' },
-  };
-
-  const MockLegendWrapper = ({ children }: { children: React.ReactNode }) => (
-    <ChartContainer config={mockConfig}>
+  const MockContextWrapper = ({ children }: { children: React.ReactNode }) => (
+    <ChartContainer config={{
+      sales: { label: 'Sales', color: '#3e9847' },
+      revenue: { label: 'Revenue', color: '#25612d' }
+    }}>
       {children}
     </ChartContainer>
   );
 
-  test('renders with basic props', () => {
+  test('renders legend with default position', () => {
     render(
-      <MockLegendWrapper>
-        <ChartLegend />
-      </MockLegendWrapper>
+      <MockContextWrapper>
+        <ChartLegend 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
+            { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
+          ]} 
+        />
+      </MockContextWrapper>
     );
     
-    // Basic test to ensure the component renders without crashing
-    expect(document.querySelector('svg')).toBeNull(); // No content should be rendered without payload
+    expect(screen.getByText('Sales')).toBeInTheDocument();
+    expect(screen.getByText('Revenue')).toBeInTheDocument();
   });
 
-  test('renders with custom content', () => {
-    const CustomContent = () => <div data-testid="custom-legend-content">Custom Legend</div>;
-    
+  test('renders legend horizontally when vertical is false', () => {
     render(
-      <MockLegendWrapper>
-        <ChartLegend content={<CustomContent />} />
-      </MockLegendWrapper>
+      <MockContextWrapper>
+        <ChartLegend 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
+            { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
+          ]} 
+          vertical={false}
+        />
+      </MockContextWrapper>
     );
     
-    // Custom content should be rendered
-    expect(screen.getByTestId('custom-legend-content')).toBeInTheDocument();
+    const legendContainer = screen.getByRole('list');
+    expect(legendContainer).toHaveClass('flex-row');
   });
 
-  test('renders with payload data', () => {
-    // Creating a component that provides payload to the legend
-    const LegendWithPayload = () => {
-      const payload = [
-        { dataKey: 'sales', value: 'Sales', color: '#3e9847' },
-        { dataKey: 'revenue', value: 'Revenue', color: '#25612d' },
-      ];
-      
-      return (
-        <ChartLegend payload={payload} />
-      );
-    };
-    
+  test('renders legend vertically when vertical is true', () => {
     render(
-      <MockLegendWrapper>
-        <LegendWithPayload />
-      </MockLegendWrapper>
+      <MockContextWrapper>
+        <ChartLegend 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
+            { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
+          ]} 
+          vertical={true}
+        />
+      </MockContextWrapper>
     );
     
-    // Since Recharts Legend is complex, we'll keep this test basic
-    // and focus on more detailed tests for our custom LegendContent
+    const legendContainer = screen.getByRole('list');
+    expect(legendContainer).toHaveClass('flex-col');
+  });
+
+  test('applies custom className to the legend container', () => {
+    render(
+      <MockContextWrapper>
+        <ChartLegend 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' }
+          ]} 
+          className="custom-legend-class"
+        />
+      </MockContextWrapper>
+    );
+    
+    const legendContainer = screen.getByRole('list');
+    expect(legendContainer).toHaveClass('custom-legend-class');
   });
 });

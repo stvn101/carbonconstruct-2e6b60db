@@ -1,42 +1,44 @@
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { useChart } from "../../ChartContainer"
-import { getPayloadConfigFromPayload } from "../../tooltip/utils/getPayloadConfig"
+import React from 'react';
+import { useChart } from '../../ChartContainer';
 
 interface LegendItemProps {
-  item: any;
-  hideIcon?: boolean;
+  item: {
+    value: string;
+    dataKey?: string;
+    [key: string]: any;
+  };
   nameKey?: string;
+  hideIcon?: boolean; 
+  className?: string;
 }
 
-export const LegendItem: React.FC<LegendItemProps> = ({
-  item,
-  hideIcon = false,
-  nameKey,
+export const LegendItem: React.FC<LegendItemProps> = ({ 
+  item, 
+  nameKey = 'dataKey',
+  hideIcon = false, 
+  className = ''
 }) => {
   const { config } = useChart();
-  const key = `${nameKey || item.dataKey || "value"}`;
-  const itemConfig = getPayloadConfigFromPayload(config, item, key);
+  
+  const key = item[nameKey];
+  const itemConfig = key ? config[key] : null;
+  
+  const IconComponent = itemConfig?.icon;
 
   return (
-    <div
-      key={item.value}
-      className={cn(
-        "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
-      )}
-    >
-      {itemConfig?.icon && !hideIcon ? (
-        <itemConfig.icon />
+    <li className={`flex items-center gap-2 text-sm ${className}`}>
+      {!hideIcon && IconComponent ? (
+        <IconComponent />
       ) : (
-        <div
-          className="h-2 w-2 shrink-0 rounded-[2px]"
-          style={{
-            backgroundColor: item.color,
-          }}
+        <div 
+          className="rounded-[2px] h-[10px] w-[10px]" 
+          style={{ backgroundColor: item.color }}
         />
       )}
-      {itemConfig?.label}
-    </div>
+      <span className="text-foreground">
+        {itemConfig?.label || item.value}
+      </span>
+    </li>
   );
 };

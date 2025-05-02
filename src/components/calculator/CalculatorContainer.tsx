@@ -40,13 +40,19 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
   setShowSaveDialog,
   demoMode,
   isCalculating,
-  setIsCalculating,
   onSaveConfirm,
   onSaveClick,
   onSignIn,
   isExistingProject,
   calculatorContext
 }) => {
+  // Remove the redundant setIsCalculating function call that's causing the infinite loop
+  const handleCalculate = () => {
+    setTimeout(() => {
+      calculatorContext.handleCalculate();
+    }, 500);
+  };
+
   return (
     <>
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 border-t-4 border-carbon-600 mb-8">
@@ -59,13 +65,7 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
         
         <CalculatorTabs 
           calculatorContext={calculatorContext}
-          onCalculate={() => {
-            setIsCalculating(true);
-            setTimeout(() => {
-              calculatorContext.handleCalculate();
-              setIsCalculating(false);
-            }, 500);
-          }}
+          onCalculate={handleCalculate}
           onSave={onSaveClick}
           isSaving={isSaving}
           isCalculating={isCalculating}
@@ -85,7 +85,7 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
           onUpdateEnergy={calculatorContext.handleUpdateEnergy}
           onAddEnergy={calculatorContext.handleAddEnergy}
           onRemoveEnergy={calculatorContext.handleRemoveEnergy}
-          onCalculate={calculatorContext.handleCalculate}
+          onCalculate={handleCalculate}
           onPrev={calculatorContext.handlePrevTab}
           onNext={calculatorContext.handleNextTab}
           demoMode={demoMode}
