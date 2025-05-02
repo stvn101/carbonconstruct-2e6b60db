@@ -9,13 +9,22 @@ export interface CalculatorTabTriggersProps {
 }
 
 const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps) => {
-  const { activeTab } = useCalculator();
+  const { activeTab, setActiveTab } = useCalculator();
   
   console.log("CalculatorTabTriggers rendering with activeTab:", activeTab);
   
+  const handleTabClick = (tab: string) => {
+    console.log(`Tab clicked: ${tab}`);
+    setActiveTab(tab as any);
+  };
+  
   return (
     <>
-      <TabsTrigger value="materials" className="relative">
+      <TabsTrigger 
+        value="materials" 
+        className="relative"
+        onClick={() => handleTabClick("materials")}
+      >
         <Building2 className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Materials</span>}
         {activeTab === "materials" && (
@@ -23,7 +32,11 @@ const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps)
         )}
       </TabsTrigger>
       
-      <TabsTrigger value="transport" className="relative">
+      <TabsTrigger 
+        value="transport" 
+        className="relative"
+        onClick={() => handleTabClick("transport")}
+      >
         <Truck className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Transport</span>}
         {activeTab === "transport" && (
@@ -31,7 +44,11 @@ const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps)
         )}
       </TabsTrigger>
       
-      <TabsTrigger value="energy" className="relative">
+      <TabsTrigger 
+        value="energy" 
+        className="relative"
+        onClick={() => handleTabClick("energy")}
+      >
         <Zap className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Energy</span>}
         {activeTab === "energy" && (
@@ -39,7 +56,11 @@ const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps)
         )}
       </TabsTrigger>
       
-      <TabsTrigger value="results" className="relative">
+      <TabsTrigger 
+        value="results" 
+        className="relative"
+        onClick={() => handleTabClick("results")}
+      >
         <Gauge className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Results</span>}
         {activeTab === "results" && (

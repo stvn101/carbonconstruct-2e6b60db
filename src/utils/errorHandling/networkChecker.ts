@@ -1,3 +1,4 @@
+
 // Health check cache duration (30 seconds - balanced approach)
 export const HEALTH_CHECK_CACHE_DURATION = 30000;
 // Last health check result and timestamp
@@ -82,4 +83,4 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
     
     return navigator.onLine;
   }
-}
+};
