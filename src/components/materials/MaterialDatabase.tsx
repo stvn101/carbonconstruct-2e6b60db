@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useRegion } from "@/contexts/RegionContext";
 import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
 import DatabaseHeader from './DatabaseHeader';
@@ -12,9 +12,9 @@ import Pagination from "@/components/ui/pagination";
 import { getCacheMetadata } from "@/services/materialCache";
 
 const MaterialDatabase = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAlternative, setSelectedAlternative] = useState<string>("none");
-  const [selectedTag, setSelectedTag] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedAlternative, setSelectedAlternative] = React.useState<string>("none");
+  const [selectedTag, setSelectedTag] = React.useState<string>("all");
   const { selectedRegion } = useRegion();
   
   // Setup data using our hook - always use Australia as the region
@@ -31,7 +31,8 @@ const MaterialDatabase = () => {
     pagination,
     handlePaginationChange,
     refreshCache,
-    isCategoriesLoading
+    isCategoriesLoading,
+    cacheStats
   } = useMaterialFiltering({
     searchTerm,
     selectedRegion: "Australia", // Always Australia
@@ -47,41 +48,6 @@ const MaterialDatabase = () => {
 
   // Calculate total pages for pagination
   const totalPages = Math.ceil(materialCount / (pagination?.pageSize || 50));
-
-  console.log("Materials data loaded:", {
-    count: filteredMaterials?.length || 0,
-    totalCount: materialCount,
-    tags: allTags,
-    categories
-  });
-
-  // Cache info state
-  const [cacheInfo, setCacheInfo] = useState<{
-    lastUpdated: Date | null;
-    itemCount: number | null;
-  }>({
-    lastUpdated: null,
-    itemCount: null
-  });
-
-  // Load cache info
-  useEffect(() => {
-    const loadCacheInfo = async () => {
-      try {
-        const metadata = await getCacheMetadata();
-        if (metadata) {
-          setCacheInfo({
-            lastUpdated: new Date(metadata.lastUpdated),
-            itemCount: metadata.count
-          });
-        }
-      } catch (err) {
-        console.warn("Failed to load cache info:", err);
-      }
-    };
-    
-    loadCacheInfo();
-  }, [filteredMaterials]);
 
   if (loading && filteredMaterials.length === 0) {
     return (
@@ -126,7 +92,7 @@ const MaterialDatabase = () => {
           <DatabaseHeader 
             globalRegion="Australia"
             materialsByRegion={materialsByRegion || {}}
-            cacheInfo={cacheInfo}
+            cacheInfo={cacheStats}
           />
           
           {/* Cache refresh button */}
