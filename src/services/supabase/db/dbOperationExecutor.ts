@@ -54,35 +54,62 @@ export const performDbOperation = async <T>(
   let attempts = 0;
   let lastError: Error | null = null;
   
-  while (attempts < retries) {
-    try {
-      const result = await operation();
-      
-      if (CONNECTION_TOAST_STATE.failure && !CONNECTION_TOAST_STATE.success) {
-        toast.dismiss("db-operation-failed");
-        toast.dismiss(CONNECTION_TOAST_STATE.id);
+  // Create an AbortController to handle timeouts
+  const controller = new AbortController();
+  const signal = controller.signal;
+  
+  // Set up timeout
+  const timeoutId = setTimeout(() => {
+    controller.abort(`Operation ${operationName} timed out after ${timeout}ms`);
+  }, timeout);
+  
+  try {
+    while (attempts < retries) {
+      try {
+        // We wrap the operation in a Promise.race to respect both the timeout and
+        // the actual operation
+        const result = await Promise.race([
+          operation(),
+          new Promise<never>((_, reject) => {
+            signal.addEventListener('abort', () => {
+              reject(new Error(`Operation ${operationName} timed out after ${timeout}ms`));
+            });
+          })
+        ]);
         
-        showSuccessToast("Connection restored successfully!", "connection-restored");
+        // Operation succeeded, show success toast if we were previously in failure state
+        if (CONNECTION_TOAST_STATE.failure && !CONNECTION_TOAST_STATE.success) {
+          toast.dismiss("db-operation-failed");
+          toast.dismiss(CONNECTION_TOAST_STATE.id);
+          
+          showSuccessToast("Connection restored successfully!", "connection-restored");
+          
+          updateToastState('success', 'connection-restored');
+        }
         
-        updateToastState('success', 'connection-restored');
+        clearTimeout(timeoutId);
+        return result;
+      } catch (error) {
+        attempts++;
+        lastError = error instanceof Error ? error : new Error(String(error));
+        
+        // If we've been aborted due to timeout, or we're offline, or we're out of retries, break
+        if (signal.aborted || isOffline() || attempts >= retries) {
+          break;
+        }
+        
+        // Exponential backoff for retries
+        const backoffDelay = calculateBackoffDelay(attempts);
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
       }
-      
-      return result;
-    } catch (error) {
-      attempts++;
-      lastError = error instanceof Error ? error : new Error(String(error));
-      
-      if (attempts >= retries || isOffline()) {
-        break;
-      }
-      
-      const backoffDelay = calculateBackoffDelay(attempts);
-      await new Promise(resolve => setTimeout(resolve, backoffDelay));
     }
+  } finally {
+    // Always clean up the timeout to prevent memory leaks
+    clearTimeout(timeoutId);
   }
   
+  // If we got here, all retries failed
   if (!silentFail) {
-    const now = Date.now();
     const toastId = `db-operation-failed-${operationName}`;
     
     if (!CONNECTION_TOAST_STATE.failure || 
