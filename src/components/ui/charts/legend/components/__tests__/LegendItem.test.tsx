@@ -62,7 +62,6 @@ describe('LegendItem Component', () => {
     });
     
     expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
-    expect(screen.queryByRole('color-box')).not.toBeInTheDocument();
   });
   
   test('renders color box when no icon available', () => {

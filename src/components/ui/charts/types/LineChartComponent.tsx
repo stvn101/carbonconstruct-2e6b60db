@@ -32,7 +32,7 @@ export const LineChartComponent: React.FC<ChartTypeProps> = ({
         }}
       />
       <YAxis className="text-foreground" tick={{ fontSize: 10 }} />
-      {showLegend && <ChartLegend content={<ChartLegend.Content />} wrapperStyle={{ fontSize: '10px' }} />}
+      {showLegend && <ChartLegend wrapperStyle={{ fontSize: '10px' }} />}
       <ChartTooltip 
         content={
           <ChartTooltip.Content 

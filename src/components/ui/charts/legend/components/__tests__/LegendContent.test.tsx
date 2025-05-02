@@ -45,7 +45,7 @@ describe('LegendContent Component', () => {
       </MockContextWrapper>
     );
     
-    const container = screen.getByRole('list');
+    const container = screen.getByRole('div');
     expect(container).toHaveClass('flex-row');
     expect(container).not.toHaveClass('flex-col');
   });
@@ -63,7 +63,7 @@ describe('LegendContent Component', () => {
       </MockContextWrapper>
     );
     
-    const container = screen.getByRole('list');
+    const container = screen.getByRole('div');
     expect(container).toHaveClass('flex-col');
     expect(container).not.toHaveClass('flex-row');
   });
@@ -80,7 +80,7 @@ describe('LegendContent Component', () => {
       </MockContextWrapper>
     );
     
-    const container = screen.getByRole('list');
+    const container = screen.getByRole('div');
     expect(container).toHaveClass('custom-legend');
   });
 });

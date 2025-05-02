@@ -3,28 +3,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TooltipContent } from '../TooltipContent';
 import { ChartContainer } from '../../../ChartContainer';
+import { describe, test, expect, vi } from 'vitest';
 
 // Mock the chart context
-jest.mock('../../../ChartContainer', () => {
-  const actual = jest.requireActual('../../../ChartContainer');
-  return {
-    ...actual,
-    useChart: () => ({
-      config: {
-        sales: { label: 'Sales', icon: () => <svg data-testid="sales-icon" /> },
-        revenue: { label: 'Revenue' },
-      }
-    })
-  };
-});
+vi.mock('../../../ChartContainer', () => ({
+  useChart: () => ({
+    config: {
+      sales: { label: 'Sales', icon: () => <svg data-testid="sales-icon" /> },
+      revenue: { label: 'Revenue' },
+    }
+  })
+}));
 
 describe('TooltipContent Component', () => {
-  const MockContextWrapper = ({ children }: { children: React.ReactNode }) => (
-    <ChartContainer config={{}}>
-      {children}
-    </ChartContainer>
-  );
-  
   const mockPayload = [
     { 
       dataKey: 'sales', 
@@ -44,9 +35,7 @@ describe('TooltipContent Component', () => {
 
   test('renders null when active is false', () => {
     const { container } = render(
-      <MockContextWrapper>
-        <TooltipContent active={false} payload={mockPayload} />
-      </MockContextWrapper>
+      <TooltipContent active={false} payload={mockPayload} />
     );
     
     expect(container.firstChild).toBeNull();
@@ -54,9 +43,7 @@ describe('TooltipContent Component', () => {
 
   test('renders null when payload is empty', () => {
     const { container } = render(
-      <MockContextWrapper>
-        <TooltipContent active={true} payload={[]} />
-      </MockContextWrapper>
+      <TooltipContent active={true} payload={[]} />
     );
     
     expect(container.firstChild).toBeNull();
@@ -64,9 +51,7 @@ describe('TooltipContent Component', () => {
 
   test('renders tooltip items for each payload entry', () => {
     const { container } = render(
-      <MockContextWrapper>
-        <TooltipContent active={true} payload={mockPayload} />
-      </MockContextWrapper>
+      <TooltipContent active={true} payload={mockPayload} />
     );
     
     // Should render a tooltip container
@@ -81,27 +66,23 @@ describe('TooltipContent Component', () => {
 
   test('applies custom className', () => {
     const { container } = render(
-      <MockContextWrapper>
-        <TooltipContent active={true} payload={mockPayload} className="custom-tooltip-class" />
-      </MockContextWrapper>
+      <TooltipContent active={true} payload={mockPayload} className="custom-tooltip-class" />
     );
     
     expect(container.firstChild).toHaveClass('custom-tooltip-class');
   });
 
   test('uses custom formatter when provided', () => {
-    const customFormatter = jest.fn((value, name) => (
+    const customFormatter = vi.fn((value, name) => (
       <div data-testid="custom-format">{name}: ${value}</div>
     ));
     
     render(
-      <MockContextWrapper>
-        <TooltipContent 
-          active={true} 
-          payload={mockPayload} 
-          formatter={customFormatter} 
-        />
-      </MockContextWrapper>
+      <TooltipContent 
+        active={true} 
+        payload={mockPayload} 
+        formatter={customFormatter} 
+      />
     );
     
     expect(customFormatter).toHaveBeenCalledTimes(2);

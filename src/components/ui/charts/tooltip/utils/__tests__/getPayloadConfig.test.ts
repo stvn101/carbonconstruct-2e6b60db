@@ -1,6 +1,6 @@
 
 import { describe, test, expect } from 'vitest';
-import { getPayloadConfig } from '../getPayloadConfig';
+import { getPayloadConfig, getPayloadConfigFromPayload } from '../getPayloadConfig';
 
 describe('getPayloadConfig', () => {
   test('returns proper configuration for a payload item', () => {
@@ -67,5 +67,31 @@ describe('getPayloadConfig', () => {
       label: 'Revenue',
       color: '#25612d'
     });
+  });
+});
+
+describe('getPayloadConfigFromPayload', () => {
+  test('returns config for valid key', () => {
+    const mockConfig = {
+      sales: { label: 'Sales', color: '#3e9847' }
+    };
+    
+    const payload = { dataKey: 'sales', name: 'Sales' };
+    
+    const result = getPayloadConfigFromPayload(mockConfig, payload, 'sales');
+    
+    expect(result).toEqual({ label: 'Sales', color: '#3e9847' });
+  });
+  
+  test('returns null for invalid key', () => {
+    const mockConfig = {
+      sales: { label: 'Sales', color: '#3e9847' }
+    };
+    
+    const payload = { dataKey: 'revenue', name: 'Revenue' };
+    
+    const result = getPayloadConfigFromPayload(mockConfig, payload, 'revenue');
+    
+    expect(result).toBeNull();
   });
 });
