@@ -1,12 +1,15 @@
 
 import React, { useState, useEffect } from "react";
 import { useRegion } from "@/contexts/RegionContext";
-import { useMaterialData } from "@/hooks/useMaterialData";
+import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
 import DatabaseHeader from './DatabaseHeader';
 import DatabaseFilterCard from './DatabaseFilterCard';
 import DatabaseResultsCard from './DatabaseResultsCard';
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Pagination from "@/components/ui/pagination";
+import { getCacheMetadata } from "@/services/materialCache";
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,11 +22,17 @@ const MaterialDatabase = () => {
     filteredMaterials,
     materialsByRegion,
     allTags,
+    categories,
     baseOptions,
     materialCount,
+    totalMaterials,
     loading,
-    error
-  } = useMaterialData({
+    error,
+    pagination,
+    handlePaginationChange,
+    refreshCache,
+    isCategoriesLoading
+  } = useMaterialFiltering({
     searchTerm,
     selectedRegion: "Australia", // Always Australia
     selectedAlternative,
@@ -36,12 +45,45 @@ const MaterialDatabase = () => {
     setSelectedTag("all");
   };
 
+  // Calculate total pages for pagination
+  const totalPages = Math.ceil(materialCount / (pagination?.pageSize || 50));
+
   console.log("Materials data loaded:", {
     count: filteredMaterials?.length || 0,
-    tags: allTags
+    totalCount: materialCount,
+    tags: allTags,
+    categories
   });
 
-  if (loading) {
+  // Cache info state
+  const [cacheInfo, setCacheInfo] = useState<{
+    lastUpdated: Date | null;
+    itemCount: number | null;
+  }>({
+    lastUpdated: null,
+    itemCount: null
+  });
+
+  // Load cache info
+  useEffect(() => {
+    const loadCacheInfo = async () => {
+      try {
+        const metadata = await getCacheMetadata();
+        if (metadata) {
+          setCacheInfo({
+            lastUpdated: new Date(metadata.lastUpdated),
+            itemCount: metadata.count
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to load cache info:", err);
+      }
+    };
+    
+    loadCacheInfo();
+  }, [filteredMaterials]);
+
+  if (loading && filteredMaterials.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 content-top-spacing">
         <div className="max-w-5xl mx-auto">
@@ -55,7 +97,7 @@ const MaterialDatabase = () => {
     );
   }
   
-  if (error) {
+  if (error && filteredMaterials.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 content-top-spacing">
         <div className="max-w-5xl mx-auto">
@@ -84,7 +126,22 @@ const MaterialDatabase = () => {
           <DatabaseHeader 
             globalRegion="Australia"
             materialsByRegion={materialsByRegion || {}}
+            cacheInfo={cacheInfo}
           />
+          
+          {/* Cache refresh button */}
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refreshCache}
+              className="text-xs flex items-center gap-1"
+              disabled={loading}
+            >
+              <RefreshCcw className="h-3 w-3" />
+              {loading ? 'Refreshing...' : 'Refresh Data'}
+            </Button>
+          </div>
           
           <DatabaseFilterCard
             searchTerm={searchTerm}
@@ -95,13 +152,29 @@ const MaterialDatabase = () => {
             setSelectedTag={setSelectedTag}
             allTags={allTags || []}
             baseOptions={baseOptions || []}
+            categories={categories || []}
+            loading={isCategoriesLoading}
           />
           
           <DatabaseResultsCard
             filteredMaterials={filteredMaterials || []}
             resetFilters={resetFilters}
             materialCount={materialCount || 0}
+            totalCount={totalMaterials || 0}
+            loading={loading && filteredMaterials.length > 0}
           />
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-6 flex justify-center">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={totalPages}
+                onPageChange={handlePaginationChange}
+                siblingCount={1}
+              />
+            </div>
+          )}
         </div>
       </div>
     </ErrorBoundaryWrapper>
