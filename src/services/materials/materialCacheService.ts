@@ -4,6 +4,7 @@
  */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { performDbOperation } from '@/services/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Cache constants
 const CACHE_KEY = 'materials-cache-v1';
@@ -47,7 +48,7 @@ export async function cacheMaterials(materials: ExtendedMaterialData[]): Promise
     materials.forEach(material => {
       if (!material) return;
       
-      const category = material.category || 'uncategorized';
+      const category = material.tags?.[0] || 'uncategorized';
       if (!materialsByCategory[category]) {
         materialsByCategory[category] = [];
       }
@@ -71,7 +72,7 @@ export async function cacheMaterials(materials: ExtendedMaterialData[]): Promise
         factor: m.factor,
         unit: m.unit,
         region: m.region,
-        category: m.category
+        tags: m.tags
       }));
       
       localStorage.setItem(CACHE_KEY, JSON.stringify(essentialData));

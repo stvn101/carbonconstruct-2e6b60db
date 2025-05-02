@@ -1,4 +1,3 @@
-
 /**
  * Connection and request manager for improved scalability
  */
@@ -10,7 +9,7 @@ const MAX_CONCURRENT = 8;
 
 // Active request counter
 const activeRequests: Record<string, number> = {};
-const requestQueue: Array<{ key: string, executor: () => Promise<any>, resolve: Function, reject: Function }> = [];
+const requestQueue: Array<{ key: string, executor: () => Promise<any>, resolve: (value: any) => void, reject: (reason: any) => void }> = [];
 let isProcessingQueue = false;
 
 /**

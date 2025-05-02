@@ -1,19 +1,20 @@
 
 // jest-setup.ts
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
-// Mock window properties not available in Jest environment
+// Mock window properties not available in test environment
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(), // deprecated
-    removeListener: jest.fn(), // deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 });
 
@@ -24,13 +25,22 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
-// Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
+// Custom IntersectionObserver mock for testing
+class MockIntersectionObserver {
+  readonly root: Element | null = null;
+  readonly rootMargin: string = "";
+  readonly thresholds: ReadonlyArray<number> = [];
+  
+  constructor(private callback: IntersectionObserverCallback) {}
+  
   observe() {}
   unobserve() {}
   disconnect() {}
-};
+  takeRecords(): IntersectionObserverEntry[] { return []; }
+}
+
+// Assign our custom mock to global
+global.IntersectionObserver = MockIntersectionObserver;
 
 // Ignore errors related to Recharts and SVG rendering
 const originalConsoleError = console.error;

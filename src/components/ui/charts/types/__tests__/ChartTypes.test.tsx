@@ -4,8 +4,8 @@ import { render, screen } from '@testing-library/react';
 import { ChartContainer } from '../../ChartContainer';
 import { 
   BarChartComponent, 
-  LineChartComponent, 
-  AreaChartComponent, 
+  LineChartComponent,
+  AreaChartComponent,
   PieChartComponent 
 } from '../index';
 import { describe, test, expect, vi } from 'vitest';
@@ -40,7 +40,6 @@ describe('Chart Type Components', () => {
   ];
   
   const mockProps = {
-    type: 'bar',
     data: mockData,
     categories: ['value'],
     index: 'name',
