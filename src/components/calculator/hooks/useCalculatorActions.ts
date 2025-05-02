@@ -16,7 +16,6 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   const navigate = useNavigate();
   const { saveProject, projects } = useProjects();
   const [projectName, setProjectName] = useState("New Carbon Project");
-  const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [authError, setAuthError] = useState<Error | null>(null);
@@ -40,8 +39,8 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
       setIsSaving,
       showSaveDialog,
       setShowSaveDialog,
-      isCalculating,
-      setIsCalculating,
+      isCalculating: false,
+      setIsCalculating: () => {},
       handleSaveClick: () => {},
       handleSaveConfirm: async () => {},
       handleSignIn: () => {},
@@ -50,7 +49,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     };
   }
 
-  const { calculationInput, calculationResult } = calculatorContext;
+  const { calculationInput, calculationResult, isCalculating, setIsCalculating } = calculatorContext;
 
   const isExistingProject = !!projects.find(
     p => p.name.toLowerCase() === projectName.toLowerCase()
@@ -96,6 +95,11 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     setSavingError(null);
     
     try {
+      // Ensure we have a valid calculation result
+      if (!calculationResult) {
+        throw new Error("Missing calculation result. Please calculate before saving.");
+      }
+      
       // Prepare the project data
       const projectData = {
         name: projectName,

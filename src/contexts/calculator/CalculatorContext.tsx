@@ -29,6 +29,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<'materials' | 'transport' | 'energy' | 'results'>('materials');
+  const [isCalculating, setIsCalculating] = useState(false);
 
   useEffect(() => {
     console.log("Active tab changed to:", activeTab);
@@ -36,24 +37,38 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const handleCalculate = useCallback(() => {
     try {
+      console.log("Starting calculation with input:", calculationInput);
+      setIsCalculating(true);
+      
       if (!navigator.onLine) {
         toast.error("You're offline. Cannot perform calculations.");
+        setIsCalculating(false);
         return;
       }
       
       const errors = validateCalculationInput(calculationInput);
       if (errors.length > 0) {
         toast.error(errors[0].message);
+        setIsCalculating(false);
         return;
       }
       
-      const result = calculateTotalEmissions(calculationInput);
-      setCalculationResult(result);
+      // Debug logs to track the calculation flow
+      console.log("Materials for calculation:", calculationInput.materials);
+      console.log("Transport for calculation:", calculationInput.transport);
+      console.log("Energy for calculation:", calculationInput.energy);
       
-      console.log('Calculation completed with result:', result.totalEmissions);
+      const result = calculateTotalEmissions(calculationInput);
+      console.log('Calculation completed with result:', result);
+      setCalculationResult(result);
+      setIsCalculating(false);
+      
+      // Show success toast
+      toast.success("Calculation completed successfully!");
     } catch (error) {
       console.error("Error calculating emissions:", error);
       toast.error("Error calculating emissions. Please check your inputs.");
+      setIsCalculating(false);
     }
   }, [calculationInput]);
 
@@ -65,10 +80,17 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setActiveTab("energy");
     }
     else if (activeTab === "energy") {
-      handleCalculate();
-      setActiveTab("results");
+      setIsCalculating(true);
+      
+      // Slight delay to allow UI to update before heavy calculation
+      setTimeout(() => {
+        const result = calculateTotalEmissions(calculationInput);
+        setCalculationResult(result);
+        setActiveTab("results");
+        setIsCalculating(false);
+      }, 100);
     }
-  }, [activeTab, handleCalculate]);
+  }, [activeTab, calculationInput]);
 
   const handlePrevTab = useCallback(() => {
     if (activeTab === "transport") {
@@ -90,6 +112,8 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     activeTab,
     setActiveTab,
     validationErrors: [],
+    isCalculating,
+    setIsCalculating,
     handleAddMaterial: () => setCalculationInput(current => handleAddMaterial(current)),
     handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: any) => 
       setCalculationInput(current => handleUpdateMaterial(current, index, field, value)),
@@ -108,7 +132,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     handleCalculate,
     handleNextTab,
     handlePrevTab
-  }), [calculationInput, calculationResult, activeTab, handleCalculate, handleNextTab, handlePrevTab]);
+  }), [calculationInput, calculationResult, activeTab, isCalculating, handleCalculate, handleNextTab, handlePrevTab]);
 
   return (
     <CalculatorContext.Provider value={contextValue}>
