@@ -6,7 +6,7 @@ import { ChartContainer } from '../../ChartContainer';
 import { describe, test, expect } from 'vitest';
 
 describe('ChartLegend Component', () => {
-  const MockContextWrapper = ({ children }: { children: React.ReactNode }) => (
+  const MockContextWrapper = ({ children }: { children: React.ReactElement }) => (
     <ChartContainer config={{
       sales: { label: 'Sales', color: '#3e9847' },
       revenue: { label: 'Revenue', color: '#25612d' }

@@ -7,7 +7,7 @@ import { describe, test, expect, vi } from 'vitest';
 
 describe('LegendContent Component', () => {
   // Setup test chart config context
-  const MockContextWrapper = ({ children }: { children: React.ReactNode }) => (
+  const MockContextWrapper = ({ children }: { children: React.ReactElement }) => (
     <ChartContainer config={{
       sales: { label: 'Sales', color: '#3e9847' },
       revenue: { label: 'Revenue', color: '#25612d' },
