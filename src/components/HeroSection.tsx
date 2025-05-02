@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,8 @@ const HeroSection = () => {
     
     // Also preload essential calculator components
     preloadComponent(() => import("@/components/CarbonCalculator"));
-    preloadComponent(() => import("@/contexts/calculator/CalculatorContext"));
+    // Fix: Use a component that has a default export instead of a named export
+    preloadComponent(() => import("@/contexts/calculator"));
   }, []);
 
   // Preload calculator when user scrolls down, indicating engagement

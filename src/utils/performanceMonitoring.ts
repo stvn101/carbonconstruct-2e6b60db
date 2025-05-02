@@ -1,3 +1,4 @@
+
 // Define an extended Performance interface that includes memory
 interface ExtendedPerformance extends Performance {
   memory?: {
@@ -114,8 +115,10 @@ export const trackApiCall = (endpoint: string) => {
  * Check memory usage and warn if approaching limits
  */
 export const checkMemoryUsage = () => {
-  if (typeof performance.memory !== 'undefined') {
-    const memory = (performance as any).memory;
+  const extendedPerformance = performance as ExtendedPerformance;
+  
+  if (extendedPerformance.memory) {
+    const memory = extendedPerformance.memory;
     
     if (memory && memory.usedJSHeapSize > PERFORMANCE_THRESHOLDS.MEMORY_WARNING) {
       console.warn(`High memory usage detected: ${(memory.usedJSHeapSize / 1000000).toFixed(2)}MB`);
