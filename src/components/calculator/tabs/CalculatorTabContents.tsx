@@ -94,9 +94,15 @@ const CalculatorTabContents = ({
     }
   };
 
+  // Debug logging
+  console.log("CalculatorTabContents rendering with activeTab:", activeTabValue);
+  console.log("Has materials:", calculationInput.materials?.length);
+  console.log("Has transport:", calculationInput.transport?.length);
+  console.log("Has energy:", calculationInput.energy?.length);
+
   return (
     <Tabs value={activeTabValue} onValueChange={handleTabChange} className="w-full">
-      <TabsContent value="materials">
+      <TabsContent value="materials" className="mt-6">
         <MaterialsTabContent 
           materials={calculationInput.materials}
           onUpdateMaterial={onUpdateMaterial}
@@ -107,7 +113,7 @@ const CalculatorTabContents = ({
         />
       </TabsContent>
       
-      <TabsContent value="transport">
+      <TabsContent value="transport" className="mt-6">
         <TransportTabContent 
           transportItems={calculationInput.transport}
           onUpdateTransport={onUpdateTransport}
@@ -119,7 +125,7 @@ const CalculatorTabContents = ({
         />
       </TabsContent>
       
-      <TabsContent value="energy">
+      <TabsContent value="energy" className="mt-6">
         <EnergyTabContent 
           energyItems={calculationInput.energy}
           onUpdateEnergy={onUpdateEnergy}
@@ -131,7 +137,7 @@ const CalculatorTabContents = ({
         />
       </TabsContent>
       
-      <TabsContent value="results">
+      <TabsContent value="results" className="mt-6">
         <ResultsTabContent 
           calculationResult={calculationResult}
           materials={calculationInput.materials}

@@ -32,6 +32,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
 
   // Handle error gracefully
   if (error || !calculatorContext) {
+    console.error("Calculator error:", error);
     return <CalculatorError />;
   }
 

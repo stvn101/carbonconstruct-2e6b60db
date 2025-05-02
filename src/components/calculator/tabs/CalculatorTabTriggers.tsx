@@ -1,107 +1,50 @@
 
+import React from "react";
 import { TabsTrigger } from "@/components/ui/tabs";
-import { Lock } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Building2, Gauge, Truck, Zap } from "lucide-react";
+import { useCalculator } from "@/contexts/calculator";
 
-interface CalculatorTabTriggersProps {
+export interface CalculatorTabTriggersProps {
   isMobile?: boolean;
-  isPremiumUser?: boolean;
 }
 
-const CalculatorTabTriggers = ({ isMobile = false, isPremiumUser = false }: CalculatorTabTriggersProps) => {
-  const renderAdvancedTrigger = (value: string, label: string) => {
-    if (isPremiumUser) {
-      return (
-        <TabsTrigger 
-          value={value} 
-          className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-        >
-          {label}
-        </TabsTrigger>
-      );
-    }
-    
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <TabsTrigger 
-              value={value}
-              disabled={!isPremiumUser}
-              className="relative data-[state=active]:bg-gray-400 data-[state=active]:text-white text-gray-400"
-            >
-              {label}
-              <Lock className="h-3 w-3 ml-1 inline-flex" />
-            </TabsTrigger>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Premium feature. Upgrade to access.</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  };
-
-  if (isMobile) {
-    return (
-      <>
-        <div className="col-span-2 flex space-x-1">
-          <TabsTrigger 
-            value="materials" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
-          >
-            Materials
-          </TabsTrigger>
-          <TabsTrigger 
-            value="transport" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
-          >
-            Transport
-          </TabsTrigger>
-        </div>
-        <div className="col-span-2 flex space-x-1 mt-1">
-          <TabsTrigger 
-            value="energy" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
-          >
-            Energy
-          </TabsTrigger>
-          <TabsTrigger 
-            value="results" 
-            className="flex-1 data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-xs md:text-sm py-1 text-foreground"
-          >
-            Results
-          </TabsTrigger>
-        </div>
-      </>
-    );
-  }
-
+const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps) => {
+  const { activeTab } = useCalculator();
+  
+  console.log("CalculatorTabTriggers rendering with activeTab:", activeTab);
+  
   return (
     <>
-      <TabsTrigger 
-        value="materials" 
-        className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-      >
-        Materials
+      <TabsTrigger value="materials" className="relative">
+        <Building2 className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
+        {!isMobile && <span>Materials</span>}
+        {activeTab === "materials" && (
+          <span className="absolute -bottom-[5px] left-0 right-0 h-[2px] bg-green-500" />
+        )}
       </TabsTrigger>
-      <TabsTrigger 
-        value="transport" 
-        className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-      >
-        Transport
+      
+      <TabsTrigger value="transport" className="relative">
+        <Truck className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
+        {!isMobile && <span>Transport</span>}
+        {activeTab === "transport" && (
+          <span className="absolute -bottom-[5px] left-0 right-0 h-[2px] bg-green-500" />
+        )}
       </TabsTrigger>
-      <TabsTrigger 
-        value="energy" 
-        className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-      >
-        Energy
+      
+      <TabsTrigger value="energy" className="relative">
+        <Zap className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
+        {!isMobile && <span>Energy</span>}
+        {activeTab === "energy" && (
+          <span className="absolute -bottom-[5px] left-0 right-0 h-[2px] bg-green-500" />
+        )}
       </TabsTrigger>
-      <TabsTrigger 
-        value="results" 
-        className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white text-foreground"
-      >
-        Results
+      
+      <TabsTrigger value="results" className="relative">
+        <Gauge className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
+        {!isMobile && <span>Results</span>}
+        {activeTab === "results" && (
+          <span className="absolute -bottom-[5px] left-0 right-0 h-[2px] bg-green-500" />
+        )}
       </TabsTrigger>
     </>
   );
