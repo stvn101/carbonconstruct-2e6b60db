@@ -74,7 +74,10 @@ export const generateSuggestions = (result: CalculationResult): string[] => {
       } else if (materialKey === "timber") {
         suggestions.push(`Consider using certified Australian Hardwood from sustainable forests for structural elements.`);
       } else {
-        suggestions.push(`Consider reducing the use of ${MATERIAL_FACTORS[materialKey as Material]?.name || materialKey} or finding alternatives with lower carbon footprints.`);
+        const materialName = materialKey in MATERIAL_FACTORS ? 
+          MATERIAL_FACTORS[materialKey as Material]?.name || String(materialKey) : 
+          String(materialKey);
+        suggestions.push(`Consider reducing the use of ${materialName} or finding alternatives with lower carbon footprints.`);
       }
     }
   }
@@ -157,15 +160,41 @@ export const calculatePotentialSavings = (input: CalculationInput): {
   }[] = [];
 
   input.materials.forEach(material => {
+    // Skip if material type is not valid or not in MATERIAL_FACTORS
+    if (!material.type || !(material.type in MATERIAL_FACTORS)) {
+      console.log(`Skipping unknown material type: ${material.type}`);
+      return;
+    }
+
     const alternatives = findLowerCarbonAlternatives(material.type);
-    const originalEmission = MATERIAL_FACTORS[material.type].factor * material.quantity;
+    
+    // Safely access MATERIAL_FACTORS with type check and fallback
+    const materialFactor = MATERIAL_FACTORS[material.type]?.factor;
+    if (materialFactor === undefined) {
+      console.log(`No factor found for material: ${material.type}`);
+      return;
+    }
+    
+    const originalEmission = materialFactor * material.quantity;
     
     alternatives.forEach(alt => {
-      // Safely access ALL_MATERIAL_FACTORS with fallback
-      const altFactor = (ALL_MATERIAL_FACTORS && ALL_MATERIAL_FACTORS[alt]) 
-        ? ALL_MATERIAL_FACTORS[alt].factor 
-        : MATERIAL_FACTORS[alt as Material]?.factor || MATERIAL_FACTORS[material.type].factor * 0.7; // Fallback factor
-        
+      // Safely determine alternative factor with multiple fallbacks
+      let altFactor: number;
+      
+      // Try to get factor from ALL_MATERIAL_FACTORS if available
+      if (ALL_MATERIAL_FACTORS && alt in ALL_MATERIAL_FACTORS && ALL_MATERIAL_FACTORS[alt]?.factor !== undefined) {
+        altFactor = ALL_MATERIAL_FACTORS[alt].factor;
+      } 
+      // Try to get from standard MATERIAL_FACTORS if alternative is a standard material
+      else if (alt in MATERIAL_FACTORS && MATERIAL_FACTORS[alt as Material]?.factor !== undefined) {
+        altFactor = MATERIAL_FACTORS[alt as Material].factor;
+      } 
+      // Use a fallback calculation based on original material factor
+      else {
+        // Use 70% of original as a conservative estimate for alternatives
+        altFactor = materialFactor * 0.7;
+      }
+      
       const alternativeEmission = altFactor * material.quantity;
       const saved = originalEmission - alternativeEmission;
       const percentage = (saved / originalEmission) * 100;
