@@ -10,9 +10,9 @@ import {
   LineChartComponent,
   PieChartComponent,
   AreaChartComponent
-} from "./ChartTypes"
-import { ChartTooltip, ChartTooltipContent } from "./ChartTooltip"
-import { ChartLegend, ChartLegendContent } from "./ChartLegend"
+} from "./types"
+import { ChartTooltip } from "./ChartTooltip"
+import { ChartLegend } from "./ChartLegend"
 
 type ChartProps = {
   type: 'bar' | 'line' | 'pie' | 'area';
@@ -86,7 +86,5 @@ export {
   MemoizedChart as Chart,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent 
+  ChartLegend
 }

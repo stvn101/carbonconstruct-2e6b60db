@@ -4,8 +4,6 @@ import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
 import { useChart } from "./ChartContainer"
 
-export const ChartTooltip = RechartsPrimitive.Tooltip
-
 export const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
@@ -160,6 +158,11 @@ export const ChartTooltipContent = React.forwardRef<
   }
 )
 ChartTooltipContent.displayName = "ChartTooltipContent"
+
+const ChartTooltip = RechartsPrimitive.Tooltip;
+ChartTooltip.Content = ChartTooltipContent;
+
+export { ChartTooltip };
 
 export function getPayloadConfigFromPayload(
   config: any,

@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils"
 import { useChart } from "./ChartContainer"
 import { getPayloadConfigFromPayload } from "./ChartTooltip"
 
-export const ChartLegend = RechartsPrimitive.Legend
+const ChartLegend = RechartsPrimitive.Legend;
 
-export const ChartLegendContent = React.forwardRef<
+const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
     Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
@@ -64,3 +64,8 @@ export const ChartLegendContent = React.forwardRef<
   }
 )
 ChartLegendContent.displayName = "ChartLegendContent"
+
+// Add Content property to ChartLegend for namespacing
+ChartLegend.Content = ChartLegendContent;
+
+export { ChartLegend, ChartLegendContent };
