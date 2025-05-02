@@ -18,7 +18,7 @@ export const useMaterialCache = () => {
       toast.info("Refreshing material data...");
       
       await clearMaterialsCache();
-      const fetchedMaterials = await fetchMaterials();
+      const fetchedMaterials = await fetchMaterials(true);
       
       setMaterials(fetchedMaterials);
       setError(null);
@@ -43,14 +43,18 @@ export const useMaterialCache = () => {
     try {
       setLoading(true);
       
+      // Try to load materials from the service
+      console.log('Loading materials with forceRefresh:', forceRefresh);
       const fetchedMaterials = await fetchMaterials(forceRefresh);
       
       // Only update if we have materials (otherwise keep what we have)
-      if (fetchedMaterials.length > 0) {
+      if (fetchedMaterials && fetchedMaterials.length > 0) {
+        console.log('Setting materials from fetch:', fetchedMaterials.length);
         setMaterials(fetchedMaterials);
         setError(null);
       } else if (materials.length === 0) {
         // If we don't have any materials yet, use static fallback
+        console.log('Using static fallback materials');
         const staticMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
           name: value.name || key,
           factor: value.factor,
@@ -76,6 +80,7 @@ export const useMaterialCache = () => {
       
       // Fallback to static materials only if we don't have any materials yet
       if (materials.length === 0) {
+        console.log('Using static fallback materials due to error');
         const staticMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
           name: value.name || key,
           factor: value.factor,
@@ -125,6 +130,7 @@ export const useMaterialCache = () => {
   
   // Load materials on mount
   useEffect(() => {
+    console.log('Initial material loading');
     loadMaterials();
   }, [loadMaterials]);
   

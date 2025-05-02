@@ -12,8 +12,10 @@ export function useSimpleOfflineMode() {
   // Simple connection check that doesn't make network requests 
   // unless explicitly called
   const checkConnection = useCallback(async () => {
+    console.log('Checking connection status');
     // Just use navigator.onLine as a base check
     const isOnline = navigator.onLine;
+    console.log('navigator.onLine says we are:', isOnline ? 'online' : 'offline');
     
     if (isOnline !== !isOffline) {
       setIsOffline(!isOnline);
@@ -38,6 +40,7 @@ export function useSimpleOfflineMode() {
   // Basic event listeners for online/offline events
   useEffect(() => {
     const handleOnline = () => {
+      console.log('Online event fired');
       setIsOffline(false);
       toast.success("Connection restored!", {
         id: "connection-restored",
@@ -46,6 +49,7 @@ export function useSimpleOfflineMode() {
     };
     
     const handleOffline = () => {
+      console.log('Offline event fired');
       setIsOffline(true);
       toast.error("You're offline. Some features may be limited.", {
         id: "offline-mode",
@@ -56,6 +60,9 @@ export function useSimpleOfflineMode() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     
+    // Initial check
+    checkConnection();
+    
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -64,7 +71,7 @@ export function useSimpleOfflineMode() {
       toast.dismiss("offline-mode");
       toast.dismiss("connection-restored");
     };
-  }, []);
+  }, [checkConnection]);
 
   return { isOffline, checkConnection };
 }

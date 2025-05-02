@@ -14,6 +14,7 @@ import { isOffline } from '@/utils/errorHandling';
  * Fetch all materials from Supabase with simplified caching
  */
 export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMaterialData[]> {
+  console.log('fetchMaterials called with forceRefresh:', forceRefresh);
   try {
     // First try to get materials from cache unless forceRefresh is true
     if (!forceRefresh) {
@@ -37,15 +38,18 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
       .order('name');
     
     if (error) {
+      console.error('Supabase error:', error);
       throw error;
     }
     
     if (!data || data.length === 0) {
+      console.log('No materials returned from API');
       // Use fallback data if API returns nothing
       return getFallbackMaterials();
     }
     
     // Process the data
+    console.log('Processing data from API:', data.length, 'rows');
     const processedData = processDataInBatches(data);
     
     // Cache the materials for future use
@@ -67,11 +71,13 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
 export async function fetchMaterialCategories(): Promise<string[]> {
   // First check if we're offline
   if (isOffline()) {
+    console.log('Offline, returning default categories');
     // Return some sensible default categories
     return ['Concrete', 'Wood', 'Steel', 'Insulation', 'Glass'];
   }
   
   try {
+    console.log('Fetching categories from API');
     const { data, error } = await supabase
       .from('materials')
       .select('category')
@@ -81,10 +87,13 @@ export async function fetchMaterialCategories(): Promise<string[]> {
     
     // Extract unique categories
     if (data && data.length > 0) {
-      return [...new Set(data.map(item => item.category).filter(Boolean))].sort();
+      const categories = [...new Set(data.map(item => item.category).filter(Boolean))].sort();
+      console.log('Categories fetched:', categories);
+      return categories;
     }
     
-    return [];
+    console.log('No categories found, returning defaults');
+    return ['Concrete', 'Wood', 'Steel', 'Insulation', 'Glass'];
   } catch (error) {
     console.error('Error fetching categories:', error);
     // Return some sensible default categories on error
@@ -96,6 +105,7 @@ export async function fetchMaterialCategories(): Promise<string[]> {
  * Get fallback materials from static data
  */
 function getFallbackMaterials(): ExtendedMaterialData[] {
+  console.log('Using fallback materials from MATERIAL_FACTORS');
   return Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
     name: value.name || key,
     factor: value.factor,
