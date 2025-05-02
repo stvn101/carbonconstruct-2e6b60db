@@ -8,10 +8,11 @@ import {
   AreaChartComponent, 
   PieChartComponent 
 } from '../index';
+import { describe, test, expect, vi } from 'vitest';
 
 // Mock Recharts ResponsiveContainer to avoid dimension issues in tests
-jest.mock('recharts', () => {
-  const OriginalRechartsModule = jest.requireActual('recharts');
+vi.mock('recharts', () => {
+  const OriginalRechartsModule = vi.importActual('recharts');
   return {
     ...OriginalRechartsModule,
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
@@ -39,6 +40,7 @@ describe('Chart Type Components', () => {
   ];
   
   const mockProps = {
+    type: 'bar',
     data: mockData,
     categories: ['value'],
     index: 'name',

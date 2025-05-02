@@ -20,7 +20,6 @@ export const PieChartComponent: React.FC<ChartTypeProps> = ({
         wrapperStyle={{ zIndex: 1000 }}
       />
       {showLegend && <ChartLegend 
-        content={<ChartLegend.Content />} 
         wrapperStyle={{ fontSize: '10px' }} 
         verticalAlign="bottom" 
       />}

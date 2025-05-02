@@ -2,18 +2,25 @@
 import React from 'react';
 import { LegendItem } from './components/LegendItem';
 import { useChart } from '../ChartContainer';
+import { LegendContent } from './components';
 
 export interface ChartLegendProps {
   payload?: Array<{ value: string; dataKey?: string | number; color: string; [key: string]: any }>;
   layout?: 'vertical' | 'horizontal';
   className?: string;
+  wrapperStyle?: React.CSSProperties;
+  verticalAlign?: 'top' | 'middle' | 'bottom';
 }
 
-export const ChartLegend = ({ 
+export const ChartLegend: React.FC<ChartLegendProps> & {
+  Content: typeof LegendContent;
+} = ({ 
   payload = [], 
   layout = 'horizontal', 
-  className = '' 
-}: ChartLegendProps) => {
+  className = '',
+  wrapperStyle,
+  verticalAlign 
+}) => {
   const { config } = useChart();
 
   if (!payload || payload.length === 0) {
@@ -26,6 +33,7 @@ export const ChartLegend = ({
     <ul 
       className={`flex gap-4 ${isVertical ? 'flex-col' : 'flex-row'} ${className}`}
       role="list"
+      style={wrapperStyle}
     >
       {payload.map((entry, index) => (
         <LegendItem 
@@ -36,3 +44,6 @@ export const ChartLegend = ({
     </ul>
   );
 };
+
+// Attach the LegendContent as a static property
+ChartLegend.Content = LegendContent;
