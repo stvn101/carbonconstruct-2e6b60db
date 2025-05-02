@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo } from 'react';
 import { useRegion } from '@/contexts/RegionContext';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
@@ -27,8 +26,11 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
   // Memoized filter function
   const filterPredicate = useCallback((material: ExtendedMaterialData) => {
     const matchesSearch = material.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-    const matchesRegion = selectedRegion === "all" || 
-      (material.region && material.region.includes(selectedRegion));
+    
+    // Updated comparison to handle the fixed Australia region correctly
+    // Since selectedRegion is always "Australia" from the context, we're checking if the material's region includes Australia
+    const matchesRegion = material.region && material.region.includes(selectedRegion);
+    
     const matchesAlternative = selectedAlternative === "none" || 
       material.alternativeTo === selectedAlternative;
     const matchesTag = selectedTag === "all" ||
