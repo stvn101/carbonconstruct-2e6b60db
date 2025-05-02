@@ -2,8 +2,20 @@
 import { Calculator, Database, FileText, GraduationCap, BarChart3, FileCheck2 } from "lucide-react";
 import { motion } from "framer-motion";
 import FeatureCard from "./FeatureCard";
+import { useEffect, useRef } from "react";
 
 const FeaturesSection = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  
+  // Log when the section mounts to help with debugging
+  useEffect(() => {
+    if (sectionRef.current) {
+      console.log("Features section mounted with ID:", sectionRef.current.id);
+      // Add a class to make it easier to find in the DOM
+      sectionRef.current.classList.add("features-section-loaded");
+    }
+  }, []);
+
   const features = [
     {
       icon: Calculator,
@@ -98,8 +110,11 @@ const FeaturesSection = () => {
   return (
     <section 
       id="features" 
-      className="py-12 md:py-20 bg-white dark:bg-gray-900 scroll-mt-24" // Increased scroll-mt for better spacing
-      data-section="features" // Add a data attribute for easier debugging
+      ref={sectionRef}
+      className="py-12 md:py-20 bg-white dark:bg-gray-900 scroll-mt-24" 
+      data-section="features"
+      aria-label="Features"
+      tabIndex={-1} // Make it focusable for scrolling
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
