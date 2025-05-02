@@ -49,6 +49,7 @@ const Chart = ({
   // Render the appropriate chart type
   const renderChart = () => {
     const props = {
+      type,
       data,
       categories,
       index,
