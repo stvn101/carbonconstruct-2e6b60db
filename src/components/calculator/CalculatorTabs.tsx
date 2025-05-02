@@ -1,6 +1,6 @@
 
 import { Tabs, TabsList } from "@/components/ui/tabs";
-import { Calculator, Save } from "lucide-react";
+import { Calculator, Save, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalculatorTabTriggers from "./tabs/CalculatorTabTriggers";
 import { CalculatorContextType } from "@/contexts/calculator/types";
@@ -54,14 +54,23 @@ const CalculatorTabs = ({
               disabled={isCalculating}
               className="bg-carbon-600 hover:bg-carbon-700 text-white flex-1 md:flex-grow-0"
             >
-              <Calculator className="h-4 w-4 mr-2" />
-              Calculate Emissions
+              {isCalculating ? (
+                <>
+                  <Loader className="h-4 w-4 mr-2 animate-spin" />
+                  Calculating...
+                </>
+              ) : (
+                <>
+                  <Calculator className="h-4 w-4 mr-2" />
+                  Calculate Emissions
+                </>
+              )}
             </Button>
             
             {!demoMode && (
               <Button 
                 onClick={onSave} 
-                disabled={isSaving}
+                disabled={isSaving || isCalculating}
                 variant="outline" 
                 className="flex-1 md:flex-grow-0 border-carbon-600 text-carbon-600 hover:bg-carbon-50"
               >

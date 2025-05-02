@@ -12,6 +12,8 @@ import CalculatorResults from "../CalculatorResults";
 import RecommendationsSection from "../RecommendationsSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateSuggestions } from "@/lib/sustainabilitySuggestions";
+import { Loader } from "lucide-react";
+import { useCalculator } from "@/contexts/calculator";
 
 interface ResultsSectionProps {
   calculationResult: CalculationResult | null;
@@ -32,6 +34,9 @@ const ResultsSection = ({
   onPrev,
   demoMode = false
 }: ResultsSectionProps) => {
+  // Access calculator context to get isCalculating status
+  const { isCalculating } = useCalculator();
+  
   // Combine all inputs for the calculation
   const calculationInput: CalculationInput = {
     materials,
@@ -53,7 +58,17 @@ const ResultsSection = ({
         </div>
       )}
       
-      {!calculationResult && (
+      {isCalculating && (
+        <div className="text-center py-12">
+          <Loader className="h-8 w-8 animate-spin mx-auto mb-4 text-carbon-600" />
+          <h3 className="text-xl font-medium mb-2">Calculating Results</h3>
+          <p className="text-muted-foreground">
+            Processing your materials, transport, and energy data...
+          </p>
+        </div>
+      )}
+      
+      {!isCalculating && !calculationResult && (
         <div className="text-center p-8">
           <h3 className="text-xl font-medium mb-4">Ready to Calculate Results</h3>
           <p className="mb-6 text-muted-foreground">
@@ -64,14 +79,14 @@ const ResultsSection = ({
             <Button variant="outline" onClick={onPrev}>
               Previous Step
             </Button>
-            <Button onClick={onCalculate}>
+            <Button onClick={onCalculate} className="bg-carbon-600 hover:bg-carbon-700 text-white">
               Calculate Now
             </Button>
           </div>
         </div>
       )}
       
-      {calculationResult && (
+      {!isCalculating && calculationResult && (
         <div>
           {/* Added space on top to separate tabs from previous content */}
           <Tabs defaultValue="results" className="mt-16 sm:mt-20 md:mt-16"> 
@@ -104,7 +119,7 @@ const ResultsSection = ({
             <Button variant="outline" onClick={onPrev} className="mr-2">
               Previous Step
             </Button>
-            <Button onClick={onCalculate}>
+            <Button onClick={onCalculate} className="bg-carbon-600 hover:bg-carbon-700 text-white">
               Recalculate
             </Button>
           </div>

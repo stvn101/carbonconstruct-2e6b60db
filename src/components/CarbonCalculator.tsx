@@ -65,8 +65,8 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
         showSaveDialog={showSaveDialog}
         setShowSaveDialog={setShowSaveDialog}
         demoMode={demoMode}
-        isCalculating={isCalculating}
-        setIsCalculating={setIsCalculating}
+        isCalculating={calculatorContext.isCalculating}
+        setIsCalculating={calculatorContext.setIsCalculating}
         onSaveConfirm={handleSaveConfirm}
         onSaveClick={handleSaveClick}
         onSignIn={handleSignIn}

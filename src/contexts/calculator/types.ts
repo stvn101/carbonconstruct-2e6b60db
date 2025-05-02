@@ -16,6 +16,8 @@ export interface CalculatorContextType {
   activeTab: 'materials' | 'transport' | 'energy' | 'results';
   setActiveTab: (tab: 'materials' | 'transport' | 'energy' | 'results') => void;
   validationErrors: ValidationError[];
+  isCalculating: boolean;
+  setIsCalculating: (isCalculating: boolean) => void;
   handleAddMaterial: () => void;
   handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: any) => void;
   handleRemoveMaterial: (index: number) => void;
