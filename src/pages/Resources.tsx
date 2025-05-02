@@ -10,11 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Book, FileText, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useScrollTo } from '@/hooks/useScrollTo';
+import { resourcesData } from '@/data/resourcesData';
 
 const Resources = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('guides');
   const { scrollToElement } = useScrollTo();
+  
+  // Filter resources by type
+  const guides = resourcesData.filter(resource => resource.type === 'guide');
+  const webinars = resourcesData.filter(resource => resource.type === 'webinar');
+  const research = resourcesData.filter(resource => resource.type === 'research');
   
   const handleViewResource = (resource: any) => {
     // Navigate to the resource URL or handle viewing the resource
@@ -132,75 +138,5 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ title, description, icon, o
     </Card>
   );
 };
-
-// Updated sample data with 2024+ resources
-const guides = [
-  { 
-    title: "2024 NCC Compliance Guide", 
-    description: "Learn how to meet Australia's National Construction Code 2024 updates for carbon reduction requirements.",
-    url: "https://ncc.abcb.gov.au/news/2024/05/latest-updates-ncc-2024-amendments"
-  },
-  { 
-    title: "Carbon Neutral Materials Selection", 
-    description: "A comprehensive guide to selecting carbon neutral and net-zero materials for 2024 and beyond.",
-    url: "https://www.worldgbc.org/advancing-net-zero-status-report-2024"
-  },
-  { 
-    title: "Embodied Carbon Calculation Methods", 
-    description: "Updated 2024 methodologies for accurately measuring and reducing embodied carbon in construction projects.",
-    url: "https://carbonleadershipforum.org/lca-practice-guide/"
-  },
-  { 
-    title: "Green Star Buildings Rating Tool", 
-    description: "Navigate the 2024 Green Star Buildings rating system to achieve higher sustainability scores.",
-    url: "https://new.gbca.org.au/green-star/"
-  }
-];
-
-const webinars = [
-  { 
-    title: "Managing Material EPDs in 2024", 
-    description: "Learn how to interpret and leverage Environmental Product Declarations for your construction projects.",
-    url: "https://www.thefifthestate.com.au/innovation/building-construction/epds-and-their-role-in-construction/"
-  },
-  { 
-    title: "Digital Carbon Tracking Technologies", 
-    description: "Explore the latest digital tools for real-time carbon tracking in construction projects.",
-    url: "https://buildingtransparency.org/ec3"
-  },
-  { 
-    title: "NABERS for New Buildings", 
-    description: "Understanding the May 2024 updates to NABERS ratings for new construction in Australia.",
-    url: "https://www.nabers.gov.au/publications/nabers-annualreport-2023-24"
-  },
-  { 
-    title: "Carbon Neutral Construction Practices", 
-    description: "Industry experts discuss practical approaches to achieving carbon neutrality in construction.",
-    url: "https://www.climateworkscentre.org/resource/decarbonisation-futures-solutions-actions-and-benchmarks-for-a-net-zero-emissions-australia/"
-  }
-];
-
-const research = [
-  { 
-    title: "Construction Emissions Report 2024", 
-    description: "Comprehensive analysis of construction carbon emissions in Australia for the first quarter of 2024.",
-    url: "https://www.industry.gov.au/publications/australias-national-greenhouse-accounts"
-  },
-  { 
-    title: "Circular Economy in Construction", 
-    description: "Research on implementing circular economy principles in Australian construction projects.",
-    url: "https://www.csiro.au/en/research/environmental-impacts/sustainability/circular-economy"
-  },
-  { 
-    title: "Low-Carbon Concrete Innovations", 
-    description: "The latest research on geopolymer and other low-carbon concrete technologies from 2024.",
-    url: "https://www.nature.com/articles/s41598-023-50109-0"
-  },
-  { 
-    title: "Climate Resilient Building Materials", 
-    description: "2024 study on materials that can withstand increasing climate challenges while reducing carbon footprint.",
-    url: "https://www.science.org/doi/10.1126/science.abf8943"
-  }
-];
 
 export default Resources;
