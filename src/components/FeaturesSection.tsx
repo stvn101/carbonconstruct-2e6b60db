@@ -18,6 +18,12 @@ const FeaturesSection = () => {
       // Dispatch a custom event that can be listened for
       const event = new CustomEvent('featuresSectionLoaded', { detail: { id: 'features' } });
       document.dispatchEvent(event);
+      
+      // Set a direct ID on the element content for redundancy
+      const contentDiv = sectionRef.current.querySelector('.container');
+      if (contentDiv) {
+        contentDiv.id = "features-content";
+      }
     }
   }, []);
 
@@ -122,9 +128,9 @@ const FeaturesSection = () => {
       role="features"
       tabIndex={-1} // Make it focusable for scrolling
     >
-      <div className="container mx-auto px-4 md:px-6">
+      <div id="features-inner" className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Sustainable Construction Made Simple</h2>
+          <h2 id="features-heading" className="text-3xl md:text-4xl font-bold mb-4">Sustainable Construction Made Simple</h2>
           <p className="text-lg text-muted-foreground">
             Our platform provides everything you need to measure, track, and reduce the carbon footprint of your construction projects.
           </p>

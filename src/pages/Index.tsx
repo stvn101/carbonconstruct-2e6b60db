@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useEffect, lazy, Suspense } from "react";
 import { preloadComponent } from "@/utils/lazyLoad";
@@ -7,9 +8,10 @@ import ThemeToggle from "@/components/ThemeToggle";
 import SEO from "@/components/SEO";
 import CalculatorDemoVideo from "@/components/CalculatorDemoVideo";
 import { useA11y } from "@/hooks/useA11y";
-import Footer from "@/components/Footer"; // Direct import to avoid lazy loading issues
+import Footer from "@/components/Footer"; 
 
-// Preload the features component to ensure it's available when scrolling
+// Direct import FeaturesSection to ensure it's available immediately
+// This is critical for the Learn More button
 import FeaturesSection from "@/components/FeaturesSection";
 
 // Lazy load other non-critical components
@@ -132,7 +134,7 @@ const Index = () => {
           <HeroSection />
           <CalculatorDemoVideo />
           
-          {/* Import FeaturesSection directly */}
+          {/* Import FeaturesSection directly - this is crucial for the Learn More button */}
           <FeaturesSection />
 
           {/* --- Begin Replacement for TestimonialsSection --- */}
@@ -192,7 +194,6 @@ const Index = () => {
       <div className="fixed bottom-4 right-4 z-40">
         <ThemeToggle />
       </div>
-      {/* Use Footer directly instead of lazy loading it */}
       <Footer />
     </motion.div>
   );

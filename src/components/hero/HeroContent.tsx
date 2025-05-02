@@ -58,16 +58,77 @@ const HeroContent = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  const handleLearnMore = () => {
+  // Direct scroll function as backup without using hook
+  const directScrollToFeatures = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log("⚡ Direct scroll to features initiated");
+    
+    // Try multiple approaches
+    setTimeout(() => {
+      try {
+        // Try to find the element by id
+        const element = document.getElementById('features') || 
+                         document.querySelector('.features-section') || 
+                         document.querySelector('[data-section="features"]');
+                         
+        if (element) {
+          console.log("📍 Found features section, scrolling directly");
+          const yOffset = -100; // Adjusted offset
+          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          
+          window.scrollTo({
+            top: y,
+            behavior: 'smooth'
+          });
+        } else {
+          console.error("❌ Could not find features section for direct scroll");
+        }
+      } catch (error) {
+        console.error("❌ Error in direct scroll:", error);
+      }
+    }, 1500);
+  };
+  
+  const handleLearnMore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("🔘 Learn More button clicked, attempting to scroll to features section");
     
-    // Use enhanced scrollToElement with better defaults for lazy-loaded content
+    // 1. Try to scroll directly first as immediate feedback
+    directScrollToFeatures();
+    
+    // 2. Also use enhanced scrollToElement with better defaults for lazy-loaded content
     scrollToElement('features', { 
-      offset: 100,        // Increased offset to account for the fixed header
-      attempts: 15,       // Try up to 15 times (increased from 10)
-      delay: 300,         // Increased delay between attempts
-      initialDelay: 1000  // Much longer initial delay for lazy-loaded components to render (1 second)
-    })();
+      offset: 120,        // Increased offset to account for the fixed header
+      attempts: 20,       // Try up to 20 times (increased from 15)
+      delay: 350,         // Increased delay between attempts
+      initialDelay: 1500  // Much longer initial delay for lazy-loaded components to render (1.5 second)
+    })(e);
+    
+    // 3. Final fallback - after a delay, try to find and scroll to any element we can
+    setTimeout(() => {
+      const fallbackElements = [
+        document.getElementById('features'),
+        document.querySelector('.features-section'),
+        document.querySelector('[data-section="features"]'),
+        document.querySelector('.features-section-loaded'),
+        document.getElementById('features-inner'),
+        document.getElementById('features-heading'),
+        document.getElementById('features-content')
+      ];
+      
+      for (const element of fallbackElements) {
+        if (element) {
+          console.log("🆘 Using fallback scroll method");
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+      }
+    }, 2000);
   };
 
   const handleTryCalculator = () => {
