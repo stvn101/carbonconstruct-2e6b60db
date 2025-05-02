@@ -3,9 +3,9 @@ import { PlanPrices, PricingPlan } from "@/types/pricing";
 
 // Define monthly prices in cents
 export const monthlyPrices: PlanPrices = {
-  starter: 4900, // $49.00
-  professional: 9900, // $99.00
-  enterprise: 24900 // $249.00
+  starter: 9900, // $99.00
+  professional: 19900, // $199.00
+  enterprise: 44900 // $449.00
 };
 
 // Calculate annual price with discount
@@ -13,7 +13,7 @@ export const calculateAnnualPrice = (monthlyPrice: number, planId: string) => {
   const annualBase = monthlyPrice * 12;
   // Starter plan gets no discount
   if (planId === 'starter') {
-    return annualBase; // $588.00 annually
+    return annualBase; // $1188.00 annually
   }
   // Professional and Enterprise get 15% discount
   return Math.round(annualBase * 0.85); // 15% discount
@@ -89,4 +89,3 @@ export const generatePricingPlans = (annual: boolean): PricingPlan[] => {
     }
   ];
 };
-

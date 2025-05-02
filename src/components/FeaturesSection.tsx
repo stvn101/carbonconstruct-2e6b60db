@@ -113,7 +113,7 @@ const FeaturesSection = () => {
           viewport={{ once: true, margin: "-100px" }}
         >
           {features.map((feature, index) => (
-            <motion.div key={index} variants={itemVariants}>
+            <motion.div key={index} variants={itemVariants} className="h-full">
               <FeatureCard 
                 icon={feature.icon} 
                 title={feature.title} 
