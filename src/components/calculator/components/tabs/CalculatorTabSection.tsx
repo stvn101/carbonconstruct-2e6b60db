@@ -79,6 +79,7 @@ const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
         onPrev={handlePrevTab}
         onNext={handleNextTab}
         demoMode={demoMode}
+        activeTab={calculatorContext.activeTab}
       />
     </div>
   );

@@ -28,6 +28,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   let saveProject: ((project: any) => Promise<SavedProject>) | undefined;
   let projects: SavedProject[] = [];
   let hasProjectsContext = true;
+  let error = false;
 
   try {
     // Try to dynamically import to avoid context errors if not in provider
@@ -35,51 +36,35 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     const projectsContext = useProjects();
     saveProject = projectsContext.saveProject;
     projects = projectsContext.projects || [];
-  } catch (error) {
-    console.warn('ProjectContext not available, running in standalone calculator mode:', error);
+  } catch (e) {
+    console.warn('ProjectContext not available, running in standalone calculator mode:', e);
     hasProjectsContext = false;
-    setProjectsContextError(error instanceof Error ? error : new Error('ProjectContext not available'));
+    setProjectsContextError(e instanceof Error ? e : new Error('ProjectContext not available'));
   }
 
   const isExistingProject = hasProjectsContext && projects.length > 0 && !!projects.find(
     p => p.name.toLowerCase() === projectName.toLowerCase()
   );
 
-  // Access calculator context
+  // Access calculator context - but wrap in try/catch to avoid errors
   let calculatorContext;
+  let isCalculating = false;
+  let setIsCalculating = () => {};
+  
   try {
     calculatorContext = useCalculator();
-  } catch (error) {
-    console.error("Error accessing calculator context:", error);
-    return {
-      error: true,
-      projectName,
-      setProjectName,
-      authError,
-      setAuthError,
-      savingError,
-      setSavingError,
-      isSaving,
-      setIsSaving,
-      showSaveDialog,
-      setShowSaveDialog,
-      isCalculating: false,
-      setIsCalculating: () => {},
-      handleSaveClick: () => {},
-      handleSaveConfirm: async () => {},
-      handleSignIn: () => {},
-      isExistingProject: false,
-      calculatorContext: null
-    };
+    isCalculating = calculatorContext.isCalculating;
+    setIsCalculating = calculatorContext.setIsCalculating;
+  } catch (e) {
+    error = true;
+    console.error("Error accessing calculator context:", e);
   }
 
-  const { calculationInput, calculationResult, isCalculating, setIsCalculating } = calculatorContext;
-  
   // Setup calculator save hooks with all required dependencies
   const { handleSaveClick, handleSaveConfirm, handleSignIn } = useCalculatorSave({
     projectName,
-    calculationInput,
-    calculationResult,
+    calculationInput: calculatorContext?.calculationInput,
+    calculationResult: calculatorContext?.calculationResult,
     setAuthError,
     setSavingError,
     setIsSaving,
@@ -92,7 +77,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   });
 
   return {
-    error: projectsContextError && !demoMode, // Only treat as error if not in demo mode
+    error: !calculatorContext || (projectsContextError && !demoMode), 
     projectName,
     setProjectName,
     authError,

@@ -32,7 +32,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
 
   // Get calculator context
   const calculatorContext = useCalculator();
-  const { isCalculating, setIsCalculating } = calculatorContext;
+  const { isCalculating } = calculatorContext;
   
   // Handle error gracefully
   if (error) {
@@ -66,7 +66,6 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
           setShowSaveDialog={setShowSaveDialog}
           demoMode={demoMode}
           isCalculating={isCalculating}
-          setIsCalculating={setIsCalculating}
           onSaveConfirm={handleSaveConfirm}
           onSaveClick={handleSaveClick}
           onSignIn={handleSignIn}

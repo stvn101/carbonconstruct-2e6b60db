@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useCallback } from "react";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -64,6 +64,7 @@ function Calculator() {
     focusMainContentOnRouteChange: true
   });
   
+  // Memoize the effect to avoid triggering it on every render
   useEffect(() => {
     // Check if we're in demo mode from navigation state or if user is not logged in
     setDemoMode(location.state?.demoMode || !user);
@@ -74,23 +75,21 @@ function Calculator() {
     }
 
     // Start with a small delay to ensure proper loading
-    const timer = setTimeout(() => setCalculatorReady(true), 300);
+    const timer = setTimeout(() => setCalculatorReady(true), 500);
     
     return () => clearTimeout(timer);
   }, [location, user]);
 
-  const handleSignUp = () => {
+  const handleSignUp = useCallback(() => {
     navigate("/auth", { state: { returnTo: "/calculator" } });
-  };
+  }, [navigate]);
 
-  const handleResetCalculatorError = () => {
+  const handleResetCalculatorError = useCallback(() => {
     // Add a short delay to give time for state updates
     toast.info("Resetting calculator...");
-    setTimeout(() => {
-      setCalculatorReady(false);
-      setTimeout(() => setCalculatorReady(true), 300);
-    }, 100);
-  };
+    setCalculatorReady(false);
+    setTimeout(() => setCalculatorReady(true), 500);
+  }, []);
 
   // Determine effective demo mode (user not logged in, explicit demo mode, or offline)
   const effectiveDemoMode = !user || demoMode || isOffline;
@@ -121,24 +120,24 @@ function Calculator() {
           </Alert>
         )}
         
-        {/* Wrap with both ProjectProvider and CalculatorProvider */}
-        <ProjectProvider>
-          <CalculatorProvider>
-            <ErrorBoundary 
-              FallbackComponent={CalculatorLoadError}
-              onReset={handleResetCalculatorError}
-              resetKeys={[location.key, isOffline]}
-            >
-              <Suspense fallback={<CalculatorLoading />}>
-                {calculatorReady ? (
+        {/* Only mount components when we're ready to avoid race conditions */}
+        {calculatorReady ? (
+          <ProjectProvider>
+            <CalculatorProvider>
+              <ErrorBoundary 
+                FallbackComponent={CalculatorLoadError}
+                onReset={handleResetCalculatorError}
+                resetKeys={[location.key, isOffline, calculatorReady]}
+              >
+                <Suspense fallback={<CalculatorLoading />}>
                   <CarbonCalculator demoMode={effectiveDemoMode} />
-                ) : (
-                  <CalculatorLoading />
-                )}
-              </Suspense>
-            </ErrorBoundary>
-          </CalculatorProvider>
-        </ProjectProvider>
+                </Suspense>
+              </ErrorBoundary>
+            </CalculatorProvider>
+          </ProjectProvider>
+        ) : (
+          <CalculatorLoading />
+        )}
       </main>
       <Footer />
     </div>
