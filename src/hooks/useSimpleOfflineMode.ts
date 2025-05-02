@@ -16,7 +16,7 @@ export function useSimpleOfflineMode() {
     
     function handleOffline() {
       setIsOffline(true);
-      showErrorToast("You're offline. Some features may be unavailable.", 0);
+      showErrorToast("You're offline. Some features may be unavailable.", 5000);
     }
     
     // Set up listeners

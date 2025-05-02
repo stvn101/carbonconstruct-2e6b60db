@@ -5,15 +5,13 @@ import { useProjects } from '@/contexts/ProjectContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth';
-import { isOffline } from '@/utils/errorHandling';
-import { trackMetric } from '@/contexts/performance/metrics';
+import { showErrorToast } from '@/utils/errorHandling/simpleToastHandler';
 
 export interface UseCalculatorActionsProps {
   demoMode?: boolean;
-  isPremiumUser?: boolean;
 }
 
-export function useCalculatorActions({ demoMode = false, isPremiumUser = false }: UseCalculatorActionsProps) {
+export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { saveProject, projects } = useProjects();
@@ -62,8 +60,8 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
     setAuthError(null);
     setSavingError(null);
     
-    if (isOffline()) {
-      toast.error("You're offline. Please connect to the internet to save projects.");
+    if (!navigator.onLine) {
+      showErrorToast("You're offline. Please connect to the internet to save projects.");
       return;
     }
     
@@ -80,7 +78,7 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
     setShowSaveDialog(true);
   };
 
-  // Optimized save function to improve performance
+  // Simplified save function
   const handleSaveConfirm = async () => {
     if (!user) {
       setAuthError("Authentication required to save projects");
@@ -88,8 +86,8 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
       return;
     }
     
-    if (isOffline()) {
-      toast.error("You're offline. Please connect to the internet to save projects.");
+    if (!navigator.onLine) {
+      showErrorToast("You're offline. Please connect to the internet to save projects.");
       setShowSaveDialog(false);
       return;
     }
@@ -98,10 +96,7 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
     setSavingError(null);
     
     try {
-      // Track saving start time for performance monitoring
-      const startTime = performance.now();
-      
-      // Prepare the project data before saving to minimize processing during DB operation
+      // Prepare the project data
       const projectData = {
         name: projectName,
         description: "Carbon calculation project",
@@ -110,25 +105,17 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
         energy: calculationInput.energy,
         result: calculationResult,
         tags: ["carbon", "calculation"],
-        status: 'draft' as const, // Fix type error by using a const assertion
-        total_emissions: calculationResult.totalEmissions || 0,
-        premium_only: isPremiumUser
+        status: 'draft' as const,
+        total_emissions: calculationResult.totalEmissions || 0
       };
       
-      // Save the project with optimized data
+      // Save the project
       const savedProject = await saveProject(projectData);
-      
-      // Track save performance
-      const saveTime = performance.now() - startTime;
-      trackMetric({
-        metric: 'project_save_time',
-        value: saveTime
-      });
       
       console.log("Project saved successfully:", savedProject);
       toast.success("Project saved successfully!");
       
-      // Use setTimeout to allow the toast to be visible before navigation
+      // Navigate after a short delay
       setTimeout(() => {
         navigate(`/projects`);
       }, 300);
@@ -137,6 +124,8 @@ export function useCalculatorActions({ demoMode = false, isPremiumUser = false }
       
       if (error instanceof Error) {
         setSavingError(error.message);
+      } else {
+        setSavingError("Unknown error occurred while saving");
       }
       
       setIsSaving(false);
