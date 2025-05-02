@@ -1,6 +1,5 @@
 
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
 import MaterialsTabContent from "./content/MaterialsTabContent";
 import TransportTabContent from "./content/TransportTabContent";
 import EnergyTabContent from "./content/EnergyTabContent";
@@ -43,16 +42,9 @@ const CalculatorTabContents = ({
   onNext,
   demoMode = false
 }: CalculatorTabContentsProps) => {
-  // Use the global calculator context to sync the tab value
+  // Use the global calculator context to get the active tab
   const { activeTab } = useCalculator();
-
-  // Debug logging
-  console.log("CalculatorTabContents rendering with activeTab:", activeTab);
-  console.log("Has materials:", calculationInput.materials?.length);
-  console.log("Has transport:", calculationInput.transport?.length);
-  console.log("Has energy:", calculationInput.energy?.length);
-  console.log("Has calculation result:", calculationResult ? "Yes" : "No");
-
+  
   return (
     <Tabs value={activeTab} className="w-full mt-4">
       <TabsContent value="materials" className="mt-6">

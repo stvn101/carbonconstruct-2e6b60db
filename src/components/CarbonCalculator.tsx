@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCalculatorActions } from './calculator/hooks/useCalculatorActions';
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorAlerts from "./calculator/CalculatorAlerts";
 import CalculatorContainer from "./calculator/CalculatorContainer";
 import { ErrorBoundary } from "react-error-boundary";
+import { useCalculator } from '@/contexts/calculator';
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
@@ -23,28 +24,21 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
     setIsSaving,
     showSaveDialog,
     setShowSaveDialog,
-    isCalculating,
-    setIsCalculating,
+    isExistingProject,
     handleSaveClick,
     handleSaveConfirm,
-    handleSignIn,
-    isExistingProject,
-    calculatorContext
+    handleSignIn
   } = useCalculatorActions({ demoMode });
 
+  // Get calculator context
+  const calculatorContext = useCalculator();
+  const { isCalculating, setIsCalculating } = calculatorContext;
+  
   // Handle error gracefully
   if (error) {
     console.error("Calculator error:", error);
     return <CalculatorError />;
   }
-
-  // Ensure we have the calculator context
-  if (!calculatorContext) {
-    console.error("Calculator context is not available");
-    return <CalculatorError />;
-  }
-
-  console.log("CarbonCalculator rendering with calculatorContext:", calculatorContext.activeTab);
 
   return (
     <div className="container mx-auto px-4 md:px-6">
@@ -71,8 +65,8 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
           showSaveDialog={showSaveDialog}
           setShowSaveDialog={setShowSaveDialog}
           demoMode={demoMode}
-          isCalculating={calculatorContext.isCalculating}
-          setIsCalculating={calculatorContext.setIsCalculating}
+          isCalculating={isCalculating}
+          setIsCalculating={setIsCalculating}
           onSaveConfirm={handleSaveConfirm}
           onSaveClick={handleSaveClick}
           onSignIn={handleSignIn}
