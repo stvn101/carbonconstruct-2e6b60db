@@ -41,7 +41,7 @@ export const useChartData = ({ result, category }: ChartDataHandlerProps) => {
                 console.log(`Material ${key} -> ${materialName}: ${value}`);
                 return {
                   name: materialName,
-                  value: Number(value.toFixed(2))
+                  value: Number(Number(value).toFixed(2))
                 };
               })
               .filter(item => item.value > 0)
@@ -57,7 +57,7 @@ export const useChartData = ({ result, category }: ChartDataHandlerProps) => {
           chartData = Object.entries(result.breakdownByTransport)
             .map(([key, value]) => ({
               name: TRANSPORT_FACTORS[key as Transport]?.name || key,
-              value: Number(value.toFixed(2))
+              value: Number(Number(value).toFixed(2))
             }))
             .filter(item => item.value > 0)
             .sort((a, b) => b.value - a.value);
@@ -71,7 +71,7 @@ export const useChartData = ({ result, category }: ChartDataHandlerProps) => {
           chartData = Object.entries(result.breakdownByEnergy)
             .map(([key, value]) => ({
               name: ENERGY_FACTORS[key as Energy]?.name || key,
-              value: Number(value.toFixed(2))
+              value: Number(Number(value).toFixed(2))
             }))
             .filter(item => item.value > 0)
             .sort((a, b) => b.value - a.value);

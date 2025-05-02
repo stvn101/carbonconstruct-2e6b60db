@@ -4,9 +4,7 @@ export {
   Chart,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent
+  ChartLegend
 } from './charts/Chart';
 
 // Export the ChartStyle for backward compatibility
