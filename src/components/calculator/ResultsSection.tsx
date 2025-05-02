@@ -181,7 +181,7 @@ const ResultsSection = ({
         <div>
           {/* Added space on top to separate tabs from previous content */}
           <Tabs defaultValue="results" className="mt-16 sm:mt-20 md:mt-16"> 
-            <TabsList className="mb-8 bg-muted/70 px-2 sm:px-4 rounded-md"> {/* more bottom margin + horizontal padding on TabsList */}
+            <TabsList className="mb-8 bg-muted/70 px-2 sm:px-4 rounded-md"> 
               <TabsTrigger value="results" className="text-sm">Results</TabsTrigger>
               <TabsTrigger value="recommendations" className="text-sm">Recommendations</TabsTrigger>
             </TabsList>

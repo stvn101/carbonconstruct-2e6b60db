@@ -13,9 +13,13 @@ const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps)
   
   console.log("CalculatorTabTriggers rendering with activeTab:", activeTab);
   
+  // Use a callback handler that only triggers when the user clicks
   const handleTabClick = (tab: string) => {
     console.log(`Tab clicked: ${tab}`);
-    setActiveTab(tab as any);
+    // Only update if the tab is different than the current one
+    if (tab !== activeTab) {
+      setActiveTab(tab as any);
+    }
   };
   
   return (
