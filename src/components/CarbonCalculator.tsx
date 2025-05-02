@@ -39,7 +39,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
     <div className="container mx-auto px-4 md:px-6">
       <CalculatorAlerts 
         demoMode={demoMode} 
-        authError={authError ? new Error(authError) : null}
+        authError={authError}
         onAuthErrorClear={() => setAuthError(null)}
         onSignIn={handleSignIn}
       />
@@ -47,10 +47,10 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
       <CalculatorContainer
         projectName={projectName}
         setProjectName={setProjectName}
-        authError={authError ? new Error(authError) : null}
-        setAuthError={(err: Error | null) => setAuthError(err ? err.message : null)}
-        savingError={savingError ? new Error(savingError) : null}
-        setSavingError={(err: Error | null) => setSavingError(err ? err.message : null)}
+        authError={authError}
+        setAuthError={setAuthError}
+        savingError={savingError}
+        setSavingError={setSavingError}
         isSaving={isSaving}
         setIsSaving={setIsSaving}
         showSaveDialog={showSaveDialog}

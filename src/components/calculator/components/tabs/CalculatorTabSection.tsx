@@ -3,13 +3,9 @@ import React from 'react';
 import CalculatorTabs from "../../CalculatorTabs";
 import CalculatorTabContents from "../../tabs/CalculatorTabContents";
 import TabErrorDisplay from "../error/TabErrorDisplay";
+import { CalculatorContextType } from "@/contexts/calculator/types";
 
 interface CalculatorTabSectionProps {
-  activeTab: string;
-  handleTabChange: (tab: string) => void;
-  handleCalculateWithTracking: () => void;
-  isMobile: boolean;
-  isPremiumUser: boolean;
   calculationInput: any;
   calculationResult: any;
   handleUpdateMaterial: any;
@@ -23,16 +19,15 @@ interface CalculatorTabSectionProps {
   handleRemoveEnergy: (index: number) => void;
   handlePrevTab: () => void;
   handleNextTab: () => void;
+  handleCalculateWithTracking: () => void;
   demoMode: boolean;
   tabError: string | null;
+  calculatorContext: CalculatorContextType;
+  isSaving: boolean;
+  onSaveClick: () => void;
 }
 
 const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
-  activeTab,
-  handleTabChange,
-  handleCalculateWithTracking,
-  isMobile,
-  isPremiumUser,
   calculationInput,
   calculationResult,
   handleUpdateMaterial,
@@ -46,17 +41,22 @@ const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
   handleRemoveEnergy,
   handlePrevTab,
   handleNextTab,
+  handleCalculateWithTracking,
   demoMode,
-  tabError
+  tabError,
+  calculatorContext,
+  isSaving,
+  onSaveClick
 }) => {
   return (
     <>
       <CalculatorTabs 
-        activeTab={activeTab}
-        setActiveTab={handleTabChange}
+        calculatorContext={calculatorContext}
         onCalculate={handleCalculateWithTracking}
-        isMobile={isMobile}
-        isPremiumUser={isPremiumUser}
+        onSave={onSaveClick}
+        isSaving={isSaving}
+        isCalculating={false}
+        demoMode={demoMode}
       />
       
       <TabErrorDisplay error={tabError} />

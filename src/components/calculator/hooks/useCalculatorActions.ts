@@ -19,8 +19,8 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [savingError, setSavingError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<Error | null>(null);
+  const [savingError, setSavingError] = useState<Error | null>(null);
 
   // Access calculator context
   let calculatorContext;
@@ -66,7 +66,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
     }
     
     if (!user) {
-      setAuthError("Please log in to save your project");
+      setAuthError(new Error("Please log in to save your project"));
       return;
     }
     
@@ -81,7 +81,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   // Simplified save function
   const handleSaveConfirm = async () => {
     if (!user) {
-      setAuthError("Authentication required to save projects");
+      setAuthError(new Error("Authentication required to save projects"));
       setShowSaveDialog(false);
       return;
     }
@@ -106,7 +106,8 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
         result: calculationResult,
         tags: ["carbon", "calculation"],
         status: 'draft' as const,
-        total_emissions: calculationResult.totalEmissions || 0
+        total_emissions: calculationResult.totalEmissions || 0,
+        premium_only: false // Adding the missing field
       };
       
       // Save the project
@@ -123,9 +124,9 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
       console.error("Error saving project:", error);
       
       if (error instanceof Error) {
-        setSavingError(error.message);
+        setSavingError(error);
       } else {
-        setSavingError("Unknown error occurred while saving");
+        setSavingError(new Error("Unknown error occurred while saving"));
       }
       
       setIsSaving(false);

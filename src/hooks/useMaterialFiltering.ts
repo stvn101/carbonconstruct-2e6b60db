@@ -24,29 +24,14 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
   // Debounce the search term to prevent excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
-  // Use the cached materials with pagination when search is active
-  const usePagination = debouncedSearchTerm.length > 0;
-  
   // Use the cached materials
   const { 
     materials: allMaterials, 
     loading, 
     error, 
-    pagination, 
-    updatePagination,
-    totalCount,
     refreshCache,
     cacheStats
-  } = useMaterialCache({
-    usePagination,
-    initialPagination: {
-      page: 1,
-      pageSize: 50,
-      search: debouncedSearchTerm,
-      sortBy: 'name',
-      sortDirection: 'asc'
-    }
-  });
+  } = useMaterialCache();
 
   // Load material categories
   useEffect(() => {
@@ -65,20 +50,11 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     loadCategories();
   }, []);
 
-  // Update search term in pagination when debounced value changes
-  useEffect(() => {
-    if (usePagination) {
-      updatePagination({ search: debouncedSearchTerm, page: 1 });
-    }
-  }, [debouncedSearchTerm, usePagination, updatePagination]);
-
-  // Memoized filter function for client-side filtering when not using pagination
+  // Memoized filter function for client-side filtering
   const filterPredicate = useCallback((material: ExtendedMaterialData) => {
-    // If we're using server-side pagination with search, don't filter by search term here
-    const matchesSearch = usePagination || material.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+    const matchesSearch = material.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     
     // Updated comparison to handle the fixed Australia region correctly
-    // Since selectedRegion is always "Australia" from the context, we're checking if the material's region includes Australia
     const matchesRegion = material.region && material.region.includes(selectedRegion);
     
     const matchesAlternative = selectedAlternative === "none" || 
@@ -87,12 +63,12 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
       (material.tags && material.tags.includes(selectedTag));
     
     return matchesSearch && matchesRegion && matchesAlternative && matchesTag;
-  }, [debouncedSearchTerm, selectedRegion, selectedAlternative, selectedTag, usePagination]);
+  }, [debouncedSearchTerm, selectedRegion, selectedAlternative, selectedTag]);
 
   // Memoized filtered materials
   const filteredMaterials = useMemo(() => 
-    usePagination ? allMaterials : allMaterials.filter(filterPredicate),
-    [allMaterials, filterPredicate, usePagination]
+    allMaterials.filter(filterPredicate),
+    [allMaterials, filterPredicate]
   );
 
   // Memoized statistics
@@ -116,17 +92,16 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
       materialsByRegion,
       allRegions: Array.from(allRegions).sort(),
       allTags: Array.from(allTags).sort(),
-      totalCount: usePagination ? totalCount : filteredMaterials.length,
+      totalCount: filteredMaterials.length,
       categories
     };
-  }, [allMaterials, filteredMaterials, usePagination, totalCount, categories]);
+  }, [allMaterials, filteredMaterials, categories]);
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
     setSelectedAlternative("none");
     setSelectedTag("all");
-    updatePagination({ page: 1, search: "" });
-  }, [updatePagination]);
+  }, []);
 
   // Extract base material options for the dropdown
   const baseOptions = useMemo(() => {
@@ -146,11 +121,6 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     });
   }, [allMaterials]);
 
-  // Handle pagination changes
-  const handlePaginationChange = useCallback((page: number) => {
-    updatePagination({ page });
-  }, [updatePagination]);
-
   return {
     // Filter states
     searchTerm,
@@ -160,10 +130,6 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     setSelectedAlternative,
     selectedTag,
     setSelectedTag,
-    
-    // Pagination
-    pagination,
-    handlePaginationChange,
     
     // Results and stats
     filteredMaterials,
@@ -177,7 +143,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     
     // Status
     materialCount: stats.totalCount,
-    totalMaterials: totalCount,
+    totalMaterials: allMaterials.length,
     loading,
     error,
     isCategoriesLoading,
