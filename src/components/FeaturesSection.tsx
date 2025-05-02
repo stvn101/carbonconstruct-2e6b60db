@@ -7,12 +7,17 @@ import { useEffect, useRef } from "react";
 const FeaturesSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   
-  // Log when the section mounts to help with debugging
+  // Enhanced logging for when the section mounts to help with debugging
   useEffect(() => {
     if (sectionRef.current) {
-      console.log("Features section mounted with ID:", sectionRef.current.id);
-      // Add a class to make it easier to find in the DOM
+      console.log("📋 Features section mounted with ID:", sectionRef.current.id);
+      // Add multiple classes to make it easier to find in the DOM
       sectionRef.current.classList.add("features-section-loaded");
+      sectionRef.current.classList.add("features-section");
+      
+      // Dispatch a custom event that can be listened for
+      const event = new CustomEvent('featuresSectionLoaded', { detail: { id: 'features' } });
+      document.dispatchEvent(event);
     }
   }, []);
 
@@ -111,9 +116,10 @@ const FeaturesSection = () => {
     <section 
       id="features" 
       ref={sectionRef}
-      className="py-12 md:py-20 bg-white dark:bg-gray-900 scroll-mt-24" 
+      className="py-12 md:py-20 bg-white dark:bg-gray-900 scroll-mt-28 features-section" 
       data-section="features"
-      aria-label="Features"
+      aria-label="Features Section"
+      role="features"
       tabIndex={-1} // Make it focusable for scrolling
     >
       <div className="container mx-auto px-4 md:px-6">

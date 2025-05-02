@@ -7,36 +7,66 @@ import { staggerContainer, fadeInUp } from "@/utils/animationVariants";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
 import { useScrollTo } from "@/hooks/useScrollTo";
+// Direct import of FeaturesSection for preloading
+import FeaturesSection from "@/components/FeaturesSection";
 
 const HeroContent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { scrollToElement } = useScrollTo();
 
-  // Preload the features section when the component mounts
+  // Enhanced preloading of the features section
   const preloadFeaturesSection = () => {
-    import("@/components/FeaturesSection").then(() => {
-      console.log("Features section preloaded successfully");
-    }).catch(err => {
-      console.error("Failed to preload Features section:", err);
-    });
+    try {
+      console.log("⏱️ Attempting to preload Features section...");
+      // Directly import to ensure it's loaded
+      if (FeaturesSection) {
+        console.log("✅ Features section preloaded successfully via direct import");
+      }
+      
+      // Also try the dynamic import as a fallback
+      import("@/components/FeaturesSection").then(() => {
+        console.log("✅ Features section also preloaded via dynamic import");
+      }).catch(err => {
+        console.error("❌ Failed to preload Features section via dynamic import:", err);
+      });
+    } catch (error) {
+      console.error("❌ Error during preload of Features section:", error);
+    }
   };
 
   // Attempt to preload after a short delay
   React.useEffect(() => {
-    const timer = setTimeout(preloadFeaturesSection, 100);
+    console.log("🔄 Setting up preload timer for Features section");
+    const timer = setTimeout(preloadFeaturesSection, 200);
     return () => clearTimeout(timer);
   }, []);
 
+  // Listen for scroll events to help with debugging
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const featuresSection = document.getElementById('features');
+      if (featuresSection) {
+        const rect = featuresSection.getBoundingClientRect();
+        if (rect.top >= 0 && rect.top <= window.innerHeight) {
+          console.log("📍 Features section is now visible in viewport");
+        }
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
   const handleLearnMore = () => {
-    console.log("Learn More button clicked, attempting to scroll to features section");
+    console.log("🔘 Learn More button clicked, attempting to scroll to features section");
     
     // Use enhanced scrollToElement with better defaults for lazy-loaded content
     scrollToElement('features', { 
-      offset: 100,       // Increased offset to account for the fixed header
-      attempts: 10,      // Try up to 10 times (increased from 5)
-      delay: 250,        // Increased delay between attempts (from 200)
-      initialDelay: 400  // Longer initial delay for lazy-loaded components to render
+      offset: 100,        // Increased offset to account for the fixed header
+      attempts: 15,       // Try up to 15 times (increased from 10)
+      delay: 300,         // Increased delay between attempts
+      initialDelay: 1000  // Much longer initial delay for lazy-loaded components to render (1 second)
     })();
   };
 
@@ -84,8 +114,8 @@ const HeroContent = () => {
           variant="outline" 
           onClick={handleLearnMore}
           className="border-carbon-500 text-carbon-800 hover:bg-carbon-100 dark:text-carbon-200 dark:hover:bg-carbon-800/50 transition-transform duration-200 hover:scale-105"
-          id="learn-more-button" // Added ID for easier debugging
-          aria-label="Learn more about CarbonConstruct features" // Added for accessibility
+          id="learn-more-button" 
+          aria-label="Learn more about CarbonConstruct features"
         >
           Learn More
         </Button>
