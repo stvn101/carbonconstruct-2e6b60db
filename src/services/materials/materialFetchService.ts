@@ -21,7 +21,7 @@ export async function fetchMaterials(): Promise<ExtendedMaterialData[]> {
       return cachedMaterials;
     }
     
-    console.log('Fetching all materials from API');
+    console.log('Fetching materials from API');
     const { data, error } = await supabase
       .from('materials')
       .select('*')
