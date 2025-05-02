@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import CalculatorHeader from "@/components/calculator/CalculatorHeader";
 import { useA11y } from "@/hooks/useA11y";
 import { useSimpleOfflineMode } from "@/hooks/useSimpleOfflineMode";
+import { CalculatorProvider } from "@/contexts/calculator";
 
 function Calculator() {
   const location = useLocation();
@@ -72,9 +73,11 @@ function Calculator() {
           </Alert>
         )}
         
-        <CarbonCalculator 
-          demoMode={!user || demoMode || isOffline}
-        />
+        <CalculatorProvider>
+          <CarbonCalculator 
+            demoMode={!user || demoMode || isOffline}
+          />
+        </CalculatorProvider>
       </main>
       <Footer />
     </div>
