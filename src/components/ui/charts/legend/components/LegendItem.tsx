@@ -6,6 +6,7 @@ interface LegendItemProps {
   item: {
     value: string;
     dataKey?: string;
+    color?: string;
     [key: string]: any;
   };
   nameKey?: string;
@@ -25,6 +26,7 @@ export const LegendItem: React.FC<LegendItemProps> = ({
   const itemConfig = key ? config[key] : null;
   
   const IconComponent = itemConfig?.icon;
+  const color = item.color || itemConfig?.color || '#3e9847'; // Default to a carbon color
 
   return (
     <li className={`flex items-center gap-2 text-sm ${className}`}>
@@ -33,7 +35,7 @@ export const LegendItem: React.FC<LegendItemProps> = ({
       ) : (
         <div 
           className="rounded-[2px] h-[10px] w-[10px]" 
-          style={{ backgroundColor: item.color }}
+          style={{ backgroundColor: color }}
         />
       )}
       <span className="text-foreground">
