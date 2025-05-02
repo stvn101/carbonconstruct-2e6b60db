@@ -35,7 +35,8 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     pagination, 
     updatePagination,
     totalCount,
-    refreshCache
+    refreshCache,
+    cacheStats
   } = useMaterialCache({
     usePagination,
     initialPagination: {
@@ -179,6 +180,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     totalMaterials: totalCount,
     loading,
     error,
-    isCategoriesLoading
+    isCategoriesLoading,
+    cacheStats
   };
 };
