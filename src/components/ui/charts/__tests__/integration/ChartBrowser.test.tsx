@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Chart } from '../../../chart';
+import { describe, test, expect, beforeEach } from 'vitest';
 
 // Mock window resize for responsive testing
 const mockMatchMedia = () => ({
@@ -11,8 +12,8 @@ const mockMatchMedia = () => ({
 });
 
 // Mock Recharts ResponsiveContainer to avoid dimension issues in tests
-jest.mock('recharts', () => {
-  const OriginalRechartsModule = jest.requireActual('recharts');
+vi.mock('recharts', () => {
+  const OriginalRechartsModule = vi.importActual('recharts');
   return {
     ...OriginalRechartsModule,
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
@@ -22,7 +23,7 @@ jest.mock('recharts', () => {
 });
 
 // Mock for window.matchMedia
-window.matchMedia = window.matchMedia || (query => mockMatchMedia());
+window.matchMedia = window.matchMedia || ((query) => mockMatchMedia() as MediaQueryList);
 
 describe('Chart Cross-Browser Integration', () => {
   const mockData = [

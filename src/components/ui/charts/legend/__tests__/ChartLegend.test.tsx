@@ -39,7 +39,7 @@ describe('ChartLegend Component', () => {
             { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
             { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
           ]} 
-          vertical={false}
+          layout="horizontal"
         />
       </MockContextWrapper>
     );
@@ -56,7 +56,7 @@ describe('ChartLegend Component', () => {
             { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
             { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
           ]} 
-          vertical={true}
+          layout="vertical"
         />
       </MockContextWrapper>
     );
