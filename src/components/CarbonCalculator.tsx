@@ -31,10 +31,18 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
   } = useCalculatorActions({ demoMode });
 
   // Handle error gracefully
-  if (error || !calculatorContext) {
+  if (error) {
     console.error("Calculator error:", error);
     return <CalculatorError />;
   }
+
+  // Ensure we have the calculator context
+  if (!calculatorContext) {
+    console.error("Calculator context is not available");
+    return <CalculatorError />;
+  }
+
+  console.log("CarbonCalculator rendering with calculatorContext:", calculatorContext.activeTab);
 
   return (
     <div className="container mx-auto px-4 md:px-6">

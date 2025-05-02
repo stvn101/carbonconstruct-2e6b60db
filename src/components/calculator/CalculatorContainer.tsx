@@ -1,10 +1,10 @@
 
 import React from "react";
-import CalculatorTabs from "./CalculatorTabs";
 import { CalculatorContextType } from "@/contexts/calculator/types";
-import { CalculationResult } from "@/lib/carbonCalculations";
 import ProjectNameInput from "./ProjectNameInput";
 import CalculatorSaveDialog from "./CalculatorSaveDialog";
+import CalculatorTabs from "./CalculatorTabs";
+import CalculatorTabContents from "./tabs/CalculatorTabContents";
 
 interface CalculatorContainerProps {
   projectName: string;
@@ -69,6 +69,25 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
           onSave={onSaveClick}
           isSaving={isSaving}
           isCalculating={isCalculating}
+          demoMode={demoMode}
+        />
+
+        {/* Add the tab contents here */}
+        <CalculatorTabContents
+          calculationInput={calculatorContext.calculationInput}
+          calculationResult={calculatorContext.calculationResult}
+          onUpdateMaterial={calculatorContext.handleUpdateMaterial}
+          onAddMaterial={calculatorContext.handleAddMaterial}
+          onRemoveMaterial={calculatorContext.handleRemoveMaterial}
+          onUpdateTransport={calculatorContext.handleUpdateTransport}
+          onAddTransport={calculatorContext.handleAddTransport}
+          onRemoveTransport={calculatorContext.handleRemoveTransport}
+          onUpdateEnergy={calculatorContext.handleUpdateEnergy}
+          onAddEnergy={calculatorContext.handleAddEnergy}
+          onRemoveEnergy={calculatorContext.handleRemoveEnergy}
+          onCalculate={calculatorContext.handleCalculate}
+          onPrev={calculatorContext.handlePrevTab}
+          onNext={calculatorContext.handleNextTab}
           demoMode={demoMode}
         />
       </div>
