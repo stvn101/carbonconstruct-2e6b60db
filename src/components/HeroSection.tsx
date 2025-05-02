@@ -16,6 +16,7 @@ const HeroSection = () => {
     
     // Also preload essential calculator components
     preloadComponent(() => import("@/components/CarbonCalculator"));
+    
     // Use the default export from calculator index
     preloadComponent(() => import("@/contexts/calculator"));
   }, []);
@@ -65,7 +66,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Calculate, track, and reduce your construction project's carbon footprint with our comprehensive platform.
+            Calculate, track, and reduce your construction project's carbon footprint with our powerful CO2e calculator.
           </motion.p>
           
           <motion.div 
