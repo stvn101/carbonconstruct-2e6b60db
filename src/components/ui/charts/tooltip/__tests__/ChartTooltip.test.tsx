@@ -1,43 +1,65 @@
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChartTooltip } from '../ChartTooltip';
-import { ChartContainer } from '../../ChartContainer';
+import { describe, test, expect, vi } from 'vitest';
 
 describe('ChartTooltip Component', () => {
-  // We need to use ChartContainer to provide context for the tooltip
-  const mockConfig = {
-    sales: { label: 'Sales' },
-    revenue: { label: 'Revenue' },
-  };
-
-  const MockTooltipWrapper = ({ children }: { children: React.ReactNode }) => (
-    <ChartContainer config={mockConfig}>
+  // Setup test chart config context
+  const MockContextWrapper = ({ children }: { children: React.ReactNode }) => (
+    <div>
       {children}
-    </ChartContainer>
+    </div>
   );
 
-  test('renders with basic props', () => {
+  const mockPayload = [
+    { name: 'Sales', value: 1000, dataKey: 'sales', color: '#3e9847' },
+    { name: 'Revenue', value: 2000, dataKey: 'revenue', color: '#25612d' }
+  ];
+
+  test('renders tooltip with label and values', () => {
     render(
-      <MockTooltipWrapper>
-        <ChartTooltip />
-      </MockTooltipWrapper>
+      <MockContextWrapper>
+        <ChartTooltip 
+          active={true}
+          payload={mockPayload}
+          label="Q1 2025"
+        />
+      </MockContextWrapper>
     );
     
-    // Basic test to ensure the component renders without crashing
-    // Since Recharts Tooltip is complex, we'll keep this test basic
+    expect(screen.getByText('Q1 2025')).toBeInTheDocument();
+    expect(screen.getByText('Sales')).toBeInTheDocument();
+    expect(screen.getByText('1000')).toBeInTheDocument();
+    expect(screen.getByText('Revenue')).toBeInTheDocument();
+    expect(screen.getByText('2000')).toBeInTheDocument();
   });
 
-  test('renders with custom content', () => {
-    const CustomContent = () => <div data-testid="custom-tooltip-content">Custom Tooltip</div>;
-    
-    render(
-      <MockTooltipWrapper>
-        <ChartTooltip content={<CustomContent />} />
-      </MockTooltipWrapper>
+  test('returns null when not active', () => {
+    const { container } = render(
+      <MockContextWrapper>
+        <ChartTooltip 
+          active={false}
+          payload={mockPayload}
+          label="Q1 2025"
+        />
+      </MockContextWrapper>
     );
     
-    // Custom content should be rendered when tooltip is active
-    // Since we can't easily trigger tooltip activation in tests,
-    // we'll focus on more detailed tests for our custom TooltipContent
+    expect(container.firstChild).toBeNull();
+  });
+
+  test('returns null with empty payload', () => {
+    const { container } = render(
+      <MockContextWrapper>
+        <ChartTooltip 
+          active={true}
+          payload={[]}
+          label="Q1 2025"
+        />
+      </MockContextWrapper>
+    );
+    
+    expect(container.firstChild).toBeNull();
   });
 });

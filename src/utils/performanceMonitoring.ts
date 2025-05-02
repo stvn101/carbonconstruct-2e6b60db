@@ -110,8 +110,8 @@ export const initializePerformanceMonitoring = () => {
   // Set up periodic memory checks
   const memoryCheckInterval = setInterval(checkMemoryUsage, 60000);
   
-  // Report standard web vitals
-  if ('web-vitals' in window) {
+  // Report standard web vitals - properly check if module is available
+  try {
     import('web-vitals').then(({ getCLS, getFID, getLCP }) => {
       getCLS(metric => {
         trackMetric({
@@ -133,7 +133,11 @@ export const initializePerformanceMonitoring = () => {
           value: metric.value
         });
       });
+    }).catch(err => {
+      console.log('Web vitals not available:', err.message);
     });
+  } catch (e) {
+    console.log('Web vitals import error:', e);
   }
   
   // Monitor long tasks

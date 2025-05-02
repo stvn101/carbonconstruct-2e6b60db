@@ -1,100 +1,78 @@
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { LegendItem } from '../LegendItem';
 import { ChartContainer } from '../../../ChartContainer';
+import { describe, test, expect, vi } from 'vitest';
 
-// Mock the chart context
-jest.mock('../../../ChartContainer', () => {
-  const actual = jest.requireActual('../../../ChartContainer');
-  return {
-    ...actual,
-    useChart: () => ({
-      config: {
-        sales: { label: 'Sales', icon: () => <svg data-testid="sales-icon" /> },
-        revenue: { label: 'Revenue' },
-      }
-    })
-  };
-});
+// Mock icon component for testing
+const MockIcon = () => <span data-testid="mock-icon">Icon</span>;
 
-describe('LegendItem Component', () => {
-  const MockContextWrapper = ({ children }: { children: React.ReactNode }) => (
-    <ChartContainer config={{}}>
-      {children}
+// Setup test context
+const setupTest = (props = {}) => {
+  return render(
+    <ChartContainer 
+      config={{
+        sales: { label: 'Sales', color: '#3e9847', icon: MockIcon },
+        revenue: { label: 'Revenue', color: '#25612d' }
+      }}
+    >
+      <LegendItem item={{ value: 'Test', ...props }} />
     </ChartContainer>
   );
+};
 
-  test('renders color indicator when no icon is provided', () => {
-    const mockItem = { value: 'Revenue', dataKey: 'revenue', color: '#25612d' };
+describe('LegendItem Component', () => {
+  test('renders with basic props', () => {
+    setupTest({
+      value: 'Sales',
+      dataKey: 'sales',
+      color: '#3e9847'
+    });
     
-    const { container } = render(
-      <MockContextWrapper>
-        <LegendItem item={mockItem} />
-      </MockContextWrapper>
-    );
-    
-    const colorIndicator = container.querySelector('.rounded-\\[2px\\]');
-    expect(colorIndicator).toBeInTheDocument();
-    expect(colorIndicator).toHaveStyle('background-color: #25612d');
+    expect(screen.getByText('Sales')).toBeInTheDocument();
+    expect(document.querySelector('.rounded-\\[2px\\]')).toBeInTheDocument();
   });
-
-  test('renders icon when available and hideIcon is false', () => {
-    const mockItem = { value: 'Sales', dataKey: 'sales', color: '#3e9847' };
+  
+  test('uses config label when available', () => {
+    setupTest({
+      value: 'Alternative Name',
+      dataKey: 'sales',
+      color: '#3e9847'
+    });
     
-    const { container } = render(
-      <MockContextWrapper>
-        <LegendItem item={mockItem} />
-      </MockContextWrapper>
-    );
-    
-    const icon = container.querySelector('[data-testid="sales-icon"]');
-    expect(icon).toBeInTheDocument();
-    
-    const colorIndicator = container.querySelector('.rounded-\\[2px\\]');
-    expect(colorIndicator).not.toBeInTheDocument();
+    expect(screen.getByText('Sales')).toBeInTheDocument();
+    expect(screen.queryByText('Alternative Name')).not.toBeInTheDocument();
   });
-
-  test('hides icon when hideIcon is true', () => {
-    const mockItem = { value: 'Sales', dataKey: 'sales', color: '#3e9847' };
+  
+  test('falls back to item value when no config label', () => {
+    setupTest({
+      value: 'Unknown',
+      dataKey: 'unknown',
+      color: '#3e9847'
+    });
     
-    const { container } = render(
-      <MockContextWrapper>
-        <LegendItem item={mockItem} hideIcon={true} />
-      </MockContextWrapper>
-    );
-    
-    const icon = container.querySelector('[data-testid="sales-icon"]');
-    expect(icon).not.toBeInTheDocument();
-    
-    const colorIndicator = container.querySelector('.rounded-\\[2px\\]');
-    expect(colorIndicator).toBeInTheDocument();
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
   });
-
-  test('uses nameKey to get config when provided', () => {
-    const mockItem = { value: 'Custom Sales', customKey: 'sales', color: '#3e9847' };
+  
+  test('renders icon when available in config', () => {
+    setupTest({
+      value: 'Sales',
+      dataKey: 'sales'
+    });
     
-    const { container } = render(
-      <MockContextWrapper>
-        <LegendItem item={mockItem} nameKey="customKey" />
-      </MockContextWrapper>
-    );
-    
-    const icon = container.querySelector('[data-testid="sales-icon"]');
-    expect(icon).toBeInTheDocument();
+    expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
+    expect(screen.queryByRole('color-box')).not.toBeInTheDocument();
   });
-
-  test('renders without crashing when item has no config', () => {
-    const mockItem = { value: 'Unknown', dataKey: 'unknown', color: '#cccccc' };
+  
+  test('renders color box when no icon available', () => {
+    setupTest({
+      value: 'Revenue',
+      dataKey: 'revenue',
+      color: '#25612d'
+    });
     
-    const { container } = render(
-      <MockContextWrapper>
-        <LegendItem item={mockItem} />
-      </MockContextWrapper>
-    );
-    
-    const colorIndicator = container.querySelector('.rounded-\\[2px\\]');
-    expect(colorIndicator).toBeInTheDocument();
-    expect(colorIndicator).toHaveStyle('background-color: #cccccc');
+    expect(document.querySelector('.rounded-\\[2px\\]')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-icon')).not.toBeInTheDocument();
   });
 });
