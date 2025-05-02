@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -7,8 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { MaterialInput, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { fetchMaterials } from "@/services/materialService";
-import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
+import { useMaterialCache } from '@/hooks/useMaterialCache';
 
 interface MaterialFormFieldsProps {
   material: MaterialInput;
@@ -26,28 +24,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
   onUpdate
 }) => {
   const isMobile = useIsMobile();
-  const [materials, setMaterials] = useState<ExtendedMaterialData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const loadMaterials = async () => {
-      try {
-        setIsLoading(true);
-        setLoadError(null);
-        const fetchedMaterials = await fetchMaterials();
-        setMaterials(fetchedMaterials);
-      } catch (err) {
-        console.error("Failed to load materials:", err);
-        setLoadError("Failed to load materials. Using defaults.");
-        // If error, use fallback static materials
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadMaterials();
-  }, []);
+  const { materials, loading: isLoading, error: loadError } = useMaterialCache();
   
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.select();
@@ -119,7 +96,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
         {loadError && (
           <div className="text-xs text-amber-600 mt-1 flex items-center">
             <AlertCircle className="h-3 w-3 mr-1" />
-            {loadError}
+            Error loading materials. Using fallback data.
           </div>
         )}
       </div>

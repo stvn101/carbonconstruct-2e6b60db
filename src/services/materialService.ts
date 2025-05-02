@@ -11,36 +11,88 @@ export interface SupabaseMaterial {
   category: string;
 }
 
+// Connection timeout values
+const CONNECTION_TIMEOUT = 15000; // 15 seconds
+const MAX_RETRIES = 2;
+
 /**
- * Fetch all materials from Supabase
+ * Fetch all materials from Supabase with optimized performance
  */
 export async function fetchMaterials(): Promise<ExtendedMaterialData[]> {
   return performDbOperation(
     async () => {
-      const { data, error } = await supabase
-        .from('materials')
-        .select('*');
+      console.time('Fetch materials');
       
-      if (error) throw error;
+      // Attempt to fetch with timeout
+      const fetchWithTimeout = async (retryCount = 0): Promise<ExtendedMaterialData[]> => {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), CONNECTION_TIMEOUT);
+          
+          const { data, error } = await supabase
+            .from('materials')
+            .select('*');
+          
+          clearTimeout(timeoutId);
+          
+          if (error) throw error;
+          if (!data) return [];
+          
+          // Process data in batches to avoid UI freezing
+          return processDataInBatches(data);
+          
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            console.warn(`Connection timeout. Retry ${retryCount + 1}/${MAX_RETRIES}`);
+            if (retryCount < MAX_RETRIES) {
+              return fetchWithTimeout(retryCount + 1);
+            }
+            console.error('Max retries reached. Using fallback data.');
+            return []; // Return empty array, the caller will use fallback data
+          }
+          throw err;
+        }
+      };
       
-      if (!data) return [];
-      
-      // Transform the data from Supabase format to our ExtendedMaterialData format
-      return data.map((material: SupabaseMaterial) => ({
-        name: material.name || 'Unknown',
-        factor: material.carbon_footprint_kgco2e_kg || 0,
-        unit: 'kg', // Default unit
-        region: 'Australia', // Default region for materials
-        tags: [material.category || 'construction'], // Use category as tag
-        sustainabilityScore: calculateSustainabilityScore(material.carbon_footprint_kgco2e_kg),
-        recyclability: determineRecyclability(material.category) as 'High' | 'Medium' | 'Low',
-        alternativeTo: undefined,
-        notes: ''
-      }));
+      const result = await fetchWithTimeout();
+      console.timeEnd('Fetch materials');
+      return result;
     },
     'fetch materials',
     { fallbackData: [] }
   );
+}
+
+/**
+ * Process data in batches to avoid UI freezing
+ */
+function processDataInBatches(data: SupabaseMaterial[]): ExtendedMaterialData[] {
+  const BATCH_SIZE = 50;
+  const result: ExtendedMaterialData[] = [];
+  
+  console.time('Process materials');
+  
+  for (let i = 0; i < data.length; i += BATCH_SIZE) {
+    const batch = data.slice(i, i + BATCH_SIZE);
+    
+    // Transform the batch from Supabase format to our ExtendedMaterialData format
+    const transformedBatch = batch.map((material: SupabaseMaterial) => ({
+      name: material.name || 'Unknown',
+      factor: material.carbon_footprint_kgco2e_kg || 0,
+      unit: 'kg', // Default unit
+      region: 'Australia', // Default region for materials
+      tags: [material.category || 'construction'], // Use category as tag
+      sustainabilityScore: calculateSustainabilityScore(material.carbon_footprint_kgco2e_kg),
+      recyclability: determineRecyclability(material.category) as 'High' | 'Medium' | 'Low',
+      alternativeTo: undefined,
+      notes: ''
+    }));
+    
+    result.push(...transformedBatch);
+  }
+  
+  console.timeEnd('Process materials');
+  return result;
 }
 
 /**
