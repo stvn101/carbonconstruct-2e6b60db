@@ -3,10 +3,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChartContainer, ChartConfig } from '../ChartContainer';
 import * as RechartsPrimitive from 'recharts';
+import { describe, test, expect, vi } from 'vitest';
 
 // Mock Recharts ResponsiveContainer to avoid dimension issues in tests
-jest.mock('recharts', () => {
-  const OriginalRechartsModule = jest.requireActual('recharts');
+vi.mock('recharts', () => {
+  const OriginalRechartsModule = vi.importActual('recharts');
   return {
     ...OriginalRechartsModule,
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (

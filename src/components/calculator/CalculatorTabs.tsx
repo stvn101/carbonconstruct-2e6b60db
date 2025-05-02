@@ -23,16 +23,16 @@ const CalculatorTabs = ({
   isCalculating,
   demoMode = false
 }: CalculatorTabsProps) => {
-  const { activeTab, setActiveTab } = calculatorContext;
+  const { activeTab } = calculatorContext;
   const { isMobile } = useIsMobile();
 
   // Function to safely handle tab changes
   const handleTabChange = (newTab: string) => {
-    if (typeof setActiveTab === 'function') {
-      setActiveTab(newTab as any);
+    if (typeof calculatorContext.setActiveTab === 'function') {
+      calculatorContext.setActiveTab(newTab as any);
       console.log(`Tab changed to: ${newTab}`);
     } else {
-      console.error("setActiveTab is not a function", setActiveTab);
+      console.error("setActiveTab is not a function", calculatorContext.setActiveTab);
     }
   };
 
