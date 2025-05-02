@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchMaterials, fetchMaterialsWithPagination, MaterialPagination } from '@/services/materialService';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MATERIAL_FACTORS } from '@/lib/materials';
-import { getCacheMetadata, clearMaterialsCache } from '@/services/materialCache';
+import { getCacheMetadata, clearMaterialsCache } from '@/services/materialService';
 import { useThrottle } from './useDebounce';
 
 // Singleton cache for materials across the application
