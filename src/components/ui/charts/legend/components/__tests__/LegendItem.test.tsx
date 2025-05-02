@@ -60,7 +60,7 @@ describe('LegendItem Component', () => {
     
     const { container } = render(
       <MockContextWrapper>
-        <LegendItem item={hideIcon={true} />
+        <LegendItem item={mockItem} hideIcon={true} />
       </MockContextWrapper>
     );
     
