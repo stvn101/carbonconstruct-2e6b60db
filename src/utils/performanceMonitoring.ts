@@ -1,4 +1,3 @@
-
 // Define an extended Performance interface that includes memory
 interface ExtendedPerformance extends Performance {
   memory?: {
@@ -143,59 +142,69 @@ export const initializePerformanceMonitoring = () => {
   // Set up periodic memory checks
   const memoryCheckInterval = setInterval(checkMemoryUsage, 60000);
   
-  // Report standard web vitals - properly check if module is available
-  try {
-    import('web-vitals').then(({ getCLS, getFID, getLCP }) => {
-      getCLS(metric => {
-        trackMetric({
-          metric: 'cls',
-          value: metric.value
+  // Only try to report web vitals if window is defined
+  if (typeof window !== 'undefined') {
+    // Report standard web vitals - properly check if module is available
+    try {
+      import('web-vitals').then(({ getCLS, getFID, getLCP }) => {
+        getCLS(metric => {
+          trackMetric({
+            metric: 'cls',
+            value: metric.value
+          });
         });
-      });
-      
-      getFID(metric => {
-        trackMetric({
-          metric: 'fid',
-          value: metric.value
+        
+        getFID(metric => {
+          trackMetric({
+            metric: 'fid',
+            value: metric.value
+          });
         });
-      });
-      
-      getLCP(metric => {
-        trackMetric({
-          metric: 'lcp',
-          value: metric.value
+        
+        getLCP(metric => {
+          trackMetric({
+            metric: 'lcp',
+            value: metric.value
+          });
         });
+      }).catch(err => {
+        console.log('Web vitals not available:', err.message);
       });
-    }).catch(err => {
-      console.log('Web vitals not available:', err.message);
-    });
-  } catch (e) {
-    console.log('Web vitals import error:', e);
+    } catch (e) {
+      console.log('Web vitals import error:', e);
+    }
   }
   
-  // Monitor long tasks
-  const observer = new PerformanceObserver((list) => {
-    list.getEntries().forEach((entry) => {
-      if (entry.duration > 50) {  // 50ms+ indicates potential jank
-        trackMetric({
-          metric: 'long_task',
-          value: entry.duration,
-          tags: { name: entry.name }
-        });
-      }
+  // Monitor long tasks if PerformanceObserver is available
+  if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
+    const observer = new PerformanceObserver((list) => {
+      list.getEntries().forEach((entry) => {
+        if (entry.duration > 50) {  // 50ms+ indicates potential jank
+          trackMetric({
+            metric: 'long_task',
+            value: entry.duration,
+            tags: { name: entry.name }
+          });
+        }
+      });
     });
-  });
-  
-  try {
-    observer.observe({ entryTypes: ['longtask'] });
-  } catch (e) {
-    console.log('LongTask monitoring not supported in this browser');
+    
+    try {
+      observer.observe({ entryTypes: ['longtask'] });
+      
+      // Return cleanup function
+      return () => {
+        clearInterval(memoryCheckInterval);
+        observer.disconnect();
+      };
+    } catch (e) {
+      console.log('LongTask monitoring not supported in this browser');
+    }
   }
   
-  // Return cleanup function
+  // Return basic cleanup if PerformanceObserver wasn't initialized
   return () => {
     clearInterval(memoryCheckInterval);
-    observer.disconnect();
   };
 };
 

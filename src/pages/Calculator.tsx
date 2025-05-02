@@ -97,6 +97,15 @@ function Calculator() {
     }, 100);
   };
 
+  // Debug logs to help pinpoint issues
+  console.log("Calculator rendering state:", { 
+    user: !!user, 
+    demoMode, 
+    isOffline, 
+    calculatorReady,
+    effectiveDemoMode: !user || demoMode || isOffline
+  });
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
