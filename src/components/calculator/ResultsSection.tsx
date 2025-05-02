@@ -12,9 +12,9 @@ import CalculatorResults from "../CalculatorResults";
 import RecommendationsSection from "../RecommendationsSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateSuggestions } from "@/lib/sustainabilitySuggestions";
-import { Loader, Info, AlertCircle } from "lucide-react";
+import { Loader, Info, AlertCircle, RefreshCw } from "lucide-react";
 import { useCalculator } from "@/contexts/calculator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ResultsSectionProps {
   calculationResult: CalculationResult | null;
@@ -35,8 +35,8 @@ const ResultsSection = ({
   onPrev,
   demoMode = false
 }: ResultsSectionProps) => {
-  // Access calculator context to get isCalculating status
-  const { isCalculating } = useCalculator();
+  // Access calculator context to get isCalculating status and error state
+  const { isCalculating, calculationError, resetCalculationErrors } = useCalculator();
   
   // Combine all inputs for the calculation
   const calculationInput: CalculationInput = {
@@ -60,6 +60,7 @@ const ResultsSection = ({
   console.log("ResultsSection rendering:");
   console.log("- isCalculating:", isCalculating);
   console.log("- calculationResult:", calculationResult);
+  console.log("- calculationError:", calculationError);
   console.log("- hasValidMaterials:", hasValidMaterials);
   console.log("- hasValidTransport:", hasValidTransport);
   console.log("- hasValidEnergy:", hasValidEnergy);
@@ -67,6 +68,12 @@ const ResultsSection = ({
   
   // Generate suggestions based on the result
   const suggestions = calculationResult ? generateSuggestions(calculationResult) : [];
+  
+  // Handler to retry calculation
+  const handleRetryCalculation = () => {
+    resetCalculationErrors();
+    onCalculate();
+  };
   
   return (
     <div className="space-y-12 sm:space-y-16"> {/* increased overall vertical spacing */}
@@ -89,7 +96,29 @@ const ResultsSection = ({
         </div>
       )}
       
-      {!isCalculating && !calculationResult && (
+      {/* Display calculation errors */}
+      {!isCalculating && calculationError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Calculation Error</AlertTitle>
+          <AlertDescription>
+            {calculationError.message}
+            <div className="mt-4">
+              <Button 
+                onClick={handleRetryCalculation} 
+                variant="outline" 
+                size="sm"
+                className="bg-destructive/10 border-destructive/30 hover:bg-destructive/20"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {!isCalculating && !calculationError && !calculationResult && (
         <div className="text-center p-8">
           <h3 className="text-xl font-medium mb-4">Ready to Calculate Results</h3>
           <p className="mb-6 text-muted-foreground">
@@ -120,7 +149,7 @@ const ResultsSection = ({
         </div>
       )}
       
-      {!isCalculating && hasEmptyResult && (
+      {!isCalculating && !calculationError && hasEmptyResult && (
         <div className="text-center p-8">
           <AlertCircle className="h-16 w-16 mx-auto mb-4 text-yellow-500" />
           <h3 className="text-xl font-medium mb-2">No Results Found</h3>
@@ -148,7 +177,7 @@ const ResultsSection = ({
         </div>
       )}
       
-      {!isCalculating && calculationResult && !hasEmptyResult && (
+      {!isCalculating && !calculationError && calculationResult && !hasEmptyResult && (
         <div>
           {/* Added space on top to separate tabs from previous content */}
           <Tabs defaultValue="results" className="mt-16 sm:mt-20 md:mt-16"> 
