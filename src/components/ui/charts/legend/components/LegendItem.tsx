@@ -5,7 +5,7 @@ import { useChart } from '../../ChartContainer';
 interface LegendItemProps {
   item: {
     value: string;
-    dataKey?: string;
+    dataKey?: string | number;
     color?: string;
     [key: string]: any;
   };

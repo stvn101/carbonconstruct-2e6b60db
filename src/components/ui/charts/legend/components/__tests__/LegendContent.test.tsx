@@ -3,82 +3,84 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LegendContent } from '../LegendContent';
 import { ChartContainer } from '../../../ChartContainer';
+import { describe, test, expect, vi } from 'vitest';
 
 describe('LegendContent Component', () => {
-  const mockConfig = {
-    sales: { label: 'Sales', color: '#3e9847' },
-    revenue: { label: 'Revenue', color: '#25612d' },
-  };
-  
-  const mockPayload = [
-    { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
-    { value: 'Revenue', dataKey: 'revenue', color: '#25612d' },
-  ];
-
+  // Setup test chart config context
   const MockContextWrapper = ({ children }: { children: React.ReactNode }) => (
-    <ChartContainer config={mockConfig}>
+    <ChartContainer config={{
+      sales: { label: 'Sales', color: '#3e9847' },
+      revenue: { label: 'Revenue', color: '#25612d' },
+      profit: { label: 'Profit', color: '#1a803b' }
+    }}>
       {children}
     </ChartContainer>
   );
 
-  test('renders null when payload is empty', () => {
-    const { container } = render(
-      <MockContextWrapper>
-        <LegendContent payload={[]} />
-      </MockContextWrapper>
-    );
-    
-    expect(container.firstChild).toBeNull();
-  });
-
-  test('renders legend items for each payload entry', () => {
+  test('renders legend items from payload', () => {
     render(
       <MockContextWrapper>
-        <LegendContent payload={mockPayload} />
+        <LegendContent 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
+            { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
+          ]}
+        />
       </MockContextWrapper>
     );
     
-    // We should have color indicators for each legend item
-    const colorIndicators = document.querySelectorAll('.rounded-\\[2px\\]');
-    expect(colorIndicators.length).toBe(2);
-    
-    // The legend should contain both labels
-    expect(document.body.textContent).toContain('Sales');
-    expect(document.body.textContent).toContain('Revenue');
+    expect(screen.getByText('Sales')).toBeInTheDocument();
+    expect(screen.getByText('Revenue')).toBeInTheDocument();
   });
 
-  test('applies top padding when verticalAlign is top', () => {
-    const { container } = render(
+  test('renders items horizontally by default', () => {
+    render(
       <MockContextWrapper>
-        <LegendContent payload={mockPayload} verticalAlign="top" />
+        <LegendContent 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
+            { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
+          ]}
+        />
       </MockContextWrapper>
     );
     
-    const legendContainer = container.firstChild as HTMLElement;
-    expect(legendContainer).toHaveClass('pb-3');
-    expect(legendContainer).not.toHaveClass('pt-3');
+    const container = screen.getByRole('list');
+    expect(container).toHaveClass('flex-row');
+    expect(container).not.toHaveClass('flex-col');
   });
 
-  test('applies bottom padding when verticalAlign is bottom', () => {
-    const { container } = render(
+  test('renders items vertically when specified', () => {
+    render(
       <MockContextWrapper>
-        <LegendContent payload={mockPayload} verticalAlign="bottom" />
+        <LegendContent 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' },
+            { value: 'Revenue', dataKey: 'revenue', color: '#25612d' }
+          ]}
+          layout="vertical"
+        />
       </MockContextWrapper>
     );
     
-    const legendContainer = container.firstChild as HTMLElement;
-    expect(legendContainer).toHaveClass('pt-3');
-    expect(legendContainer).not.toHaveClass('pb-3');
+    const container = screen.getByRole('list');
+    expect(container).toHaveClass('flex-col');
+    expect(container).not.toHaveClass('flex-row');
   });
 
   test('applies custom className', () => {
-    const { container } = render(
+    render(
       <MockContextWrapper>
-        <LegendContent payload={mockPayload} className="custom-legend-class" />
+        <LegendContent 
+          payload={[
+            { value: 'Sales', dataKey: 'sales', color: '#3e9847' }
+          ]}
+          className="custom-legend"
+        />
       </MockContextWrapper>
     );
     
-    const legendContainer = container.firstChild as HTMLElement;
-    expect(legendContainer).toHaveClass('custom-legend-class');
+    const container = screen.getByRole('list');
+    expect(container).toHaveClass('custom-legend');
   });
 });

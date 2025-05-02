@@ -4,7 +4,7 @@ import { LegendItem } from './components/LegendItem';
 import { useChart } from '../ChartContainer';
 
 export interface ChartLegendProps {
-  payload?: Array<{ value: string; dataKey?: string; color: string; [key: string]: any }>;
+  payload?: Array<{ value: string; dataKey?: string | number; color: string; [key: string]: any }>;
   layout?: 'vertical' | 'horizontal';
   className?: string;
 }
