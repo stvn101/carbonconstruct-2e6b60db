@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useEffect, lazy, Suspense } from "react";
 import { preloadComponent } from "@/utils/lazyLoad";
@@ -90,7 +89,7 @@ const Index = () => {
           setTimeout(() => {
             element.scrollIntoView({ behavior: 'smooth' });
             console.log(`Scrolled to hash target: #${id}`);
-          }, 500); // Add delay for more reliable scrolling
+          }, 800); // Increased delay for more reliable scrolling
         }
       });
     }
@@ -106,7 +105,7 @@ const Index = () => {
           console.warn(`Section #${sectionId} not found in DOM`);
         }
       });
-    }, 300);
+    }, 500); // Increased from 300 to give more time
 
     return () => {
       sectionObserver.disconnect();
@@ -133,7 +132,7 @@ const Index = () => {
           <HeroSection />
           <CalculatorDemoVideo />
           
-          {/* Import FeaturesSection directly instead of lazy loading */}
+          {/* Import FeaturesSection directly */}
           <FeaturesSection />
 
           {/* --- Begin Replacement for TestimonialsSection --- */}
