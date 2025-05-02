@@ -1,4 +1,3 @@
-
 import { Leaf, Info } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -28,8 +27,9 @@ const FeatureCard = ({ icon: Icon, title, description, items, explanationContent
           boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
         }}
         transition={{ duration: 0.2 }}
+        className="h-full" // Ensure motion div is full height
       >
-        <Card className="border-carbon-100 h-full overflow-hidden group hover:border-carbon-300 transition-colors duration-300 bg-white dark:bg-gray-800">
+        <Card className="border-carbon-100 h-full flex flex-col overflow-hidden group hover:border-carbon-300 transition-colors duration-300 bg-white dark:bg-gray-800">
           <CardHeader className="pb-2 relative">
             <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-carbon-100 group-hover:bg-carbon-200 transition-colors duration-300">
               <Icon className="h-5 w-5 text-carbon-700 group-hover:text-carbon-800 transition-all duration-300" />
@@ -45,11 +45,11 @@ const FeatureCard = ({ icon: Icon, title, description, items, explanationContent
               transition={{ duration: 0.3 }}
             />
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             <p className="text-sm text-muted-foreground group-hover:text-carbon-700 dark:group-hover:text-carbon-300 transition-colors duration-300">
               {description}
             </p>
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-2 flex-1">
               {items.map((item, index) => (
                 <motion.li 
                   key={index}
