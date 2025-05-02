@@ -10,8 +10,10 @@ import CalculatorDemoVideo from "@/components/CalculatorDemoVideo";
 import { useA11y } from "@/hooks/useA11y";
 import Footer from "@/components/Footer"; // Direct import to avoid lazy loading issues
 
-// Lazy load non-critical components
-const FeaturesSection = lazy(() => import("@/components/FeaturesSection"));
+// Preload the features component to ensure it's available when scrolling
+import FeaturesSection from "@/components/FeaturesSection";
+
+// Lazy load other non-critical components
 const BenefitsSection = lazy(() => import("@/components/BenefitsSection"));
 const CTASection = lazy(() => import("@/components/CTASection"));
 
@@ -29,6 +31,7 @@ const Index = () => {
   });
 
   useEffect(() => {
+    // Register an intersection observer to detect when sections come into view
     const sections = ['learn-more', 'features', 'testimonials', 'demo'];
 
     const observerOptions = {
@@ -41,6 +44,7 @@ const Index = () => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const sectionId = entry.target.id;
+          console.log(`Section ${sectionId} is now visible`);
 
           if (typeof window !== 'undefined') {
             if ('requestIdleCallback' in window) {
@@ -77,22 +81,32 @@ const Index = () => {
       });
     }, observerOptions);
 
-    sections.forEach(sectionId => {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        sectionObserver.observe(element);
-      }
-    });
-
+    // Also handle direct navigation to sections via hash
     if (window.location.hash) {
       requestAnimationFrame(() => {
         const id = window.location.hash.substring(1);
         const element = document.getElementById(id);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth' });
+            console.log(`Scrolled to hash target: #${id}`);
+          }, 500); // Add delay for more reliable scrolling
         }
       });
     }
+
+    // Start observing sections after a small delay to ensure they're rendered
+    setTimeout(() => {
+      sections.forEach(sectionId => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          sectionObserver.observe(element);
+          console.log(`Now observing section: #${sectionId}`);
+        } else {
+          console.warn(`Section #${sectionId} not found in DOM`);
+        }
+      });
+    }, 300);
 
     return () => {
       sectionObserver.disconnect();
@@ -118,9 +132,9 @@ const Index = () => {
         <div className="overflow-x-hidden w-full">
           <HeroSection />
           <CalculatorDemoVideo />
-          <Suspense fallback={<div className="h-20" />}>
-            <FeaturesSection />
-          </Suspense>
+          
+          {/* Import FeaturesSection directly instead of lazy loading */}
+          <FeaturesSection />
 
           {/* --- Begin Replacement for TestimonialsSection --- */}
           <section className="py-8 md:py-16 bg-gray-50 dark:bg-gray-800">

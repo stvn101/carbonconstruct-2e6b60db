@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
 import { m as motion } from "framer-motion";
@@ -12,13 +11,30 @@ const HeroContent = () => {
   const navigate = useNavigate();
   const { scrollToElement } = useScrollTo();
 
+  // Preload the features section when the component mounts
+  const preloadFeaturesSection = () => {
+    import("@/components/FeaturesSection").then(() => {
+      console.log("Features section preloaded successfully");
+    }).catch(err => {
+      console.error("Failed to preload Features section:", err);
+    });
+  };
+
+  // Attempt to preload after a short delay
+  React.useEffect(() => {
+    const timer = setTimeout(preloadFeaturesSection, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleLearnMore = () => {
     console.log("Learn More button clicked, attempting to scroll to features section");
-    // Use enhanced scrollToElement with multiple attempts and delay
+    
+    // Use enhanced scrollToElement with better defaults for lazy-loaded content
     scrollToElement('features', { 
-      offset: 90, // Increased offset to account for the fixed header
-      attempts: 5, // Try up to 5 times
-      delay: 200 // Longer initial delay for lazy-loaded components to render
+      offset: 100,       // Increased offset to account for the fixed header
+      attempts: 10,      // Try up to 10 times (increased from 5)
+      delay: 250,        // Increased delay between attempts (from 200)
+      initialDelay: 400  // Longer initial delay for lazy-loaded components to render
     })();
   };
 
@@ -66,6 +82,8 @@ const HeroContent = () => {
           variant="outline" 
           onClick={handleLearnMore}
           className="border-carbon-500 text-carbon-800 hover:bg-carbon-100 dark:text-carbon-200 dark:hover:bg-carbon-800/50 transition-transform duration-200 hover:scale-105"
+          id="learn-more-button" // Added ID for easier debugging
+          aria-label="Learn more about CarbonConstruct features" // Added for accessibility
         >
           Learn More
         </Button>

@@ -6,6 +6,7 @@ interface ScrollOptions {
   behavior?: ScrollBehavior;
   attempts?: number;
   delay?: number;
+  initialDelay?: number;
 }
 
 export const useScrollTo = () => {
@@ -13,8 +14,9 @@ export const useScrollTo = () => {
     const { 
       offset = 80, 
       behavior = 'smooth',
-      attempts = 5,
-      delay = 100
+      attempts = 10, // Increased from 5 to 10
+      delay = 200,   // Increased from 100 to 200
+      initialDelay = 300 // Added new initialDelay parameter
     } = options;
     
     return (e?: React.MouseEvent) => {
@@ -22,15 +24,29 @@ export const useScrollTo = () => {
         e.preventDefault();
       }
       
+      // Log for debugging
+      console.log(`Attempting to scroll to #${elementId} with initialDelay: ${initialDelay}ms`);
+      
       // Try to find the element multiple times with a delay
       // This helps with lazy-loaded components
       let currentAttempt = 0;
       
       const attemptScroll = () => {
-        const element = document.getElementById(elementId);
+        // Try with getElementById first (most common)
+        let element = document.getElementById(elementId);
+        
+        // If that fails, try with querySelector for more flexibility
+        if (!element) {
+          element = document.querySelector(`[id="${elementId}"]`);
+        }
+        
+        // Also try with data-section attribute as fallback
+        if (!element) {
+          element = document.querySelector(`[data-section="${elementId}"]`);
+        }
         
         if (element) {
-          console.log(`Found element ${elementId}, scrolling now...`);
+          console.log(`Found element ${elementId} on attempt ${currentAttempt + 1}, scrolling now...`);
           const elementPosition = element.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - offset;
           
@@ -38,6 +54,10 @@ export const useScrollTo = () => {
             top: offsetPosition,
             behavior
           });
+          
+          // Force focus on the element for accessibility
+          element.setAttribute('tabindex', '-1');
+          element.focus({ preventScroll: true });
           
           // Log success for debugging
           console.log(`Scrolled to ${elementId} at position ${offsetPosition}`);
@@ -54,8 +74,9 @@ export const useScrollTo = () => {
         }
       };
       
-      // Add a small delay before the first attempt to ensure React has updated the DOM
-      setTimeout(attemptScroll, delay);
+      // Add the initial delay before the first attempt to ensure React has updated the DOM
+      // This is crucial for lazy-loaded components
+      setTimeout(attemptScroll, initialDelay);
     };
   }, []);
 
