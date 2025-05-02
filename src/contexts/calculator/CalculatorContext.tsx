@@ -13,10 +13,9 @@ import {
   handleUpdateEnergy,
   handleRemoveEnergy
 } from "@/utils/calculatorHandlers";
-import { validateCalculationInput, ValidationError } from "@/utils/calculatorValidation";
+import { validateCalculationInput } from "@/utils/calculatorValidation";
 import { toast } from "sonner";
 import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonTypes";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {
   materials: [{ type: "concrete", quantity: 1000 }],
@@ -30,8 +29,6 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [calculationInput, setCalculationInput] = useState<CalculationInput>(DEFAULT_CALCULATION_INPUT);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<'materials' | 'transport' | 'energy' | 'results'>('materials');
-  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
-  const { isOnline } = useNetworkStatus();
 
   useEffect(() => {
     console.log("Active tab changed to:", activeTab);
@@ -39,64 +36,49 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const handleCalculate = useCallback(() => {
     try {
-      if (!isOnline) {
+      if (!navigator.onLine) {
         toast.error("You're offline. Cannot perform calculations.");
         return;
       }
       
       const errors = validateCalculationInput(calculationInput);
       if (errors.length > 0) {
-        setValidationErrors(errors);
-        const errorMessages = errors.map(e => e.message);
-        toast.error(errorMessages[0]);
+        toast.error(errors[0].message);
         return;
       }
-      
-      setValidationErrors([]);
       
       const result = calculateTotalEmissions(calculationInput);
       setCalculationResult(result);
       
-      console.log('Calculation completed:', {
-        input: calculationInput,
-        result: result
-      });
+      console.log('Calculation completed with result:', result.totalEmissions);
     } catch (error) {
       console.error("Error calculating emissions:", error);
       toast.error("Error calculating emissions. Please check your inputs.");
     }
-  }, [calculationInput, isOnline]);
+  }, [calculationInput]);
 
   const handleNextTab = useCallback(() => {
-    console.log(`Current tab: ${activeTab}, moving to next tab`);
     if (activeTab === "materials") {
       setActiveTab("transport");
-      console.log("Tab set to transport");
     }
     else if (activeTab === "transport") {
       setActiveTab("energy");
-      console.log("Tab set to energy");
     }
     else if (activeTab === "energy") {
       handleCalculate();
       setActiveTab("results");
-      console.log("Tab set to results");
     }
   }, [activeTab, handleCalculate]);
 
   const handlePrevTab = useCallback(() => {
-    console.log(`Current tab: ${activeTab}, moving to previous tab`);
     if (activeTab === "transport") {
       setActiveTab("materials");
-      console.log("Tab set to materials");
     }
     else if (activeTab === "energy") {
       setActiveTab("transport");
-      console.log("Tab set to transport");
     }
     else if (activeTab === "results") {
       setActiveTab("energy");
-      console.log("Tab set to energy");
     }
   }, [activeTab]);
 
@@ -107,7 +89,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setCalculationResult,
     activeTab,
     setActiveTab,
-    validationErrors,
+    validationErrors: [],
     handleAddMaterial: () => setCalculationInput(current => handleAddMaterial(current)),
     handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: any) => 
       setCalculationInput(current => handleUpdateMaterial(current, index, field, value)),
@@ -126,7 +108,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     handleCalculate,
     handleNextTab,
     handlePrevTab
-  }), [calculationInput, calculationResult, activeTab, validationErrors, handleCalculate, handleNextTab, handlePrevTab]);
+  }), [calculationInput, calculationResult, activeTab, handleCalculate, handleNextTab, handlePrevTab]);
 
   return (
     <CalculatorContext.Provider value={contextValue}>

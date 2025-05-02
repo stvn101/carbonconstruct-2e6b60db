@@ -25,7 +25,9 @@ export const protectedRoutes = (
     } />
     <Route path="/materials" element={
       <ErrorBoundary feature="Materials">
-        <MaterialDatabase />
+        <RequireAuth>
+          <MaterialDatabase />
+        </RequireAuth>
       </ErrorBoundary>
     } />
     <Route path="/notifications" element={

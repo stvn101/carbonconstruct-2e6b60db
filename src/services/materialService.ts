@@ -1,16 +1,14 @@
 
 /**
- * Material Service - Main entry point for material-related services
- * Re-exports all functionality from the modularized services
+ * Simplified Material Service - Main entry point for material-related services
  */
 
 // Re-export types
-export type { MaterialPagination, SupabaseMaterial } from './materials/materialTypes';
+export type { SupabaseMaterial } from './materials/materialTypes';
 
 // Re-export data fetch functions
 export { 
   fetchMaterials, 
-  fetchMaterialsWithPagination, 
   fetchMaterialCategories 
 } from './materials/materialFetchService';
 
