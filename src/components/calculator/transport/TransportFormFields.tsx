@@ -38,9 +38,9 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end border border-carbon-100 p-3 md:p-4 rounded-lg">
-      <div className="w-full">
-        <Label htmlFor={`transport-type-${index}`} className="text-xs md:text-sm">Transport Type</Label>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start border border-carbon-100 p-3 md:p-4 rounded-lg">
+      <div className="w-full flex flex-col">
+        <Label htmlFor={`transport-type-${index}`} className="text-xs md:text-sm mb-1.5">Transport Type</Label>
         <Select
           value={transport.type}
           onValueChange={(value) => onUpdate("type", value)}
@@ -48,7 +48,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
           <SelectTrigger 
             id={`transport-type-${index}`}
             name={`transport-type-${index}`}
-            className="mt-1 border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm"
+            className="border-carbon-200 focus:ring-carbon-500 text-xs md:text-sm h-10"
           >
             <SelectValue placeholder="Select transport" />
           </SelectTrigger>
@@ -63,7 +63,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
       </div>
       
       <div className="w-full">
-        <Label htmlFor={`transport-distance-${index}`} className="text-xs md:text-sm">
+        <Label htmlFor={`transport-distance-${index}`} className="text-xs md:text-sm mb-1.5 block">
           Distance (km)
         </Label>
         <Input
@@ -73,7 +73,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
           value={transport.distance === 0 ? '' : transport.distance}
           onChange={(e) => onUpdate("distance", e.target.value)}
           onFocus={handleFocus}
-          className={`mt-1 text-xs md:text-sm ${getInputValidationClass('distance')}`}
+          className={`text-xs md:text-sm ${getInputValidationClass('distance')}`}
           aria-invalid={!!errors?.distance}
           aria-describedby={errors?.distance ? `transport-distance-error-${index}` : undefined}
         />
@@ -91,7 +91,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
       </div>
       
       <div className="w-full sm:col-span-2">
-        <Label htmlFor={`transport-weight-${index}`} className="text-xs md:text-sm">
+        <Label htmlFor={`transport-weight-${index}`} className="text-xs md:text-sm mb-1.5 block">
           Weight (kg)
         </Label>
         <Input
@@ -101,7 +101,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
           value={transport.weight === 0 ? '' : transport.weight}
           onChange={(e) => onUpdate("weight", e.target.value)}
           onFocus={handleFocus}
-          className={`mt-1 text-xs md:text-sm ${getInputValidationClass('weight')}`}
+          className={`text-xs md:text-sm ${getInputValidationClass('weight')}`}
           aria-invalid={!!errors?.weight}
           aria-describedby={errors?.weight ? `transport-weight-error-${index}` : undefined}
         />
