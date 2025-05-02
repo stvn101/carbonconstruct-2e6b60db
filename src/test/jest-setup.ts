@@ -26,7 +26,7 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 // Custom IntersectionObserver mock for testing
-class MockIntersectionObserver {
+class MockIntersectionObserver implements IntersectionObserver {
   readonly root: Element | null = null;
   readonly rootMargin: string = "";
   readonly thresholds: ReadonlyArray<number> = [];
@@ -40,7 +40,7 @@ class MockIntersectionObserver {
 }
 
 // Assign our custom mock to global
-global.IntersectionObserver = MockIntersectionObserver;
+global.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
 // Ignore errors related to Recharts and SVG rendering
 const originalConsoleError = console.error;

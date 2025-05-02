@@ -1,3 +1,33 @@
+// Define an extended Performance interface that includes memory
+interface ExtendedPerformance extends Performance {
+  memory?: {
+    jsHeapSizeLimit: number;
+    totalJSHeapSize: number;
+    usedJSHeapSize: number;
+  };
+}
+
+export const monitorMemoryUsage = (): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Cast performance to our extended type
+    const performance = window.performance as ExtendedPerformance;
+    
+    if (performance && performance.memory) {
+      const { jsHeapSizeLimit, totalJSHeapSize, usedJSHeapSize } = performance.memory;
+      
+      console.debug('[Performance] Memory:', {
+        used: Math.round(usedJSHeapSize / 1048576), // Convert to MB
+        total: Math.round(totalJSHeapSize / 1048576),
+        limit: Math.round(jsHeapSizeLimit / 1048576),
+        percentUsed: Math.round((usedJSHeapSize / jsHeapSizeLimit) * 100)
+      });
+    }
+  } catch (error) {
+    console.debug('[Performance] Memory monitoring not available:', error);
+  }
+};
 
 /**
  * Enhanced performance monitoring for application scaling

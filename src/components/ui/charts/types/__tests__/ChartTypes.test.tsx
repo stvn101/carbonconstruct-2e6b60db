@@ -45,9 +45,10 @@ describe('Chart Type Components', () => {
     index: 'name',
     colors: ['#3e9847'],
     showLegend: true,
+    type: 'bar', // Add missing type property
   };
 
-  const MockWrapper = ({ children }: { children: React.ReactNode }) => (
+  const MockWrapper = ({ children }: { children: React.ReactElement }) => (
     <ChartContainer config={mockConfig}>
       {children}
     </ChartContainer>
@@ -56,7 +57,7 @@ describe('Chart Type Components', () => {
   test('BarChartComponent renders properly', () => {
     render(
       <MockWrapper>
-        <BarChartComponent {...mockProps} />
+        <BarChartComponent {...mockProps} type="bar" />
       </MockWrapper>
     );
     
@@ -69,7 +70,7 @@ describe('Chart Type Components', () => {
   test('LineChartComponent renders properly', () => {
     render(
       <MockWrapper>
-        <LineChartComponent {...mockProps} />
+        <LineChartComponent {...mockProps} type="line" />
       </MockWrapper>
     );
     
@@ -82,7 +83,7 @@ describe('Chart Type Components', () => {
   test('AreaChartComponent renders properly', () => {
     render(
       <MockWrapper>
-        <AreaChartComponent {...mockProps} />
+        <AreaChartComponent {...mockProps} type="area" />
       </MockWrapper>
     );
     
@@ -95,7 +96,7 @@ describe('Chart Type Components', () => {
   test('PieChartComponent renders properly', () => {
     render(
       <MockWrapper>
-        <PieChartComponent {...mockProps} />
+        <PieChartComponent {...mockProps} type="pie" />
       </MockWrapper>
     );
     
@@ -107,7 +108,7 @@ describe('Chart Type Components', () => {
     
     render(
       <MockWrapper>
-        <BarChartComponent {...mockProps} valueFormatter={valueFormatter} />
+        <BarChartComponent {...mockProps} type="bar" valueFormatter={valueFormatter} />
       </MockWrapper>
     );
     

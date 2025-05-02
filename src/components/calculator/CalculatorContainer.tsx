@@ -46,12 +46,15 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
   isExistingProject,
   calculatorContext
 }) => {
-  // Remove the redundant setIsCalculating function call that's causing the infinite loop
-  const handleCalculate = () => {
+  // Fix: Use calculatorContext's handleCalculate directly to avoid React state update inside render
+  const handleCalculate = React.useCallback(() => {
+    // Use setTimeout to avoid React state update during render
     setTimeout(() => {
-      calculatorContext.handleCalculate();
-    }, 500);
-  };
+      if (calculatorContext && typeof calculatorContext.handleCalculate === 'function') {
+        calculatorContext.handleCalculate();
+      }
+    }, 100);
+  }, [calculatorContext]);
 
   return (
     <>
@@ -72,7 +75,6 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
           demoMode={demoMode}
         />
 
-        {/* Add the tab contents here */}
         <CalculatorTabContents
           calculationInput={calculatorContext.calculationInput}
           calculationResult={calculatorContext.calculationResult}
