@@ -2,13 +2,9 @@
 import * as React from "react"
 import { CartesianGrid, XAxis, YAxis } from "../ChartComponents"
 import { Area } from "../ChartComponents"
-import { ChartTooltip } from "../ChartTooltip"
-import { ChartLegend } from "../ChartLegend"
+import { ChartTooltip } from "../tooltip/ChartTooltip"
+import { ChartLegend } from "../legend/ChartLegend"
 import { ChartTypeProps } from "./ChartTypeProps"
-
-// Memoized tooltip and legend contents
-const MemoizedTooltipContent = React.memo(ChartTooltip.Content);
-const MemoizedLegendContent = React.memo(ChartLegend.Content);
 
 export const AreaChartComponent: React.FC<ChartTypeProps> = ({ 
   data, categories, index, colors, valueFormatter, showLegend 
@@ -36,10 +32,10 @@ export const AreaChartComponent: React.FC<ChartTypeProps> = ({
         }}
       />
       <YAxis className="text-foreground" tick={{ fontSize: 10 }} />
-      {showLegend && <ChartLegend content={<MemoizedLegendContent />} wrapperStyle={{ fontSize: '10px' }} />}
+      {showLegend && <ChartLegend content={<ChartLegend.Content />} wrapperStyle={{ fontSize: '10px' }} />}
       <ChartTooltip 
         content={
-          <MemoizedTooltipContent 
+          <ChartTooltip.Content 
             formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
           />
         }

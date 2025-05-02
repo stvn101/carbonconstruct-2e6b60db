@@ -11,8 +11,8 @@ import {
   PieChartComponent,
   AreaChartComponent
 } from "./types"
-import { ChartTooltip } from "./ChartTooltip"
-import { ChartLegend } from "./ChartLegend"
+import { ChartTooltip } from "./tooltip/ChartTooltip"
+import { ChartLegend } from "./legend/ChartLegend"
 
 type ChartProps = {
   type: 'bar' | 'line' | 'pie' | 'area';
