@@ -5,7 +5,6 @@ import TransportTabContent from "./content/TransportTabContent";
 import EnergyTabContent from "./content/EnergyTabContent";
 import ResultsTabContent from "./content/ResultsTabContent";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
-import { useCalculator } from "@/contexts/calculator";
 
 export interface CalculatorTabContentsProps {
   calculationInput: CalculationInput;
@@ -23,6 +22,7 @@ export interface CalculatorTabContentsProps {
   onPrev: () => void;
   onNext: () => void;
   demoMode?: boolean;
+  activeTab: string;
 }
 
 const CalculatorTabContents = ({
@@ -40,11 +40,9 @@ const CalculatorTabContents = ({
   onCalculate,
   onPrev,
   onNext,
-  demoMode = false
+  demoMode = false,
+  activeTab
 }: CalculatorTabContentsProps) => {
-  // Use the global calculator context to get the active tab
-  const { activeTab } = useCalculator();
-  
   return (
     <Tabs value={activeTab} className="w-full mt-4">
       <TabsContent value="materials" className="mt-6">

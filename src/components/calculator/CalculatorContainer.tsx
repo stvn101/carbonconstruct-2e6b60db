@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useCallback } from "react";
 import { CalculatorContextType } from "@/contexts/calculator/types";
 import ProjectNameInput from "./ProjectNameInput";
 import CalculatorSaveDialog from "./CalculatorSaveDialog";
@@ -19,7 +19,6 @@ interface CalculatorContainerProps {
   setShowSaveDialog: (show: boolean) => void;
   demoMode: boolean;
   isCalculating: boolean;
-  setIsCalculating: (isCalculating: boolean) => void;
   onSaveConfirm: () => void;
   onSaveClick: () => void;
   onSignIn: () => void;
@@ -46,14 +45,11 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
   isExistingProject,
   calculatorContext
 }) => {
-  // Fix: Use calculatorContext's handleCalculate directly to avoid React state update inside render
-  const handleCalculate = React.useCallback(() => {
-    // Use setTimeout to avoid React state update during render
-    setTimeout(() => {
-      if (calculatorContext && typeof calculatorContext.handleCalculate === 'function') {
-        calculatorContext.handleCalculate();
-      }
-    }, 100);
+  // Use calculatorContext's handleCalculate directly to avoid React state update inside render
+  const handleCalculate = useCallback(() => {
+    if (calculatorContext && typeof calculatorContext.handleCalculate === 'function') {
+      calculatorContext.handleCalculate();
+    }
   }, [calculatorContext]);
 
   return (
@@ -91,6 +87,7 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
           onPrev={calculatorContext.handlePrevTab}
           onNext={calculatorContext.handleNextTab}
           demoMode={demoMode}
+          activeTab={calculatorContext.activeTab}
         />
       </div>
 
