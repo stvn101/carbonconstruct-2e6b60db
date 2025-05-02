@@ -45,8 +45,12 @@ export function ThemeProvider({
       // Apply dark mode to body when using system preference
       if (systemTheme === "dark") {
         document.body.classList.add("dark-mode-body");
+        document.body.style.backgroundColor = "hsl(220, 14%, 10%)";
+        document.body.style.color = "hsl(123, 30%, 92%)";
       } else {
         document.body.classList.remove("dark-mode-body");
+        document.body.style.backgroundColor = "";
+        document.body.style.color = "";
       }
       return;
     }

@@ -20,7 +20,7 @@
   }
 
   .dark {
-    /* Dark mode colors - improved darker theme */
+    /* Dark mode colors - enhanced for better contrast */
     --background: 220 14% 10%; /* Deeper dark background with blue tint */
     --foreground: 123 30% 92%; /* Brighter text for better contrast */
     --card: 220 14% 13%; /* Slightly lighter card background */
