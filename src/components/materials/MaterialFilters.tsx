@@ -14,37 +14,24 @@ import { Button } from "@/components/ui/button";
 interface MaterialFiltersProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  selectedRegion: string;
-  setSelectedRegion: (value: string) => void;
   selectedAlternative: string;
   setSelectedAlternative: (value: string) => void;
   selectedTag: string;
   setSelectedTag: (value: string) => void;
   allTags: string[];
-  allRegions: readonly string[] | string[];
   baseOptions: Array<{id: string, name: string}>;
 }
 
 const MaterialFilters: React.FC<MaterialFiltersProps> = ({ 
   searchTerm, 
   setSearchTerm,
-  selectedRegion,
-  setSelectedRegion,
   selectedAlternative,
   setSelectedAlternative,
   selectedTag,
   setSelectedTag,
   allTags,
-  allRegions,
   baseOptions
 }) => {
-  // Set Australia as default if no region is selected
-  React.useEffect(() => {
-    if (selectedRegion === "all") {
-      setSelectedRegion("Australia");
-    }
-  }, []);
-
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -57,31 +44,7 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Region</label>
-          <Select
-            value={selectedRegion}
-            onValueChange={setSelectedRegion}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select region" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Regions</SelectItem>
-              {Array.from(allRegions).map((region) => (
-                <SelectItem 
-                  key={region} 
-                  value={region}
-                  className={region === "Australia" ? "text-carbon-600 font-medium" : ""}
-                >
-                  {region === "Australia" ? "🇦🇺 Australia" : region}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm font-medium">Alternative To</label>
           <Select
@@ -130,7 +93,6 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
           variant="outline" 
           onClick={() => {
             setSearchTerm("");
-            setSelectedRegion("all");
             setSelectedAlternative("none");
             setSelectedTag("all");
           }}

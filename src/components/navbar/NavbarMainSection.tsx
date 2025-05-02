@@ -2,7 +2,6 @@
 import NavbarLogo from "@/components/navbar/NavbarLogo";
 import NavbarDesktopItems from "./NavbarDesktopItems";
 import NavbarMobileToggle from "./NavbarMobileToggle";
-import RegionSelector from "@/components/RegionSelector";
 import NavbarLinks from "@/components/navbar/NavbarLinks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserNavLinks } from "@/hooks/useUserNavLinks";
@@ -25,7 +24,6 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
         <NavbarDesktopItems navLinks={navLinks} />
       </div>
       <div className="md:hidden flex items-center">
-        <RegionSelector />
         <NavbarLinks />
         <NavbarMobileToggle isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       </div>

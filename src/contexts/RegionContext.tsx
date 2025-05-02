@@ -1,8 +1,8 @@
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 
-// Modify the type to be more specific to Australian regions
-type Region = "National" | "New South Wales" | "Victoria" | "Queensland" | "Western Australia" | "South Australia" | "Tasmania" | "Northern Territory" | "Australian Capital Territory";
+// Define Australia as the only region since NCC is Australia-wide
+type Region = "Australia";
 
 interface RegionContextType {
   selectedRegion: Region;
@@ -12,22 +12,17 @@ interface RegionContextType {
 
 const RegionContext = createContext<RegionContextType | undefined>(undefined);
 
-// Updated regions list to include specific Australian states and territories
-export const regions: Region[] = [
-  "National", 
-  "New South Wales", 
-  "Victoria", 
-  "Queensland", 
-  "Western Australia", 
-  "South Australia", 
-  "Tasmania", 
-  "Northern Territory", 
-  "Australian Capital Territory"
-];
+// Only Australia is available as a region
+export const regions: Region[] = ["Australia"];
 
 export function RegionProvider({ children }: { children: ReactNode }) {
-  // Default to National as the initial region
-  const [selectedRegion, setSelectedRegion] = useState<Region>("National");
+  // Set Australia as the fixed region
+  const selectedRegion: Region = "Australia";
+  
+  // No-op function since we don't allow changing the region anymore
+  const setSelectedRegion = (region: Region) => {
+    console.log("Region is fixed to Australia");
+  };
 
   return (
     <RegionContext.Provider
