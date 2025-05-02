@@ -30,10 +30,26 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [activeTab, setActiveTab] = useState<'materials' | 'transport' | 'energy' | 'results'>('materials');
   const [isCalculating, setIsCalculating] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Array<{field: string, message: string}>>([]);
 
   useEffect(() => {
     console.log("Active tab changed to:", activeTab);
-  }, [activeTab]);
+    
+    // When switching to results tab, preemptively validate inputs
+    if (activeTab === 'results' && !calculationResult) {
+      const errors = validateCalculationInput(calculationInput);
+      setValidationErrors(errors);
+    }
+  }, [activeTab, calculationInput, calculationResult]);
+
+  // Helper function to check if inputs have valid values
+  const hasValidInputs = useCallback(() => {
+    const hasValidMaterials = calculationInput.materials?.some(m => Number(m.quantity) > 0) || false;
+    const hasValidTransport = calculationInput.transport?.some(t => Number(t.distance) > 0 && Number(t.weight) > 0) || false;
+    const hasValidEnergy = calculationInput.energy?.some(e => Number(e.amount) > 0) || false;
+    
+    return hasValidMaterials || hasValidTransport || hasValidEnergy;
+  }, [calculationInput]);
 
   const handleCalculate = useCallback(() => {
     try {
@@ -46,31 +62,61 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return;
       }
       
-      const errors = validateCalculationInput(calculationInput);
-      if (errors.length > 0) {
-        toast.error(errors[0].message);
+      // Basic validation to ensure we have some data to calculate with
+      if (!hasValidInputs()) {
+        toast.error("You need to add at least one material, transport, or energy input with values greater than zero.");
         setIsCalculating(false);
         return;
       }
+      
+      const errors = validateCalculationInput(calculationInput);
+      if (errors.length > 0) {
+        toast.error(errors[0].message);
+        setValidationErrors(errors);
+        setIsCalculating(false);
+        return;
+      }
+      
+      // Clear previous errors
+      setValidationErrors([]);
       
       // Debug logs to track the calculation flow
       console.log("Materials for calculation:", calculationInput.materials);
       console.log("Transport for calculation:", calculationInput.transport);
       console.log("Energy for calculation:", calculationInput.energy);
       
-      const result = calculateTotalEmissions(calculationInput);
-      console.log('Calculation completed with result:', result);
-      setCalculationResult(result);
-      setIsCalculating(false);
-      
-      // Show success toast
-      toast.success("Calculation completed successfully!");
+      // Perform the calculation with a small delay to allow UI to update
+      setTimeout(() => {
+        try {
+          const result = calculateTotalEmissions(calculationInput);
+          console.log('Calculation completed with result:', result);
+          
+          // Validate the result
+          if (result.totalEmissions === 0 && 
+              Object.keys(result.breakdownByMaterial || {}).length === 0 &&
+              Object.keys(result.breakdownByTransport || {}).length === 0 &&
+              Object.keys(result.breakdownByEnergy || {}).length === 0) {
+            console.warn("Calculation produced empty result");
+            toast.warning("Calculation produced no emissions data. Please check your inputs.");
+          } else {
+            toast.success("Calculation completed successfully!");
+          }
+          
+          setCalculationResult(result);
+          setActiveTab("results");
+        } catch (error) {
+          console.error("Error during calculation:", error);
+          toast.error("Failed to calculate emissions. Please try again.");
+        } finally {
+          setIsCalculating(false);
+        }
+      }, 500);
     } catch (error) {
       console.error("Error calculating emissions:", error);
       toast.error("Error calculating emissions. Please check your inputs.");
       setIsCalculating(false);
     }
-  }, [calculationInput]);
+  }, [calculationInput, hasValidInputs]);
 
   const handleNextTab = useCallback(() => {
     if (activeTab === "materials") {
@@ -80,15 +126,22 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setActiveTab("energy");
     }
     else if (activeTab === "energy") {
+      // When moving from energy to results, trigger calculation
       setIsCalculating(true);
       
       // Slight delay to allow UI to update before heavy calculation
       setTimeout(() => {
-        const result = calculateTotalEmissions(calculationInput);
-        setCalculationResult(result);
-        setActiveTab("results");
-        setIsCalculating(false);
-      }, 100);
+        try {
+          const result = calculateTotalEmissions(calculationInput);
+          setCalculationResult(result);
+          setActiveTab("results");
+        } catch (error) {
+          console.error("Error during calculation:", error);
+          toast.error("Failed to calculate emissions. Please try again.");
+        } finally {
+          setIsCalculating(false);
+        }
+      }, 500);
     }
   }, [activeTab, calculationInput]);
 
@@ -111,7 +164,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setCalculationResult,
     activeTab,
     setActiveTab,
-    validationErrors: [],
+    validationErrors,
     isCalculating,
     setIsCalculating,
     handleAddMaterial: () => setCalculationInput(current => handleAddMaterial(current)),
@@ -132,7 +185,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     handleCalculate,
     handleNextTab,
     handlePrevTab
-  }), [calculationInput, calculationResult, activeTab, isCalculating, handleCalculate, handleNextTab, handlePrevTab]);
+  }), [calculationInput, calculationResult, activeTab, isCalculating, validationErrors, handleCalculate, handleNextTab, handlePrevTab]);
 
   return (
     <CalculatorContext.Provider value={contextValue}>
