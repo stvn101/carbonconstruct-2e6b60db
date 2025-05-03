@@ -1,27 +1,34 @@
 
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import React from "react";
 import { Skeleton } from "./skeleton";
 
 interface SkeletonContentProps {
-  className?: string;
   lines?: number;
+  height?: number;
+  className?: string;
+  withTitle?: boolean;
 }
 
-export function SkeletonContent({ className, lines = 3 }: SkeletonContentProps) {
+export const SkeletonContent: React.FC<SkeletonContentProps> = ({
+  lines = 3,
+  height = 20,
+  className = "",
+  withTitle = false
+}) => {
   return (
-    <div className={cn("space-y-4", className)}>
-      {Array.from({ length: lines }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: i * 0.1 }}
-        >
-          <Skeleton className="h-4 w-full" />
-        </motion.div>
-      ))}
+    <div className={`space-y-2 w-full ${className}`}>
+      {withTitle && (
+        <Skeleton className="h-7 w-3/4 mb-4" />
+      )}
+      {Array(lines)
+        .fill(0)
+        .map((_, i) => (
+          <Skeleton
+            key={i}
+            className={`h-${height} w-${i % 2 === 0 ? "full" : "4/5"}`}
+            style={{ height: `${height}px` }}
+          />
+        ))}
     </div>
   );
-}
-
+};

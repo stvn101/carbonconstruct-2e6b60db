@@ -43,9 +43,20 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
         return getFallbackMaterials();
       }
       
-      // Try to fetch from API
+      // Try to fetch from API with timeout
       try {
-        const data = await fetchMaterialsFromApi();
+        console.log('Fetching materials from API');
+        
+        // Create a timeout promise
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('API request timed out')), 15000);
+        });
+        
+        // Race the API fetch against the timeout
+        const data = await Promise.race([
+          fetchMaterialsFromApi(),
+          timeoutPromise
+        ]);
         
         // Process the data
         console.log('Processing data from API:', data.length, 'rows');
@@ -88,10 +99,29 @@ export async function fetchMaterialCategories(): Promise<string[]> {
   }
   
   try {
-    return await fetchCategoriesFromApi();
+    // Create a timeout promise
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Categories request timed out')), 8000);
+    });
+    
+    // Race the categories fetch against the timeout
+    return await Promise.race([
+      fetchCategoriesFromApi(),
+      timeoutPromise
+    ]);
   } catch (error) {
     console.error('Error fetching categories:', error);
     // Return some sensible default categories on error
     return getDefaultCategories();
   }
 }
+
+// Start prefetching materials immediately when this module is imported
+(function initializeMaterialCache() {
+  setTimeout(() => {
+    console.log('Starting background prefetch of materials');
+    fetchMaterials(false)
+      .then(materials => console.log(`Background prefetch complete: ${materials.length} materials loaded`))
+      .catch(err => console.warn('Background prefetch failed:', err));
+  }, 1000);
+})();

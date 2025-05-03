@@ -1,7 +1,7 @@
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import './styles/dark-mode-variables.css'; /* Import dark mode variables */
 
 /* Ensure the page is scrollable */
 html, body {
