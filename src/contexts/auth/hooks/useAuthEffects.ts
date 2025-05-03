@@ -15,6 +15,8 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
       // Set up auth state listener with optimized handling
       const { data } = supabase.auth.onAuthStateChange(
         (event, session) => {
+          console.log("Auth state changed:", event);
+          
           // First update the session state immediately (sync operation)
           updateState({
             session: session,
@@ -34,7 +36,7 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
                     id: session.user.id,
                     full_name: session.user.user_metadata?.full_name || null,
                     company_name: null,
-                    avatar_url: null,
+                    avatar_url: session.user.user_metadata?.avatar_url || null,
                     website: null,
                     role: 'user',
                     subscription_tier: 'free',
@@ -59,7 +61,11 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
                     });
                   }
                 } else {
-                  updateState({ profile });
+                  updateState({ 
+                    profile,
+                    loading: false,
+                    isLoading: false
+                  });
                 }
               } catch (error) {
                 console.error('Error processing user profile:', error);
@@ -71,7 +77,7 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
                     id: session.user.id,
                     full_name: session.user.user_metadata?.full_name || null,
                     company_name: null,
-                    avatar_url: null,
+                    avatar_url: session.user.user_metadata?.avatar_url || null,
                     website: null,
                     role: 'user',
                     subscription_tier: 'free',
@@ -81,7 +87,7 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
               }
             }, 0);
           } else if (event === 'SIGNED_OUT') {
-            updateState({ profile: null });
+            updateState({ profile: null, loading: false, isLoading: false });
           }
         }
       );
@@ -91,7 +97,17 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
 
     const checkExistingSession = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session check error:", error);
+          updateState({
+            loading: false,
+            isLoading: false
+          });
+          return;
+        }
+        
         updateState({
           session: data.session,
           user: data.session?.user ?? null
@@ -107,7 +123,7 @@ export const useAuthEffects = (updateState: (updates: Partial<AuthState>) => voi
                 id: data.session.user.id,
                 full_name: data.session.user.user_metadata?.full_name || null,
                 company_name: null,
-                avatar_url: null,
+                avatar_url: data.session.user.user_metadata?.avatar_url || null,
                 website: null,
                 role: 'user',
                 subscription_tier: 'free',

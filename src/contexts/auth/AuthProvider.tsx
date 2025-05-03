@@ -20,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => { /* empty implementation */ },
   register: async () => { /* empty implementation */ },
   signInWithGitHub: async () => { /* empty implementation */ },
+  signInWithGoogle: async () => { /* empty implementation */ },
   updateProfile: async () => { /* empty implementation */ },
   loading: true,
   isLoading: true
@@ -52,7 +53,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!isOffline && state.user) {
       const refreshSession = async () => {
         try {
-          const { data } = await supabase.auth.getSession();
+          const { data, error } = await supabase.auth.getSession();
+          if (error) {
+            console.error("Error refreshing session:", error);
+            return;
+          }
+          
           if (data.session) {
             updateState({
               session: data.session,
@@ -67,6 +73,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       refreshSession();
     }
   }, [isOffline, state.user, updateState]);
+
+  // Setup automatic token refresh - this is critical for long-lived sessions
+  useEffect(() => {
+    const setupTokenRefresh = async () => {
+      try {
+        // This sets up the internal mechanism for token refresh
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session) {
+          // If we have a session during initialization, make sure state is properly updated
+          updateState({
+            session: data.session,
+            user: data.session.user
+          });
+        }
+      } catch (error) {
+        console.error("Token refresh setup error:", error);
+      }
+    };
+    
+    setupTokenRefresh();
+  }, [updateState]);
 
   const contextValue: AuthContextType = {
     ...state,
