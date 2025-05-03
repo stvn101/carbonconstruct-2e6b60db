@@ -45,11 +45,7 @@ const CalculatorTabs = ({
       >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-2">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 h-auto p-1 mb-0 flex-grow">
-            <CalculatorTabTriggers 
-              isMobile={isMobile}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-            />
+            <CalculatorTabTriggers isMobile={isMobile} />
           </TabsList>
           
           <div className="flex gap-2 w-full md:w-auto">

@@ -1,36 +1,29 @@
 
-import React, { useCallback, memo } from "react";
+import React from "react";
 import { TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Gauge, Truck, Zap } from "lucide-react";
+import { useCalculator } from "@/contexts/calculator";
 
 export interface CalculatorTabTriggersProps {
   isMobile?: boolean;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
 }
 
-// Use memo to prevent unnecessary re-renders
-const CalculatorTabTriggers = memo(({ isMobile = false, activeTab, onTabChange }: CalculatorTabTriggersProps) => {
-  // Use a callback handler that only triggers when the user clicks
-  const handleTabClick = useCallback((tab: string) => {
-    // Only update if the tab is different than the current one
-    if (tab !== activeTab) {
-      onTabChange(tab);
-    }
-  }, [activeTab, onTabChange]);
+const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps) => {
+  const { activeTab, setActiveTab } = useCalculator();
   
-  // Create individual handlers for each tab to avoid recreating functions on each render
-  const handleMaterialsClick = useCallback(() => handleTabClick("materials"), [handleTabClick]);
-  const handleTransportClick = useCallback(() => handleTabClick("transport"), [handleTabClick]);
-  const handleEnergyClick = useCallback(() => handleTabClick("energy"), [handleTabClick]);
-  const handleResultsClick = useCallback(() => handleTabClick("results"), [handleTabClick]);
+  console.log("CalculatorTabTriggers rendering with activeTab:", activeTab);
+  
+  const handleTabClick = (tab: string) => {
+    console.log(`Tab clicked: ${tab}`);
+    setActiveTab(tab as any);
+  };
   
   return (
     <>
       <TabsTrigger 
         value="materials" 
         className="relative"
-        onClick={handleMaterialsClick}
+        onClick={() => handleTabClick("materials")}
       >
         <Building2 className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Materials</span>}
@@ -42,7 +35,7 @@ const CalculatorTabTriggers = memo(({ isMobile = false, activeTab, onTabChange }
       <TabsTrigger 
         value="transport" 
         className="relative"
-        onClick={handleTransportClick}
+        onClick={() => handleTabClick("transport")}
       >
         <Truck className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Transport</span>}
@@ -54,7 +47,7 @@ const CalculatorTabTriggers = memo(({ isMobile = false, activeTab, onTabChange }
       <TabsTrigger 
         value="energy" 
         className="relative"
-        onClick={handleEnergyClick}
+        onClick={() => handleTabClick("energy")}
       >
         <Zap className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Energy</span>}
@@ -66,7 +59,7 @@ const CalculatorTabTriggers = memo(({ isMobile = false, activeTab, onTabChange }
       <TabsTrigger 
         value="results" 
         className="relative"
-        onClick={handleResultsClick}
+        onClick={() => handleTabClick("results")}
       >
         <Gauge className={`h-4 w-4 ${isMobile ? "" : "mr-2"}`} />
         {!isMobile && <span>Results</span>}
@@ -76,9 +69,6 @@ const CalculatorTabTriggers = memo(({ isMobile = false, activeTab, onTabChange }
       </TabsTrigger>
     </>
   );
-});
-
-// Explicitly set display name for debugging purposes
-CalculatorTabTriggers.displayName = 'CalculatorTabTriggers';
+};
 
 export default CalculatorTabTriggers;

@@ -1,21 +1,14 @@
 
-import React, { memo } from 'react';
-import { ErrorBoundary } from "react-error-boundary";
+import { useCalculatorActions } from './calculator/hooks/useCalculatorActions';
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorAlerts from "./calculator/CalculatorAlerts";
 import CalculatorContainer from "./calculator/CalculatorContainer";
-import { useCalculatorActions } from './calculator/hooks/useCalculatorActions';
-import { useSimpleOfflineMode } from '@/hooks/useSimpleOfflineMode';
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
 }
 
-// Use memo to prevent unnecessary re-renders
-const CarbonCalculator = memo(({ demoMode = false }: CarbonCalculatorProps) => {
-  const { isOffline } = useSimpleOfflineMode();
-  
-  // Get all needed actions and state in one place to avoid multiple context accesses
+const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
   const {
     error,
     projectName,
@@ -28,58 +21,60 @@ const CarbonCalculator = memo(({ demoMode = false }: CarbonCalculatorProps) => {
     setIsSaving,
     showSaveDialog,
     setShowSaveDialog,
-    isExistingProject,
     isCalculating,
+    setIsCalculating,
     handleSaveClick,
     handleSaveConfirm,
     handleSignIn,
+    isExistingProject,
     calculatorContext
-  } = useCalculatorActions({ demoMode: demoMode || isOffline });
-  
+  } = useCalculatorActions({ demoMode });
+
   // Handle error gracefully
-  if (error || !calculatorContext) {
-    console.error("Calculator error: Context unavailable", { error, hasContext: !!calculatorContext });
+  if (error) {
+    console.error("Calculator error:", error);
     return <CalculatorError />;
   }
+
+  // Ensure we have the calculator context
+  if (!calculatorContext) {
+    console.error("Calculator context is not available");
+    return <CalculatorError />;
+  }
+
+  console.log("CarbonCalculator rendering with calculatorContext:", calculatorContext.activeTab);
 
   return (
     <div className="container mx-auto px-4 md:px-6">
       <CalculatorAlerts 
-        demoMode={demoMode || isOffline} 
+        demoMode={demoMode} 
         authError={authError ? authError.message : null}
         onAuthErrorClear={() => setAuthError(null)}
         onSignIn={handleSignIn}
       />
       
-      <ErrorBoundary 
-        fallback={<CalculatorError />}
-        onError={(error) => console.error("Calculator component error:", error)}
-      >
-        <CalculatorContainer
-          projectName={projectName}
-          setProjectName={setProjectName}
-          authError={authError}
-          setAuthError={setAuthError}
-          savingError={savingError}
-          setSavingError={setSavingError}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
-          showSaveDialog={showSaveDialog}
-          setShowSaveDialog={setShowSaveDialog}
-          demoMode={demoMode || isOffline}
-          isCalculating={isCalculating}
-          onSaveConfirm={handleSaveConfirm}
-          onSaveClick={handleSaveClick}
-          onSignIn={handleSignIn}
-          isExistingProject={isExistingProject}
-          calculatorContext={calculatorContext}
-        />
-      </ErrorBoundary>
+      <CalculatorContainer
+        projectName={projectName}
+        setProjectName={setProjectName}
+        authError={authError}
+        setAuthError={setAuthError}
+        savingError={savingError}
+        setSavingError={setSavingError}
+        isSaving={isSaving}
+        setIsSaving={setIsSaving}
+        showSaveDialog={showSaveDialog}
+        setShowSaveDialog={setShowSaveDialog}
+        demoMode={demoMode}
+        isCalculating={calculatorContext.isCalculating}
+        setIsCalculating={calculatorContext.setIsCalculating}
+        onSaveConfirm={handleSaveConfirm}
+        onSaveClick={handleSaveClick}
+        onSignIn={handleSignIn}
+        isExistingProject={isExistingProject}
+        calculatorContext={calculatorContext}
+      />
     </div>
   );
-});
-
-// Explicitly set display name for debugging purposes
-CarbonCalculator.displayName = 'CarbonCalculator';
+};
 
 export default CarbonCalculator;

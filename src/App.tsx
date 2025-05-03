@@ -1,3 +1,4 @@
+
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -14,7 +15,6 @@ import SkipToContent from './components/SkipToContent';
 import { AppContent } from './components/AppContent';
 import ErrorTrackingService from './services/errorTrackingService';
 import performanceMonitoringService from './services/performanceMonitoringService';
-import { initializePerformanceMonitoring } from './utils/performanceMonitoring';
 
 // Loading fallback for Suspense
 const LoadingFallback = () => (
@@ -47,7 +47,7 @@ if (typeof window !== 'undefined') {
   initializeTheme();
 }
 
-export default function App() {
+const App: React.FC = () => {
   useEffect(() => {
     // Initialize error tracking on app mount
     ErrorTrackingService.initialize();
@@ -67,15 +67,6 @@ export default function App() {
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-  
-  // Initialize performance monitoring for scaling
-  useEffect(() => {
-    const cleanupMonitoring = initializePerformanceMonitoring();
-    
-    return () => {
-      cleanupMonitoring();
     };
   }, []);
   
@@ -116,4 +107,6 @@ export default function App() {
       </HelmetProvider>
     </ErrorBoundaryWrapper>
   );
-}
+};
+
+export default App;

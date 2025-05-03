@@ -1,5 +1,5 @@
 
-import React, { useCallback } from "react";
+import React from "react";
 import { CalculatorContextType } from "@/contexts/calculator/types";
 import ProjectNameInput from "./ProjectNameInput";
 import CalculatorSaveDialog from "./CalculatorSaveDialog";
@@ -19,6 +19,7 @@ interface CalculatorContainerProps {
   setShowSaveDialog: (show: boolean) => void;
   demoMode: boolean;
   isCalculating: boolean;
+  setIsCalculating: (isCalculating: boolean) => void;
   onSaveConfirm: () => void;
   onSaveClick: () => void;
   onSignIn: () => void;
@@ -39,19 +40,13 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
   setShowSaveDialog,
   demoMode,
   isCalculating,
+  setIsCalculating,
   onSaveConfirm,
   onSaveClick,
   onSignIn,
   isExistingProject,
   calculatorContext
 }) => {
-  // Use calculatorContext's handleCalculate directly to avoid React state update inside render
-  const handleCalculate = useCallback(() => {
-    if (calculatorContext && typeof calculatorContext.handleCalculate === 'function') {
-      calculatorContext.handleCalculate();
-    }
-  }, [calculatorContext]);
-
   return (
     <>
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 border-t-4 border-carbon-600 mb-8">
@@ -64,13 +59,20 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
         
         <CalculatorTabs 
           calculatorContext={calculatorContext}
-          onCalculate={handleCalculate}
+          onCalculate={() => {
+            setIsCalculating(true);
+            setTimeout(() => {
+              calculatorContext.handleCalculate();
+              setIsCalculating(false);
+            }, 500);
+          }}
           onSave={onSaveClick}
           isSaving={isSaving}
           isCalculating={isCalculating}
           demoMode={demoMode}
         />
 
+        {/* Add the tab contents here */}
         <CalculatorTabContents
           calculationInput={calculatorContext.calculationInput}
           calculationResult={calculatorContext.calculationResult}
@@ -83,11 +85,10 @@ const CalculatorContainer: React.FC<CalculatorContainerProps> = ({
           onUpdateEnergy={calculatorContext.handleUpdateEnergy}
           onAddEnergy={calculatorContext.handleAddEnergy}
           onRemoveEnergy={calculatorContext.handleRemoveEnergy}
-          onCalculate={handleCalculate}
+          onCalculate={calculatorContext.handleCalculate}
           onPrev={calculatorContext.handlePrevTab}
           onNext={calculatorContext.handleNextTab}
           demoMode={demoMode}
-          activeTab={calculatorContext.activeTab}
         />
       </div>
 

@@ -1,73 +1,77 @@
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 
+/**
+ * A simplified hook to determine if the app is currently offline
+ * with reduced complexity and network calls
+ */
 export function useSimpleOfflineMode() {
-  // Initialize with the current online status
-  const [isOffline, setIsOffline] = useState(() => {
-    return typeof navigator !== 'undefined' ? !navigator.onLine : false;
-  });
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   
-  // Use refs to prevent unnecessary re-renders and cleanup issues
-  const mountedRef = useRef(true);
-
-  // Memoized handlers to prevent re-renders
-  const handleOnline = useCallback(() => {
-    if (mountedRef.current) {
-      setIsOffline(false);
-    }
-  }, []);
-  
-  const handleOffline = useCallback(() => {
-    if (mountedRef.current) {
-      setIsOffline(true);
-    }
-  }, []);
-
-  // Handle connection check
+  // Simple connection check that doesn't make network requests 
+  // unless explicitly called
   const checkConnection = useCallback(async () => {
-    if (!mountedRef.current) return;
+    console.log('Checking connection status');
+    // Just use navigator.onLine as a base check
+    const isOnline = navigator.onLine;
+    console.log('navigator.onLine says we are:', isOnline ? 'online' : 'offline');
     
-    try {
-      // Simple fetch to check connection
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+    if (isOnline !== !isOffline) {
+      setIsOffline(!isOnline);
       
-      const response = await fetch('/favicon.ico', {
-        method: 'HEAD',
-        signal: controller.signal,
-        cache: 'no-store'
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (mountedRef.current) {
-        setIsOffline(!response.ok);
-      }
-    } catch (err) {
-      if (mountedRef.current) {
-        setIsOffline(true);
+      // Show appropriate toast based on current status
+      if (isOnline) {
+        toast.success("Connection restored!", {
+          id: "connection-restored",
+          duration: 3000
+        });
+      } else {
+        toast.error("You're offline. Some features may be limited.", {
+          id: "offline-mode", 
+          duration: 5000
+        });
       }
     }
-  }, []);
+    
+    return isOnline;
+  }, [isOffline]);
 
+  // Basic event listeners for online/offline events
   useEffect(() => {
-    // Add event listeners
+    const handleOnline = () => {
+      console.log('Online event fired');
+      setIsOffline(false);
+      toast.success("Connection restored!", {
+        id: "connection-restored",
+        duration: 3000
+      });
+    };
+    
+    const handleOffline = () => {
+      console.log('Offline event fired');
+      setIsOffline(true);
+      toast.error("You're offline. Some features may be limited.", {
+        id: "offline-mode",
+        duration: 5000
+      });
+    };
+    
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     
-    // Initial connection check
+    // Initial check
     checkConnection();
     
-    // Clean up event listeners and set mounted flag on unmount
     return () => {
-      mountedRef.current = false;
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      
+      // Clean up any toasts
+      toast.dismiss("offline-mode");
+      toast.dismiss("connection-restored");
     };
-  }, [handleOnline, handleOffline, checkConnection]);
+  }, [checkConnection]);
 
-  return { 
-    isOffline,
-    checkConnection
-  };
+  return { isOffline, checkConnection };
 }
