@@ -37,13 +37,20 @@ const MaterialDatabase = () => {
     selectedTag
   });
 
+  // Make sure we have safe arrays to work with
+  const safeTags = Array.isArray(allTags) ? allTags : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  const safeMaterials = Array.isArray(filteredMaterials) ? filteredMaterials : [];
+  const safeBaseOptions = Array.isArray(baseOptions) ? baseOptions : [];
+
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedAlternative("none");
     setSelectedTag("all");
   };
 
-  if (loading && filteredMaterials.length === 0) {
+  // Show loading state only on initial load
+  if (loading && (!safeMaterials || safeMaterials.length === 0)) {
     return (
       <div className="container mx-auto px-4 py-8 content-top-spacing">
         <div className="max-w-5xl mx-auto">
@@ -57,7 +64,8 @@ const MaterialDatabase = () => {
     );
   }
   
-  if (error && filteredMaterials.length === 0) {
+  // Show error state only when there's no data at all
+  if (error && (!safeMaterials || safeMaterials.length === 0)) {
     return (
       <div className="container mx-auto px-4 py-8 content-top-spacing">
         <div className="max-w-5xl mx-auto">
@@ -110,18 +118,18 @@ const MaterialDatabase = () => {
             setSelectedAlternative={setSelectedAlternative}
             selectedTag={selectedTag}
             setSelectedTag={setSelectedTag}
-            allTags={allTags || []}
-            baseOptions={baseOptions || []}
-            categories={categories || []}
+            allTags={safeTags}
+            baseOptions={safeBaseOptions}
+            categories={safeCategories}
             loading={isCategoriesLoading}
           />
           
           <DatabaseResultsCard
-            filteredMaterials={filteredMaterials || []}
+            filteredMaterials={safeMaterials}
             resetFilters={resetFilters}
             materialCount={materialCount || 0}
             totalCount={totalMaterials || 0}
-            loading={loading && filteredMaterials.length > 0}
+            loading={loading && safeMaterials.length > 0}
           />
         </div>
       </div>
