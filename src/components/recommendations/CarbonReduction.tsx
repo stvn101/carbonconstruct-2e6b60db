@@ -2,9 +2,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Leaf } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
+import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { PotentialSavings } from "./PotentialSavings";
 import { calculatePotentialSavings } from "@/lib/sustainabilitySuggestions";
+import { Material } from "@/lib/carbonTypes";
 
 interface CarbonReductionProps {
   calculationInput: CalculationInput;
@@ -66,7 +67,7 @@ export const CarbonReduction: React.FC<CarbonReductionProps> = ({
                 potentialEmissions={item.potentialEmissions}
                 savings={item.savings}
                 savingsPercentage={item.savingsPercentage}
-                material={item.material}
+                material={item.material as Material}
                 alternative={item.alternative}
               />
             ))}
