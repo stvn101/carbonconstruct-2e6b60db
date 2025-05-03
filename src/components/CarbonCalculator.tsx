@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ErrorBoundary } from "react-error-boundary";
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorAlerts from "./calculator/CalculatorAlerts";
@@ -10,7 +10,8 @@ export interface CarbonCalculatorProps {
   demoMode?: boolean;
 }
 
-const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
+// Use memo to prevent unnecessary re-renders
+const CarbonCalculator = memo(({ demoMode = false }: CarbonCalculatorProps) => {
   // Get all needed actions and state in one place to avoid multiple context accesses
   const {
     error,
@@ -34,7 +35,7 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
   
   // Handle error gracefully
   if (error || !calculatorContext) {
-    console.error("Calculator error:", error);
+    console.error("Calculator error: Context unavailable");
     return <CalculatorError />;
   }
 
@@ -73,6 +74,6 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
       </ErrorBoundary>
     </div>
   );
-};
+});
 
 export default CarbonCalculator;

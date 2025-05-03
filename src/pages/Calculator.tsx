@@ -64,6 +64,18 @@ function Calculator() {
     focusMainContentOnRouteChange: true
   });
   
+  // Use a stable function to avoid rerenders
+  const handleSignUp = useCallback(() => {
+    navigate("/auth", { state: { returnTo: "/calculator" } });
+  }, [navigate]);
+
+  const handleResetCalculatorError = useCallback(() => {
+    // Add a short delay to give time for state updates
+    toast.info("Resetting calculator...");
+    setCalculatorReady(false);
+    setTimeout(() => setCalculatorReady(true), 500);
+  }, []);
+  
   // Use effect to setup initial state
   useEffect(() => {
     // Check if we're in demo mode from navigation state or if user is not logged in
@@ -80,20 +92,10 @@ function Calculator() {
     return () => clearTimeout(timer);
   }, [location, user]);
 
-  const handleSignUp = useCallback(() => {
-    navigate("/auth", { state: { returnTo: "/calculator" } });
-  }, [navigate]);
-
-  const handleResetCalculatorError = useCallback(() => {
-    // Add a short delay to give time for state updates
-    toast.info("Resetting calculator...");
-    setCalculatorReady(false);
-    setTimeout(() => setCalculatorReady(true), 500);
-  }, []);
-
   // Determine effective demo mode (user not logged in, explicit demo mode, or offline)
   const effectiveDemoMode = !user || demoMode || isOffline;
 
+  // Avoid nested providers inside error boundaries to prevent context issues
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -120,22 +122,22 @@ function Calculator() {
           </Alert>
         )}
         
-        {calculatorReady ? (
+        {!calculatorReady ? (
+          <CalculatorLoading />
+        ) : (
           <ErrorBoundary 
             FallbackComponent={CalculatorLoadError}
             onReset={handleResetCalculatorError}
             resetKeys={[location.key, isOffline, calculatorReady]}
           >
-            <ProjectProvider>
-              <CalculatorProvider>
-                <Suspense fallback={<CalculatorLoading />}>
+            <Suspense fallback={<CalculatorLoading />}>
+              <ProjectProvider>
+                <CalculatorProvider>
                   <CarbonCalculator demoMode={effectiveDemoMode} />
-                </Suspense>
-              </CalculatorProvider>
-            </ProjectProvider>
+                </CalculatorProvider>
+              </ProjectProvider>
+            </Suspense>
           </ErrorBoundary>
-        ) : (
-          <CalculatorLoading />
         )}
       </main>
       <Footer />

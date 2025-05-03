@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
 
 // Default calculation input with initial values
@@ -18,18 +18,43 @@ export function useCalculatorState() {
   const [validationErrors, setValidationErrors] = useState<Array<{field: string, message: string}>>([]);
   const [calculationError, setCalculationError] = useState<Error | null>(null);
 
+  // Use useCallback to stabilize functions to prevent render loops
+  const stableSetActiveTab = useCallback((tab: 'materials' | 'transport' | 'energy' | 'results') => {
+    setActiveTab(tab);
+  }, []);
+
+  const stableSetCalculationInput = useCallback((input: CalculationInput | ((prevInput: CalculationInput) => CalculationInput)) => {
+    setCalculationInput(input);
+  }, []);
+
+  const stableSetCalculationResult = useCallback((result: CalculationResult | null) => {
+    setCalculationResult(result);
+  }, []);
+
+  const stableSetIsCalculating = useCallback((calculating: boolean) => {
+    setIsCalculating(calculating);
+  }, []);
+
+  const stableSetValidationErrors = useCallback((errors: Array<{field: string, message: string}>) => {
+    setValidationErrors(errors);
+  }, []);
+
+  const stableSetCalculationError = useCallback((error: Error | null) => {
+    setCalculationError(error);
+  }, []);
+
   return {
     calculationInput,
-    setCalculationInput,
+    setCalculationInput: stableSetCalculationInput,
     calculationResult,
-    setCalculationResult,
+    setCalculationResult: stableSetCalculationResult,
     activeTab,
-    setActiveTab,
+    setActiveTab: stableSetActiveTab,
     isCalculating,
-    setIsCalculating,
+    setIsCalculating: stableSetIsCalculating,
     validationErrors,
-    setValidationErrors,
+    setValidationErrors: stableSetValidationErrors,
     calculationError,
-    setCalculationError,
+    setCalculationError: stableSetCalculationError,
   };
 }
