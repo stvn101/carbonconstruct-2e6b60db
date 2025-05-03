@@ -296,12 +296,7 @@ export type Database = {
       }
     }
     Views: {
-      material_categories: {
-        Row: {
-          category: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_material_categories: {
