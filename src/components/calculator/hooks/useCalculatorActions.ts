@@ -24,40 +24,52 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   
   const { saveTimeout, setSaveTimeout, clearSaveTimeout } = useCalculatorTimeout();
   
-  // Try to get projects context if available
+  // Initialize with safer defaults
   let saveProject: ((project: any) => Promise<SavedProject>) | undefined;
   let projects: SavedProject[] = [];
-  let hasProjectsContext = true;
+  let hasProjectsContext = false;
   let error = false;
-  let calculatorContext;
+  let calculatorContext = null;
   let isCalculating = false;
   let setIsCalculating = () => {};
 
+  // Safely check for calculator context first - it's critical
   try {
-    // Try to dynamically import to avoid context errors if not in provider
-    const { useProjects } = require('@/contexts/ProjectContext');
-    const projectsContext = useProjects();
-    saveProject = projectsContext.saveProject;
-    projects = projectsContext.projects || [];
+    calculatorContext = useCalculator();
+    if (calculatorContext) {
+      isCalculating = calculatorContext.isCalculating;
+      setIsCalculating = calculatorContext.setIsCalculating;
+    }
   } catch (e) {
-    console.warn('ProjectContext not available, running in standalone calculator mode:', e);
-    hasProjectsContext = false;
-    setProjectsContextError(e instanceof Error ? e : new Error('ProjectContext not available'));
+    error = true;
+    console.error("Error accessing calculator context:", e);
+  }
+
+  // Only try to access projects context if calculator context succeeded
+  if (!error) {
+    try {
+      // Use a safer approach than dynamic require
+      const projectsModule = window.require ? window.require('@/contexts/ProjectContext') : null;
+      
+      if (projectsModule && projectsModule.useProjects) {
+        const projectsContext = projectsModule.useProjects();
+        saveProject = projectsContext.saveProject;
+        projects = projectsContext.projects || [];
+        hasProjectsContext = true;
+      } else {
+        console.warn('ProjectContext not available, running in standalone calculator mode');
+        hasProjectsContext = false;
+      }
+    } catch (e) {
+      console.warn('ProjectContext not available, running in standalone calculator mode:', e);
+      hasProjectsContext = false;
+      setProjectsContextError(e instanceof Error ? e : new Error('ProjectContext not available'));
+    }
   }
 
   const isExistingProject = hasProjectsContext && projects.length > 0 && !!projects.find(
     p => p.name.toLowerCase() === projectName.toLowerCase()
   );
-
-  // Access calculator context - but wrap in try/catch to avoid errors
-  try {
-    calculatorContext = useCalculator();
-    isCalculating = calculatorContext.isCalculating;
-    setIsCalculating = calculatorContext.setIsCalculating;
-  } catch (e) {
-    error = true;
-    console.error("Error accessing calculator context:", e);
-  }
 
   // Setup calculator save hooks with all required dependencies
   const { handleSaveClick, handleSaveConfirm, handleSignIn } = useCalculatorSave({
