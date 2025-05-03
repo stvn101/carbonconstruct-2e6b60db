@@ -3,7 +3,7 @@ import {
   CalculationResult, 
   CalculationInput,
   Material
-} from './carbonCalculations';
+} from './carbonExports';
 import { MATERIAL_FACTORS } from './carbonData';
 import { ALL_MATERIAL_FACTORS } from './carbonFactors';
 

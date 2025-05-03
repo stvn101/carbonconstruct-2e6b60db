@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRegion } from "@/contexts/RegionContext";
-import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
+import { useMaterialFiltering, ExtendedMaterialData } from "@/hooks/useMaterialFiltering";
 import { useMaterialData } from "@/hooks/useMaterialData";
 import { useMaterialCache } from "@/hooks/useMaterialCache";
 import DatabaseHeader from './DatabaseHeader';
@@ -19,6 +19,9 @@ const MaterialDatabase = () => {
   
   // Use the material cache hook for efficient data loading
   const { materials, loading, error, refreshCache, cacheStats } = useMaterialCache();
+  
+  // Default empty categories array
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
 
   // Use the material data hook for organizing and categorizing data
   const {
@@ -27,26 +30,41 @@ const MaterialDatabase = () => {
     allTags,
     baseOptions,
     materialCount,
-    allRegions,
-    categories
+    allRegions
   } = useMaterialData({
     searchTerm,
     selectedRegion: "Australia", // Always Australia
     selectedAlternative,
     selectedTag
-  });
+  }) || { filteredMaterials: [], materialsByRegion: {}, allTags: [], baseOptions: [], materialCount: 0, allRegions: [] };
   
   // Use the filter hook for sorting and filtering
   const filterResult = useMaterialFiltering(filteredMaterials || []);
   
+  // Extract categories from materials on load
+  useEffect(() => {
+    if (materials && materials.length > 0) {
+      // Extract unique categories
+      const uniqueCategories = Array.from(
+        new Set(
+          materials
+            .map(m => m.category)
+            .filter(Boolean) as string[]
+        )
+      );
+      
+      setCategoriesList(uniqueCategories);
+    }
+  }, [materials]);
+  
   // Combine all data for the UI
   const displayMaterials = filterResult.filteredMaterials;
-  const isCategoriesLoading = loading && (!categories || categories.length === 0);
+  const isCategoriesLoading = loading && (!categoriesList || categoriesList.length === 0);
   const totalMaterials = materials ? materials.length : 0;
   
   // Make sure we have safe arrays to work with
   const safeTags = Array.isArray(allTags) ? allTags : [];
-  const safeCategories = Array.isArray(categories) ? categories : [];
+  const safeCategories = Array.isArray(categoriesList) ? categoriesList : [];
   const safeMaterials = Array.isArray(displayMaterials) ? displayMaterials : [];
   const safeBaseOptions = Array.isArray(baseOptions) ? baseOptions : [];
 

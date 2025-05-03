@@ -1,5 +1,5 @@
 
-import { CalculationInput, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+import { CalculationInput, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 
 export const handleUpdateMaterial = (
   calculationInput: CalculationInput,

@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 
 export const useExportHandlers = (
   result: CalculationResult,
