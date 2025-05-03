@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -10,6 +11,7 @@ import PaymentHistory from "@/components/payment/PaymentHistory";
 import PaymentSuccess from "@/components/payment/PaymentSuccess";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjects } from "@/contexts/ProjectContext";
+import Navbar from "@/components/navbar/Navbar"; // Add Navbar import
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -52,75 +54,78 @@ const Dashboard = () => {
   const projectsCount = projects?.length || 0;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      
-      {showPaymentSuccess && (
-        <div className="mb-8">
-          <PaymentSuccess onClose={() => setShowPaymentSuccess(false)} />
-        </div>
-      )}
-
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="w-full border-b bg-transparent p-0">
-          <div className="flex overflow-x-auto pb-2">
-            <TabsTrigger
-              value="overview"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
-              data-state={activeTab === "overview" ? "active" : "inactive"}
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="projects"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
-              data-state={activeTab === "projects" ? "active" : "inactive"}
-            >
-              Recent Projects
-            </TabsTrigger>
-            <TabsTrigger
-              value="reports"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
-              data-state={activeTab === "reports" ? "active" : "inactive"}
-            >
-              Reports
-            </TabsTrigger>
-            <TabsTrigger
-              value="payments"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
-              data-state={activeTab === "payments" ? "active" : "inactive"}
-            >
-              Payments
-            </TabsTrigger>
-          </div>
-        </TabsList>
-
-        <TabsContent value="overview" className="pt-4">
-          <div className="grid grid-cols-1 gap-8">
-            <DashboardStats
-              projectsCount={projectsCount}
-              recentProjects={recentProjects}
-            />
-            <SubscriptionStatus />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="projects" className="pt-4">
-          <ProjectsTab projects={projects || []} />
-        </TabsContent>
-
-        <TabsContent value="reports" className="pt-4">
-          <ReportsTab />
-        </TabsContent>
+    <>
+      <Navbar />
+      <div className="container mx-auto px-4 py-8 max-w-7xl content-top-spacing">
+        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
         
-        <TabsContent value="payments" className="pt-4">
-          <div className="grid grid-cols-1 gap-8">
-            <SubscriptionStatus />
-            <PaymentHistory />
+        {showPaymentSuccess && (
+          <div className="mb-8">
+            <PaymentSuccess onClose={() => setShowPaymentSuccess(false)} />
           </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+        )}
+
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+          <TabsList className="w-full border-b bg-transparent p-0">
+            <div className="flex overflow-x-auto pb-2">
+              <TabsTrigger
+                value="overview"
+                className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+                data-state={activeTab === "overview" ? "active" : "inactive"}
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="projects"
+                className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+                data-state={activeTab === "projects" ? "active" : "inactive"}
+              >
+                Recent Projects
+              </TabsTrigger>
+              <TabsTrigger
+                value="reports"
+                className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+                data-state={activeTab === "reports" ? "active" : "inactive"}
+              >
+                Reports
+              </TabsTrigger>
+              <TabsTrigger
+                value="payments"
+                className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+                data-state={activeTab === "payments" ? "active" : "inactive"}
+              >
+                Payments
+              </TabsTrigger>
+            </div>
+          </TabsList>
+
+          <TabsContent value="overview" className="pt-4">
+            <div className="grid grid-cols-1 gap-8">
+              <DashboardStats
+                projectsCount={projectsCount}
+                recentProjects={recentProjects}
+              />
+              <SubscriptionStatus />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="projects" className="pt-4">
+            <ProjectsTab projects={projects || []} />
+          </TabsContent>
+
+          <TabsContent value="reports" className="pt-4">
+            <ReportsTab />
+          </TabsContent>
+          
+          <TabsContent value="payments" className="pt-4">
+            <div className="grid grid-cols-1 gap-8">
+              <SubscriptionStatus />
+              <PaymentHistory />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
   );
 };
 
