@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { fetchMaterials } from '@/services/materialService';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
@@ -66,7 +67,8 @@ export const useMaterialCache = () => {
             throw new Error('MATERIAL_FACTORS not properly defined');
           }
           
-          const staticMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+          const staticMaterials: ExtendedMaterialData[] = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+            id: key, // Add id to satisfy the interface
             name: value.name || key,
             factor: value.factor || 0,
             unit: value.unit || 'kg',
@@ -99,7 +101,8 @@ export const useMaterialCache = () => {
       if (materials.length === 0) {
         console.log('Using static fallback materials due to error');
         try {
-          const staticMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+          const staticMaterials: ExtendedMaterialData[] = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+            id: key, // Add id to satisfy the interface
             name: value.name || key,
             factor: value.factor || 0,
             unit: value.unit || 'kg',

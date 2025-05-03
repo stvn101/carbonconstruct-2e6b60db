@@ -1,4 +1,3 @@
-
 /**
  * This file contains optimized calculation functions for carbon emissions
  * with improved memory management and batch processing for large datasets.

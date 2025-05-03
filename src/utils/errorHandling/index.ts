@@ -5,4 +5,6 @@ export * from './networkListeners';
 export * from './toastHelpers';
 export * from './networkErrorHandler';
 export * from './timeoutHelper';
+export * from './isNetworkError';
+export * from './errorUtils';
 
