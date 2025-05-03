@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route, Navigate } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { RequireAuth } from '@/components/RequireAuth';
 import { lazyLoad } from '@/utils/lazyLoad';
@@ -13,6 +13,7 @@ const UserProjects = lazyLoad(() => import('@/pages/UserProjects'),
 const ProjectsBrowser = lazyLoad(() => import('@/pages/ProjectsBrowser'));
 const Calculator = lazyLoad(() => import('@/pages/Calculator'));
 const ProjectDetail = lazyLoad(() => import('@/pages/ProjectDetail'));
+const AuthenticationRequired = lazyLoad(() => import('@/components/project/AuthenticationRequired'));
 
 export const projectRoutes = (
   <>

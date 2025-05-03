@@ -31,14 +31,18 @@ export const protectedRoutes = (
       </ErrorBoundary>
     } />
     <Route path="/notifications" element={
-      <RequireAuth>
-        <Notifications />
-      </RequireAuth>
+      <ErrorBoundary feature="Notifications">
+        <RequireAuth>
+          <Notifications />
+        </RequireAuth>
+      </ErrorBoundary>
     } />
     <Route path="/profile" element={
-      <RequireAuth>
-        <UserProfile />
-      </RequireAuth>
+      <ErrorBoundary feature="User Profile">
+        <RequireAuth>
+          <UserProfile />
+        </RequireAuth>
+      </ErrorBoundary>
     } />
   </>
 );
