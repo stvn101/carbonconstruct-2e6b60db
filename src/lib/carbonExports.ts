@@ -19,8 +19,6 @@ import {
   processMaterialsInBatches,
   processTransportInBatches,
   calculateEnergyEmissions,
-  CalculationInput,
-  CalculationResult
 } from './carbonCalculations';
 
 // Export the calculation functions
