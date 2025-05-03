@@ -4,7 +4,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorAlerts from "./calculator/CalculatorAlerts";
 import CalculatorContainer from "./calculator/CalculatorContainer";
-import { useCalculator } from '@/contexts/calculator';
 import { useCalculatorActions } from './calculator/hooks/useCalculatorActions';
 
 export interface CarbonCalculatorProps {
@@ -12,6 +11,7 @@ export interface CarbonCalculatorProps {
 }
 
 const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
+  // Get all needed actions and state in one place to avoid multiple context accesses
   const {
     error,
     projectName,
@@ -25,22 +25,12 @@ const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
     showSaveDialog,
     setShowSaveDialog,
     isExistingProject,
+    isCalculating,
     handleSaveClick,
     handleSaveConfirm,
-    handleSignIn
+    handleSignIn,
+    calculatorContext
   } = useCalculatorActions({ demoMode });
-
-  // Get calculator context - nested in try/catch to prevent render failures
-  let calculatorContext = null;
-  let isCalculating = false;
-  
-  try {
-    calculatorContext = useCalculator();
-    isCalculating = calculatorContext?.isCalculating || false;
-  } catch (err) {
-    console.error("Failed to access calculator context:", err);
-    return <CalculatorError />;
-  }
   
   // Handle error gracefully
   if (error || !calculatorContext) {

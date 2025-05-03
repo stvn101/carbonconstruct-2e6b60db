@@ -12,7 +12,6 @@ export interface CalculatorTabTriggersProps {
 const CalculatorTabTriggers = ({ isMobile = false, activeTab, onTabChange }: CalculatorTabTriggersProps) => {
   // Use a callback handler that only triggers when the user clicks
   const handleTabClick = useCallback((tab: string) => {
-    console.log(`Tab clicked: ${tab}`);
     // Only update if the tab is different than the current one
     if (tab !== activeTab) {
       onTabChange(tab);

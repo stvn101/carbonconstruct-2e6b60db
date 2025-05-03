@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export function useSimpleOfflineMode() {
   // Initialize with the current online status
@@ -10,20 +10,20 @@ export function useSimpleOfflineMode() {
   // Use refs to prevent unnecessary re-renders and cleanup issues
   const mountedRef = useRef(true);
 
-  useEffect(() => {
-    // Functions to update offline status
-    const handleOnline = () => {
-      if (mountedRef.current) {
-        setIsOffline(false);
-      }
-    };
-    
-    const handleOffline = () => {
-      if (mountedRef.current) {
-        setIsOffline(true);
-      }
-    };
+  // Memoized handlers to prevent re-renders
+  const handleOnline = useCallback(() => {
+    if (mountedRef.current) {
+      setIsOffline(false);
+    }
+  }, []);
+  
+  const handleOffline = useCallback(() => {
+    if (mountedRef.current) {
+      setIsOffline(true);
+    }
+  }, []);
 
+  useEffect(() => {
     // Add event listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -34,7 +34,7 @@ export function useSimpleOfflineMode() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []); // Empty dependency array ensures this only runs once
+  }, [handleOnline, handleOffline]); // Dependencies now include the memoized handlers
 
   return { isOffline };
 }
