@@ -6,19 +6,38 @@ import { MATERIAL_FACTORS } from '@/lib/materials';
 import { getCacheMetadata, clearMaterialsCache } from '@/services/materialService';
 import { toast } from 'sonner';
 
-// Simplified material cache hook - no pagination or complex options
+// Add debounce utility to prevent multiple refresh attempts
+const debounce = (fn: Function, ms = 300) => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return function(this: any, ...args: any[]) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), ms);
+  };
+};
+
+// Simplified material cache hook with improved error handling
 export const useMaterialCache = () => {
   const [materials, setMaterials] = useState<ExtendedMaterialData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
-  // Refresh cache handler - forces fresh data fetch
-  const refreshCache = useCallback(async () => {
+  // Limit refresh attempts
+  const [refreshAttempts, setRefreshAttempts] = useState(0);
+  const MAX_REFRESH_ATTEMPTS = 3;
+  
+  // Refresh cache handler - with debounce to prevent multiple refreshes
+  const refreshCache = useCallback(debounce(async () => {
+    if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
+      toast.error("Too many refresh attempts. Please try again later.");
+      return;
+    }
+    
     try {
       setLoading(true);
       toast.info("Refreshing material data...");
       
+      setRefreshAttempts(prev => prev + 1);
       await clearMaterialsCache();
       const fetchedMaterials = await fetchMaterials(true);
       
@@ -42,9 +61,9 @@ export const useMaterialCache = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, 500), [refreshAttempts]);
   
-  // Main materials loading function - simplified
+  // Main materials loading function - simplified with better error handling
   const loadMaterials = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
@@ -80,11 +99,34 @@ export const useMaterialCache = () => {
             notes: ''
           }));
           
-          setMaterials(staticMaterials);
+          if (staticMaterials.length > 0) {
+            setMaterials(staticMaterials);
+          } else {
+            throw new Error('No static materials available');
+          }
         } catch (staticError) {
           console.error('Error creating static materials:', staticError);
-          // Set to empty array to prevent undefined errors
-          setMaterials([]);
+          // Create a minimum set of materials to prevent empty state
+          setMaterials([
+            {
+              name: "Concrete",
+              factor: 0.159,
+              unit: "kg",
+              region: "Australia",
+              tags: ["construction"],
+              sustainabilityScore: 70,
+              recyclability: "Medium" as "High" | "Medium" | "Low"
+            },
+            {
+              name: "Steel",
+              factor: 1.77,
+              unit: "kg",
+              region: "Australia",
+              tags: ["construction"],
+              sustainabilityScore: 65,
+              recyclability: "High" as "High" | "Medium" | "Low"
+            }
+          ]);
           setError(new Error('Failed to load materials data'));
         }
       }
@@ -113,18 +155,39 @@ export const useMaterialCache = () => {
             notes: ''
           }));
           
-          setMaterials(staticMaterials);
+          if (staticMaterials.length > 0) {
+            setMaterials(staticMaterials);
+          }
         } catch (staticError) {
           console.error('Error creating static materials:', staticError);
-          // Set to empty array to prevent undefined errors
-          setMaterials([]);
+          // Create a minimum set of materials to prevent empty state
+          setMaterials([
+            {
+              name: "Concrete",
+              factor: 0.159,
+              unit: "kg",
+              region: "Australia",
+              tags: ["construction"],
+              sustainabilityScore: 70,
+              recyclability: "Medium" as "High" | "Medium" | "Low"
+            },
+            {
+              name: "Steel",
+              factor: 1.77,
+              unit: "kg",
+              region: "Australia",
+              tags: ["construction"],
+              sustainabilityScore: 65,
+              recyclability: "High" as "High" | "Medium" | "Low"
+            }
+          ]);
         }
       }
     } finally {
       setLoading(false);
       setInitialLoadComplete(true);
     }
-  }, [materials]);
+  }, [materials.length]);
   
   // Cache statistics information
   const [cacheStats, setCacheStats] = useState<{

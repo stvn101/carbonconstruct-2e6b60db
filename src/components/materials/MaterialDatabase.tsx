@@ -16,6 +16,9 @@ const MaterialDatabase = () => {
   const [selectedTag, setSelectedTag] = React.useState<string>("all");
   const { selectedRegion } = useRegion();
   
+  // Set a flag to track initial loading
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
   // Use the material cache hook for efficient data loading
   const { materials, loading, error, refreshCache, cacheStats } = useMaterialCache();
   
@@ -51,8 +54,13 @@ const MaterialDatabase = () => {
       );
       
       setCategoriesList(uniqueCategories);
+      
+      // If we've successfully loaded materials, mark initial load as complete
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
     }
-  }, [materials]);
+  }, [materials, isInitialLoad]);
   
   // Make sure we have safe arrays to work with
   const safeTags = Array.isArray(allTags) ? allTags : [];
@@ -67,9 +75,9 @@ const MaterialDatabase = () => {
   };
 
   // Show loading state only on initial load
-  if (loading && (!safeMaterials || safeMaterials.length === 0)) {
+  if ((loading || isInitialLoad) && (!safeMaterials || safeMaterials.length === 0)) {
     return (
-      <div className="container mx-auto px-4 py-8 content-top-spacing">
+      <div className="container mx-auto px-4 py-8 content-top-spacing pt-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbon-600" />
@@ -84,7 +92,7 @@ const MaterialDatabase = () => {
   // Show error state only when there's no data at all
   if (error && (!safeMaterials || safeMaterials.length === 0)) {
     return (
-      <div className="container mx-auto px-4 py-8 content-top-spacing">
+      <div className="container mx-auto px-4 py-8 content-top-spacing pt-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center bg-red-50 p-6 rounded-lg border border-red-200">
             <AlertCircle className="h-8 w-8 mx-auto mb-4 text-red-500" />
@@ -92,12 +100,12 @@ const MaterialDatabase = () => {
             <p className="text-red-600 mt-2">
               {error.message || "Failed to load material data. Please try again later."}
             </p>
-            <button 
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            <Button 
+              className="mt-4 bg-red-600 text-white rounded hover:bg-red-700"
               onClick={() => window.location.reload()}
             >
               Retry
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -106,7 +114,7 @@ const MaterialDatabase = () => {
 
   return (
     <ErrorBoundaryWrapper feature="Material Database">
-      <div className="container mx-auto px-4 py-8 content-top-spacing">
+      <div className="container mx-auto px-4 py-8 content-top-spacing pt-24">
         <div className="max-w-5xl mx-auto">
           <DatabaseHeader 
             globalRegion="Australia"

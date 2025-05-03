@@ -1,100 +1,130 @@
 
 /**
- * Fallback service for providing material data when API is unavailable
+ * Fallback material service for offline or error states
  */
+import { MATERIAL_FACTORS } from '@/lib/materials';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { MATERIAL_FACTORS, EXTENDED_MATERIALS } from '@/lib/materials';
 
 /**
- * Get comprehensive fallback materials from both static data sources
+ * Get default fallback materials from local material factors
  */
 export function getFallbackMaterials(): ExtendedMaterialData[] {
   console.log('Using fallback materials');
   
-  // First try to use the extended materials data which has more detailed information
-  if (Object.keys(EXTENDED_MATERIALS).length > 0) {
-    console.log('Using EXTENDED_MATERIALS for fallback', Object.keys(EXTENDED_MATERIALS).length, 'items');
-    return Object.values(EXTENDED_MATERIALS);
+  try {
+    // Create material data from our static definitions
+    return Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+      name: value.name || key,
+      factor: value.factor || 0,
+      unit: value.unit || 'kg',
+      region: 'Australia', // Default region 
+      tags: ['construction'], // Default tags
+      sustainabilityScore: 70, // Default score
+      recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
+      alternativeTo: undefined,
+      notes: ''
+    }));
+  } catch (error) {
+    console.error('Error creating fallback materials:', error);
+    
+    // Last resort - return minimal dataset if everything else fails
+    return [
+      {
+        name: "Concrete",
+        factor: 0.159,
+        unit: "kg",
+        region: "Australia",
+        tags: ["construction"],
+        sustainabilityScore: 70,
+        recyclability: "Medium" as "High" | "Medium" | "Low",
+        alternativeTo: undefined,
+        notes: ""
+      },
+      {
+        name: "Steel",
+        factor: 1.77,
+        unit: "kg",
+        region: "Australia",
+        tags: ["construction"],
+        sustainabilityScore: 65,
+        recyclability: "High" as "High" | "Medium" | "Low",
+        alternativeTo: undefined,
+        notes: ""
+      },
+      {
+        name: "Timber",
+        factor: 0.42,
+        unit: "kg",
+        region: "Australia",
+        tags: ["construction"],
+        sustainabilityScore: 85,
+        recyclability: "High" as "High" | "Medium" | "Low",
+        alternativeTo: undefined,
+        notes: ""
+      },
+      {
+        name: "Glass",
+        factor: 0.85,
+        unit: "kg",
+        region: "Australia",
+        tags: ["construction"],
+        sustainabilityScore: 75,
+        recyclability: "High" as "High" | "Medium" | "Low",
+        alternativeTo: undefined,
+        notes: ""
+      },
+      // Additional fallback materials to ensure more than 4
+      {
+        name: "Aluminum",
+        factor: 8.24,
+        unit: "kg",
+        region: "Australia",
+        tags: ["construction"],
+        sustainabilityScore: 60,
+        recyclability: "High" as "High" | "Medium" | "Low",
+        alternativeTo: undefined,
+        notes: ""
+      },
+      {
+        name: "Brick",
+        factor: 0.24,
+        unit: "kg",
+        region: "Australia",
+        tags: ["construction"],
+        sustainabilityScore: 80,
+        recyclability: "Medium" as "High" | "Medium" | "Low",
+        alternativeTo: undefined,
+        notes: ""
+      },
+      {
+        name: "Insulation",
+        factor: 1.86,
+        unit: "kg",
+        region: "Australia",
+        tags: ["construction"],
+        sustainabilityScore: 75,
+        recyclability: "Low" as "High" | "Medium" | "Low",
+        alternativeTo: undefined,
+        notes: ""
+      }
+    ];
   }
-  
-  // Fallback to basic material factors if extended isn't available
-  console.log('Using MATERIAL_FACTORS for fallback');
-  return Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
-    name: value.name || key,
-    factor: value.factor,
-    unit: value.unit || 'kg',
-    region: 'Australia',
-    tags: ['construction'],
-    sustainabilityScore: 70,
-    recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
-    alternativeTo: undefined,
-    notes: ''
-  }));
 }
 
 /**
- * Try to load static test materials for offline/demo scenarios
- */
-export function getTestMaterials(): ExtendedMaterialData[] {
-  const testMaterials: ExtendedMaterialData[] = [
-    {
-      name: 'Concrete (General)',
-      factor: 0.12,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction', 'structural'],
-      sustainabilityScore: 65,
-      recyclability: 'Medium',
-      notes: 'Standard concrete mix. NCC 2025 compliant.'
-    },
-    {
-      name: 'Steel (Structural)',
-      factor: 1.46,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction', 'structural'],
-      sustainabilityScore: 72,
-      recyclability: 'High',
-      notes: 'Structural steel beams and columns.'
-    },
-    {
-      name: 'Timber (Pine)',
-      factor: 0.20,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction', 'natural'],
-      sustainabilityScore: 85,
-      recyclability: 'Medium',
-      notes: 'Sustainably sourced pine timber.'
-    },
-    {
-      name: 'Glass (Window)',
-      factor: 0.86,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction', 'finishes'],
-      sustainabilityScore: 68,
-      recyclability: 'High',
-      notes: 'Standard window glass.'
-    },
-    {
-      name: 'Brick (Clay)',
-      factor: 0.24,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction', 'masonry'],
-      sustainabilityScore: 70,
-      recyclability: 'Medium',
-      notes: 'Standard clay brick.'
-    }
-  ];
-  
-  return testMaterials;
-}
-
-/**
- * Get default categories when API is unavailable
+ * Get default material categories when API or cache fails
  */
 export function getDefaultCategories(): string[] {
-  return ['Concrete', 'Wood', 'Steel', 'Insulation', 'Glass', 'Masonry', 'Metals', 'Plastics'];
+  return [
+    'Concrete',
+    'Metals',
+    'Wood',
+    'Glass',
+    'Insulation',
+    'Ceramics',
+    'Plastics',
+    'Composites',
+    'Finishes',
+    'Other'
+  ];
 }
