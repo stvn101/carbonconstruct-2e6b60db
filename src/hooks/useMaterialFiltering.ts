@@ -63,8 +63,8 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     const matchesSearch = debouncedSearchTerm.trim() === '' || 
       materialName.includes(debouncedSearchTerm.toLowerCase());
     
-    // Handle region comparison safely
-    const matchesRegion = selectedRegion === "all" || materialRegion.includes(selectedRegion);
+    // Fix the type comparison error - convert selectedRegion to string before comparison
+    const matchesRegion = selectedRegion === "all" || selectedRegion === materialRegion;
     
     const matchesAlternative = selectedAlternative === "none" || materialAltTo === selectedAlternative;
     
@@ -105,10 +105,10 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
         // Handle tags safely
         if (Array.isArray(material?.tags)) {
           material.tags.forEach(tag => tag && allTags.add(tag));
-        } else if (material?.category) {
-          // Use category as a tag if tags aren't available
-          allTags.add(material.category);
         }
+        
+        // Fix for accessing category - don't access it directly from ExtendedMaterialData
+        // This information should come from separate categories fetch API call
       });
     }
 
