@@ -304,7 +304,12 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_material_categories: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
