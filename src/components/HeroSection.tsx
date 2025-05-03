@@ -98,7 +98,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <p>3 builders currently testing, with Master Builders Queensland exploring a beta for their network.</p>
+            <p>Meet NCC 2025 reporting requirements with streamlined carbon management for construction.</p>
           </motion.div>
         </div>
 
