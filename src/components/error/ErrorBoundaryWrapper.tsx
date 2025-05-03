@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ErrorFallbackCard from './ErrorFallbackCard';
 import { useErrorBoundaryState } from '@/hooks/useErrorBoundaryState';
-import { isNetworkError } from '@/utils/errorHandling/isNetworkError';
+import { isNetworkError } from '@/utils/errorHandling/networkChecker';
 
 interface ErrorBoundaryWrapperProps {
   children: React.ReactNode;

@@ -1,10 +1,11 @@
+
 /**
  * Service for fetching materials data with caching and fallbacks
  */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { cacheMaterials, getCachedMaterials } from '@/services/materials/materialCacheService';
 import { processDataInBatches } from './materialDataProcessor';
-import { isOffline } from '@/utils/errorHandling';
+import { isOffline } from '@/utils/errorHandling/networkChecker';
 import { fetchMaterialsFromApi, fetchCategoriesFromApi, handleMaterialApiError } from './materialApiUtils';
 import { getFallbackMaterials, getDefaultCategories } from './materialFallbackService';
 import { toast } from 'sonner';
