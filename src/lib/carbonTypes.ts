@@ -7,19 +7,22 @@ export type Energy = keyof typeof ENERGY_FACTORS;
 
 export interface MaterialInput {
   type: Material;
-  quantity: number;
+  quantity: number | string;
   unit?: string;
+  region?: string;
 }
 
 export interface TransportInput {
   type: Transport;
-  distance: number;
-  weight: number;
+  distance: number | string;
+  weight?: number | string;
+  unit?: string;
 }
 
 export interface EnergyInput {
   type: Energy;
-  amount: number;
+  amount: number | string;
+  quantity?: number | string; // For backward compatibility
   unit?: string;
 }
 

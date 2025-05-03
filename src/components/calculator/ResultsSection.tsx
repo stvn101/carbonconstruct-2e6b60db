@@ -46,8 +46,11 @@ const ResultsSection = ({
   
   // Check if data is valid for results
   const hasValidMaterials = materials?.some(m => Number(m.quantity) > 0) || false;
-  const hasValidTransport = transport?.some(t => Number(t.distance) > 0 && Number(t.weight) > 0) || false;
-  const hasValidEnergy = energy?.some(e => Number(e.amount) > 0) || false;
+  const hasValidTransport = transport?.some(t => Number(t.distance) > 0 && (t.weight ? Number(t.weight) > 0 : true)) || false;
+  const hasValidEnergy = energy?.some(e => 
+    (e.amount ? Number(e.amount) > 0 : false) || 
+    (e.quantity ? Number(e.quantity) > 0 : false)
+  ) || false;
   
   // Check if calculation result has any data
   const hasEmptyResult = calculationResult && 

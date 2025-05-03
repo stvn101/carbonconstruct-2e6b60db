@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface TransportInputSectionProps {
   demoMode?: boolean;
 }
 
-// Fix the TransportFieldError type issue on line 67
+// Fix the TransportFieldError type issue
 interface TransportFieldError {
   [key: string]: string; // Add index signature
 }
@@ -120,7 +121,7 @@ const TransportInputSection = ({
           key={`transport-${index}`}
           transport={transportItem}
           index={index}
-          error={errors[index]}
+          errors={errors[index]}
           onRemove={() => onRemoveTransport(index)}
           onUpdate={(field, value) => {
             if (field === "distance") {

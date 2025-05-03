@@ -1,38 +1,36 @@
-import { TabsContent } from "@/components/ui/tabs";
+
+import React from "react";
+import { useCalculator } from "@/contexts/calculator";
 import TransportInputSection from "../../TransportInputSection";
-import { TransportInput } from "@/lib/carbonExports";
 
-interface TransportTabContentProps {
-  transportItems: TransportInput[];
-  onUpdateTransport: (index: number, field: string, value: string | number) => void;
-  onAddTransport: () => void;
-  onRemoveTransport: (index: number) => void;
-  onNext: () => void;
-  onPrev: () => void;
-  demoMode?: boolean;
-}
+const TransportTabContent: React.FC = () => {
+  const {
+    calculationInput,
+    handleUpdateTransport,
+    handleAddTransport,
+    handleRemoveTransport,
+    handleNextTab,
+    handlePrevTab
+  } = useCalculator();
 
-const TransportTabContent = ({
-  transportItems,
-  onUpdateTransport,
-  onAddTransport,
-  onRemoveTransport,
-  onNext,
-  onPrev,
-  demoMode = false
-}: TransportTabContentProps) => {
+  const handleNext = () => {
+    handleNextTab();
+  };
+
+  const handlePrev = () => {
+    handlePrevTab();
+  };
+
   return (
-    <TabsContent value="transport">
-      <TransportInputSection 
-        transportItems={transportItems}
-        onUpdateTransport={onUpdateTransport}
-        onAddTransport={onAddTransport}
-        onRemoveTransport={onRemoveTransport}
-        onNext={onNext}
-        onPrev={onPrev}
-        demoMode={demoMode}
-      />
-    </TabsContent>
+    <TransportInputSection
+      transport={calculationInput.transport}
+      onUpdateTransport={handleUpdateTransport}
+      onAddTransport={handleAddTransport}
+      onRemoveTransport={handleRemoveTransport}
+      onNext={handleNext}
+      onBack={handlePrev}
+      demoMode={false}
+    />
   );
 };
 
