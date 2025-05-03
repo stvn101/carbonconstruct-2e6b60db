@@ -1,4 +1,6 @@
-import { Material, MATERIAL_FACTORS } from "@/lib/carbonExports";
+
+import { Material } from '@/lib/carbonExports';
+import { MATERIAL_FACTORS } from '@/lib/carbonExports';
 
 export function getCategory(materialType: string): string {
   const lowerType = materialType.toLowerCase();
