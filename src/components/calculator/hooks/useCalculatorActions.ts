@@ -1,133 +1,149 @@
 
 import { useState } from 'react';
 import { useCalculator } from '@/contexts/calculator';
-import { SavedProject } from '@/types/project';
+import { useProjects } from '@/contexts/ProjectContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/auth';
+import { showErrorToast } from '@/utils/errorHandling/simpleToastHandler';
 
 export interface UseCalculatorActionsProps {
   demoMode?: boolean;
 }
 
 export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsProps) {
-  // State management
-  const [projectName, setProjectName] = useState('');
-  const [authError, setAuthError] = useState<Error | null>(null);
-  const [savingError, setSavingError] = useState<Error | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { saveProject, projects } = useProjects();
+  const [projectName, setProjectName] = useState("New Carbon Project");
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [projectsContextError, setProjectsContextError] = useState<Error | null>(null);
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
-  
-  // Clear save timeout utility
-  const clearSaveTimeout = () => {
-    if (saveTimeout) {
-      clearTimeout(saveTimeout);
-      setSaveTimeout(null);
-    }
-  };
-  
-  // Initialize with safer defaults
-  let saveProject: ((project: any) => Promise<SavedProject>) | undefined;
-  let projects: SavedProject[] = [];
-  let hasProjectsContext = false;
-  let error = false;
-  let calculatorContext = null;
-  let isCalculating = false;
-  let setIsCalculating = () => {};
+  const [authError, setAuthError] = useState<Error | null>(null);
+  const [savingError, setSavingError] = useState<Error | null>(null);
 
-  // Safely check for calculator context first - it's critical
+  // Access calculator context
+  let calculatorContext;
   try {
     calculatorContext = useCalculator();
-    if (calculatorContext) {
-      isCalculating = calculatorContext.isCalculating;
-      setIsCalculating = calculatorContext.setIsCalculating;
-    }
-  } catch (e) {
-    error = true;
-    console.error("Error accessing calculator context:", e);
+  } catch (error) {
+    console.error("Error accessing calculator context:", error);
+    return {
+      error: true,
+      projectName,
+      setProjectName,
+      authError,
+      setAuthError,
+      savingError,
+      setSavingError,
+      isSaving,
+      setIsSaving,
+      showSaveDialog,
+      setShowSaveDialog,
+      isCalculating: false,
+      setIsCalculating: () => {},
+      handleSaveClick: () => {},
+      handleSaveConfirm: async () => {},
+      handleSignIn: () => {},
+      isExistingProject: false,
+      calculatorContext: null
+    };
   }
 
-  // Only try to access projects context if calculator context succeeded
-  if (!error && !demoMode) {
-    try {
-      // Import ProjectContext directly rather than using dynamic require
-      const { useProjects } = require('@/contexts/ProjectContext');
-      if (useProjects) {
-        try {
-          const projectsContext = useProjects();
-          if (projectsContext) {
-            saveProject = projectsContext.saveProject;
-            projects = projectsContext.projects || [];
-            hasProjectsContext = true;
-          }
-        } catch (e) {
-          console.warn('Error using ProjectContext:', e);
-          hasProjectsContext = false;
-          setProjectsContextError(e instanceof Error ? e : new Error('Error using ProjectContext'));
-        }
-      } else {
-        console.warn('useProjects not available');
-        hasProjectsContext = false;
-      }
-    } catch (e) {
-      console.warn('ProjectContext module not available:', e);
-      hasProjectsContext = false;
-      setProjectsContextError(e instanceof Error ? e : new Error('ProjectContext module not available'));
-    }
-  }
+  const { calculationInput, calculationResult, isCalculating, setIsCalculating } = calculatorContext;
 
-  const isExistingProject = hasProjectsContext && projects.length > 0 && !!projects.find(
+  const isExistingProject = !!projects.find(
     p => p.name.toLowerCase() === projectName.toLowerCase()
   );
 
-  // Handler for saving projects
   const handleSaveClick = () => {
-    if (demoMode) {
-      setAuthError(new Error('Please sign in to save projects'));
+    setAuthError(null);
+    setSavingError(null);
+    
+    if (!navigator.onLine) {
+      showErrorToast("You're offline. Please connect to the internet to save projects.");
       return;
     }
     
-    if (!hasProjectsContext) {
-      setSavingError(new Error('Project saving is not available'));
+    if (!user) {
+      setAuthError(new Error("Please log in to save your project"));
       return;
     }
     
+    if (!calculationInput || !calculationResult) {
+      toast.error("Please complete your calculation before saving");
+      return;
+    }
+
     setShowSaveDialog(true);
   };
-  
-  // Handler for confirming save
+
+  // Simplified save function
   const handleSaveConfirm = async () => {
-    if (!calculatorContext?.calculationResult || !saveProject) {
-      setSavingError(new Error('Unable to save project - missing data or save function'));
+    if (!user) {
+      setAuthError(new Error("Authentication required to save projects"));
+      setShowSaveDialog(false);
+      return;
+    }
+    
+    if (!navigator.onLine) {
+      showErrorToast("You're offline. Please connect to the internet to save projects.");
+      setShowSaveDialog(false);
       return;
     }
     
     setIsSaving(true);
+    setSavingError(null);
+    
     try {
-      await saveProject({
-        name: projectName,
-        materials: calculatorContext.calculationInput.materials,
-        transport: calculatorContext.calculationInput.transport,
-        energy: calculatorContext.calculationInput.energy,
-        result: calculatorContext.calculationResult
-      });
+      // Ensure we have a valid calculation result
+      if (!calculationResult) {
+        throw new Error("Missing calculation result. Please calculate before saving.");
+      }
       
-      setShowSaveDialog(false);
-      setIsSaving(false);
+      // Prepare the project data
+      const projectData = {
+        name: projectName,
+        description: "Carbon calculation project",
+        materials: calculationInput.materials,
+        transport: calculationInput.transport,
+        energy: calculationInput.energy,
+        result: calculationResult,
+        tags: ["carbon", "calculation"],
+        status: 'draft' as const,
+        total_emissions: calculationResult.totalEmissions || 0,
+        premium_only: false // Adding the missing field
+      };
+      
+      // Save the project
+      const savedProject = await saveProject(projectData);
+      
+      console.log("Project saved successfully:", savedProject);
+      toast.success("Project saved successfully!");
+      
+      // Navigate after a short delay
+      setTimeout(() => {
+        navigate(`/projects`);
+      }, 300);
     } catch (error) {
-      setSavingError(error instanceof Error ? error : new Error('Failed to save project'));
+      console.error("Error saving project:", error);
+      
+      if (error instanceof Error) {
+        setSavingError(error);
+      } else {
+        setSavingError(new Error("Unknown error occurred while saving"));
+      }
+      
       setIsSaving(false);
+      setShowSaveDialog(false);
     }
   };
   
-  // Handler for sign in
   const handleSignIn = () => {
-    // This would redirect to sign in page or open sign in modal
-    console.log('Sign in handler called');
-    // Implement redirection or modal opening logic here
+    navigate("/auth", { state: { returnTo: "/calculator" } });
   };
 
   return {
-    error: !calculatorContext || (projectsContextError && !demoMode), 
+    error: false,
     projectName,
     setProjectName,
     authError,

@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { state, updateState } = useAuthState();
   const authHandlers = useAuthHandlers();
   useAuthEffects(updateState);
-  const { isOffline } = useSimpleOfflineMode();
+  const { isOffline, checkConnection } = useSimpleOfflineMode();
 
   // Monitor offline status for auth
   useEffect(() => {

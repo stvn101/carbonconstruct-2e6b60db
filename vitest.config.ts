@@ -8,15 +8,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts', './src/test/jest-setup.ts'],
-    coverage: {
-      reporter: ['text', 'html'],
-      exclude: ['node_modules/', 'src/test/'],
-    },
-    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    deps: {
-      inline: ['recharts'],
-    },
+    setupFiles: './src/test/setup.ts',
   },
   resolve: {
     alias: {

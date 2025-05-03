@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import CalculatorTabs from "../../CalculatorTabs";
 import CalculatorTabContents from "../../tabs/CalculatorTabContents";
 import TabErrorDisplay from "../error/TabErrorDisplay";
@@ -50,6 +50,18 @@ const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
   onSaveClick,
   isCalculating = false
 }) => {
+  
+  // Debug logging
+  console.log("CalculatorTabSection rendering with activeTab:", calculatorContext.activeTab);
+  console.log("Materials:", calculationInput.materials);
+  console.log("Transport:", calculationInput.transport);
+  console.log("Energy:", calculationInput.energy);
+  
+  // Synchronize the tab content with the calculator context
+  useEffect(() => {
+    console.log("Tab section effect running, current active tab:", calculatorContext.activeTab);
+  }, [calculatorContext.activeTab]);
+  
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
       <CalculatorTabs 
@@ -79,7 +91,6 @@ const CalculatorTabSection: React.FC<CalculatorTabSectionProps> = ({
         onPrev={handlePrevTab}
         onNext={handleNextTab}
         demoMode={demoMode}
-        activeTab={calculatorContext.activeTab}
       />
     </div>
   );

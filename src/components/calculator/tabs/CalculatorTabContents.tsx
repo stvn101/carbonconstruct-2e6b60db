@@ -1,10 +1,12 @@
 
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
 import MaterialsTabContent from "./content/MaterialsTabContent";
 import TransportTabContent from "./content/TransportTabContent";
 import EnergyTabContent from "./content/EnergyTabContent";
 import ResultsTabContent from "./content/ResultsTabContent";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
+import { useCalculator } from "@/contexts/calculator";
 
 export interface CalculatorTabContentsProps {
   calculationInput: CalculationInput;
@@ -22,7 +24,6 @@ export interface CalculatorTabContentsProps {
   onPrev: () => void;
   onNext: () => void;
   demoMode?: boolean;
-  activeTab: string;
 }
 
 const CalculatorTabContents = ({
@@ -40,11 +41,26 @@ const CalculatorTabContents = ({
   onCalculate,
   onPrev,
   onNext,
-  demoMode = false,
-  activeTab
+  demoMode = false
 }: CalculatorTabContentsProps) => {
+  // Use the global calculator context to sync the tab value
+  const { activeTab, setActiveTab } = useCalculator();
+
+  // Ensure tab changes in the context update the UI
+  const handleTabChange = (value: string) => {
+    console.log(`Tab changed to: ${value}`);
+    setActiveTab(value as any);
+  };
+
+  // Debug logging
+  console.log("CalculatorTabContents rendering with activeTab:", activeTab);
+  console.log("Has materials:", calculationInput.materials?.length);
+  console.log("Has transport:", calculationInput.transport?.length);
+  console.log("Has energy:", calculationInput.energy?.length);
+  console.log("Has calculation result:", calculationResult ? "Yes" : "No");
+
   return (
-    <Tabs value={activeTab} className="w-full mt-4">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-4">
       <TabsContent value="materials" className="mt-6">
         <MaterialsTabContent 
           materials={calculationInput.materials}
