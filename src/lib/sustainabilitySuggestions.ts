@@ -1,6 +1,26 @@
 
 import { CalculationResult } from "./carbonExports";
 import { CalculationInput } from "./carbonCalculations";
+import { Material } from "./carbonTypes";
+import { MATERIAL_FACTORS } from "./carbonData";
+
+// Define ExtendedMaterial type
+export interface ExtendedMaterial {
+  name: string;
+  factor: number;
+  unit?: string;
+  region?: string;
+  tags?: string[];
+  category?: string;
+}
+
+// Helper function to get material name
+export const getMaterialName = (material: ExtendedMaterial | string): string => {
+  if (typeof material === 'string') {
+    return MATERIAL_FACTORS[material as Material]?.name || material;
+  }
+  return material.name || 'Unknown Material';
+};
 
 // Placeholder function for calculating potential savings
 export const calculatePotentialSavings = (input: CalculationInput) => {
@@ -11,7 +31,7 @@ export const calculatePotentialSavings = (input: CalculationInput) => {
       potentialEmissions: 800,
       savings: 200,
       savingsPercentage: 20,
-      material: "concrete",
+      material: "concrete" as Material, // Type assertion to ensure it's a valid Material
       alternative: "low-carbon concrete"
     }
   ];

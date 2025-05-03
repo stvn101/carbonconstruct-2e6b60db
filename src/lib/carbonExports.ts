@@ -1,16 +1,17 @@
 
-// Reexport types and calculation functions from carbonCalculations.ts
+// Reexport calculation functions from carbonCalculations.ts
 export { 
-  calculateTotalEmissions,
-  calculateMaterialEmissions,
-  calculateTransportEmissions,
-  calculateEnergyEmissions,
+  calculateTotalEmissions
+} from './carbonCalculations';
+
+// Export types with proper 'export type' syntax for isolatedModules
+export type { 
   CalculationResult,
   CalculationInput
 } from './carbonCalculations';
 
-// Export types from carbonTypes
-export {
+// Export types from carbonTypes with proper syntax
+export type {
   Material,
   Transport, 
   Energy,

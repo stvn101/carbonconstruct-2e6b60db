@@ -5,7 +5,7 @@ import MaterialsTabContent from "./content/MaterialsTabContent";
 import TransportTabContent from "./content/TransportTabContent";
 import EnergyTabContent from "./content/EnergyTabContent";
 import ResultsTabContent from "./content/ResultsTabContent";
-import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
+import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { useCalculator } from "@/contexts/calculator";
 
 export interface CalculatorTabContentsProps {
@@ -73,15 +73,7 @@ const CalculatorTabContents = ({
       </TabsContent>
       
       <TabsContent value="transport" className="mt-6">
-        <TransportTabContent 
-          transportItems={calculationInput.transport}
-          onUpdateTransport={onUpdateTransport}
-          onAddTransport={onAddTransport}
-          onRemoveTransport={onRemoveTransport}
-          onNext={onNext}
-          onPrev={onPrev}
-          demoMode={demoMode}
-        />
+        <TransportTabContent />
       </TabsContent>
       
       <TabsContent value="energy" className="mt-6">

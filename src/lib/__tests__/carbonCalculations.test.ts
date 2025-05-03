@@ -1,27 +1,26 @@
+
 import { expect, test, describe } from 'vitest';
 import { 
   calculateTotalEmissions,
-  MaterialInput,
-  TransportInput,
-  EnergyInput
+  CalculationInput
 } from '../carbonExports';
 
 describe('Carbon Calculations', () => {
   test('calculateTotalEmissions returns expected results', () => {
-    const materials: MaterialInput[] = [
-      { type: 'concrete', quantity: 1000, unit: 'kg' },
-      { type: 'steel', quantity: 500, unit: 'kg' }
-    ];
+    const input: CalculationInput = {
+      materials: [
+        { type: 'concrete', quantity: 1000, unit: 'kg' },
+        { type: 'steel', quantity: 500, unit: 'kg' }
+      ],
+      transport: [
+        { type: 'truck', distance: 100 }
+      ],
+      energy: [
+        { type: 'electricity', amount: 1000, unit: 'kWh' }
+      ]
+    };
     
-    const transport: TransportInput[] = [
-      { type: 'truck', distance: 100 }
-    ];
-    
-    const energy: EnergyInput[] = [
-      { type: 'electricity', quantity: 1000, unit: 'kWh' }
-    ];
-    
-    const result = calculateTotalEmissions(materials, transport, energy);
+    const result = calculateTotalEmissions(input);
     expect(result).toBeDefined();
     // More assertions could be added here
   });

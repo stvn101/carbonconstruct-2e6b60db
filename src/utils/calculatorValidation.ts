@@ -16,13 +16,18 @@ export const validateCalculationInput = (input: CalculationInput): ValidationErr
 
   // Validate materials
   input.materials.forEach((material, index) => {
-    if (material.quantity < 0) {
+    const quantity = Number(material.quantity);
+    if (isNaN(quantity)) {
+      errors.push({
+        field: `materials[${index}].quantity`,
+        message: "Quantity must be a number"
+      });
+    } else if (quantity < 0) {
       errors.push({
         field: `materials[${index}].quantity`,
         message: "Quantity cannot be negative"
       });
-    }
-    if (material.quantity > MAX_QUANTITY) {
+    } else if (quantity > MAX_QUANTITY) {
       errors.push({
         field: `materials[${index}].quantity`,
         message: `Maximum quantity is ${MAX_QUANTITY} kg`
@@ -32,25 +37,36 @@ export const validateCalculationInput = (input: CalculationInput): ValidationErr
 
   // Validate transport
   input.transport.forEach((transport, index) => {
-    if (transport.distance < 0) {
+    const distance = Number(transport.distance);
+    if (isNaN(distance)) {
+      errors.push({
+        field: `transport[${index}].distance`,
+        message: "Distance must be a number"
+      });
+    } else if (distance < 0) {
       errors.push({
         field: `transport[${index}].distance`,
         message: "Distance cannot be negative"
       });
-    }
-    if (transport.distance > MAX_DISTANCE) {
+    } else if (distance > MAX_DISTANCE) {
       errors.push({
         field: `transport[${index}].distance`,
         message: `Maximum distance is ${MAX_DISTANCE} km`
       });
     }
-    if (transport.weight < 0) {
+
+    const weight = Number(transport.weight);
+    if (transport.weight !== undefined && isNaN(weight)) {
+      errors.push({
+        field: `transport[${index}].weight`,
+        message: "Weight must be a number"
+      });
+    } else if (transport.weight !== undefined && weight < 0) {
       errors.push({
         field: `transport[${index}].weight`,
         message: "Weight cannot be negative"
       });
-    }
-    if (transport.weight > MAX_WEIGHT) {
+    } else if (transport.weight !== undefined && weight > MAX_WEIGHT) {
       errors.push({
         field: `transport[${index}].weight`,
         message: `Maximum weight is ${MAX_WEIGHT} kg`
@@ -60,13 +76,18 @@ export const validateCalculationInput = (input: CalculationInput): ValidationErr
 
   // Validate energy
   input.energy.forEach((energy, index) => {
-    if (energy.amount < 0) {
+    const amount = Number(energy.amount);
+    if (isNaN(amount)) {
+      errors.push({
+        field: `energy[${index}].amount`,
+        message: "Amount must be a number"
+      });
+    } else if (amount < 0) {
       errors.push({
         field: `energy[${index}].amount`,
         message: "Amount cannot be negative"
       });
-    }
-    if (energy.amount > MAX_ENERGY) {
+    } else if (amount > MAX_ENERGY) {
       errors.push({
         field: `energy[${index}].amount`,
         message: `Maximum amount is ${MAX_ENERGY} units`

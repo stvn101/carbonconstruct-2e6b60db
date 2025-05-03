@@ -1,16 +1,13 @@
 
 import React from "react";
 import { ArrowRight, TrendingDown } from "lucide-react";
-import { 
-  ExtendedMaterial, 
-  getMaterialName
-} from "@/lib/sustainabilitySuggestions";
+import { ExtendedMaterial, getMaterialName } from "@/lib/sustainabilitySuggestions";
 import { MATERIAL_FACTORS } from "@/lib/carbonData";
 import { Material } from "@/lib/carbonTypes";
 
 interface PotentialSavingsProps {
   material: Material;
-  alternative: ExtendedMaterial;
+  alternative: ExtendedMaterial | string;
   originalEmissions: number;
   potentialEmissions: number;
   savings: number;
