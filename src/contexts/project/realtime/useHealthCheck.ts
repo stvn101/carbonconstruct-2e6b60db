@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { pingSupabaseConnection, checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
+import { checkSupabaseConnection } from '@/services/supabase/connection';
 
 /**
  * Hook to periodically check connection health and reconnect if needed
@@ -23,7 +23,7 @@ export const useHealthCheck = (
       if (isSubscribingRef.current || !mountedRef.current) return;
       
       try {
-        const isConnected = await pingSupabaseConnection();
+        const isConnected = await checkSupabaseConnection();
         
         // If we detected a disconnection, try to reconnect
         if (!isConnected && channelRef.current && mountedRef.current) {

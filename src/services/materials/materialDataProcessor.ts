@@ -1,48 +1,83 @@
 
+/**
+ * Utilities for processing material data
+ */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
+import { SupabaseMaterial } from './materialTypes';
 
 /**
- * Process material data in batches to avoid UI blocking
- * @param data Raw material data from API
- * @returns Processed material data
+ * Process data in batches to avoid UI freezing
  */
-export function processDataInBatches(data: any[]): ExtendedMaterialData[] {
-  const BATCH_SIZE = 100;
+export function processDataInBatches(data: SupabaseMaterial[]): ExtendedMaterialData[] {
+  const BATCH_SIZE = 50;
   const result: ExtendedMaterialData[] = [];
-
-  // Process data in batches
+  
+  console.time('Process materials');
+  
   for (let i = 0; i < data.length; i += BATCH_SIZE) {
     const batch = data.slice(i, i + BATCH_SIZE);
     
-    batch.forEach(item => {
-      // Clean and normalize data
-      const material: ExtendedMaterialData = {
-        id: item.id || `material-${Math.random().toString(36).substring(2, 9)}`,
-        name: item.name || 'Unknown Material',
-        category: item.category || 'Uncategorized',
-        factor: typeof item.factor === 'number' ? item.factor : 
-               typeof item.carbon_footprint_kgco2e_kg === 'number' ? item.carbon_footprint_kgco2e_kg : 0,
-        unit: item.unit || 'kg',
-        carbon_footprint_kgco2e_kg: typeof item.carbon_footprint_kgco2e_kg === 'number' ? 
-                                   item.carbon_footprint_kgco2e_kg : 
-                                   typeof item.factor === 'number' ? item.factor : 0,
-        region: item.region || 'Global'
-      };
-      
-      // Add optional properties if they exist
-      if (item.sustainabilityscore !== undefined) material.sustainabilityscore = item.sustainabilityscore;
-      if (item.recyclability !== undefined) material.recyclability = item.recyclability;
-      if (item.notes !== undefined) material.notes = item.notes;
-      if (item.alternativeto !== undefined) material.alternativeto = item.alternativeto;
-      
-      // Add tags if they exist
-      if (Array.isArray(item.tags)) {
-        material.tags = item.tags;
-      }
-      
-      result.push(material);
-    });
+    // Transform the batch from Supabase format to our ExtendedMaterialData format
+    // Adding robust defaults for all fields that might be missing
+    const transformedBatch = batch.map((material: SupabaseMaterial) => ({
+      name: material.name || 'Unnamed Material',
+      // Map carbon_footprint_kgco2e_kg to factor
+      factor: material.carbon_footprint_kgco2e_kg || 0,
+      // Default to kg if unit is missing
+      unit: 'kg', 
+      // Default to Australia if region is missing
+      region: 'Australia', 
+      // Use category as tag if available, otherwise default to construction
+      tags: material.category ? [material.category] : ['construction'],
+      // Calculate sustainability score if possible, otherwise use default
+      sustainabilityScore: calculateSustainabilityScore(material.carbon_footprint_kgco2e_kg),
+      // Determine recyclability or default to Medium
+      recyclability: determineRecyclability(material.category) as 'High' | 'Medium' | 'Low',
+      // These fields might be missing in the database, so default to undefined
+      alternativeTo: undefined,
+      notes: ''
+    }));
+    
+    result.push(...transformedBatch);
   }
-
+  
+  console.timeEnd('Process materials');
   return result;
+}
+
+/**
+ * Calculate a sustainability score based on carbon footprint
+ */
+export function calculateSustainabilityScore(carbonFootprint: number | null | undefined): number {
+  if (carbonFootprint === null || carbonFootprint === undefined) return 70; // Default score
+  
+  // Lower carbon footprint means higher sustainability score
+  // Capped between 10 and 95
+  const inverseScore = Math.max(10, Math.min(95, 100 - (carbonFootprint * 10)));
+  return Math.round(inverseScore);
+}
+
+/**
+ * Determine recyclability based on material category
+ */
+export function determineRecyclability(category: string | null | undefined): string {
+  if (!category) return 'Medium';
+  
+  const lowerCategory = category.toLowerCase();
+  
+  if (lowerCategory.includes('metal') || 
+      lowerCategory.includes('steel') || 
+      lowerCategory.includes('aluminium') || 
+      lowerCategory.includes('recycl')) {
+    return 'High';
+  } else if (lowerCategory.includes('concrete') ||
+             lowerCategory.includes('brick') ||
+             lowerCategory.includes('ceramic')) {
+    return 'Medium';
+  } else if (lowerCategory.includes('plastic') ||
+             lowerCategory.includes('composite')) {
+    return 'Low';
+  }
+  
+  return 'Medium'; // Default
 }
