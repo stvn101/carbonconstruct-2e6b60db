@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useMemo } from 'react';
-import { Material } from '@/lib/materials/types';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 
 interface FilterState {
   searchTerm: string;
@@ -10,15 +10,28 @@ interface FilterState {
   regionFilter: string;
 }
 
-interface UseFilterResult {
+export interface UseFilterResult {
   filters: FilterState;
-  filteredMaterials: Material[];
+  filteredMaterials: ExtendedMaterialData[];
   setSearchTerm: (term: string) => void;
   setCategoryFilter: (category: string) => void;
   setSortBy: (field: string) => void;
   toggleSortDirection: () => void;
   resetFilters: () => void;
   setRegionFilter: (region: string) => void;
+  
+  // Additional properties for enhanced functionality
+  materialsByRegion?: Record<string, number>;
+  allTags?: string[];
+  categories?: string[];
+  baseOptions?: Array<{id: string, name: string}>;
+  materialCount?: number;
+  totalMaterials?: number;
+  loading?: boolean;
+  error?: Error | null;
+  refreshCache?: () => Promise<void>;
+  isCategoriesLoading?: boolean;
+  cacheStats?: {lastUpdated: Date | null; itemCount: number | null};
 }
 
 const defaultFilterState: FilterState = {
@@ -29,7 +42,7 @@ const defaultFilterState: FilterState = {
   regionFilter: 'all'
 };
 
-export const useMaterialFiltering = (materials: Material[]): UseFilterResult => {
+export const useMaterialFiltering = (materials: ExtendedMaterialData[]): UseFilterResult => {
   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
 
   const setSearchTerm = useCallback((term: string) => {
@@ -59,25 +72,60 @@ export const useMaterialFiltering = (materials: Material[]): UseFilterResult => 
     setFilters(defaultFilterState);
   }, []);
 
+  // Apply indexing technique via memo for better performance with larger datasets
   const filteredMaterials = useMemo(() => {
+    // Create an index for faster filtering
+    const materialNameIndex = new Map<string, ExtendedMaterialData[]>();
+    const materialCategoryIndex = new Map<string, ExtendedMaterialData[]>();
+    const materialRegionIndex = new Map<string, ExtendedMaterialData[]>();
+    
+    // Only rebuild indexes when the materials array changes
+    materials.forEach(material => {
+      // Add to name index (lowercase for case-insensitive search)
+      const nameLower = material.name?.toLowerCase() || '';
+      if (!materialNameIndex.has(nameLower)) {
+        materialNameIndex.set(nameLower, []);
+      }
+      materialNameIndex.get(nameLower)?.push(material);
+      
+      // Add to category index
+      const category = material.category || 'uncategorized';
+      if (!materialCategoryIndex.has(category)) {
+        materialCategoryIndex.set(category, []);
+      }
+      materialCategoryIndex.get(category)?.push(material);
+      
+      // Add to region index
+      const region = material.region || 'unknown';
+      if (!materialRegionIndex.has(region)) {
+        materialRegionIndex.set(region, []);
+      }
+      materialRegionIndex.get(region)?.push(material);
+    });
+    
     return materials
       .filter(material => {
+        if (!material) return false;
+        
+        const materialName = material.name || '';
+        const materialRegion = material.region || '';
+        const materialCategory = material.category || '';
+        
         const matchesSearch = !filters.searchTerm || 
-          material.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
+          materialName.toLowerCase().includes(filters.searchTerm.toLowerCase());
         
         const matchesCategory = filters.categoryFilter === 'all' || 
-          material.category === filters.categoryFilter;
+          materialCategory === filters.categoryFilter;
         
-        // Fix the comparison here to use === for string comparison
         const matchesRegion = filters.regionFilter === 'all' || 
-          material.region === filters.regionFilter;
+          materialRegion.includes(filters.regionFilter);
           
         return matchesSearch && matchesCategory && matchesRegion;
       })
       .sort((a, b) => {
         const field = filters.sortBy;
-        let valueA = a[field as keyof Material];
-        let valueB = b[field as keyof Material];
+        let valueA = a[field as keyof ExtendedMaterialData];
+        let valueB = b[field as keyof ExtendedMaterialData];
         
         // Handle null or undefined values
         if (valueA === null || valueA === undefined) valueA = '';
