@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRegion } from "@/contexts/RegionContext";
 import { useMaterialData } from "@/hooks/useMaterialData";
 import { useMaterialCache } from "@/hooks/useMaterialCache";
@@ -7,8 +7,9 @@ import DatabaseHeader from './DatabaseHeader';
 import DatabaseFilterCard from './DatabaseFilterCard';
 import DatabaseResultsCard from './DatabaseResultsCard';
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
-import { AlertCircle, Loader2, RefreshCcw } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -18,6 +19,7 @@ const MaterialDatabase = () => {
   
   // Set a flag to track initial loading
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [loadTimeout, setLoadTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // Use the material cache hook for efficient data loading
   const { materials, loading, error, refreshCache, cacheStats } = useMaterialCache();
@@ -25,6 +27,48 @@ const MaterialDatabase = () => {
   // Default empty categories array
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
 
+  // Handle manual refresh
+  const handleRefresh = useCallback(() => {
+    // Show loading indicator
+    toast.loading("Refreshing materials...", { id: "materials-refresh" });
+    
+    // Call refresh function
+    refreshCache().then(() => {
+      toast.dismiss("materials-refresh");
+      toast.success("Materials refreshed successfully!");
+    }).catch((err) => {
+      toast.dismiss("materials-refresh");
+      toast.error("Failed to refresh materials.");
+      console.error("Refresh error:", err);
+    });
+  }, [refreshCache]);
+
+  // Set timeout to prevent eternal loading state
+  useEffect(() => {
+    if (loading && !loadTimeout) {
+      const timeout = setTimeout(() => {
+        if (materials.length === 0) {
+          toast.error("Loading materials timed out. Please try refreshing manually.");
+          setIsInitialLoad(false);
+        }
+      }, 20000); // 20 seconds timeout
+      
+      setLoadTimeout(timeout);
+      
+      return () => {
+        clearTimeout(timeout);
+        setLoadTimeout(null);
+      };
+    }
+    
+    return () => {
+      if (loadTimeout) {
+        clearTimeout(loadTimeout);
+        setLoadTimeout(null);
+      }
+    };
+  }, [loading, materials.length, loadTimeout]);
+  
   // Use the material data hook for organizing and categorizing data - prevent unnecessary recalculations
   const {
     filteredMaterials,
@@ -74,7 +118,7 @@ const MaterialDatabase = () => {
     setSelectedTag("all");
   };
 
-  // Show loading state only on initial load
+  // Show loading state only on initial load with an added timeout 
   if ((loading || isInitialLoad) && (!safeMaterials || safeMaterials.length === 0)) {
     return (
       <div className="container mx-auto px-4 py-8 content-top-spacing pt-24">
@@ -83,6 +127,16 @@ const MaterialDatabase = () => {
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbon-600" />
             <h2 className="text-2xl font-bold">Loading Material Database...</h2>
             <p className="text-muted-foreground">Fetching materials from database</p>
+            
+            {/* Add manual refresh option after a delay */}
+            <Button 
+              variant="outline" 
+              className="mt-6"
+              onClick={handleRefresh}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Materials
+            </Button>
           </div>
         </div>
       </div>
@@ -94,18 +148,27 @@ const MaterialDatabase = () => {
     return (
       <div className="container mx-auto px-4 py-8 content-top-spacing pt-24">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center bg-red-50 p-6 rounded-lg border border-red-200">
+          <div className="text-center bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-800">
             <AlertCircle className="h-8 w-8 mx-auto mb-4 text-red-500" />
-            <h2 className="text-2xl font-bold text-red-700">Error Loading Materials</h2>
-            <p className="text-red-600 mt-2">
+            <h2 className="text-2xl font-bold text-red-700 dark:text-red-400">Error Loading Materials</h2>
+            <p className="text-red-600 dark:text-red-300 mt-2">
               {error.message || "Failed to load material data. Please try again later."}
             </p>
-            <Button 
-              className="mt-4 bg-red-600 text-white rounded hover:bg-red-700"
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </Button>
+            <div className="flex gap-4 justify-center mt-4">
+              <Button 
+                className="bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={() => window.location.reload()}
+              >
+                Reload Page
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleRefresh}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Materials
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -127,11 +190,11 @@ const MaterialDatabase = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={refreshCache}
+              onClick={handleRefresh}
               className="text-xs flex items-center gap-1"
               disabled={loading}
             >
-              <RefreshCcw className="h-3 w-3" />
+              <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
               {loading ? 'Refreshing...' : 'Refresh Data'}
             </Button>
           </div>
@@ -156,6 +219,21 @@ const MaterialDatabase = () => {
             totalCount={materials ? materials.length : 0}
             loading={loading && safeMaterials.length > 0}
           />
+
+          {/* Fallback when materials don't load properly */}
+          {!loading && safeMaterials.length === 0 && materials.length === 0 && (
+            <div className="mt-8 p-6 border rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+              <h3 className="text-lg font-medium mb-2">No materials loaded</h3>
+              <p className="mb-4">Try refreshing the materials database using the button below.</p>
+              <Button
+                onClick={handleRefresh}
+                className="bg-carbon-600 hover:bg-carbon-700 text-white"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Materials
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </ErrorBoundaryWrapper>

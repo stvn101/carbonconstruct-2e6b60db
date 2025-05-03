@@ -11,7 +11,8 @@ import PaymentHistory from "@/components/payment/PaymentHistory";
 import PaymentSuccess from "@/components/payment/PaymentSuccess";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjects } from "@/contexts/ProjectContext";
-import Navbar from "@/components/navbar/Navbar"; // Add Navbar import
+import Navbar from "@/components/navbar/Navbar"; // Use correct Navbar import
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Check if there's a tab parameter in the URL
@@ -39,6 +41,29 @@ const Dashboard = () => {
           .catch(err => console.error("Error verifying payment:", err));
       }
     }
+
+    // Set a timeout to prevent infinite loading states
+    const timeout = setTimeout(() => {
+      // If any component is stuck loading, this will allow the user to still interact
+      document.querySelectorAll('.animate-spin').forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.classList.remove('animate-spin');
+          element.setAttribute('title', 'Loading timed out. Please refresh the page.');
+        }
+      });
+      
+      toast.error("Some components are taking too long to load. You may need to refresh the page.", {
+        duration: 8000,
+      });
+    }, 20000); // 20 second timeout
+    
+    setLoadingTimeout(timeout);
+    
+    return () => {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+      }
+    };
   }, [searchParams, user]);
 
   const handleTabChange = (value: string) => {
@@ -56,7 +81,7 @@ const Dashboard = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto px-4 py-8 max-w-7xl content-top-spacing">
+      <div className="container mx-auto px-4 py-8 max-w-7xl content-top-spacing pt-24">
         <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
         
         {showPaymentSuccess && (
