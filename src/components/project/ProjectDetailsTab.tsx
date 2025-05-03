@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { SavedProject } from "@/contexts/ProjectContext";
-import { MATERIAL_FACTORS, ENERGY_FACTORS } from "@/lib/carbonCalculations";
+import { MATERIAL_FACTORS, ENERGY_FACTORS } from "@/lib/carbonExports";
 
 interface ProjectDetailsTabProps {
   project: SavedProject;

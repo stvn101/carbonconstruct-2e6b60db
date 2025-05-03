@@ -1,9 +1,10 @@
+
 import React from "react";
 import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TransportInput } from "@/lib/carbonExports";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useTransportValidation } from "@/hooks/useTransportValidation";
+import { useTransportValidation, TransportFieldError } from "@/hooks/useTransportValidation";
 import TransportFormFields from "./transport/TransportFormFields";
 
 interface TransportInputSectionProps {
@@ -63,7 +64,7 @@ const TransportInputSection = ({
           key={`transport-${index}`}
           transport={transport}
           index={index}
-          errors={errors[index]}
+          errors={errors[index] || {}}
           onRemove={() => onRemoveTransport(index)}
           onUpdate={(field, value) => handleInputChange(index, field, String(value))}
         />

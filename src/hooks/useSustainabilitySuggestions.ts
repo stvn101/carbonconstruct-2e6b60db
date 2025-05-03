@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonCalculations';
+import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
 
 export function useSustainabilitySuggestions() {
   const [suggestions, setSuggestions] = useState<string[]>([]);

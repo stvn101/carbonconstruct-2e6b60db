@@ -14,8 +14,5 @@ export type Transport = keyof typeof TRANSPORT_FACTORS;
 export type Energy = keyof typeof ENERGY_FACTORS;
 
 // Re-export calculation types from carbonCalculations
-export { 
-  CalculationInput,
-  CalculationResult,
-  calculateTotalEmissions 
-} from './carbonCalculations';
+export { calculateTotalEmissions } from './carbonCalculations';
+export type { CalculationInput, CalculationResult } from './carbonCalculations';

@@ -1,6 +1,6 @@
 
 import { UserProfile } from '@/types/auth';
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonCalculations';
+import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
 
 export interface SavedProject {
   id: string;
