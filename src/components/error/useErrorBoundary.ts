@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { toast } from "sonner";
-import { checkNetworkStatus } from '@/utils/errorHandling';
+import { checkNetworkStatus } from '@/utils/errorHandling/networkChecker';
 import { checkSupabaseConnectionWithRetry } from '@/services/supabase/connection';
 
 export const useErrorBoundary = () => {

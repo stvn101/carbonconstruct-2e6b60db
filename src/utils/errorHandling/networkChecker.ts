@@ -55,6 +55,24 @@ export const fetchWithTimeout = <T>(fetchPromise: Promise<T>, timeoutMs = 10000)
   ]);
 };
 
+// Test connection to a specific URL - implementation of checkNetworkStatus
+export const checkNetworkStatus = async (): Promise<boolean> => {
+  try {
+    const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    
+    if (!isOnline) {
+      return false;
+    }
+    
+    // Attempt a lightweight connection test
+    const result = await testConnection();
+    return result;
+  } catch (error) {
+    console.error('Network check failed:', error);
+    return false;
+  }
+};
+
 // Test connection to a specific URL
 export const testConnection = async (url: string = 'https://jaqzoyouuzhchuyzafii.supabase.co/rest/v1/', 
                                    timeoutMs = 5000): Promise<boolean> => {

@@ -101,7 +101,7 @@ const HeroSection = () => {
         {isLoading ? (
           <SkeletonHero />
         ) : (
-          <ErrorBoundary feature="Hero Section" fallback={<FallbackHero />}>
+          <ErrorBoundary feature="Hero Section" fallbackComponent={FallbackHero}>
             <LazyMotion features={domAnimation}>
               <div className="flex flex-col md:flex-row items-center">
                 <Suspense fallback={<div className="md:w-1/2 animate-pulse h-64 bg-secondary/20 rounded-lg" />}>
