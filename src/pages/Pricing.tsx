@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from '@/contexts/auth';
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 import PricingHeader from "@/components/pricing/PricingHeader";
 import PricingPlans from "@/components/pricing/PricingPlans";
+import PaymentSuccess from "@/components/payment/PaymentSuccess";
 import { generatePricingPlans } from "@/utils/pricingUtils";
 
 const Pricing = () => {
@@ -16,8 +17,18 @@ const Pricing = () => {
   const [processing, setProcessing] = useState<string | null>(null);
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
 
   const plans = generatePricingPlans(annual);
+
+  useEffect(() => {
+    // Check if we're coming back from a successful payment
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('payment') === 'success') {
+      setShowPaymentSuccess(true);
+    }
+  }, [location.search]);
 
   const handlePlanAction = async (planId: string) => {
     if (!user) {
@@ -25,7 +36,7 @@ const Pricing = () => {
       return;
     }
 
-    if (profile?.subscription_tier === 'premium') {
+    if (profile?.subscription_tier === 'premium' && planId !== 'enterprise') {
       toast.info("You already have a premium subscription.");
       return;
     }
@@ -50,7 +61,7 @@ const Pricing = () => {
           throw new Error(error.message);
         }
 
-        if (data.success) {
+        if (data.success && !data.url) {
           toast.success("Your 3-day free trial has been activated!");
           navigate('/dashboard');
           return;
@@ -73,17 +84,32 @@ const Pricing = () => {
         throw new Error(error.message);
       }
 
-      if (data.success) {
+      if (data.success && data.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else if (data.success) {
         toast.success("Payment processed successfully!");
         navigate('/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Payment error:", error);
-      toast.error("There was an issue processing your request. Please try again.");
+      toast.error(error.message || "There was an issue processing your request. Please try again.");
     } finally {
       setProcessing(null);
     }
   };
+
+  if (showPaymentSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24 px-4">
+          <PaymentSuccess onClose={() => navigate('/dashboard', { replace: true })} />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

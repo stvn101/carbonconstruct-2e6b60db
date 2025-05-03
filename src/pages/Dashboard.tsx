@@ -1,170 +1,118 @@
 
-import { motion } from "framer-motion";
-import { Helmet } from "react-helmet-async";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/contexts/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from '@/contexts/auth';
-import { useProjects } from "@/contexts/ProjectContext";
-import { 
-  Calculator,
-  FileText, 
-  Brain,
-  FolderPlus,
-} from "lucide-react";
-import AIFeatures from "@/components/ai/AIFeatures";
-import { DashboardStats } from "@/components/dashboard/DashboardStats";
-import { EmissionsCharts } from "@/components/dashboard/EmissionsCharts";
-import { SustainabilityInsights } from "@/components/dashboard/SustainabilityInsights";
-import { ProjectsTab } from "@/components/dashboard/ProjectsTab";
-import { ReportsTab } from "@/components/dashboard/ReportsTab";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { SkeletonContent } from "@/components/ui/skeleton-content";
-import { ProjectCardSkeleton } from "@/components/project/ProjectCardSkeleton";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import ProjectsTab from "@/components/dashboard/ProjectsTab";
+import ReportsTab from "@/components/dashboard/ReportsTab";
+import SubscriptionStatus from "@/components/payment/SubscriptionStatus";
+import PaymentHistory from "@/components/payment/PaymentHistory";
+import PaymentSuccess from "@/components/payment/PaymentSuccess";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
-  const { user, profile, loading: authLoading } = useAuth();
-  const { projects, isLoading: projectsLoading } = useProjects();
-  
-  // Get the most recent projects
-  const recentProjects = projects
-    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-    .slice(0, 3);
+  const { user } = useAuth();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <main className="flex-grow pt-24 md:pt-28 pb-10 px-4">
-          <div className="container mx-auto">
-            <SkeletonContent lines={2} className="max-w-lg" />
-            <div className="grid gap-6 mt-8">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <ProjectCardSkeleton key={i} />
-              ))}
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  useEffect(() => {
+    // Check if there's a tab parameter in the URL
+    const tabParam = searchParams.get("tab");
+    if (tabParam && ["overview", "projects", "reports", "payments"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+    
+    // Check if we're coming from a successful payment
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      setShowPaymentSuccess(true);
+      
+      // Verify payment with backend
+      if (user) {
+        supabase.functions.invoke('verify-payment')
+          .catch(err => console.error("Error verifying payment:", err));
+      }
+    }
+  }, [searchParams, user]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Update URL without full page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", value);
+    window.history.pushState({}, "", url.toString());
+  };
 
   return (
-    <motion.div 
-      className="min-h-screen flex flex-col bg-carbon-50"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Helmet>
-        <title>Dashboard | CarbonConstruct</title>
-        <meta 
-          name="description" 
-          content="Manage your projects and view your carbon footprint calculations"
-        />
-      </Helmet>
-      <Navbar />
-      <main className="flex-grow pt-24 md:pt-28 pb-10 px-4">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Welcome, {profile?.full_name || user?.email?.split('@')[0]}</h1>
-              <p className="text-muted-foreground">Manage your carbon footprint calculations</p>
-            </div>
-            <div className="mt-4 md:mt-0 space-x-2">
-              <Button 
-                asChild
-                variant="outline"
-              >
-                <Link to="/projects/new">
-                  <FolderPlus className="h-4 w-4 mr-2" />
-                  New Project
-                </Link>
-              </Button>
-              <Button 
-                asChild
-                className="bg-carbon-600 hover:bg-carbon-700 text-white"
-              >
-                <Link to="/calculator">
-                  <Calculator className="h-4 w-4 mr-2" />
-                  New Calculation
-                </Link>
-              </Button>
-              <Button 
-                asChild
-                variant="outline"
-              >
-                <Link to="/projects">
-                  <FileText className="h-4 w-4 mr-2" />
-                  All Projects
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          <Tabs defaultValue="overview" className="space-y-8">
-            <TabsList>
-              <TabsTrigger value="overview" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="projects" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                Recent Projects
-              </TabsTrigger>
-              <TabsTrigger value="ai" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                AI Assistant
-              </TabsTrigger>
-              <TabsTrigger value="reports" className="data-[state=active]:bg-carbon-500 data-[state=active]:text-white">
-                Reports
-              </TabsTrigger>
-            </TabsList>
-
-            <ErrorBoundary feature="Dashboard Overview" ignoreErrors={true}>
-              <TabsContent value="overview">
-                <DashboardStats projectsCount={projects.length} recentProjects={recentProjects} />
-                <EmissionsCharts />
-                <SustainabilityInsights recentProjects={recentProjects} />
-              </TabsContent>
-            </ErrorBoundary>
-
-            <ErrorBoundary feature="Projects Tab" ignoreErrors={true}>
-              <TabsContent value="projects">
-                <ProjectsTab projects={projects} />
-              </TabsContent>
-            </ErrorBoundary>
-
-            <ErrorBoundary feature="AI Features" ignoreErrors={true}>
-              <TabsContent value="ai">
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Brain className="h-5 w-5 mr-2 text-carbon-600" />
-                      AI Carbon Assistant
-                    </CardTitle>
-                    <CardDescription>
-                      Use our AI-powered tools to analyze and optimize your construction projects
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <AIFeatures />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </ErrorBoundary>
-
-            <ErrorBoundary feature="Reports Tab" ignoreErrors={true}>
-              <TabsContent value="reports">
-                <ReportsTab />
-              </TabsContent>
-            </ErrorBoundary>
-          </Tabs>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      
+      {showPaymentSuccess && (
+        <div className="mb-8">
+          <PaymentSuccess onClose={() => setShowPaymentSuccess(false)} />
         </div>
-      </main>
-      <Footer />
-    </motion.div>
+      )}
+
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+        <TabsList className="w-full border-b bg-transparent p-0">
+          <div className="flex overflow-x-auto pb-2">
+            <TabsTrigger
+              value="overview"
+              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+              data-state={activeTab === "overview" ? "active" : "inactive"}
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="projects"
+              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+              data-state={activeTab === "projects" ? "active" : "inactive"}
+            >
+              Recent Projects
+            </TabsTrigger>
+            <TabsTrigger
+              value="reports"
+              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+              data-state={activeTab === "reports" ? "active" : "inactive"}
+            >
+              Reports
+            </TabsTrigger>
+            <TabsTrigger
+              value="payments"
+              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-carbon-600 data-[state=active]:shadow-none"
+              data-state={activeTab === "payments" ? "active" : "inactive"}
+            >
+              Payments
+            </TabsTrigger>
+          </div>
+        </TabsList>
+
+        <TabsContent value="overview" className="pt-4">
+          <div className="grid grid-cols-1 gap-8">
+            <DashboardStats />
+            <SubscriptionStatus />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="projects" className="pt-4">
+          <ProjectsTab />
+        </TabsContent>
+
+        <TabsContent value="reports" className="pt-4">
+          <ReportsTab />
+        </TabsContent>
+        
+        <TabsContent value="payments" className="pt-4">
+          <div className="grid grid-cols-1 gap-8">
+            <SubscriptionStatus />
+            <PaymentHistory />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

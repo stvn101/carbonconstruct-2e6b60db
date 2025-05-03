@@ -2,11 +2,19 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { registerSchema, type RegisterFormValues } from "@/lib/validations/auth";
 import AuthFormError from "./AuthFormError";
 import EmailField from "./form-fields/EmailField";
@@ -18,42 +26,34 @@ interface RegisterFormProps {
 }
 
 const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
-  const { register, signInWithGoogle, signInWithGitHub, loading } = useAuth();
+  const { register, signInWithGoogle, signInWithGitHub } = useAuth();
+  const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [socialLoginType, setSocialLoginType] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
   const handleSubmit = async (data: RegisterFormValues) => {
     try {
-      setServerError(null);
       setIsLoading(true);
-      
-      // Use email as name until user updates profile
-      await register(data.email, data.email, data.password);
-      
-      // On successful registration, navigate to the return URL
+      setServerError(null);
+      await register(data.name, data.email, data.password);
       navigate(returnTo, { state: { fromAuth: true } });
     } catch (error: any) {
-      if (error.message?.includes('already registered')) {
-        setServerError("This email is already registered. Please try logging in instead.");
-      } else {
-        setServerError("Registration failed: " + error.message);
-      }
+      setServerError(error.message || "Registration failed");
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleSocialLogin = async (provider: 'google' | 'github') => {
     try {
       setServerError(null);
@@ -78,28 +78,38 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <AuthFormError error={serverError} />
+          
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Full Name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
           <EmailField form={form} />
           <PasswordField form={form} />
-          <PasswordField 
-            form={form} 
-            name="confirmPassword" 
-            label="Confirm Password" 
-          />
 
           <Button
             type="submit"
             className="w-full bg-carbon-600 hover:bg-carbon-700 border border-black dark:border-white/10"
-            disabled={isLoading || loading}
+            disabled={isLoading}
           >
-            {(isLoading || loading) ? (
+            {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing Up
               </>
             ) : (
-              "Create Account"
+              "Sign Up"
             )}
           </Button>
-          
+
           <div className="relative my-6">
             <Separator />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 px-2 text-muted-foreground text-sm">

@@ -18,7 +18,7 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ returnTo = "/dashboard" }: LoginFormProps) => {
-  const { login, signInWithGoogle, signInWithGitHub, loading } = useAuth();
+  const { login, signInWithGoogle, signInWithGitHub } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [socialLoginType, setSocialLoginType] = useState<string | null>(null);
@@ -75,9 +75,9 @@ const LoginForm = ({ returnTo = "/dashboard" }: LoginFormProps) => {
           <Button
             type="submit"
             className="w-full bg-carbon-600 hover:bg-carbon-700 border border-black dark:border-white/10"
-            disabled={isLoading || loading}
+            disabled={isLoading}
           >
-            {(isLoading || loading) ? (
+            {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing In
               </>
