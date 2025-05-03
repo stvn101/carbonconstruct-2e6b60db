@@ -1,9 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { UserProfile } from "@/types/auth";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface ProfileFormProps {
   profile: UserProfile;
@@ -25,6 +27,16 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
     avatar_url: profile.avatar_url || ''
   });
   
+  // Update form data when profile changes
+  useEffect(() => {
+    setFormData({
+      full_name: profile.full_name || '',
+      company_name: profile.company_name || '',
+      website: profile.website || '',
+      avatar_url: profile.avatar_url || ''
+    });
+  }, [profile]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -39,25 +51,56 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (formData.website && !formData.website.match(/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/)) {
+    if (formData.website && !isValidUrl(formData.website)) {
       newErrors.website = "Please enter a valid website URL";
     }
     
-    if (formData.avatar_url && !formData.avatar_url.match(/^(https?:\/\/)/)) {
-      newErrors.avatar_url = "Avatar URL must start with http:// or https://";
+    if (formData.avatar_url && !isValidUrl(formData.avatar_url)) {
+      newErrors.avatar_url = "Avatar URL must be a valid URL";
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+  
+  const isValidUrl = (url: string): boolean => {
+    if (!url) return true;
+    
+    try {
+      // For URLs without protocol, add a temporary one for validation
+      const urlToValidate = url.match(/^https?:\/\//) ? url : `https://${url}`;
+      new URL(urlToValidate);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const formatUrl = (url: string): string => {
+    if (!url) return '';
+    
+    // If URL doesn't start with protocol, add https://
+    return url.match(/^https?:\/\//) ? url : `https://${url}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     
+    // Format URLs before submission
+    const formattedData = {
+      ...formData,
+      website: formData.website ? formatUrl(formData.website) : '',
+      avatar_url: formData.avatar_url ? formatUrl(formData.avatar_url) : '',
+    };
+    
     setIsLoading(true);
     try {
-      await onSubmit(formData);
+      await onSubmit(formattedData);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      console.error("Profile update error:", error);
+      toast.error("Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -76,8 +119,9 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={1}
           autoComplete="name"
+          aria-invalid={!!errors.full_name}
         />
-        <div className="form-error">{errors.full_name || ''}</div>
+        {errors.full_name && <div className="form-error text-red-500 text-sm mt-1">{errors.full_name}</div>}
       </div>
       
       <div className="form-field">
@@ -91,8 +135,9 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={2}
           autoComplete="organization"
+          aria-invalid={!!errors.company_name}
         />
-        <div className="form-error">{errors.company_name || ''}</div>
+        {errors.company_name && <div className="form-error text-red-500 text-sm mt-1">{errors.company_name}</div>}
       </div>
       
       <div className="form-field">
@@ -102,13 +147,14 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           name="website"
           value={formData.website}
           onChange={handleChange}
-          placeholder="https://example.com"
-          type="url"
+          placeholder="example.com"
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={3}
           autoComplete="url"
+          aria-invalid={!!errors.website}
         />
-        <div className="form-error">{errors.website || ''}</div>
+        {errors.website && <div className="form-error text-red-500 text-sm mt-1">{errors.website}</div>}
+        <p className="text-xs text-gray-500 mt-1">Enter with or without https://</p>
       </div>
       
       <div className="form-field">
@@ -118,13 +164,13 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
           name="avatar_url"
           value={formData.avatar_url}
           onChange={handleChange}
-          placeholder="https://example.com/avatar.jpg"
-          type="url"
+          placeholder="example.com/avatar.jpg"
           className="form-input dark:bg-gray-700 dark:text-carbon-300 dark:border-gray-600"
           tabIndex={4}
           autoComplete="off"
+          aria-invalid={!!errors.avatar_url}
         />
-        <div className="form-error">{errors.avatar_url || ''}</div>
+        {errors.avatar_url && <div className="form-error text-red-500 text-sm mt-1">{errors.avatar_url}</div>}
       </div>
       
       <Button 
@@ -133,7 +179,13 @@ export const ProfileForm = ({ profile, onSubmit }: ProfileFormProps) => {
         disabled={isLoading}
         tabIndex={5}
       >
-        {isLoading ? 'Updating...' : 'Update Profile'}
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...
+          </>
+        ) : (
+          'Update Profile'
+        )}
       </Button>
     </form>
   );

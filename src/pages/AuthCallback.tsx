@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -33,15 +34,24 @@ const AuthCallback = () => {
           const returnUrl = sessionStorage.getItem('authReturnUrl');
           sessionStorage.removeItem('authReturnUrl'); // Clean up
           
+          // Log provider information for debugging purposes
+          if (data.session.provider) {
+            console.log("Authenticated with provider:", data.session.provider);
+          }
+          
           // Successfully logged in, redirect to dashboard or return URL
           const redirectTo = returnUrl || "/dashboard";
+          
+          // Show success toast
+          toast.success(`Successfully signed in${data.session.user?.email ? ` as ${data.session.user.email}` : ''}`);
+          
           navigate(redirectTo, { 
             state: { fromAuth: true },
             replace: true
           });
         } else {
           // Check queryParams for error message
-          const errorMsg = queryParams.get('error_description');
+          const errorMsg = queryParams.get('error_description') || hashParams.get('error_description');
           
           if (errorMsg) {
             setError(errorMsg);
@@ -67,7 +77,7 @@ const AuthCallback = () => {
   
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-carbon-50 dark:bg-gray-900">
         <div className="w-full max-w-md">
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4 mr-2" />
@@ -85,7 +95,7 @@ const AuthCallback = () => {
   }
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-carbon-50 dark:bg-gray-900">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-carbon-600"></div>
       <p className="mt-4 text-gray-600 dark:text-gray-400">Processing authentication...</p>
     </div>

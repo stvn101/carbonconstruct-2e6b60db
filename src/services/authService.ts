@@ -94,7 +94,21 @@ export async function createUserProfile(profile: UserProfile): Promise<UserProfi
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Check if the profile already exists (unique constraint)
+        if (error.code === '23505') {
+          // If the profile already exists, fetch it instead
+          const { data: existingData, error: fetchError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', profile.id)
+            .single();
+            
+          if (fetchError) throw fetchError;
+          return existingData;
+        }
+        throw error;
+      }
       return data;
     });
 

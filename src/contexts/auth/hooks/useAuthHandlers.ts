@@ -1,3 +1,4 @@
+
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
@@ -101,6 +102,34 @@ export const useAuthHandlers = () => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      if (isOffline()) {
+        toast.error("You're offline. Please check your internet connection.", { 
+          id: "offline-google-error" 
+        });
+        throw new Error("Network unavailable");
+      }
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("Google login error:", error.message);
+      handleNetworkError(error, 'google-login');
+      throw error;
+    }
+  };
+
   const updateProfile = async (updatedProfile: UserProfile) => {
     try {
       if (isOffline()) {
@@ -114,10 +143,20 @@ export const useAuthHandlers = () => {
         throw new Error('Profile ID is required for updating');
       }
       
+      // Make a copy of the profile to avoid mutation issues
+      const profileToUpdate = { ...updatedProfile };
+      
+      // Ensure we don't submit undefined values
+      Object.keys(profileToUpdate).forEach(key => {
+        if (profileToUpdate[key as keyof UserProfile] === undefined) {
+          delete profileToUpdate[key as keyof UserProfile];
+        }
+      });
+      
       const { error } = await supabase
         .from('profiles')
-        .update(updatedProfile)
-        .eq('id', updatedProfile.id);
+        .update(profileToUpdate)
+        .eq('id', profileToUpdate.id);
         
       if (error) throw error;
       
@@ -135,6 +174,7 @@ export const useAuthHandlers = () => {
     logout,
     register,
     signInWithGitHub,
+    signInWithGoogle,
     updateProfile
   };
 };

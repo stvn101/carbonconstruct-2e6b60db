@@ -22,6 +22,7 @@ export interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   signInWithGitHub: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   updateProfile: (updatedProfile: UserProfile) => Promise<void>;
   signUp: (email: string, password: string, captchaToken: string | null) => Promise<void>;
   signIn: (email: string, password: string, captchaToken: string | null) => Promise<void>;

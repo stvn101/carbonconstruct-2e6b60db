@@ -23,8 +23,13 @@ enabled = true
 
 [auth]
 enabled = true
-site_url = "http://localhost:5173"
-additional_redirect_urls = ["https://localhost:5173", "http://localhost:3000"]
+site_url = "https://carbonconstruct.lovable.app" # Updated main site URL
+additional_redirect_urls = [
+  "https://localhost:5173",
+  "http://localhost:5173", 
+  "http://localhost:3000",
+  "https://carbonconstruct.lovable.app/auth/callback"
+]
 enable_signup = true
 enable_pwned_check = true
 
