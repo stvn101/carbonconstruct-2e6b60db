@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -9,9 +10,11 @@ import SubscriptionStatus from "@/components/payment/SubscriptionStatus";
 import PaymentHistory from "@/components/payment/PaymentHistory";
 import PaymentSuccess from "@/components/payment/PaymentSuccess";
 import { supabase } from "@/integrations/supabase/client";
+import { useProjects } from "@/contexts/project";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { projects } = useProjects();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
@@ -44,6 +47,10 @@ const Dashboard = () => {
     url.searchParams.set("tab", value);
     window.history.pushState({}, "", url.toString());
   };
+
+  // Get recent projects for the dashboard stats
+  const recentProjects = projects?.slice(0, 5) || [];
+  const projectsCount = projects?.length || 0;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -91,13 +98,16 @@ const Dashboard = () => {
 
         <TabsContent value="overview" className="pt-4">
           <div className="grid grid-cols-1 gap-8">
-            <DashboardStats />
+            <DashboardStats
+              projectsCount={projectsCount}
+              recentProjects={recentProjects}
+            />
             <SubscriptionStatus />
           </div>
         </TabsContent>
 
         <TabsContent value="projects" className="pt-4">
-          <ProjectsTab />
+          <ProjectsTab projects={projects || []} />
         </TabsContent>
 
         <TabsContent value="reports" className="pt-4">

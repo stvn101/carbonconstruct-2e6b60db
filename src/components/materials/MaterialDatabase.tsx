@@ -1,14 +1,15 @@
 
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRegion } from "@/contexts/RegionContext";
 import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
+import { useMaterialData } from "@/hooks/useMaterialData";
+import { useMaterialCache } from "@/hooks/useMaterialCache";
 import DatabaseHeader from './DatabaseHeader';
 import DatabaseFilterCard from './DatabaseFilterCard';
 import DatabaseResultsCard from './DatabaseResultsCard';
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 import { AlertCircle, Loader2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCacheMetadata } from "@/services/materialCache";
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -16,31 +17,37 @@ const MaterialDatabase = () => {
   const [selectedTag, setSelectedTag] = React.useState<string>("all");
   const { selectedRegion } = useRegion();
   
-  // Setup data using our hook - always use Australia as the region
+  // Use the material cache hook for efficient data loading
+  const { materials, loading, error, refreshCache, cacheStats } = useMaterialCache();
+
+  // Use the material data hook for organizing and categorizing data
   const {
     filteredMaterials,
     materialsByRegion,
     allTags,
-    categories,
     baseOptions,
     materialCount,
-    totalMaterials,
-    loading,
-    error,
-    refreshCache,
-    isCategoriesLoading,
-    cacheStats
-  } = useMaterialFiltering({
+    allRegions,
+    categories
+  } = useMaterialData({
     searchTerm,
     selectedRegion: "Australia", // Always Australia
     selectedAlternative,
     selectedTag
   });
-
+  
+  // Use the filter hook for sorting and filtering
+  const filterResult = useMaterialFiltering(filteredMaterials || []);
+  
+  // Combine all data for the UI
+  const displayMaterials = filterResult.filteredMaterials;
+  const isCategoriesLoading = loading && (!categories || categories.length === 0);
+  const totalMaterials = materials ? materials.length : 0;
+  
   // Make sure we have safe arrays to work with
   const safeTags = Array.isArray(allTags) ? allTags : [];
   const safeCategories = Array.isArray(categories) ? categories : [];
-  const safeMaterials = Array.isArray(filteredMaterials) ? filteredMaterials : [];
+  const safeMaterials = Array.isArray(displayMaterials) ? displayMaterials : [];
   const safeBaseOptions = Array.isArray(baseOptions) ? baseOptions : [];
 
   const resetFilters = () => {
