@@ -63,7 +63,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     const matchesSearch = debouncedSearchTerm.trim() === '' || 
       materialName.includes(debouncedSearchTerm.toLowerCase());
     
-    // Fix the type comparison error - ensure both sides are string type
+    // Both selectedRegion and materialRegion are treated as strings
     const matchesRegion = selectedRegion === "all" || 
       materialRegion.includes(String(selectedRegion));
     
