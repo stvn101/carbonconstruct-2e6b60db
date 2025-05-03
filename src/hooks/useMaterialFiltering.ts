@@ -42,6 +42,8 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
         setCategories(cats);
       } catch (err) {
         console.error("Failed to load material categories:", err);
+        // Set to empty array on error to prevent undefined issues
+        setCategories([]);
       } finally {
         setCategoriesLoading(false);
       }
@@ -50,50 +52,72 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     loadCategories();
   }, []);
 
-  // Memoized filter function for client-side filtering
+  // Memoized filter function for client-side filtering with added safety checks
   const filterPredicate = useCallback((material: ExtendedMaterialData) => {
-    const matchesSearch = material.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+    // Safely access properties with defaults if they don't exist
+    const materialName = material.name?.toLowerCase() || '';
+    const materialRegion = material.region || 'Australia'; // Default to Australia if not specified
+    const materialAltTo = material.alternativeTo || '';
+    const materialTags = material.tags || []; // Default to empty array if tags don't exist
     
-    // Updated comparison to handle the fixed Australia region correctly
-    const matchesRegion = material.region && material.region.includes(selectedRegion);
+    const matchesSearch = debouncedSearchTerm.trim() === '' || 
+      materialName.includes(debouncedSearchTerm.toLowerCase());
     
-    const matchesAlternative = selectedAlternative === "none" || 
-      material.alternativeTo === selectedAlternative;
-    const matchesTag = selectedTag === "all" ||
-      (material.tags && material.tags.includes(selectedTag));
+    // Handle region comparison safely
+    const matchesRegion = selectedRegion === "all" || materialRegion.includes(selectedRegion);
+    
+    const matchesAlternative = selectedAlternative === "none" || materialAltTo === selectedAlternative;
+    
+    // Handle tag filtering safely
+    const matchesTag = selectedTag === "all" || materialTags.includes(selectedTag);
     
     return matchesSearch && matchesRegion && matchesAlternative && matchesTag;
   }, [debouncedSearchTerm, selectedRegion, selectedAlternative, selectedTag]);
 
-  // Memoized filtered materials
+  // Memoized filtered materials with safety check
   const filteredMaterials = useMemo(() => 
-    allMaterials.filter(filterPredicate),
+    Array.isArray(allMaterials) ? allMaterials.filter(filterPredicate) : [],
     [allMaterials, filterPredicate]
   );
 
-  // Memoized statistics
+  // Memoized statistics with safety checks
   const stats = useMemo(() => {
     const materialsByRegion: Record<string, number> = {};
     const allRegions = new Set<string>();
     const allTags = new Set<string>();
     
-    allMaterials.forEach(material => {
-      if (material.region) {
-        const regions = material.region.split(", ");
-        regions.forEach(region => {
-          materialsByRegion[region] = (materialsByRegion[region] || 0) + 1;
-          allRegions.add(region);
-        });
-      }
-      material.tags?.forEach(tag => allTags.add(tag));
-    });
+    if (Array.isArray(allMaterials)) {
+      allMaterials.forEach(material => {
+        // Handle region safely
+        if (material?.region) {
+          const regions = material.region.split(", ");
+          regions.forEach(region => {
+            materialsByRegion[region] = (materialsByRegion[region] || 0) + 1;
+            allRegions.add(region);
+          });
+        } else {
+          // Default region if not specified
+          const defaultRegion = 'Australia';
+          materialsByRegion[defaultRegion] = (materialsByRegion[defaultRegion] || 0) + 1;
+          allRegions.add(defaultRegion);
+        }
+        
+        // Handle tags safely
+        if (Array.isArray(material?.tags)) {
+          material.tags.forEach(tag => tag && allTags.add(tag));
+        } else if (material?.category) {
+          // Use category as a tag if tags aren't available
+          allTags.add(material.category);
+        }
+      });
+    }
 
     return {
       materialsByRegion,
       allRegions: Array.from(allRegions).sort(),
       allTags: Array.from(allTags).sort(),
       totalCount: filteredMaterials.length,
-      categories
+      categories: categories || []
     };
   }, [allMaterials, filteredMaterials, categories]);
 
@@ -103,20 +127,23 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     setSelectedTag("all");
   }, []);
 
-  // Extract base material options for the dropdown
+  // Extract base material options for the dropdown with safety checks
   const baseOptions = useMemo(() => {
     const options = new Set<string>();
-    allMaterials.forEach(material => {
-      if (material.alternativeTo) {
-        options.add(material.alternativeTo);
-      }
-    });
+    
+    if (Array.isArray(allMaterials)) {
+      allMaterials.forEach(material => {
+        if (material?.alternativeTo) {
+          options.add(material.alternativeTo);
+        }
+      });
+    }
     
     return Array.from(options).map(id => {
-      const material = allMaterials.find(m => m.name.toLowerCase() === id.toLowerCase());
+      const material = allMaterials?.find(m => m?.name?.toLowerCase() === id.toLowerCase());
       return {
         id,
-        name: material ? material.name : id
+        name: material?.name || id
       };
     });
   }, [allMaterials]);
@@ -143,7 +170,7 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     
     // Status
     materialCount: stats.totalCount,
-    totalMaterials: allMaterials.length,
+    totalMaterials: Array.isArray(allMaterials) ? allMaterials.length : 0,
     loading,
     error,
     isCategoriesLoading,

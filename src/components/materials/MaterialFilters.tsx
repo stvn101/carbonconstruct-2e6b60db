@@ -43,6 +43,11 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
     setSearchTerm("");
   };
   
+  // Ensure we have valid arrays
+  const safeTags = Array.isArray(allTags) ? allTags : [];
+  const safeBaseOptions = Array.isArray(baseOptions) ? baseOptions : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  
   // Count active filters
   const activeFilterCount = [
     selectedAlternative !== "none",
@@ -72,14 +77,14 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
         )}
       </div>
       
-      {/* Category tabs */}
-      {categories.length > 0 && (
+      {/* Category tabs - only show if we have categories */}
+      {safeCategories.length > 0 && (
         <div className="overflow-x-auto pb-2">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full justify-start">
               <TabsTrigger value="all">All Categories</TabsTrigger>
-              {categories.slice(0, 10).map(category => (
-                <TabsTrigger key={category} value={category}>
+              {safeCategories.slice(0, 10).map((category, index) => (
+                <TabsTrigger key={`cat-${index}`} value={category}>
                   {category}
                 </TabsTrigger>
               ))}
@@ -100,8 +105,10 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">All Materials</SelectItem>
-              {baseOptions.map((option) => (
-                <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+              {safeBaseOptions.map((option, index) => (
+                <SelectItem key={`opt-${index}`} value={option.id || `opt-${index}`}>
+                  {option.name || option.id || `Option ${index}`}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -118,9 +125,9 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Tags</SelectItem>
-              {allTags.map((tag) => (
+              {safeTags.map((tag, index) => (
                 <SelectItem 
-                  key={tag} 
+                  key={`tag-${index}`}
                   value={tag}
                   className={tag === "australian" ? "text-carbon-600 font-medium" : ""}
                 >

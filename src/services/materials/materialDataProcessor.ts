@@ -18,14 +18,21 @@ export function processDataInBatches(data: SupabaseMaterial[]): ExtendedMaterial
     const batch = data.slice(i, i + BATCH_SIZE);
     
     // Transform the batch from Supabase format to our ExtendedMaterialData format
+    // Adding robust defaults for all fields that might be missing
     const transformedBatch = batch.map((material: SupabaseMaterial) => ({
-      name: material.name || 'Unknown',
+      name: material.name || 'Unnamed Material',
       factor: material.carbon_footprint_kgco2e_kg || 0,
-      unit: 'kg', // Default unit
-      region: 'Australia', // Default region for materials
-      tags: [material.category || 'construction'], // Use category as tag
+      // Default to kg if unit is missing
+      unit: 'kg', 
+      // Default to Australia if region is missing
+      region: 'Australia', 
+      // Use category as tag if available, otherwise default to construction
+      tags: material.category ? [material.category] : ['construction'],
+      // Calculate sustainability score if possible, otherwise use default
       sustainabilityScore: calculateSustainabilityScore(material.carbon_footprint_kgco2e_kg),
+      // Determine recyclability or default to Medium
       recyclability: determineRecyclability(material.category) as 'High' | 'Medium' | 'Low',
+      // These fields might be missing in the database, so default to undefined
       alternativeTo: undefined,
       notes: ''
     }));
@@ -41,7 +48,7 @@ export function processDataInBatches(data: SupabaseMaterial[]): ExtendedMaterial
  * Calculate a sustainability score based on carbon footprint
  */
 export function calculateSustainabilityScore(carbonFootprint: number | null | undefined): number {
-  if (!carbonFootprint) return 70; // Default score
+  if (carbonFootprint === null || carbonFootprint === undefined) return 70; // Default score
   
   // Lower carbon footprint means higher sustainability score
   // Capped between 10 and 95

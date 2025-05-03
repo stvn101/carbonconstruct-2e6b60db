@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -36,16 +37,27 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
     return '';
   };
   
-  // Get the current material unit
+  // Get the current material unit with defensive coding
   const getMaterialUnit = () => {
-    // First try to find in dynamic materials
-    const dynamicMaterial = materials.find(m => m.name.toLowerCase() === material.type.toLowerCase());
-    if (dynamicMaterial) {
-      return dynamicMaterial.unit || 'kg';
+    try {
+      // First try to find in dynamic materials
+      if (Array.isArray(materials)) {
+        const dynamicMaterial = materials.find(m => m?.name?.toLowerCase() === material.type.toLowerCase());
+        if (dynamicMaterial?.unit) {
+          return dynamicMaterial.unit;
+        }
+      }
+      
+      // Fall back to static materials
+      return MATERIAL_FACTORS[material.type]?.unit || 'kg';
+    } catch (error) {
+      console.error('Error getting material unit:', error);
+      return 'kg'; // Default unit
     }
-    // Fall back to static materials
-    return MATERIAL_FACTORS[material.type]?.unit || 'kg';
   };
+
+  // Make sure materials is safe to use
+  const safeMaterials = Array.isArray(materials) ? materials.filter(Boolean) : [];
 
   return (
     <div className="grid grid-cols-1 gap-3 items-end border border-carbon-100 p-3 md:p-4 rounded-lg">
@@ -76,11 +88,11 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 <span className="text-sm">Loading materials...</span>
               </div>
-            ) : materials && materials.length > 0 ? (
+            ) : safeMaterials && safeMaterials.length > 0 ? (
               // Show database materials if available
-              materials.map((material, i) => (
-                <SelectItem key={`db-${i}`} value={material.name} className="text-xs md:text-sm">
-                  {material.name}
+              safeMaterials.map((material, i) => (
+                <SelectItem key={`db-${i}`} value={material.name || `Material-${i}`} className="text-xs md:text-sm">
+                  {material.name || `Material-${i}`}
                 </SelectItem>
               ))
             ) : (

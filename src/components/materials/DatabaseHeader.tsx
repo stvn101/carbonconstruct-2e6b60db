@@ -17,7 +17,7 @@ interface DatabaseHeaderProps {
 }
 
 const DatabaseHeader = ({ materialsByRegion, cacheInfo }: DatabaseHeaderProps) => {
-  // Format the last updated time
+  // Format the last updated time with safety check
   const formattedLastUpdated = cacheInfo?.lastUpdated 
     ? new Intl.DateTimeFormat('en-AU', {
         day: 'numeric',
@@ -28,6 +28,9 @@ const DatabaseHeader = ({ materialsByRegion, cacheInfo }: DatabaseHeaderProps) =
         second: '2-digit'
       }).format(cacheInfo.lastUpdated)
     : 'Never';
+
+  // Make sure materialsByRegion is safe to use
+  const hasMaterials = materialsByRegion && Object.keys(materialsByRegion).length > 0;
 
   return (
     <div className="text-center mb-8">
@@ -43,8 +46,8 @@ const DatabaseHeader = ({ materialsByRegion, cacheInfo }: DatabaseHeaderProps) =
         Comprehensive database of construction materials with carbon coefficients across Australia
       </p>
       
-      {/* Cache status indicator */}
-      {cacheInfo?.lastUpdated && (
+      {/* Cache status indicator - only show if we have itemCount */}
+      {cacheInfo?.itemCount && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -65,7 +68,7 @@ const DatabaseHeader = ({ materialsByRegion, cacheInfo }: DatabaseHeaderProps) =
       )}
       
       <ErrorBoundaryWrapper feature="Region Stats">
-        {materialsByRegion && Object.keys(materialsByRegion).length > 0 && (
+        {hasMaterials && (
           <RegionStats materialsByRegion={materialsByRegion} />
         )}
       </ErrorBoundaryWrapper>
