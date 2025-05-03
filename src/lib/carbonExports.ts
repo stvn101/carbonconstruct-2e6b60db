@@ -29,10 +29,8 @@ export {
   processMaterialsInBatches,
   processTransportInBatches,
   calculateEnergyEmissions,
-  CalculationInput,
-  CalculationResult
 };
 
 // Using export type for type-only exports
+export type { CalculationInput, CalculationResult } from './carbonCalculations';
 export type { MaterialInput, TransportInput, EnergyInput } from './carbonTypes';
-
