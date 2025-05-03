@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { fetchMaterials } from '@/services/materialService';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
@@ -10,6 +11,7 @@ export const useMaterialCache = () => {
   const [materials, setMaterials] = useState<ExtendedMaterialData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
   // Refresh cache handler - forces fresh data fetch
   const refreshCache = useCallback(async () => {
@@ -70,10 +72,10 @@ export const useMaterialCache = () => {
             name: value.name || key,
             factor: value.factor || 0,
             unit: value.unit || 'kg',
-            region: 'Australia',
-            tags: ['construction'],
+            region: 'Australia', // Default region
+            tags: ['construction'], // Default tags
             sustainabilityScore: 70,
-            recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
+            recyclability: 'Medium' as 'High' | 'Medium' | 'Low', // Example data
             alternativeTo: undefined,
             notes: ''
           }));
@@ -120,6 +122,7 @@ export const useMaterialCache = () => {
       }
     } finally {
       setLoading(false);
+      setInitialLoadComplete(true);
     }
   }, [materials]);
   
@@ -149,14 +152,19 @@ export const useMaterialCache = () => {
       }
     };
     
-    loadCacheStats();
-  }, [materials]);
+    // Only load cache stats if we have materials
+    if (materials.length > 0) {
+      loadCacheStats();
+    }
+  }, [materials.length]);
   
-  // Load materials on mount
+  // Load materials on mount only once
   useEffect(() => {
-    console.log('Initial material loading');
-    loadMaterials();
-  }, [loadMaterials]);
+    if (!initialLoadComplete) {
+      console.log('Initial material loading');
+      loadMaterials();
+    }
+  }, [loadMaterials, initialLoadComplete]);
   
   return { 
     materials, 

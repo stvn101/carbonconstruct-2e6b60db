@@ -3,23 +3,25 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { MATERIAL_FACTORS, REGIONS } from '@/lib/materials';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MaterialOption } from '@/lib/materialTypes';
-import { useMaterialCache } from './useMaterialCache';
 
 interface UseMaterialDataProps {
   searchTerm: string;
   selectedRegion: string;
   selectedAlternative: string;
   selectedTag: string;
+  materials?: ExtendedMaterialData[]; // Accept materials as a prop
 }
 
 export const useMaterialData = ({
   searchTerm,
   selectedRegion,
   selectedAlternative,
-  selectedTag
+  selectedTag,
+  materials = [] // Default to empty array
 }: UseMaterialDataProps) => {
-  // Use the centralized material cache
-  const { materials, loading, error } = useMaterialCache();
+  // No need to use the cache hook again, accept materials directly
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
   // Safely create base options
   const baseOptions = useMemo(() => {
