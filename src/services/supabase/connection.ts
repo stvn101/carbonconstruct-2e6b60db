@@ -1,13 +1,12 @@
-
 /**
  * Supabase connection utilities with improved reliability
  */
-import { isOffline } from '@/utils/errorHandling/networkChecker';
+import { isOffline as isDeviceOffline } from '@/utils/errorHandling/networkChecker';
 
 // Simplified connection check with improved reliability and longer timeout
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   // If device is offline, don't even try
-  if (isOffline()) {
+  if (isDeviceOffline()) {
     return false;
   }
   
@@ -31,7 +30,7 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
 
 // Simple connection check without AbortSignal for broader compatibility
 export const pingSupabaseConnection = async (): Promise<boolean> => {
-  if (isOffline()) {
+  if (isDeviceOffline()) {
     return false;
   }
   
@@ -64,7 +63,7 @@ export const checkSupabaseConnectionWithRetry = async (
   delayMs: number = 2000
 ): Promise<boolean> => {
   // First check if we have network connectivity at all
-  if (isOffline()) {
+  if (isDeviceOffline()) {
     return false;
   }
   
