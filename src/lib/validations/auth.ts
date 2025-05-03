@@ -1,10 +1,10 @@
 
 import * as z from "zod";
 
-// Password schema that enforces our security policies
+// Password schema that enforces our security policies based on NCC 2025 standards
 const passwordSchema = z
   .string()
-  .min(8, "Password must be at least 8 characters")
+  .min(10, "Password must be at least 10 characters")
   .refine(
     (password) => /[A-Z]/.test(password),
     "Password must contain at least one uppercase letter"
@@ -20,6 +20,10 @@ const passwordSchema = z
   .refine(
     (password) => /[^A-Za-z0-9]/.test(password),
     "Password must contain at least one special character"
+  )
+  .refine(
+    (password) => !/(.)\1\1/.test(password),
+    "Password must not contain more than 2 identical consecutive characters"
   );
 
 export const loginSchema = z.object({
