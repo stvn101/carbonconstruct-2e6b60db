@@ -32,13 +32,14 @@ export interface ProjectFormData {
 export interface ProjectContextType {
   projects: SavedProject[];
   isLoading: boolean;
-  fetchError: Error | null;  // Added this property to match what's used in ProjectsBrowser
+  fetchError: Error | null;
   saveProject: (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<SavedProject>;
   updateProject: (project: SavedProject) => Promise<SavedProject>;
   deleteProject: (id: string) => Promise<void>;
   getProject: (id: string) => SavedProject | undefined;
   exportProjectPDF: (project: SavedProject) => Promise<void>;
   exportProjectCSV: (project: SavedProject) => Promise<void>;
+  loadProjects?: () => Promise<SavedProject[] | undefined>;
 }
 
 // Helper function with proper type annotations

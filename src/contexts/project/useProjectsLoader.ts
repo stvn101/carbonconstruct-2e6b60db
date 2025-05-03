@@ -26,7 +26,7 @@ interface ProjectsContextType {
 }
 
 // Create a context with a default null value
-const ProjectsContext = createContext<ProjectsContextType>(null as any);
+const ProjectsContext = createContext<ProjectsContextType | null>(null);
 
 export const ProjectsProvider = ({ children }: { children: React.ReactNode }) => {
   const [projects, setProjects] = useState<SavedProject[]>([]);
@@ -102,16 +102,16 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     loadProjects: loadProjectsWrapper,
   };
   
-  // Return an object with a Provider function to avoid JSX in .ts file
+  // Return an object with Provider function and the context itself
   return {
     Provider: function ProjectsContextProvider({ children }: { children: React.ReactNode }) {
-      // Use React.createElement to avoid JSX in .ts file
       return React.createElement(
         ProjectsContext.Provider,
         { value },
         children
       );
-    }
+    },
+    context: ProjectsContext
   };
 };
 

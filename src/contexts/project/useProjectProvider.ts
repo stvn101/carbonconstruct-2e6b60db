@@ -5,6 +5,7 @@ import { useProjectOperations } from './useProjectOperations';
 import { useProjectExports } from './useProjectExports';
 import { SavedProject } from '@/types/project';
 import { useAuth } from '@/contexts/auth';
+import { loadProjects as loadProjectsUtil } from '@/utils/projectLoader';
 
 export const useProjectProvider = () => {
   const { user } = useAuth();
@@ -25,6 +26,24 @@ export const useProjectProvider = () => {
   const getProject = useCallback((id: string) => {
     return projects.find(p => p.id === id);
   }, [projects]);
+
+  // Add loadProjects function
+  const loadProjects = useCallback(async () => {
+    if (!user?.id) {
+      return [];
+    }
+    
+    setIsLoading(true);
+    try {
+      const loadedProjects = await loadProjectsUtil(user.id, setProjects, setFetchError);
+      setIsLoading(false);
+      return loadedProjects;
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      setIsLoading(false);
+      return [];
+    }
+  }, [user?.id, setProjects, setFetchError, setIsLoading]);
 
   const contextValue = useMemo(() => ({
     projects,
@@ -58,7 +77,8 @@ export const useProjectProvider = () => {
     getProject,
     exportProjectPDF: projectExports.exportProjectPDF,
     exportProjectCSV: projectExports.exportProjectCSV,
-  }), [projects, isLoading, fetchError, projectOperations, projectExports, getProject, user?.id]);
+    loadProjects,
+  }), [projects, isLoading, fetchError, projectOperations, projectExports, getProject, loadProjects]);
 
   return {
     contextValue,

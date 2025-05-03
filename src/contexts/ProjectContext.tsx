@@ -48,16 +48,18 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     subscribeToProjects,
     initializeData
   });
-
-  // Ensure we have a CalculatorProvider to wrap the ProjectsProvider
-  const wrappedProvider = (
-    <CalculatorProvider>
-      {ProjectsProvider({ children }).Provider({ children })}
-    </CalculatorProvider>
-  );
+  
+  // Import the useProjects hook from the ProjectsLoader for its loadProjects function
+  const projectsContext = useContext(ProjectsProvider({children}).context);
+  
+  // Merge the contextValue with the loadProjects function from ProjectsLoader
+  const mergedContextValue = {
+    ...contextValue,
+    loadProjects: projectsContext?.loadProjects
+  };
   
   return (
-    <ProjectContext.Provider value={contextValue}>
+    <ProjectContext.Provider value={mergedContextValue}>
       {children}
     </ProjectContext.Provider>
   );
