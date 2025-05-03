@@ -1,4 +1,3 @@
-
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -196,12 +195,13 @@ async function createCategoryIndexes(materials: ExtendedMaterialData[]): Promise
     const categoryMap = new Map<string, Set<string>>();
     
     materials.forEach(material => {
-      if (!material.category) return;
+      // Safely handle category which might be undefined
+      const category = material.category || 'Uncategorized';
       
-      if (!categoryMap.has(material.category)) {
-        categoryMap.set(material.category, new Set());
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, new Set());
       }
-      categoryMap.get(material.category)?.add(material.name);
+      categoryMap.get(category)?.add(material.name);
     });
     
     // Store all categories

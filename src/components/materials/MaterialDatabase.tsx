@@ -45,8 +45,8 @@ const MaterialDatabase = () => {
       const uniqueCategories = Array.from(
         new Set(
           materials
-            .map(m => m.category)
-            .filter(Boolean) as string[]
+            .map(m => m.category || 'Uncategorized')
+            .filter(Boolean)
         )
       );
       

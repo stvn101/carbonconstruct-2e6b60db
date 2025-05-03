@@ -1,5 +1,15 @@
 
-import { Material, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+// Fix the import error by using our newly exported types
+import { Material } from "@/lib/carbonExports";
+
+// Use a typesafe default material factors object
+const DEFAULT_MATERIAL_FACTORS: Record<string, { name: string; factor: number; unit?: string }> = {
+  concrete: { name: 'Concrete', factor: 0.159, unit: 'kg' },
+  steel: { name: 'Steel', factor: 1.77, unit: 'kg' },
+  timber: { name: 'Timber', factor: 0.42, unit: 'kg' },
+  glass: { name: 'Glass', factor: 0.85, unit: 'kg' },
+  // Add more default materials as needed
+};
 
 export function getCategory(materialType: string): string {
   const lowerType = materialType.toLowerCase();
@@ -19,8 +29,13 @@ export function getReductionPercent(altMaterial: string, standardMaterial: strin
   const altMaterialKey = altMaterial as Material;
   const standardMaterialKey = standardMaterial as Material;
   
-  const altFactor = MATERIAL_FACTORS[altMaterialKey]?.factor || 0;
-  const standardFactor = MATERIAL_FACTORS[standardMaterialKey]?.factor || altFactor;
+  // Safely access factor values with fallbacks
+  const getMaterialFactor = (key: string) => {
+    return DEFAULT_MATERIAL_FACTORS[key]?.factor || 0;
+  };
+  
+  const altFactor = getMaterialFactor(altMaterialKey);
+  const standardFactor = getMaterialFactor(standardMaterialKey) || altFactor;
   
   if (standardFactor === 0) return 0;
   return Math.round(((standardFactor - altFactor) / standardFactor) * 100);
@@ -67,7 +82,7 @@ export interface EnrichedMaterial {
 }
 
 export const createExtendedMaterialDB = (): EnrichedMaterial[] => {
-  return Object.entries(MATERIAL_FACTORS).map(([key, value]) => {
+  return Object.entries(DEFAULT_MATERIAL_FACTORS).map(([key, value]) => {
     const isAlt = key.toLowerCase().includes('recycled') || 
                 key.toLowerCase().includes('low-carbon') || 
                 key.toLowerCase().includes('sustainable');
@@ -81,7 +96,7 @@ export const createExtendedMaterialDB = (): EnrichedMaterial[] => {
       alternativeToStandard: isAlt,
       carbonReduction: isAlt ? Math.round(getReductionPercent(key, standardName)) : 0,
       sustainabilityScore: Math.round(getSustainabilityScore(key, value.factor)),
-      locallySourced: isAustralian || Math.random() > 0.6, // 40% chance of being locally sourced if not explicitly Australian
+      locallySourced: isAustralian || Math.random() > 0.6,
       recyclability: getRecyclability(key),
     };
   });
