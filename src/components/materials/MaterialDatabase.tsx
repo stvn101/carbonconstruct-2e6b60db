@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from "react";
 import { useRegion } from "@/contexts/RegionContext";
 import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
@@ -9,7 +10,7 @@ import DatabaseResultsCard from './DatabaseResultsCard';
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 import { AlertCircle, Loader2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ExtendedMaterialData as MaterialTypesExtendedMaterialData } from "@/lib/materials/materialTypes"; 
+import { ExtendedMaterialData } from "@/lib/materials/materialTypes"; 
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -42,7 +43,7 @@ const MaterialDatabase = () => {
   const filterResult = useMaterialFiltering(filteredMaterials || []);
   
   // Safely convert filtered materials to expected type
-  const displayMaterials: MaterialTypesExtendedMaterialData[] = filterResult.filteredMaterials?.map(item => ({
+  const displayMaterials: ExtendedMaterialData[] = filterResult.filteredMaterials?.map(item => ({
     name: item.name || '',
     factor: item.factor || 0,
     unit: item.unit || 'kg',
@@ -51,7 +52,8 @@ const MaterialDatabase = () => {
     notes: item.notes,
     tags: item.tags,
     sustainabilityScore: item.sustainabilityScore,
-    recyclability: item.recyclability
+    recyclability: item.recyclability,
+    category: item.category
   })) || [];
   
   // Extract categories from materials on load
@@ -61,8 +63,8 @@ const MaterialDatabase = () => {
       const uniqueCategories = Array.from(
         new Set(
           materials
-            .map(m => m?.category)
-            .filter(Boolean) as string[]
+            .map(m => m?.category || 'Uncategorized')
+            .filter(Boolean)
         )
       );
       

@@ -1,3 +1,4 @@
+
 // Use Record type instead of array to allow string keys
 interface IndexData<T> {
   [key: string]: T;
