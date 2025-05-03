@@ -8,18 +8,21 @@ import { ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
-import { NoAuth } from "@/components/NoAuth";
 import { useA11y } from "@/hooks/useA11y";
 
 // Lazy load the auth forms
 const LoginForm = lazy(() => import("@/components/auth/LoginForm"));
 const RegisterForm = lazy(() => import("@/components/auth/RegisterForm"));
 
-const Auth = () => {
+interface AuthProps {
+  initialTab?: "signin" | "signup";
+}
+
+const Auth = ({ initialTab = "signin" }: AuthProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("signin");
+  const [activeTab, setActiveTab] = useState(initialTab);
   const returnTo = location.state?.returnTo || '/dashboard';
 
   // Improve accessibility

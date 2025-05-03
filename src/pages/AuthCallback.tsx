@@ -31,19 +31,15 @@ const AuthCallback = () => {
         
         if (data?.session) {
           // Check if we have a returnUrl in the session storage
-          const returnUrl = sessionStorage.getItem('authReturnUrl');
+          const returnUrl = sessionStorage.getItem('authReturnUrl') || '/dashboard';
           sessionStorage.removeItem('authReturnUrl'); // Clean up
           
-          // Log provider information for debugging purposes
           console.log("Authentication successful:", data.session);
           
           // Successfully logged in, redirect to dashboard or return URL
-          const redirectTo = returnUrl || "/dashboard";
-          
-          // Show success toast
           toast.success(`Successfully signed in${data.session.user?.email ? ` as ${data.session.user.email}` : ''}`);
           
-          navigate(redirectTo, { 
+          navigate(returnUrl, { 
             state: { fromAuth: true },
             replace: true
           });
