@@ -1,7 +1,7 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+import { toast } from 'sonner';
+import { MaterialInput, TransportInput, EnergyInput, CalculationResult } from '@/lib/carbonExports';
 import { Json } from '@/integrations/supabase/types';
 import { performDbOperation } from './supabase';
 
