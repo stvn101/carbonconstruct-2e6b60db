@@ -1,8 +1,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { 
-  processMaterialsInBatches as calculateMaterialEmissions,
-  processTransportInBatches as calculateTransportEmissions,
+  processMaterialsInBatches,
+  processTransportInBatches,
   calculateEnergyEmissions,
   calculateTotalEmissions,
   Material,
@@ -15,29 +15,29 @@ import {
 } from '../carbonExports';
 
 describe('Carbon Calculations', () => {
-  describe('calculateMaterialEmissions', () => {
+  describe('processMaterialsInBatches', () => {
     it('should correctly calculate emissions for single material', () => {
       const materials: MaterialInput[] = [
         { type: "concrete" as Material, quantity: 1000 }
       ];
-      const result = calculateMaterialEmissions(materials);
+      const result = processMaterialsInBatches(materials);
       expect(result).toBeGreaterThan(0);
       expect(typeof result).toBe('object');
       expect(typeof result.total).toBe('number');
     });
 
     it('should return 0 for empty materials array', () => {
-      const result = calculateMaterialEmissions([]);
+      const result = processMaterialsInBatches([]);
       expect(result.total).toBe(0);
     });
   });
 
-  describe('calculateTransportEmissions', () => {
+  describe('processTransportInBatches', () => {
     it('should correctly calculate emissions for single transport', () => {
       const transport: TransportInput[] = [
         { type: "truck" as Transport, distance: 100, weight: 1000 }
       ];
-      const result = calculateTransportEmissions(transport);
+      const result = processTransportInBatches(transport);
       expect(result.total).toBeGreaterThan(0);
       expect(typeof result.total).toBe('number');
     });

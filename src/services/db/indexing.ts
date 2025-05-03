@@ -1,12 +1,12 @@
 
 // Use Record type instead of array to allow string keys
 interface IndexData<T> {
-  [key: string]: T;
+  [key: string]: T[];
 }
 
 // Function to create a material index for faster lookups
-export function createMaterialIndex<T>(materials: T[]): IndexData<T[]> {
-  const index: IndexData<T[]> = {};
+export function createMaterialIndex<T>(materials: T[]): IndexData<T> {
+  const index: IndexData<T> = {};
   
   for (const material of materials) {
     const key = String(material);
@@ -20,8 +20,8 @@ export function createMaterialIndex<T>(materials: T[]): IndexData<T[]> {
 }
 
 // Function to create a category index
-export function createCategoryIndex<T extends { category?: string }>(items: T[]): IndexData<T[]> {
-  const index: IndexData<T[]> = {};
+export function createCategoryIndex<T extends { category?: string }>(items: T[]): IndexData<T> {
+  const index: IndexData<T> = {};
   
   for (const item of items) {
     const category = item.category || 'uncategorized';
@@ -35,8 +35,8 @@ export function createCategoryIndex<T extends { category?: string }>(items: T[])
 }
 
 // Function to create a region index
-export function createRegionIndex<T extends { region?: string }>(items: T[]): IndexData<T[]> {
-  const index: IndexData<T[]> = {};
+export function createRegionIndex<T extends { region?: string }>(items: T[]): IndexData<T> {
+  const index: IndexData<T> = {};
   
   for (const item of items) {
     const region = item.region || 'unknown';
@@ -68,7 +68,7 @@ export function createTagIndex<T extends { tags?: string[] }>(items: T[]): Recor
 
 // Function to search through an index
 export function searchIndex<T>(
-  index: IndexData<T[]>,
+  index: IndexData<T>,
   searchTerm: string,
   getSearchableText: (item: T) => string
 ): T[] {
