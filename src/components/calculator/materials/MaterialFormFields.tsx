@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MaterialInput, MATERIAL_FACTORS, Material } from "@/lib/carbonExports";
+import { MaterialInput, Material, MATERIAL_FACTORS } from "@/lib/carbonExports";
 
 interface MaterialFormFieldsProps {
   material: MaterialInput;

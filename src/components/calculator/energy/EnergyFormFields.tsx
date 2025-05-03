@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { EnergyInput, ENERGY_FACTORS, Energy } from "@/lib/carbonExports";
+import { EnergyInput, Energy, ENERGY_FACTORS } from "@/lib/carbonExports";
 
 interface EnergyFormFieldsProps {
   energy: EnergyInput;
@@ -57,7 +57,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
               type="number"
               min="0"
               max="10000"
-              value={energy.amount}
+              value={energy.amount || energy.quantity || ""}
               onChange={(e) => onUpdate("amount", e.target.value)}
               className={error ? "border-red-300 bg-red-50" : ""}
               aria-invalid={error ? "true" : "false"}
