@@ -1,7 +1,7 @@
 
 import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
-import { isOffline } from '@/utils/errorHandling/networkErrorHandler';
+import { isOffline } from '@/utils/errorHandling';
 import { showErrorToast, showSuccessToast } from '@/utils/errorHandling/toastHelpers';
 import { CONNECTION_TOAST_STATE, updateToastState, shouldThrottleToast } from '@/utils/errorHandling/connectionToast';
 import { calculateBackoffDelay } from '@/utils/errorHandling/retryUtils';

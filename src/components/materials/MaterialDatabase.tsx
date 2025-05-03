@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRegion } from "@/contexts/RegionContext";
-import { useMaterialFiltering } from "@/hooks/useMaterialFiltering";
+import { useMaterialFiltering, ExtendedMaterialData } from "@/hooks/useMaterialFiltering";
 import { useMaterialData } from "@/hooks/useMaterialData";
 import { useMaterialCache } from "@/hooks/useMaterialCache";
 import DatabaseHeader from './DatabaseHeader';
@@ -10,7 +10,6 @@ import DatabaseResultsCard from './DatabaseResultsCard';
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 import { AlertCircle, Loader2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ExtendedMaterialData } from "@/lib/materials/materialTypes"; 
 
 const MaterialDatabase = () => {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -42,29 +41,15 @@ const MaterialDatabase = () => {
   // Use the filter hook for sorting and filtering
   const filterResult = useMaterialFiltering(filteredMaterials || []);
   
-  // Safely convert filtered materials to expected type
-  const displayMaterials: ExtendedMaterialData[] = filterResult.filteredMaterials?.map(item => ({
-    name: item.name || '',
-    factor: item.factor || 0,
-    unit: item.unit || 'kg',
-    region: item.region,
-    alternativeTo: item.alternativeTo,
-    notes: item.notes,
-    tags: item.tags,
-    sustainabilityScore: item.sustainabilityScore,
-    recyclability: item.recyclability,
-    category: item.category
-  })) || [];
-  
   // Extract categories from materials on load
   useEffect(() => {
     if (materials && materials.length > 0) {
-      // Extract unique categories, ensuring we have the category property
+      // Extract unique categories
       const uniqueCategories = Array.from(
         new Set(
           materials
-            .map(m => m?.category || 'Uncategorized')
-            .filter(Boolean)
+            .map(m => m.category)
+            .filter(Boolean) as string[]
         )
       );
       
@@ -73,6 +58,7 @@ const MaterialDatabase = () => {
   }, [materials]);
   
   // Combine all data for the UI
+  const displayMaterials = filterResult.filteredMaterials;
   const isCategoriesLoading = loading && (!categoriesList || categoriesList.length === 0);
   const totalMaterials = materials ? materials.length : 0;
   
@@ -164,11 +150,11 @@ const MaterialDatabase = () => {
           />
           
           <DatabaseResultsCard
-            filteredMaterials={displayMaterials}
+            filteredMaterials={safeMaterials}
             resetFilters={resetFilters}
             materialCount={materialCount || 0}
             totalCount={totalMaterials || 0}
-            loading={loading && displayMaterials.length > 0}
+            loading={loading && safeMaterials.length > 0}
           />
         </div>
       </div>

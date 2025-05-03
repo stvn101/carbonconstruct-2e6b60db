@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { checkNetworkStatus, isDeviceOffline } from '@/utils/errorHandling';
+import { checkNetworkStatus } from '@/utils/errorHandling/networkChecker';
 import { pingSupabaseConnection } from '@/services/supabase/connection';
 import { toast } from 'sonner';
 

@@ -1,89 +1,85 @@
 
-// Use Record type instead of array to allow string keys
-interface IndexData<T> {
-  [key: string]: T[];
-}
+import { supabase } from '@/integrations/supabase/client';
 
-// Function to create a material index for faster lookups
-export function createMaterialIndex<T>(materials: T[]): IndexData<T> {
-  const index: IndexData<T> = {};
-  
-  for (const material of materials) {
-    const key = String(material);
-    if (!index[key]) {
-      index[key] = [];
+/**
+ * Diagnostic function to analyze query performance
+ * This function is safe to run in production as it only logs diagnostics
+ */
+export async function analyzeQueryPerformance(
+  queryName: string, 
+  tableName: string,
+  conditions: string[]
+): Promise<void> {
+  try {
+    console.log(`Running query analysis for "${queryName}" on table "${tableName}"`);
+    console.log(`Conditions: ${conditions.join(', ')}`);
+    
+    // This is a read-only operation that helps identify missing indexes
+    const { data, error } = await supabase
+      .rpc('analyze_query_performance', { 
+        p_query_name: queryName,
+        p_table_name: tableName,
+        p_conditions: conditions
+      });
+    
+    if (error) {
+      console.error('Error analyzing query:', error);
+      return;
     }
-    index[key].push(material);
-  }
-  
-  return index;
-}
-
-// Function to create a category index
-export function createCategoryIndex<T extends { category?: string }>(items: T[]): IndexData<T> {
-  const index: IndexData<T> = {};
-  
-  for (const item of items) {
-    const category = item.category || 'uncategorized';
-    if (!index[category]) {
-      index[category] = [];
+    
+    if (data) {
+      console.log('Query performance analysis:', data);
     }
-    index[category].push(item);
+  } catch (err) {
+    console.error('Error in analyzeQueryPerformance:', err);
   }
-  
-  return index;
 }
 
-// Function to create a region index
-export function createRegionIndex<T extends { region?: string }>(items: T[]): IndexData<T> {
-  const index: IndexData<T> = {};
-  
-  for (const item of items) {
-    const region = item.region || 'unknown';
-    if (!index[region]) {
-      index[region] = [];
+/**
+ * Get optimization suggestions for slow queries
+ * Helps identify potential indexing improvements
+ */
+export async function getQueryOptimizationSuggestions(
+  tableName: string
+): Promise<{ suggestions: string[] } | null> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_optimization_suggestions', { 
+        p_table_name: tableName
+      });
+    
+    if (error) {
+      console.error('Error getting optimization suggestions:', error);
+      return null;
     }
-    index[region].push(item);
+    
+    return data;
+  } catch (err) {
+    console.error('Error in getQueryOptimizationSuggestions:', err);
+    return null;
   }
-  
-  return index;
 }
 
-// Function to create a tag index
-export function createTagIndex<T extends { tags?: string[] }>(items: T[]): Record<string, T[]> {
-  const index: Record<string, T[]> = {};
-  
-  for (const item of items) {
-    const tags = item.tags || [];
-    for (const tag of tags) {
-      if (!index[tag]) {
-        index[tag] = [];
-      }
-      index[tag].push(item);
+/**
+ * Check query plan to evaluate if appropriate indexes are being used
+ */
+export async function checkQueryPlan(
+  sqlQuery: string
+): Promise<{ plan: any } | null> {
+  try {
+    const { data, error } = await supabase
+      .rpc('explain_query_plan', { 
+        p_query: sqlQuery
+      });
+    
+    if (error) {
+      console.error('Error checking query plan:', error);
+      return null;
     }
+    
+    return data;
+  } catch (err) {
+    console.error('Error in checkQueryPlan:', err);
+    return null;
   }
-  
-  return index;
-}
-
-// Function to search through an index
-export function searchIndex<T>(
-  index: IndexData<T>,
-  searchTerm: string,
-  getSearchableText: (item: T) => string
-): T[] {
-  const results: T[] = [];
-  const lowerSearchTerm = searchTerm.toLowerCase();
-  
-  // Search through all items in the index
-  Object.values(index).forEach(items => {
-    items.forEach(item => {
-      const searchableText = getSearchableText(item).toLowerCase();
-      if (searchableText.includes(lowerSearchTerm)) {
-        results.push(item);
-      }
-    });
-  });
-  
-  return results;
 }
