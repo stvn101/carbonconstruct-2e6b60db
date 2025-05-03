@@ -12,3 +12,10 @@ export { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS };
 export type Material = keyof typeof MATERIAL_FACTORS;
 export type Transport = keyof typeof TRANSPORT_FACTORS;
 export type Energy = keyof typeof ENERGY_FACTORS;
+
+// Re-export calculation types from carbonCalculations
+export { 
+  CalculationInput,
+  CalculationResult,
+  calculateTotalEmissions 
+} from './carbonCalculations';

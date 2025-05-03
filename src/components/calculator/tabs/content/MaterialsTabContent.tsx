@@ -1,7 +1,6 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import MaterialsInputSection from "../../MaterialsInputSection";
-import { MaterialInput } from "@/lib/carbonCalculations";
+import { MaterialInput } from "@/lib/carbonExports";
 
 interface MaterialsTabContentProps {
   materials: MaterialInput[];

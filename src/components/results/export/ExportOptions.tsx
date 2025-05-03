@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 import { useExportHandlers } from "@/hooks/useExportHandlers";
 import ExportButton from "./ExportButton";
 
