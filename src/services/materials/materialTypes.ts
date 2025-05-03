@@ -3,7 +3,7 @@
  * Material data types and interfaces shared across material services
  */
 
-// Supabase material type definition
+// Supabase material type definition - match actual database columns
 export interface SupabaseMaterial {
   id: string;
   name: string;

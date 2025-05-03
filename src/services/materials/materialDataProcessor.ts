@@ -21,6 +21,7 @@ export function processDataInBatches(data: SupabaseMaterial[]): ExtendedMaterial
     // Adding robust defaults for all fields that might be missing
     const transformedBatch = batch.map((material: SupabaseMaterial) => ({
       name: material.name || 'Unnamed Material',
+      // Map carbon_footprint_kgco2e_kg to factor
       factor: material.carbon_footprint_kgco2e_kg || 0,
       // Default to kg if unit is missing
       unit: 'kg', 
