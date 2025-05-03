@@ -3,7 +3,6 @@ import React, { useEffect, useState, Suspense, useCallback } from "react";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 import { useLocation, useNavigate } from "react-router-dom";
-import CarbonCalculator from "@/components/CarbonCalculator";
 import { toast } from "sonner";
 import { useAuth } from '@/contexts/auth';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -12,9 +11,12 @@ import { Button } from "@/components/ui/button";
 import CalculatorHeader from "@/components/calculator/CalculatorHeader";
 import { useA11y } from "@/hooks/useA11y";
 import { useSimpleOfflineMode } from '@/hooks/useSimpleOfflineMode';
+import { ErrorBoundary } from "react-error-boundary";
+
+// Non-lazy loaded component for better reliability
+import CarbonCalculator from "@/components/CarbonCalculator";
 import { CalculatorProvider } from "@/contexts/calculator";
 import { ProjectProvider } from "@/contexts/ProjectContext";
-import { ErrorBoundary } from "react-error-boundary";
 
 // Fallback component for when calculator is loading
 const CalculatorLoading = () => (
@@ -95,7 +97,6 @@ function Calculator() {
   // Determine effective demo mode (user not logged in, explicit demo mode, or offline)
   const effectiveDemoMode = !user || demoMode || isOffline;
 
-  // Avoid nested providers inside error boundaries to prevent context issues
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />

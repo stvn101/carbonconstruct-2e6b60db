@@ -23,10 +23,40 @@ export function useSimpleOfflineMode() {
     }
   }, []);
 
+  // Handle connection check
+  const checkConnection = useCallback(async () => {
+    if (!mountedRef.current) return;
+    
+    try {
+      // Simple fetch to check connection
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      const response = await fetch('/favicon.ico', {
+        method: 'HEAD',
+        signal: controller.signal,
+        cache: 'no-store'
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (mountedRef.current) {
+        setIsOffline(!response.ok);
+      }
+    } catch (err) {
+      if (mountedRef.current) {
+        setIsOffline(true);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     // Add event listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    
+    // Initial connection check
+    checkConnection();
     
     // Clean up event listeners and set mounted flag on unmount
     return () => {
@@ -34,7 +64,10 @@ export function useSimpleOfflineMode() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [handleOnline, handleOffline]); // Dependencies now include the memoized handlers
+  }, [handleOnline, handleOffline, checkConnection]);
 
-  return { isOffline };
+  return { 
+    isOffline,
+    checkConnection
+  };
 }

@@ -17,6 +17,14 @@ export function useCalculatorState() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Array<{field: string, message: string}>>([]);
   const [calculationError, setCalculationError] = useState<Error | null>(null);
+  
+  // Project saving related state
+  const [projectName, setProjectName] = useState<string>('');
+  const [authError, setAuthError] = useState<Error | null>(null);
+  const [savingError, setSavingError] = useState<Error | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
+  const [projectsContextError, setProjectsContextError] = useState<Error | null>(null);
 
   // Use useCallback to stabilize functions to prevent render loops
   const stableSetActiveTab = useCallback((tab: 'materials' | 'transport' | 'energy' | 'results') => {
@@ -43,6 +51,30 @@ export function useCalculatorState() {
     setCalculationError(error);
   }, []);
 
+  const stableSetProjectName = useCallback((name: string) => {
+    setProjectName(name);
+  }, []);
+
+  const stableSetAuthError = useCallback((error: Error | null) => {
+    setAuthError(error);
+  }, []);
+
+  const stableSetSavingError = useCallback((error: Error | null) => {
+    setSavingError(error);
+  }, []);
+
+  const stableSetIsSaving = useCallback((saving: boolean) => {
+    setIsSaving(saving);
+  }, []);
+
+  const stableSetShowSaveDialog = useCallback((show: boolean) => {
+    setShowSaveDialog(show);
+  }, []);
+
+  const stableSetProjectsContextError = useCallback((error: Error | null) => {
+    setProjectsContextError(error);
+  }, []);
+
   return {
     calculationInput,
     setCalculationInput: stableSetCalculationInput,
@@ -56,5 +88,19 @@ export function useCalculatorState() {
     setValidationErrors: stableSetValidationErrors,
     calculationError,
     setCalculationError: stableSetCalculationError,
+    
+    // Project saving related state
+    projectName,
+    setProjectName: stableSetProjectName,
+    authError,
+    setAuthError: stableSetAuthError,
+    savingError,
+    setSavingError: stableSetSavingError,
+    isSaving, 
+    setIsSaving: stableSetIsSaving,
+    showSaveDialog,
+    setShowSaveDialog: stableSetShowSaveDialog,
+    projectsContextError,
+    setProjectsContextError: stableSetProjectsContextError
   };
 }
