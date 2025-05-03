@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import Stripe from 'https://esm.sh/stripe@14.21.0';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +13,32 @@ const corsHeaders = {
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Initialize Stripe
+const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')!;
+const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: '2023-10-16',
+});
+
+// Helper function to determine the amount based on plan and purchase type
+function getPlanAmount(planName: string, purchaseType: string): number {
+  const monthlyPrices = {
+    starter: 9900, // $99.00
+    professional: 19900, // $199.00
+    enterprise: 44900 // $449.00
+  };
+  
+  // If annual, apply 15% discount for professional and enterprise plans
+  if (purchaseType === 'annual') {
+    const annualBase = monthlyPrices[planName as keyof typeof monthlyPrices] * 12;
+    if (planName === 'starter') {
+      return annualBase;
+    }
+    return Math.round(annualBase * 0.85); // 15% discount
+  }
+  
+  return monthlyPrices[planName as keyof typeof monthlyPrices];
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -43,180 +70,185 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { planName, action, purchaseType } = await req.json();
+    const { planName, purchaseType, action } = await req.json();
     
     // Basic validation
-    if (!planName || !action) {
+    if (!planName) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+        JSON.stringify({ error: "Missing plan name" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Determine amount based on plan name
-    let amount = 0;
-    let period = ''; 
-    let description = '';
-
+    // For trial requests, check if user has already used trial
     if (action === 'trial') {
-      // Set up a free trial
-      const { data: profile, error: profileError } = await supabase
+      // Get user profile
+      const { data: profile } = await supabase
         .from('profiles')
-        .select('*')
+        .select('had_trial')
         .eq('id', user.id)
         .single();
-
-      if (profileError) {
+        
+      if (profile?.had_trial) {
         return new Response(
-          JSON.stringify({ error: "Error fetching profile" }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Check if user already had a trial
-      if (profile.had_trial) {
-        return new Response(
-          JSON.stringify({ error: "You have already used your free trial" }),
+          JSON.stringify({ error: "You've already used your free trial", success: false }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-
-      // Update user profile to mark them as in trial and set expiration
-      const trialEndDate = new Date();
-      trialEndDate.setDate(trialEndDate.getDate() + 3); // 3-day trial
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          subscription_tier: 'premium',
-          had_trial: true,
-          trial_end_date: trialEndDate.toISOString(),
-        })
-        .eq('id', user.id);
-
-      if (updateError) {
-        return new Response(
-          JSON.stringify({ error: "Failed to start trial" }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Create a notification about the trial
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: user.id,
-          title: `3-Day Trial Started`,
-          message: `Your 3-day free trial of the Premium plan has begun. Enjoy all premium features until ${trialEndDate.toLocaleDateString()}.`,
-          type: 'info',
-          read: false,
-        });
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Trial activated successfully",
-          trialEndDate: trialEndDate.toISOString(),
-          subscription_tier: 'premium'
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } else if (action === 'subscribe') {
-      // Determine amount based on plan
-      if (planName === 'starter') {
-        amount = purchaseType === 'monthly' ? 199 : 1912; // ~20% discount for annual
-        period = purchaseType === 'monthly' ? 'month' : 'year';
-        description = purchaseType === 'monthly' ? 'Starter Plan - Monthly' : 'Starter Plan - Annual';
-      } else if (planName === 'professional') {
-        amount = purchaseType === 'monthly' ? 449 : 4310; // ~20% discount for annual
-        period = purchaseType === 'monthly' ? 'month' : 'year';
-        description = purchaseType === 'monthly' ? 'Professional Plan - Monthly' : 'Professional Plan - Annual';
-      } else if (planName === 'enterprise') {
-        amount = purchaseType === 'monthly' ? 899 : 8630; // ~20% discount for annual
-        period = purchaseType === 'monthly' ? 'month' : 'year';
-        description = purchaseType === 'monthly' ? 'Enterprise Plan - Monthly' : 'Enterprise Plan - Annual';
-      } else {
-        return new Response(
-          JSON.stringify({ error: "Invalid plan selected" }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Insert a payment record for demonstration
-      const { data: payment, error: paymentError } = await supabase
-        .from('payments')
-        .insert({
-          user_id: user.id,
-          amount: amount,
-          status: 'pending',
-          description: description,
-          plan: planName,
-          period: period
-        })
-        .select()
-        .single();
-
-      if (paymentError) {
-        return new Response(
-          JSON.stringify({ error: "Failed to create payment record" }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Create a notification about the payment
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: user.id,
-          title: `Payment Initiated for ${planName}`,
-          message: `Your payment of A$${(amount/100).toFixed(2)} for the ${description} has been initiated.`,
-          type: 'info',
-          read: false,
-        });
-
-      // In a full implementation, this would create a Stripe checkout session
-      // For this demo, we'll simulate a successful payment and update the user profile
       
-      // Update user's subscription tier
-      const { error: updateError } = await supabase
+      // Activate trial by updating profile
+      await supabase
         .from('profiles')
-        .update({
+        .update({ 
           subscription_tier: 'premium',
+          had_trial: true
         })
         .eq('id', user.id);
-
-      if (updateError) {
-        return new Response(
-          JSON.stringify({ error: "Failed to update subscription" }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // For demo purposes, also mark the payment as completed
+        
+      // Create notification
       await supabase
-        .from('payments')
-        .update({ status: 'completed' })
-        .eq('id', payment.id);
-
+        .from('notifications')
+        .insert({
+          user_id: user.id,
+          title: 'Free Trial Activated',
+          message: 'Your 3-day free trial of the Professional plan has been activated.',
+          type: 'success',
+          read: false,
+        });
+        
       return new Response(
-        JSON.stringify({
+        JSON.stringify({ 
           success: true,
-          message: "Payment processed successfully",
-          subscription_tier: 'premium',
-          payment: {
-            id: payment.id,
-            amount: payment.amount,
-            description: payment.description,
-            status: 'completed'
-          }
+          message: "Trial activated successfully"
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    // Check if user already has a Stripe customer ID
+    let { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('stripe_customer_id')
+      .eq('id', user.id)
+      .maybeSingle();
+      
+    if (profileError) {
+      console.error("Error fetching profile:", profileError);
+    }
+    
+    let customerId = profiles?.stripe_customer_id;
+    
+    // Create or retrieve Stripe customer
+    if (!customerId) {
+      // Create new Stripe customer
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.user_metadata?.full_name || '',
+        metadata: {
+          user_id: user.id
+        },
+      });
+      
+      customerId = customer.id;
+      
+      // Update profile with Stripe customer ID
+      await supabase
+        .from('profiles')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', user.id);
+    }
+
+    // Determine if this is a subscription
+    const isSubscription = purchaseType === 'monthly' || purchaseType === 'annual';
+    
+    // Determine amount based on plan and purchase type
+    const amount = getPlanAmount(planName, purchaseType || 'monthly');
+    
+    const planTitle = `${planName.charAt(0).toUpperCase() + planName.slice(1)} Plan`;
+    const description = isSubscription
+      ? `${purchaseType === 'annual' ? 'Annual' : 'Monthly'} subscription to ${planTitle}`
+      : `One-time payment for ${planTitle}`;
+    
+    // Create checkout session
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'aud',
+            product_data: {
+              name: `CarbonConstruct ${planTitle}`,
+              description: description,
+            },
+            unit_amount: amount,
+            ...(isSubscription ? {
+              recurring: {
+                interval: purchaseType === 'annual' ? 'year' : 'month',
+              }
+            } : {})
+          },
+          quantity: 1,
+        },
+      ],
+      mode: isSubscription ? 'subscription' : 'payment',
+      success_url: `${req.headers.get('origin')}/dashboard?payment=success`,
+      cancel_url: `${req.headers.get('origin')}/pricing?payment=canceled`,
+      metadata: {
+        user_id: user.id,
+        plan_name: planName,
+        purchase_type: purchaseType || 'one-time'
+      }
+    });
+
+    // Insert payment record in the database
+    const paymentData = {
+      user_id: user.id,
+      amount: amount / 100, // Convert cents to dollars for storage
+      status: 'pending',
+      description: description,
+      stripe_payment_id: session.id,
+    };
+
+    const { data: payment, error: dbError } = await supabase
+      .from('payments')
+      .insert(paymentData)
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error("Database error:", dbError);
+      return new Response(
+        JSON.stringify({ error: "Failed to create payment record" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create a notification about the payment
+    const notificationData = {
+      user_id: user.id,
+      title: `Payment Initiated for ${planTitle}`,
+      message: `Your payment of $${(amount / 100).toFixed(2)} for the ${planTitle} has been initiated.`,
+      type: 'info',
+      read: false,
+    };
+
+    await supabase
+      .from('notifications')
+      .insert(notificationData);
 
     return new Response(
-      JSON.stringify({ error: "Invalid action" }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        success: true,
+        url: session.url,
+        payment: {
+          id: payment.id,
+          amount: payment.amount,
+          status: payment.status,
+          created_at: payment.created_at
+        }
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {

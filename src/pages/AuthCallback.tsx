@@ -35,9 +35,7 @@ const AuthCallback = () => {
           sessionStorage.removeItem('authReturnUrl'); // Clean up
           
           // Log provider information for debugging purposes
-          if (data.session.provider) {
-            console.log("Authenticated with provider:", data.session.provider);
-          }
+          console.log("Authentication successful:", data.session);
           
           // Successfully logged in, redirect to dashboard or return URL
           const redirectTo = returnUrl || "/dashboard";

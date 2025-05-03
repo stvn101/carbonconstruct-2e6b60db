@@ -36,5 +36,10 @@ enable_pwned_check = true
 [functions]
 [functions.create-payment]
 verify_jwt = true
+[functions.verify-payment]
+verify_jwt = true
+[functions.create-payment-session]
+verify_jwt = true
 [functions.get-sustainability-suggestions]
 verify_jwt = false
+

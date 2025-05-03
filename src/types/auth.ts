@@ -10,6 +10,7 @@ export interface UserProfile {
   role: string | null;
   subscription_tier: string | null;
   had_trial: boolean;
+  stripe_customer_id?: string | null;
 }
 
 export interface AuthContextType {
