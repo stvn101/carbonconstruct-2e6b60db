@@ -1,8 +1,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { 
-  calculateMaterialEmissions,
-  calculateTransportEmissions,
+  processMaterialsInBatches as calculateMaterialEmissions,
+  processTransportInBatches as calculateTransportEmissions,
   calculateEnergyEmissions,
   calculateTotalEmissions,
   Material,
@@ -22,12 +22,13 @@ describe('Carbon Calculations', () => {
       ];
       const result = calculateMaterialEmissions(materials);
       expect(result).toBeGreaterThan(0);
-      expect(typeof result).toBe('number');
+      expect(typeof result).toBe('object');
+      expect(typeof result.total).toBe('number');
     });
 
     it('should return 0 for empty materials array', () => {
       const result = calculateMaterialEmissions([]);
-      expect(result).toBe(0);
+      expect(result.total).toBe(0);
     });
   });
 
@@ -37,8 +38,8 @@ describe('Carbon Calculations', () => {
         { type: "truck" as Transport, distance: 100, weight: 1000 }
       ];
       const result = calculateTransportEmissions(transport);
-      expect(result).toBeGreaterThan(0);
-      expect(typeof result).toBe('number');
+      expect(result.total).toBeGreaterThan(0);
+      expect(typeof result.total).toBe('number');
     });
   });
 

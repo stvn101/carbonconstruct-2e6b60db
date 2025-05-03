@@ -16,9 +16,8 @@ export type Energy = keyof typeof ENERGY_FACTORS;
 // Re-export calculation types and functions from carbonCalculations
 export { 
   calculateTotalEmissions,
-  // Also export the internal functions for testing
-  processMaterialsInBatches as calculateMaterialEmissions,
-  processTransportInBatches as calculateTransportEmissions,
+  processMaterialsInBatches,
+  processTransportInBatches,
   calculateEnergyEmissions
 } from './carbonCalculations';
 export type { CalculationInput, CalculationResult } from './carbonCalculations';

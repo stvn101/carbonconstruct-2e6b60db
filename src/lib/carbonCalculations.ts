@@ -1,3 +1,4 @@
+
 /**
  * This file contains optimized calculation functions for carbon emissions
  * with improved memory management and batch processing for large datasets.
@@ -105,7 +106,7 @@ export const calculateTotalEmissions = (input: CalculationInput): CalculationRes
 /**
  * Process materials in batches to handle large datasets more efficiently
  */
-function processMaterialsInBatches(materials: MaterialInput[], batchSize = 100) {
+export function processMaterialsInBatches(materials: MaterialInput[], batchSize = 100) {
   const result = {
     total: 0,
     breakdown: {} as Record<string, number>
@@ -136,7 +137,7 @@ function processMaterialsInBatches(materials: MaterialInput[], batchSize = 100) 
 /**
  * Process transport in batches to handle large datasets more efficiently
  */
-function processTransportInBatches(transport: TransportInput[], batchSize = 100) {
+export function processTransportInBatches(transport: TransportInput[], batchSize = 100) {
   const result = {
     total: 0,
     breakdown: {} as Record<string, number>
@@ -168,7 +169,7 @@ function processTransportInBatches(transport: TransportInput[], batchSize = 100)
 /**
  * Calculate energy emissions (typically a smaller dataset)
  */
-function calculateEnergyEmissions(energy: EnergyInput[]) {
+export function calculateEnergyEmissions(energy: EnergyInput[]) {
   const result = {
     total: 0,
     breakdown: {} as Record<string, number>

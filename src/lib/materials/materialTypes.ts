@@ -9,6 +9,7 @@ export interface ExtendedMaterialData {
   tags?: string[];
   sustainabilityScore?: number;
   recyclability?: "High" | "Medium" | "Low";
+  category?: string; // Add category property
 }
 
 export type MaterialsByRegion = Record<string, number>;
