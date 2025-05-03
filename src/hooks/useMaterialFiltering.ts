@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useMemo } from 'react';
-import { Material } from '@/lib/materialTypes';
+import { Material } from '@/lib/materials/types';
 
 interface FilterState {
   searchTerm: string;

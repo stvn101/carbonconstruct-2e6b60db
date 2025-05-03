@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DashboardStats from "@/components/dashboard/DashboardStats";
-import ProjectsTab from "@/components/dashboard/ProjectsTab";
-import ReportsTab from "@/components/dashboard/ReportsTab";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { ProjectsTab } from "@/components/dashboard/ProjectsTab";
+import { ReportsTab } from "@/components/dashboard/ReportsTab";
 import SubscriptionStatus from "@/components/payment/SubscriptionStatus";
 import PaymentHistory from "@/components/payment/PaymentHistory";
 import PaymentSuccess from "@/components/payment/PaymentSuccess";
