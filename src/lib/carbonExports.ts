@@ -18,7 +18,9 @@ import {
   calculateTotalEmissions,
   processMaterialsInBatches,
   processTransportInBatches,
-  calculateEnergyEmissions
+  calculateEnergyEmissions,
+  CalculationInput,
+  CalculationResult
 } from './carbonCalculations';
 
 // Export the calculation functions
@@ -26,8 +28,11 @@ export {
   calculateTotalEmissions,
   processMaterialsInBatches,
   processTransportInBatches,
-  calculateEnergyEmissions
+  calculateEnergyEmissions,
+  CalculationInput,
+  CalculationResult
 };
 
 // Using export type for type-only exports
-export type { MaterialInput, TransportInput, EnergyInput, CalculationResult, CalculationInput } from './carbonTypes';
+export type { MaterialInput, TransportInput, EnergyInput } from './carbonTypes';
+
