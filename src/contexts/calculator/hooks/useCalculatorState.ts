@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
 import { validateCalculationInput } from "@/utils/calculatorValidation";
 
@@ -18,17 +18,6 @@ export function useCalculatorState() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Array<{field: string, message: string}>>([]);
   const [calculationError, setCalculationError] = useState<Error | null>(null);
-
-  // Effect for tab changes
-  useEffect(() => {
-    console.log("Active tab changed to:", activeTab);
-    
-    // When switching to results tab, preemptively validate inputs
-    if (activeTab === 'results' && !calculationResult) {
-      const errors = validateCalculationInput(calculationInput);
-      setValidationErrors(errors);
-    }
-  }, [activeTab, calculationInput, calculationResult]);
 
   return {
     calculationInput,

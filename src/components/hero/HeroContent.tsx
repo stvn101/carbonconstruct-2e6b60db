@@ -41,22 +41,6 @@ const HeroContent = () => {
     const timer = setTimeout(preloadFeaturesSection, 200);
     return () => clearTimeout(timer);
   }, []);
-
-  // Listen for scroll events to help with debugging
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const featuresSection = document.getElementById('features');
-      if (featuresSection) {
-        const rect = featuresSection.getBoundingClientRect();
-        if (rect.top >= 0 && rect.top <= window.innerHeight) {
-          console.log("📍 Features section is now visible in viewport");
-        }
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
   
   // Direct scroll function as backup without using hook
   const directScrollToFeatures = (e?: React.MouseEvent) => {

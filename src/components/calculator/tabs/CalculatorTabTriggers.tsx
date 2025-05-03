@@ -1,26 +1,23 @@
 
-import React from "react";
+import React, { useCallback } from "react";
 import { TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Gauge, Truck, Zap } from "lucide-react";
-import { useCalculator } from "@/contexts/calculator";
 
 export interface CalculatorTabTriggersProps {
   isMobile?: boolean;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-const CalculatorTabTriggers = ({ isMobile = false }: CalculatorTabTriggersProps) => {
-  const { activeTab, setActiveTab } = useCalculator();
-  
-  console.log("CalculatorTabTriggers rendering with activeTab:", activeTab);
-  
+const CalculatorTabTriggers = ({ isMobile = false, activeTab, onTabChange }: CalculatorTabTriggersProps) => {
   // Use a callback handler that only triggers when the user clicks
-  const handleTabClick = (tab: string) => {
+  const handleTabClick = useCallback((tab: string) => {
     console.log(`Tab clicked: ${tab}`);
     // Only update if the tab is different than the current one
     if (tab !== activeTab) {
-      setActiveTab(tab as any);
+      onTabChange(tab);
     }
-  };
+  }, [activeTab, onTabChange]);
   
   return (
     <>
