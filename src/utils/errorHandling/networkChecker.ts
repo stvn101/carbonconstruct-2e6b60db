@@ -1,86 +1,76 @@
 
-// Health check cache duration (30 seconds - balanced approach)
-export const HEALTH_CHECK_CACHE_DURATION = 30000;
-// Last health check result and timestamp
-let lastHealthCheckResult = true;
-let lastHealthCheckTimestamp = 0;
-
 /**
- * Check if the device is offline based on browser API with improved reliability
+ * Utility for checking network status with improved error handling
  */
+
+// Enhanced network status check with multiple signals
 export const isOffline = (): boolean => {
-  console.log('Checking if offline, navigator.onLine:', navigator.onLine);
-  // Primarily rely on the browser's online status
-  const browserSaysOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+  // First check the navigator.onLine property
+  const navigatorOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
   
-  // If browser definitively says we're offline, trust it
-  if (browserSaysOffline) {
-    console.log('Browser says we are offline, returning true');
-    return true;
-  }
+  // Log for debugging
+  console.info('Checking if offline, navigator.onLine:', navigator.onLine);
   
-  // Otherwise check our cached health check (if we recently had a failed health check)
-  // but only if the cache is still fresh
-  const now = Date.now();
-  if (now - lastHealthCheckTimestamp < HEALTH_CHECK_CACHE_DURATION) {
-    // If our recent health check failed, we should still be considered offline
-    if (!lastHealthCheckResult) {
-      console.log('Recent health check failed, considering offline');
-      return true;
-    }
-  }
-  
-  // Default to online for best user experience
-  return false;
+  return navigatorOffline;
 };
 
-/**
- * Performs a network health check with improved reliability and less aggressive caching
- */
-export const checkNetworkStatus = async (): Promise<boolean> => {
-  console.log('Running network status check');
-  // If browser says we're offline, trust it
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    console.log('Browser says we are offline');
-    lastHealthCheckResult = false;
-    lastHealthCheckTimestamp = Date.now();
-    return false;
-  }
+// Function to check if a fetch request has timed out
+export const hasTimedOut = (error: any): boolean => {
+  if (!error) return false;
   
-  // Use cached result if recent enough to reduce unnecessary checks
-  const now = Date.now();
-  if (now - lastHealthCheckTimestamp < HEALTH_CHECK_CACHE_DURATION) {
-    console.log('Using cached health check result:', lastHealthCheckResult);
-    return lastHealthCheckResult;
-  }
+  const errorMessage = error.message || error.toString();
+  return (
+    errorMessage.includes('timeout') || 
+    errorMessage.includes('timed out') ||
+    errorMessage.includes('abort')
+  );
+};
+
+// Function to check if an error is a network error
+export const isNetworkError = (error: any): boolean => {
+  if (!error) return false;
   
+  const errorMessage = error.message || error.toString();
+  return (
+    errorMessage.includes('Failed to fetch') ||
+    errorMessage.includes('Network request failed') ||
+    errorMessage.includes('Network Error') ||
+    errorMessage.includes('NetworkError') ||
+    errorMessage.includes('ETIMEDOUT')
+  );
+};
+
+// Helper to create a timeout promise
+export const createTimeoutPromise = <T>(ms: number): Promise<T> => {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error(`Request timed out after ${ms}ms`)), ms);
+  });
+};
+
+// Fetch with timeout
+export const fetchWithTimeout = <T>(fetchPromise: Promise<T>, timeoutMs = 10000): Promise<T> => {
+  return Promise.race([
+    fetchPromise,
+    createTimeoutPromise<T>(timeoutMs)
+  ]);
+};
+
+// Test connection to a specific URL
+export const testConnection = async (url: string = 'https://jaqzoyouuzhchuyzafii.supabase.co/rest/v1/', 
+                                   timeoutMs = 5000): Promise<boolean> => {
   try {
-    console.log('Performing actual connectivity check');
-    // Simplified check with a short timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    // Try to fetch a small resource from the same origin
-    const response = await fetch('/favicon.ico', { 
-      method: 'HEAD',
-      cache: 'no-store',
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    // Update cache with success
-    lastHealthCheckResult = response.ok;
-    lastHealthCheckTimestamp = now;
-    console.log('Health check result:', response.ok);
-    
-    return response.ok;
+    await fetchWithTimeout(
+      fetch(url, { 
+        method: 'HEAD',
+        headers: { 
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXpveW91dXpoY2h1eXphZmlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MTQyNjgsImV4cCI6MjA1OTM5MDI2OH0.NRKgoHt0rISen_jzkJpztRwmc4DFMeQDAinCu3eCDRE' 
+        }
+      }),
+      timeoutMs
+    );
+    return true;
   } catch (error) {
-    console.warn('Health check failed, falling back to navigator.onLine:', navigator.onLine);
-    // If that fails, use navigator.onLine as fallback
-    lastHealthCheckResult = navigator.onLine;
-    lastHealthCheckTimestamp = now;
-    
-    return navigator.onLine;
+    console.error('Connection test failed:', error);
+    return false;
   }
 };
