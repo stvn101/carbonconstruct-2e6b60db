@@ -7,6 +7,8 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 export const useNotificationSubscription = (onNewNotification: () => void) => {
   const { user } = useAuth();
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const lastNotificationTimeRef = useRef<number>(0);
+  const MIN_NOTIFICATION_INTERVAL = 2000; // 2 seconds minimum between notification triggers
   
   useEffect(() => {
     if (!user) return;
@@ -24,7 +26,13 @@ export const useNotificationSubscription = (onNewNotification: () => void) => {
         },
         (payload) => {
           console.log('New notification received:', payload);
-          onNewNotification();
+          
+          // Throttle notification callbacks to prevent UI flicker
+          const now = Date.now();
+          if (now - lastNotificationTimeRef.current > MIN_NOTIFICATION_INTERVAL) {
+            lastNotificationTimeRef.current = now;
+            onNewNotification();
+          }
         }
       )
       .subscribe();

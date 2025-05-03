@@ -137,7 +137,8 @@ const Notifications = () => {
       
       <Navbar />
       
-      <main className="flex-grow py-12 px-4">
+      {/* Added pt-24 to create space below the navbar */}
+      <main className="flex-grow py-12 px-4 pt-24">
         <div className="container mx-auto max-w-3xl">
           <NotificationsHeader 
             hasUnreadNotifications={notifications.some(n => !n.read)}

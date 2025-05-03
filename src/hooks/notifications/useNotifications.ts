@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import ErrorTrackingService from '@/services/errorTrackingService';
 
@@ -9,8 +9,19 @@ export const useNotifications = () => {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
   const MAX_RETRIES = 3;
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFetchTimeRef = useRef<number>(0);
+  const MIN_FETCH_INTERVAL = 2000; // minimum 2 seconds between fetches
   
   const fetchUnreadNotificationCount = useCallback(async () => {
+    const now = Date.now();
+    
+    // Prevent rapid refetching by enforcing a minimum interval
+    if (now - lastFetchTimeRef.current < MIN_FETCH_INTERVAL) {
+      return;
+    }
+    
+    lastFetchTimeRef.current = now;
     setIsLoading(true);
     setError(null);
     
@@ -83,6 +94,19 @@ export const useNotifications = () => {
     }
   }, [retryCount]);
 
+  // Debounced fetch function
+  const debouncedFetch = useCallback(() => {
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      fetchUnreadNotificationCount();
+    }, 500); // 500ms debounce
+  }, [fetchUnreadNotificationCount]);
+
   // Handle retry logic
   useEffect(() => {
     if (error && retryCount < MAX_RETRIES) {
@@ -117,12 +141,16 @@ export const useNotifications = () => {
             table: 'notifications' 
           }, 
           () => {
-            fetchUnreadNotificationCount();
+            // Use debounced fetch to prevent rapid updates
+            debouncedFetch();
           })
         .subscribe();
 
       // Cleanup subscription on unmount
       return () => {
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
         subscription.unsubscribe();
       };
     } catch (err) {
@@ -132,7 +160,7 @@ export const useNotifications = () => {
         { component: 'useNotifications subscription' }
       );
     }
-  }, [fetchUnreadNotificationCount]);
+  }, [fetchUnreadNotificationCount, debouncedFetch]);
 
   return { 
     unreadNotifications, 
