@@ -63,9 +63,9 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     const matchesSearch = debouncedSearchTerm.trim() === '' || 
       materialName.includes(debouncedSearchTerm.toLowerCase());
     
-    // Fix: Compare the regions correctly, treating selectedRegion as a string
+    // Fix: Compare the regions correctly, using string comparison
     const matchesRegion = selectedRegion === "all" || 
-      materialRegion.includes(selectedRegion.toString());
+      materialRegion.includes(selectedRegion);
     
     const matchesAlternative = selectedAlternative === "none" || materialAltTo === selectedAlternative;
     
