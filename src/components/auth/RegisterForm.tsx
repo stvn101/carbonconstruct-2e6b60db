@@ -35,7 +35,7 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
+      full_name: "",
       email: "",
       password: "",
     },
@@ -45,7 +45,7 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
     try {
       setIsLoading(true);
       setServerError(null);
-      await register(data.name, data.email, data.password);
+      await register(data.full_name, data.email, data.password);
       navigate(returnTo, { state: { fromAuth: true } });
     } catch (error: any) {
       setServerError(error.message || "Registration failed");
@@ -81,7 +81,7 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
           
           <FormField
             control={form.control}
-            name="name"
+            name="full_name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Name</FormLabel>

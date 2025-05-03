@@ -1,4 +1,3 @@
-
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
@@ -87,10 +86,15 @@ export const useAuthHandlers = () => {
         throw new Error("Network unavailable");
       }
       
+      // Support both the Lovable domain and the custom domain
+      const redirectTo = typeof window !== 'undefined' 
+        ? `${window.location.origin}/auth/callback`
+        : 'https://carbonconstruct.net/auth/callback';
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo
         }
       });
       
@@ -111,10 +115,15 @@ export const useAuthHandlers = () => {
         throw new Error("Network unavailable");
       }
       
+      // Support both the Lovable domain and the custom domain
+      const redirectTo = typeof window !== 'undefined' 
+        ? `${window.location.origin}/auth/callback`
+        : 'https://carbonconstruct.net/auth/callback';
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'
