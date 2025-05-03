@@ -11,7 +11,7 @@ import {
   MaterialInput,
   TransportInput,
   EnergyInput
-} from "@/lib/carbonCalculations";
+} from "@/lib/carbonExports";
 import SummaryCard from "./results/SummaryCard";
 import EmissionsBreakdownChart from "./results/EmissionsBreakdownChart";
 import CategoryBreakdownChart from "./results/CategoryBreakdownChart";

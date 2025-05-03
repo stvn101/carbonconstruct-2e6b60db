@@ -5,7 +5,7 @@ import {
   MaterialInput,
   TransportInput,
   EnergyInput
-} from "@/lib/carbonTypes";
+} from "@/lib/carbonExports";
 import { ValidationError } from "@/utils/calculatorValidation";
 
 export interface CalculatorContextType {

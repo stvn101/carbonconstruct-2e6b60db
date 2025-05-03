@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MaterialInput } from "@/lib/carbonCalculations";
+import { MaterialInput } from "@/lib/carbonExports";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonContent } from "@/components/ui/skeleton-content";
 import MaterialFormFields from "./materials/MaterialFormFields";

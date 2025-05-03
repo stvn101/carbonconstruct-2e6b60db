@@ -1,8 +1,7 @@
-
 import React from "react";
 import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TransportInput } from "@/lib/carbonTypes";
+import { TransportInput } from "@/lib/carbonExports";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTransportValidation } from "@/hooks/useTransportValidation";
 import TransportFormFields from "./transport/TransportFormFields";

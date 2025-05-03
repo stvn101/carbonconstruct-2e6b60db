@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EnergyInput } from "@/lib/carbonCalculations";
+import { EnergyInput } from "@/lib/carbonExports";
 import { useIsMobile } from "@/hooks/use-mobile";
 import EnergyFormFields from "./energy/EnergyFormFields";
 
