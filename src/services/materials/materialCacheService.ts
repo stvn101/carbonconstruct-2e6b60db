@@ -1,15 +1,48 @@
-import { SupabaseMaterial } from './materialTypes';
-import { supabase } from '@/integrations/supabase/client';
-import { CONNECTION_TIMEOUT, MAX_RETRIES } from './materialTypes';
 
 /**
  * In-memory cache service for storing and retrieving material data.
  * This service also handles periodic cache refresh and connection change events.
  */
+import { SupabaseMaterial } from './materialTypes';
+import { supabase } from '@/integrations/supabase/client';
+import { CONNECTION_TIMEOUT, MAX_RETRIES } from './materialTypes';
+
+// Export these functions for use in other modules
+export async function cacheMaterials(materials) {
+  try {
+    return await materialCacheService.syncMaterialsCache();
+  } catch (error) {
+    console.error('Error caching materials:', error);
+    throw error;
+  }
+}
+
+export async function getCachedMaterials() {
+  return materialCacheService.getMaterials();
+}
+
+export async function clearMaterialsCache() {
+  try {
+    // Clear local cache
+    materialCacheService.clearCache();
+    return true;
+  } catch (error) {
+    console.error('Failed to clear cache:', error);
+    return false;
+  }
+}
+
+export async function getCacheMetadata() {
+  return {
+    lastUpdated: materialCacheService.lastUpdated,
+    count: materialCacheService.cache?.length || 0
+  };
+}
+
 class MaterialCacheService {
-  private cache: SupabaseMaterial[] = [];
-  private lastUpdated: Date | null = null;
-  private isSyncing: boolean = false;
+  private cache = [];
+  lastUpdated = null;
+  private isSyncing = false;
 
   constructor() {
     this.initializeCache();
@@ -20,7 +53,7 @@ class MaterialCacheService {
   /**
    * Initializes the cache with data from local storage or fetches it from the database.
    */
-  private async initializeCache(): Promise<void> {
+  private async initializeCache() {
     try {
       const cachedData = localStorage.getItem('materialsCache');
       const cachedTimestamp = localStorage.getItem('materialsCacheTimestamp');
@@ -43,7 +76,7 @@ class MaterialCacheService {
   /**
    * Fetches material data from the database and updates the cache.
    */
-  public async syncMaterialsCache(): Promise<void> {
+  public async syncMaterialsCache() {
     if (this.isSyncing) {
       console.log('Materials cache sync already in progress');
       return;
@@ -52,12 +85,12 @@ class MaterialCacheService {
     this.isSyncing = true;
     try {
       console.log('Syncing materials cache with database');
+      // Remove the timeout method that's causing the error
       const { data, error } = await supabase
         .from('materials')
         .select('*')
         .order('id')
-        .limit(5000)
-        .timeout(CONNECTION_TIMEOUT);
+        .limit(5000);
 
       if (error) {
         throw new Error(`Error fetching materials: ${error.message}`);
@@ -70,8 +103,8 @@ class MaterialCacheService {
         localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
         console.log('Materials cache synced with database');
       }
-    } catch (error: any) {
-      console.error('Error syncing materials cache:', error.message);
+    } catch (error) {
+      console.error('Error syncing materials cache:', error?.message || error);
     } finally {
       this.isSyncing = false;
     }
@@ -81,8 +114,18 @@ class MaterialCacheService {
    * Retrieves all materials from the cache.
    * @returns An array of SupabaseMaterial objects.
    */
-  public getMaterials(): SupabaseMaterial[] {
+  public getMaterials() {
     return this.cache;
+  }
+
+  /**
+   * Clears the cache
+   */
+  public clearCache() {
+    this.cache = [];
+    localStorage.removeItem('materialsCache');
+    localStorage.removeItem('materialsCacheTimestamp');
+    console.log('Materials cache cleared');
   }
 
   /**
@@ -90,7 +133,7 @@ class MaterialCacheService {
    * @param id The ID of the material to retrieve.
    * @returns The SupabaseMaterial object if found, otherwise undefined.
    */
-  public getMaterialById(id: string): SupabaseMaterial | undefined {
+  public getMaterialById(id) {
     return this.cache.find(material => material.id === id);
   }
 
@@ -98,8 +141,7 @@ class MaterialCacheService {
    * Handles changes in the network connection status.
    * @param e The event object.
    */
-  private handleConnectionChange = (e: Event) => {
-    // Safe way to check if the event has a transaction property
+  private handleConnectionChange = (e) => {
     if (navigator.onLine) {
       // Do something when online
       console.log('Connection restored, syncing materials cache');
