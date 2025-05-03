@@ -3,48 +3,22 @@
  * In-memory cache service for storing and retrieving material data.
  * This service also handles periodic cache refresh and connection change events.
  */
-import { SupabaseMaterial } from './materialTypes';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { supabase } from '@/integrations/supabase/client';
-import { CONNECTION_TIMEOUT, MAX_RETRIES } from './materialTypes';
+import { withTimeout } from '@/utils/timeoutUtils';
 
-// Export these functions for use in other modules
-export async function cacheMaterials(materials) {
-  try {
-    return await materialCacheService.syncMaterialsCache();
-  } catch (error) {
-    console.error('Error caching materials:', error);
-    throw error;
-  }
-}
-
-export async function getCachedMaterials() {
-  return materialCacheService.getMaterials();
-}
-
-export async function clearMaterialsCache() {
-  try {
-    // Clear local cache
-    materialCacheService.clearCache();
-    return true;
-  } catch (error) {
-    console.error('Failed to clear cache:', error);
-    return false;
-  }
-}
-
-export async function getCacheMetadata() {
-  return {
-    lastUpdated: materialCacheService.lastUpdated,
-    // Use getMaterialsCount() method instead of directly accessing the private cache property
-    count: materialCacheService.getMaterialsCount()
-  };
-}
+// Cache expiration time (24 hours)
+const CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
+// Cache refresh interval (24 hours)
+const CACHE_REFRESH_INTERVAL = 24 * 60 * 60 * 1000;
+// Connection timeout for database requests
+const CONNECTION_TIMEOUT = 15000;
 
 class MaterialCacheService {
-  // These properties should follow a consistent visibility pattern
-  private cache = [];
-  public lastUpdated = null;
+  private cache: ExtendedMaterialData[] = [];
+  public lastUpdated: Date | null = null;
   private isSyncing = false;
+  private refreshInterval: number | null = null;
 
   constructor() {
     this.initializeCache();
@@ -64,12 +38,22 @@ class MaterialCacheService {
         this.cache = JSON.parse(cachedData);
         this.lastUpdated = new Date(cachedTimestamp);
         console.log('Materials cache loaded from local storage');
+        
+        // Check if cache is expired
+        const now = new Date();
+        if (now.getTime() - new Date(cachedTimestamp).getTime() > CACHE_EXPIRATION) {
+          console.log('Cache is expired, refreshing...');
+          this.syncMaterialsCache();
+        }
       } else {
         await this.syncMaterialsCache();
       }
 
       // Set up periodic cache refresh
-      setInterval(() => this.syncMaterialsCache(), 24 * 60 * 60 * 1000); // Refresh daily
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval);
+      }
+      this.refreshInterval = window.setInterval(() => this.syncMaterialsCache(), CACHE_REFRESH_INTERVAL);
     } catch (error) {
       console.error('Error initializing materials cache:', error);
     }
@@ -87,26 +71,32 @@ class MaterialCacheService {
     this.isSyncing = true;
     try {
       console.log('Syncing materials cache with database');
-      // Remove the timeout method that's causing the error
-      const { data, error } = await supabase
-        .from('materials')
-        .select('*')
-        .order('id')
-        .limit(5000);
+      
+      // Use the withTimeout utility to prevent hanging operations
+      const { data, error } = await withTimeout(
+        supabase.from('materials').select('*').order('id').limit(5000),
+        CONNECTION_TIMEOUT,
+        'Materials fetch timed out',
+        { data: null, error: new Error('Fetch timed out') }
+      );
 
       if (error) {
         throw new Error(`Error fetching materials: ${error.message}`);
       }
 
-      if (data) {
+      if (data && data.length > 0) {
         this.cache = data;
         this.lastUpdated = new Date();
         localStorage.setItem('materialsCache', JSON.stringify(data));
         localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
-        console.log('Materials cache synced with database');
+        console.log(`Materials cache synced with database: ${data.length} items`);
+        return data;
+      } else {
+        console.warn('No materials returned from database');
       }
     } catch (error) {
       console.error('Error syncing materials cache:', error?.message || error);
+      throw error;
     } finally {
       this.isSyncing = false;
     }
@@ -114,7 +104,7 @@ class MaterialCacheService {
 
   /**
    * Retrieves all materials from the cache.
-   * @returns An array of SupabaseMaterial objects.
+   * @returns An array of ExtendedMaterialData objects.
    */
   public getMaterials() {
     return this.cache;
@@ -141,9 +131,9 @@ class MaterialCacheService {
   /**
    * Retrieves a material from the cache by its ID.
    * @param id The ID of the material to retrieve.
-   * @returns The SupabaseMaterial object if found, otherwise undefined.
+   * @returns The ExtendedMaterialData object if found, otherwise undefined.
    */
-  public getMaterialById(id) {
+  public getMaterialById(id: string) {
     return this.cache.find(material => material.id === id);
   }
 
@@ -151,20 +141,53 @@ class MaterialCacheService {
    * Handles changes in the network connection status.
    * @param e The event object.
    */
-  private handleConnectionChange = (e) => {
+  private handleConnectionChange = (e: Event) => {
     if (navigator.onLine) {
-      // Do something when online
       console.log('Connection restored, syncing materials cache');
-      this.syncMaterialsCache();
-      // Any other online connection logic
+      this.syncMaterialsCache().catch(err => {
+        console.warn('Failed to sync cache after connection restored:', err);
+      });
     } else {
-      // Do something when offline
       console.log('Connection lost, using cached materials');
-      // Any other offline connection logic
     }
   };
 }
 
 const materialCacheService = new MaterialCacheService();
+
+// Export these functions for use in other modules
+export async function cacheMaterials(materials: ExtendedMaterialData[]) {
+  try {
+    materialCacheService.cache = materials;
+    materialCacheService.lastUpdated = new Date();
+    localStorage.setItem('materialsCache', JSON.stringify(materials));
+    localStorage.setItem('materialsCacheTimestamp', materialCacheService.lastUpdated.toISOString());
+    return true;
+  } catch (error) {
+    console.error('Error caching materials:', error);
+    throw error;
+  }
+}
+
+export async function getCachedMaterials() {
+  return materialCacheService.getMaterials();
+}
+
+export async function clearMaterialsCache() {
+  try {
+    materialCacheService.clearCache();
+    return true;
+  } catch (error) {
+    console.error('Failed to clear cache:', error);
+    return false;
+  }
+}
+
+export async function getCacheMetadata() {
+  return {
+    lastUpdated: materialCacheService.lastUpdated,
+    count: materialCacheService.getMaterialsCount()
+  };
+}
 
 export default materialCacheService;

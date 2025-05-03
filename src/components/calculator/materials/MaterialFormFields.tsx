@@ -1,17 +1,18 @@
 
 import React from "react";
-import { X } from "lucide-react";
+import { MaterialInput } from "@/lib/carbonExports";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MaterialInput, Material, MATERIAL_FACTORS } from "@/lib/carbonExports";
+import { AlertCircle } from "lucide-react";
 
 interface MaterialFormFieldsProps {
   material: MaterialInput;
   index: number;
   error?: string;
   onRemove: () => void;
-  onUpdate: (field: keyof MaterialInput, value: string | number) => void;
+  onUpdate: (field: keyof MaterialInput, value: any) => void;
 }
 
 const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
@@ -21,77 +22,68 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
   onRemove,
   onUpdate
 }) => {
-  const materialTypes = Object.keys(MATERIAL_FACTORS) as Material[];
-  
-  const getUnitLabel = (materialType: Material) => {
-    if (!materialType) return "kg";
-    
-    const factor = MATERIAL_FACTORS[materialType];
-    if (!factor) return "kg";
-    
-    return factor.unit || "kg";
-  };
-  
+  // Define material options
+  const materialOptions = [
+    { value: "concrete", label: "Concrete" },
+    { value: "steel", label: "Steel" },
+    { value: "timber", label: "Timber" },
+    { value: "glass", label: "Glass" },
+    { value: "brick", label: "Brick" },
+    { value: "aluminium", label: "Aluminium" },
+    { value: "insulation", label: "Insulation" },
+    { value: "plastic", label: "Plastic" }
+  ];
+
   return (
-    <div className={`grid grid-cols-1 gap-3 items-end border p-3 md:p-4 rounded-lg ${error ? "border-red-300 bg-red-50" : "border-carbon-100"}`}>
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-3">
-          <div>
-            <label htmlFor={`material-type-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-              Material Type
-            </label>
-            <Select
-              value={material.type}
-              onValueChange={(value) => onUpdate("type", value as Material)}
-            >
-              <SelectTrigger id={`material-type-${index}`}>
-                <SelectValue placeholder="Select material type" />
-              </SelectTrigger>
-              <SelectContent>
-                {materialTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {MATERIAL_FACTORS[type]?.name || type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <label htmlFor={`material-quantity-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-              {`Quantity (${getUnitLabel(material.type)})`}
-            </label>
-            <Input
-              id={`material-quantity-${index}`}
-              type="number"
-              min="0"
-              max="10000"
-              value={material.quantity}
-              onChange={(e) => onUpdate("quantity", e.target.value)}
-              className={error ? "border-red-300 bg-red-50" : ""}
-              aria-invalid={error ? "true" : "false"}
-              aria-describedby={error ? `material-error-${index}` : undefined}
-            />
-            {error && (
-              <p id={`material-error-${index}`} className="mt-1 text-xs text-red-600">
-                {error}
-              </p>
-            )}
-          </div>
-        </div>
-        
-        <div className="self-end">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onRemove}
-            className="h-9 w-9"
-            aria-label="Remove material"
+    <div className="grid grid-cols-1 gap-3 items-end border border-gray-200 dark:border-gray-700 p-3 md:p-4 rounded-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor={`material-type-${index}`}>Material Type</Label>
+          <Select
+            value={material.type}
+            onValueChange={(value) => onUpdate("type", value)}
           >
-            <X className="h-4 w-4" />
-          </Button>
+            <SelectTrigger id={`material-type-${index}`}>
+              <SelectValue placeholder="Select material" />
+            </SelectTrigger>
+            <SelectContent>
+              {materialOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        <div className="space-y-2">
+          <Label htmlFor={`material-quantity-${index}`}>
+            Quantity (kg)
+            {error && (
+              <span className="text-red-500 text-xs ml-2 flex items-center">
+                <AlertCircle className="h-3 w-3 mr-1" /> {error}
+              </span>
+            )}
+          </Label>
+          <Input
+            id={`material-quantity-${index}`}
+            type="number"
+            value={material.quantity || ""}
+            onChange={(e) => onUpdate("quantity", e.target.value)}
+            placeholder="Enter quantity in kg"
+            className={error ? "border-red-500" : ""}
+          />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <Button 
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onRemove}
+          className="text-xs"
+        >
+          Remove
+        </Button>
       </div>
     </div>
   );

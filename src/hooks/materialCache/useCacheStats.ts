@@ -1,38 +1,33 @@
-/**
- * Hook for managing material cache statistics
- */
+
 import { useState, useEffect } from 'react';
 import { getCacheMetadata } from '@/services/materialService';
 import { CacheStats } from './types';
 
-export const useCacheStats = (materialsLength: number) => {
-  const [cacheStats, setCacheStats] = useState<CacheStats>({
+export const useCacheStats = (materialsCount: number): CacheStats => {
+  const [stats, setStats] = useState<CacheStats>({
     lastUpdated: null,
-    itemCount: null
+    itemCount: materialsCount || null
   });
   
-  // Get cache statistics safely
   useEffect(() => {
-    const loadCacheStats = async () => {
+    const updateStats = async () => {
       try {
         const metadata = await getCacheMetadata();
-        if (metadata) {
-          setCacheStats({
-            lastUpdated: new Date(metadata.lastUpdated),
-            itemCount: metadata.count
-          });
-        }
+        setStats({
+          lastUpdated: metadata.lastUpdated,
+          itemCount: metadata.count || materialsCount
+        });
       } catch (err) {
-        console.warn('Failed to load cache statistics:', err);
-        // Keep the existing stats on error
+        console.error('Error fetching cache stats:', err);
       }
     };
     
-    // Only load cache stats if we have materials
-    if (materialsLength > 0) {
-      loadCacheStats();
-    }
-  }, [materialsLength]);
-
-  return cacheStats;
+    updateStats();
+    
+    // Update stats every minute
+    const intervalId = setInterval(updateStats, 60000);
+    return () => clearInterval(intervalId);
+  }, [materialsCount]);
+  
+  return stats;
 };

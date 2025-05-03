@@ -6,7 +6,6 @@ import { useProjectProvider } from './project/useProjectProvider';
 import { ProjectsProvider } from './project/useProjectsLoader';
 import { useProjectRealtime } from './project/useProjectRealtime';
 import { useProjectInitialization } from './project/useProjectInitialization';
-import { CalculatorProvider } from '@/contexts/calculator/CalculatorContext';
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
