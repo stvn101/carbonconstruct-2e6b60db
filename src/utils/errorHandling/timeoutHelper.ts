@@ -1,94 +1,66 @@
 
 /**
- * Creates a timeout promise that rejects after specified milliseconds
+ * Utility to create a promise that rejects after a timeout
+ * @param ms Timeout in milliseconds
+ * @returns Promise that rejects after the specified timeout
  */
-export const timeoutPromise = (ms: number): Promise<never> => {
+export function createTimeout(ms: number): Promise<never> {
   return new Promise((_, reject) => {
     setTimeout(() => reject(new Error(`Operation timed out after ${ms}ms`)), ms);
   });
-};
+}
 
 /**
- * Execute a promise with timeout
+ * Wraps a promise with a timeout
+ * @param promise The promise to wrap with timeout
+ * @param ms Timeout in milliseconds
+ * @returns Promise that resolves with the original promise or rejects with timeout
  */
-export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
-    timeoutPromise(ms)
+    createTimeout(ms)
   ]);
-};
+}
 
 /**
- * Helper to identify if an error is network-related
+ * Retry a function with exponential backoff
+ * @param fn Function that returns a promise
+ * @param retries Maximum number of retries
+ * @param initialDelay Initial delay in milliseconds
+ * @param maxDelay Maximum delay in milliseconds
+ * @returns Promise resolving to the result of the function
  */
-export const isNetworkError = (error: unknown): boolean => {
-  if (!error) return false;
-  
-  const errorString = String(error);
-  return (
-    errorString.includes('Failed to fetch') ||
-    errorString.includes('Network Error') ||
-    errorString.includes('NetworkError') ||
-    errorString.includes('timeout') ||
-    errorString.includes('ETIMEDOUT') ||
-    errorString.includes('ECONNREFUSED') ||
-    errorString.includes('ECONNRESET') ||
-    errorString.includes('EAI_AGAIN') ||
-    errorString.includes('network')
-  );
-};
+export async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  initialDelay: number = 500,
+  maxDelay: number = 10000
+): Promise<T> {
+  let lastError: Error;
+  let delay = initialDelay;
 
-/**
- * More conservative retry utility with exponential backoff and jitter
- */
-export const retryWithBackoff = async <T>(
-  operation: () => Promise<T>,
-  maxRetries: number = 2,
-  initialDelay: number = 4000,
-  options: {
-    onRetry?: (attempt: number) => void;
-    shouldRetry?: (error: unknown) => boolean;
-    maxDelay?: number;
-    factor?: number;
-  } = {}
-): Promise<T> => {
-  const { 
-    onRetry, 
-    shouldRetry = isNetworkError,
-    maxDelay = 60000,
-    factor = 1.5
-  } = options;
-  
-  let attempt = 0;
-  
-  while (true) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      return await operation();
+      return await fn();
     } catch (error) {
-      attempt++;
+      console.warn(`Attempt ${attempt + 1}/${retries + 1} failed:`, error);
+      lastError = error as Error;
       
-      if (attempt >= maxRetries || !shouldRetry(error)) {
-        throw error;
+      if (attempt === retries) {
+        break;
       }
       
-      const baseDelay = Math.min(
-        initialDelay * Math.pow(factor, attempt - 1),
-        maxDelay
-      );
+      // Calculate exponential backoff with jitter
+      delay = Math.min(delay * 2, maxDelay);
+      // Add random jitter between 0-30% of the delay to prevent all clients retrying at once
+      const jitter = delay * 0.3 * Math.random();
+      const delayWithJitter = delay + jitter;
       
-      const jitterFactor = 0.25 * (Math.random() * 2 - 1);
-      const delay = Math.floor(baseDelay * (1 + jitterFactor));
-      
-      if (onRetry) {
-        onRetry(attempt);
-      }
-      
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        throw new Error('Network offline');
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
+      console.log(`Retrying in ${delayWithJitter.toFixed(0)}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delayWithJitter));
     }
   }
-};
 
+  throw lastError!;
+}

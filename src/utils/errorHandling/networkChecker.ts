@@ -1,86 +1,45 @@
 
-// Health check cache duration (30 seconds - balanced approach)
-export const HEALTH_CHECK_CACHE_DURATION = 30000;
-// Last health check result and timestamp
-let lastHealthCheckResult = true;
-let lastHealthCheckTimestamp = 0;
+/**
+ * Utility functions to check network connectivity with improved reliability
+ */
 
 /**
- * Check if the device is offline based on browser API with improved reliability
+ * Check if the application is currently offline using multiple signals
  */
-export const isOffline = (): boolean => {
-  console.log('Checking if offline, navigator.onLine:', navigator.onLine);
-  // Primarily rely on the browser's online status
-  const browserSaysOffline = typeof navigator !== 'undefined' && !navigator.onLine;
-  
-  // If browser definitively says we're offline, trust it
-  if (browserSaysOffline) {
-    console.log('Browser says we are offline, returning true');
-    return true;
-  }
-  
-  // Otherwise check our cached health check (if we recently had a failed health check)
-  // but only if the cache is still fresh
-  const now = Date.now();
-  if (now - lastHealthCheckTimestamp < HEALTH_CHECK_CACHE_DURATION) {
-    // If our recent health check failed, we should still be considered offline
-    if (!lastHealthCheckResult) {
-      console.log('Recent health check failed, considering offline');
-      return true;
-    }
-  }
-  
-  // Default to online for best user experience
-  return false;
-};
+export function isOffline(): boolean {
+  return typeof navigator !== 'undefined' && !navigator.onLine;
+}
 
 /**
- * Performs a network health check with improved reliability and less aggressive caching
+ * Check current network status with more advanced detection than just navigator.onLine
+ * @returns Promise resolving to boolean indicating if network is available
  */
-export const checkNetworkStatus = async (): Promise<boolean> => {
-  console.log('Running network status check');
-  // If browser says we're offline, trust it
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    console.log('Browser says we are offline');
-    lastHealthCheckResult = false;
-    lastHealthCheckTimestamp = Date.now();
+export async function checkNetworkStatus(): Promise<boolean> {
+  // First check the basic navigator.onLine property
+  if (typeof navigator === 'undefined' || !navigator.onLine) {
     return false;
   }
-  
-  // Use cached result if recent enough to reduce unnecessary checks
-  const now = Date.now();
-  if (now - lastHealthCheckTimestamp < HEALTH_CHECK_CACHE_DURATION) {
-    console.log('Using cached health check result:', lastHealthCheckResult);
-    return lastHealthCheckResult;
-  }
-  
+
+  // Then attempt a lightweight network request to confirm connectivity
   try {
-    console.log('Performing actual connectivity check');
-    // Simplified check with a short timeout
+    // Use a data URL to avoid an actual network request but test fetch
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
     
-    // Try to fetch a small resource from the same origin
-    const response = await fetch('/favicon.ico', { 
+    // Try to fetch a tiny resource to check connectivity
+    // We use /favicon.ico as it's typically small and cached
+    await fetch('/favicon.ico', { 
       method: 'HEAD',
       cache: 'no-store',
-      signal: controller.signal
+      signal: controller.signal,
+      // Add random parameter to avoid cache
+      headers: { 'Cache-Control': 'no-cache' }
     });
     
     clearTimeout(timeoutId);
-    
-    // Update cache with success
-    lastHealthCheckResult = response.ok;
-    lastHealthCheckTimestamp = now;
-    console.log('Health check result:', response.ok);
-    
-    return response.ok;
+    return true;
   } catch (error) {
-    console.warn('Health check failed, falling back to navigator.onLine:', navigator.onLine);
-    // If that fails, use navigator.onLine as fallback
-    lastHealthCheckResult = navigator.onLine;
-    lastHealthCheckTimestamp = now;
-    
-    return navigator.onLine;
+    console.log('Network check failed:', error);
+    return false;
   }
-};
+}

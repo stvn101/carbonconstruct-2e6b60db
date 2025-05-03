@@ -1,28 +1,26 @@
 
 /**
- * Simplified Material Service - Main entry point for material-related services
+ * Central service that re-exports all material-related functionality
  */
 
-// Re-export types
-export type { SupabaseMaterial } from './materials/materialTypes';
-
-// Re-export data fetch functions
+// Re-export all functions from materialCacheService
 export { 
-  fetchMaterials, 
-  fetchMaterialCategories 
-} from './materials/materialFetchService';
-
-// Re-export cache functions
-export {
   cacheMaterials,
   getCachedMaterials,
   clearMaterialsCache,
-  getCacheMetadata
+  getCacheMetadata 
 } from './materials/materialCacheService';
 
-// Re-export data processing functions
-export {
-  processDataInBatches,
-  calculateSustainabilityScore,
-  determineRecyclability
-} from './materials/materialDataProcessor';
+// Re-export all functions from materialFetchService
+export { 
+  fetchMaterials,
+  fetchMaterialCategories
+} from './materials/materialFetchService';
+
+// Re-export types
+export type { 
+  ExtendedMaterialData,
+  MaterialCategory,
+  MaterialSearchParams,
+  MaterialSearchResult
+} from '@/lib/materials/materialTypes';

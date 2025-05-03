@@ -1,4 +1,3 @@
-
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -13,7 +12,7 @@ import ErrorBoundaryWrapper from './components/error/ErrorBoundaryWrapper';
 import PageLoading from './components/ui/page-loading';
 import SkipToContent from './components/SkipToContent';
 import { AppContent } from './components/AppContent';
-import ErrorTrackingService from './services/errorTrackingService';
+import ErrorTrackingService from './services/error/errorTrackingService';
 import performanceMonitoringService from './services/performanceMonitoringService';
 
 // Loading fallback for Suspense
