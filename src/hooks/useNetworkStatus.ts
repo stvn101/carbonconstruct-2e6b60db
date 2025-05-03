@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { isNetworkError } from '@/utils/errorHandling/isNetworkError';
+import { isNetworkError } from '@/utils/errorHandling/networkChecker';
 
 export const useNetworkStatus = (error?: Error) => {
   const [isChecking, setIsChecking] = useState(false);
