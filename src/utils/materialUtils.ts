@@ -1,5 +1,4 @@
-
-import { Material, MATERIAL_FACTORS } from "@/lib/carbonCalculations";
+import { Material, MATERIAL_FACTORS } from "@/lib/carbonExports";
 
 export function getCategory(materialType: string): string {
   const lowerType = materialType.toLowerCase();
@@ -87,7 +86,7 @@ export const createExtendedMaterialDB = (): EnrichedMaterial[] => {
   });
 };
 
-export const getCategoryAverages = (materials: EnrichedMaterial[]) => {
+export function getCategoryAverages(materials: EnrichedMaterial[]): { name: string, emissionFactor: number, sustainabilityScore: number }[] {
   const categoryMap: Record<string, { count: number, totalFactor: number, totalScore: number }> = {};
   
   materials.forEach(material => {
@@ -105,4 +104,4 @@ export const getCategoryAverages = (materials: EnrichedMaterial[]) => {
     emissionFactor: +(data.totalFactor / data.count).toFixed(2),
     sustainabilityScore: +(data.totalScore / data.count).toFixed(0)
   }));
-};
+}

@@ -12,7 +12,7 @@ import {
   TransportInput,
   EnergyInput,
   CalculationInput
-} from '../carbonCalculations';
+} from '../carbonExports';
 
 describe('Carbon Calculations', () => {
   describe('calculateMaterialEmissions', () => {

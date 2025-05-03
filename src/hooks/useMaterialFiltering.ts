@@ -1,14 +1,20 @@
 
 import { useState, useCallback, useMemo } from 'react';
 
-// Adding a proper type definition for ExtendedMaterialData
+// Update the ExtendedMaterialData to match the type from materialTypes.ts
 export interface ExtendedMaterialData {
   id?: string;
   name?: string;
   description?: string;
-  co2PerKg?: number;
+  factor?: number;
+  unit?: string;
   category?: string;
   region?: string;
+  alternativeTo?: string;
+  notes?: string;
+  tags?: string[];
+  sustainabilityScore?: number;
+  recyclability?: "High" | "Medium" | "Low";
   [key: string]: any; // Allow other properties
 }
 

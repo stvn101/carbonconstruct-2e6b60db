@@ -5,9 +5,11 @@ import { useState } from 'react';
 export const MAX_DISTANCE = 10000; // 10,000 km
 export const MAX_WEIGHT = 10000;   // 10,000 kg
 
+// Add index signature for string type
 export interface TransportFieldError {
   distance?: string;
   weight?: string;
+  [key: string]: string | undefined; // Add index signature
 }
 
 export const useTransportValidation = () => {

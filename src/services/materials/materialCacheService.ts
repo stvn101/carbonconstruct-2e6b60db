@@ -1,4 +1,3 @@
-
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -617,3 +616,27 @@ export async function queryCachedMaterialsByPrefix(
     return null;
   }
 }
+
+// For event handling:
+interface TransactionEvent extends Event {
+  transaction?: IDBTransaction;
+}
+
+// ... then in your event handler:
+const handleTransactionComplete = (event: TransactionEvent) => {
+  if (event.transaction) {
+    // Now TypeScript knows event.transaction exists
+  }
+};
+
+// For category operations, ensure ExtendedMaterialData has category:
+const processMaterialCategories = (materials: ExtendedMaterialData[]) => {
+  const categoriesMap: Record<string, number> = {};
+  
+  materials.forEach(material => {
+    const category = material.category || 'Uncategorized';
+    categoriesMap[category] = (categoriesMap[category] || 0) + 1;
+  });
+  
+  return categoriesMap;
+};
