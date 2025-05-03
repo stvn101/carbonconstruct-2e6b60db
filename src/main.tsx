@@ -1,10 +1,10 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import errorTrackingService from './services/errorTrackingService';
+import performanceMonitoringService from './services/performanceMonitoringService';
 import { CachedCalculationsProvider } from './contexts/CachedCalculationsContext';
-import { ErrorBoundaryProvider } from './components/error/ErrorBoundaryContext';
-import { initializeAppServices } from './services/app-services';
-import logger from './services/logging/loggingService';
 import './index.css';
 
 // Prevent theme flickering by setting initial theme before render
@@ -26,7 +26,7 @@ setInitialTheme();
 // Error handler for React 18+ root errors
 const handleRootError = (error: Error) => {
   console.error('React root error:', error);
-  logger.fatal('React root error', 'app', error);
+  errorTrackingService.captureException(error, { source: 'ReactRoot' });
   
   // Display a user-friendly error message
   const rootElement = document.getElementById('root');
@@ -44,10 +44,8 @@ const handleRootError = (error: Error) => {
   }
 };
 
-// Initialize application services
-initializeAppServices().catch(error => {
-  console.error('Failed to initialize application services:', error);
-});
+// Initialize error tracking service - this is critical and should run immediately
+errorTrackingService.initialize();
 
 // Create a root with error handling
 try {
@@ -61,18 +59,30 @@ try {
   // Mount React app with priority
   root.render(
     <React.StrictMode>
-      <ErrorBoundaryProvider>
-        <CachedCalculationsProvider>
-          <App />
-        </CachedCalculationsProvider>
-      </ErrorBoundaryProvider>
+      <CachedCalculationsProvider>
+        <App />
+      </CachedCalculationsProvider>
     </React.StrictMode>
   );
+
+  // Initialize non-critical services after main render
+  // Use requestIdleCallback only if it's available
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      performanceMonitoringService.initialize();
+    });
+  } else {
+    // Fallback for browsers without requestIdleCallback
+    setTimeout(() => {
+      performanceMonitoringService.initialize();
+    }, 0);
+  }
 
   // Use page visibility API instead of beforeunload for cleanup
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
-      logger.flush();
+      errorTrackingService.flush();
+      performanceMonitoringService.cleanup();
     }
   });
 } catch (error) {
