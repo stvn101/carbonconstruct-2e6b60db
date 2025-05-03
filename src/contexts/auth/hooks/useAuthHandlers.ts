@@ -1,10 +1,8 @@
-
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
 import { toast } from 'sonner';
-import { handleNetworkError } from '@/utils/errorHandling';
-import { isOffline } from '@/utils/errorHandling/networkErrorHandler';
+import { handleNetworkError, isOffline } from '@/utils/errorHandling';
 
 export const useAuthHandlers = () => {
   const login = async (email: string, password: string) => {

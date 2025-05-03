@@ -1,6 +1,16 @@
 
 import { useState, useCallback, useMemo } from 'react';
-import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
+
+// Adding a proper type definition for ExtendedMaterialData
+export interface ExtendedMaterialData {
+  id?: string;
+  name?: string;
+  description?: string;
+  co2PerKg?: number;
+  category?: string;
+  region?: string;
+  [key: string]: any; // Allow other properties
+}
 
 interface FilterState {
   searchTerm: string;

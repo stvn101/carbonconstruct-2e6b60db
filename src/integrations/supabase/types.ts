@@ -270,41 +270,17 @@ export type Database = {
         }
         Relationships: []
       }
-      todos: {
+    }
+    Views: {
+      material_categories: {
         Row: {
-          id: number
-          inserted_at: string
-          is_complete: boolean | null
-          task: string | null
-          user_id: string
-        }
-        Insert: {
-          id?: number
-          inserted_at?: string
-          is_complete?: boolean | null
-          task?: string | null
-          user_id: string
-        }
-        Update: {
-          id?: number
-          inserted_at?: string
-          is_complete?: boolean | null
-          task?: string | null
-          user_id?: string
+          category: string | null
         }
         Relationships: []
       }
     }
-    Views: {
-      [_ in never]: never
-    }
     Functions: {
-      get_material_categories: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          category: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

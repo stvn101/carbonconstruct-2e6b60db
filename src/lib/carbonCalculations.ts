@@ -105,7 +105,7 @@ export const calculateTotalEmissions = (input: CalculationInput): CalculationRes
 /**
  * Process materials in batches to handle large datasets more efficiently
  */
-export function processMaterialsInBatches(materials: MaterialInput[], batchSize = 100) {
+function processMaterialsInBatches(materials: MaterialInput[], batchSize = 100) {
   const result = {
     total: 0,
     breakdown: {} as Record<string, number>
@@ -136,7 +136,7 @@ export function processMaterialsInBatches(materials: MaterialInput[], batchSize 
 /**
  * Process transport in batches to handle large datasets more efficiently
  */
-export function processTransportInBatches(transport: TransportInput[], batchSize = 100) {
+function processTransportInBatches(transport: TransportInput[], batchSize = 100) {
   const result = {
     total: 0,
     breakdown: {} as Record<string, number>
@@ -168,7 +168,7 @@ export function processTransportInBatches(transport: TransportInput[], batchSize
 /**
  * Calculate energy emissions (typically a smaller dataset)
  */
-export function calculateEnergyEmissions(energy: EnergyInput[]) {
+function calculateEnergyEmissions(energy: EnergyInput[]) {
   const result = {
     total: 0,
     breakdown: {} as Record<string, number>

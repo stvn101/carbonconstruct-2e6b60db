@@ -5,7 +5,7 @@
 export * from './carbonTypes';
 
 // Re-export all carbon factor constants
-import { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from './carbonFactors';
+import { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from './carbonData';
 export { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS };
 
 // Define and export the Material, Transport, and Energy types
@@ -13,22 +13,6 @@ export type Material = keyof typeof MATERIAL_FACTORS;
 export type Transport = keyof typeof TRANSPORT_FACTORS;
 export type Energy = keyof typeof ENERGY_FACTORS;
 
-// Import calculation functions to export
-import {
-  calculateTotalEmissions,
-  processMaterialsInBatches,
-  processTransportInBatches,
-  calculateEnergyEmissions,
-} from './carbonCalculations';
-
-// Export the calculation functions
-export {
-  calculateTotalEmissions,
-  processMaterialsInBatches,
-  processTransportInBatches,
-  calculateEnergyEmissions,
-};
-
-// Using export type for type-only exports
+// Re-export calculation types from carbonCalculations
+export { calculateTotalEmissions } from './carbonCalculations';
 export type { CalculationInput, CalculationResult } from './carbonCalculations';
-export type { MaterialInput, TransportInput, EnergyInput } from './carbonTypes';
