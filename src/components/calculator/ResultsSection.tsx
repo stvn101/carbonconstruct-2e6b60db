@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -7,7 +6,7 @@ import {
   TransportInput, 
   EnergyInput,
   CalculationInput
-} from "@/lib/carbonCalculations";
+} from "@/lib/carbonExports";
 import CalculatorResults from "../CalculatorResults";
 import RecommendationsSection from "../RecommendationsSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

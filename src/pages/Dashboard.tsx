@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -10,7 +9,7 @@ import SubscriptionStatus from "@/components/payment/SubscriptionStatus";
 import PaymentHistory from "@/components/payment/PaymentHistory";
 import PaymentSuccess from "@/components/payment/PaymentSuccess";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjects } from "@/contexts/project";
+import { useProjects } from "@/contexts/ProjectContext";
 
 const Dashboard = () => {
   const { user } = useAuth();
