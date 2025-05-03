@@ -22,7 +22,7 @@ const Auth = ({ initialTab = "signin" }: AuthProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">(initialTab);
   const returnTo = location.state?.returnTo || '/dashboard';
 
   // Improve accessibility
@@ -38,6 +38,11 @@ const Auth = ({ initialTab = "signin" }: AuthProps) => {
       navigate(returnTo, { state: { fromAuth: true } });
     }
   }, [user, navigate, returnTo]);
+
+  // Fixed type issue - create a handler function with the correct signature
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as "signin" | "signup");
+  };
 
   return (
     <>
@@ -80,7 +85,7 @@ const Auth = ({ initialTab = "signin" }: AuthProps) => {
             <CardContent>
               <Tabs 
                 value={activeTab} 
-                onValueChange={setActiveTab}
+                onValueChange={handleTabChange}
                 className="w-full"
               >
                 <TabsList className="grid w-full grid-cols-2 mb-6 dark:bg-gray-700 tabs-list bg-gray-100">

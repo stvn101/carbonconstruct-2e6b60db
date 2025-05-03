@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ import AuthFormError from "./AuthFormError";
 import EmailField from "./form-fields/EmailField";
 import PasswordField from "./form-fields/PasswordField";
 import { Separator } from "@/components/ui/separator";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
 
 interface RegisterFormProps {
   returnTo?: string;
@@ -31,6 +32,7 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [socialLoginType, setSocialLoginType] = useState<string | null>(null);
+  const [password, setPassword] = useState<string>("");
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -40,6 +42,16 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
       password: "",
     },
   });
+  
+  // Watch password field for strength meter
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'password') {
+        setPassword(value.password || "");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   const handleSubmit = async (data: RegisterFormValues) => {
     try {
@@ -94,7 +106,11 @@ const RegisterForm = ({ returnTo = "/dashboard" }: RegisterFormProps) => {
           />
           
           <EmailField form={form} />
-          <PasswordField form={form} />
+          
+          <div className="space-y-1">
+            <PasswordField form={form} />
+            <PasswordStrengthMeter password={password} />
+          </div>
 
           <Button
             type="submit"
