@@ -35,13 +35,15 @@ export async function clearMaterialsCache() {
 export async function getCacheMetadata() {
   return {
     lastUpdated: materialCacheService.lastUpdated,
-    count: materialCacheService.cache?.length || 0
+    // Use getMaterialsCount() method instead of directly accessing the private cache property
+    count: materialCacheService.getMaterialsCount()
   };
 }
 
 class MaterialCacheService {
+  // These properties should follow a consistent visibility pattern
   private cache = [];
-  lastUpdated = null;
+  public lastUpdated = null;
   private isSyncing = false;
 
   constructor() {
@@ -116,6 +118,14 @@ class MaterialCacheService {
    */
   public getMaterials() {
     return this.cache;
+  }
+
+  /**
+   * Get the number of materials in cache
+   * @returns The number of materials in the cache
+   */
+  public getMaterialsCount() {
+    return this.cache?.length || 0;
   }
 
   /**
