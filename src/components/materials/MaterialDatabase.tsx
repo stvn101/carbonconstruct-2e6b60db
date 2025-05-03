@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRegion } from "@/contexts/RegionContext";
-import { useMaterialFiltering, ExtendedMaterialData } from "@/hooks/useMaterialFiltering";
 import { useMaterialData } from "@/hooks/useMaterialData";
 import { useMaterialCache } from "@/hooks/useMaterialCache";
 import DatabaseHeader from './DatabaseHeader';
@@ -23,7 +22,7 @@ const MaterialDatabase = () => {
   // Default empty categories array
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
 
-  // Use the material data hook for organizing and categorizing data
+  // Use the material data hook for organizing and categorizing data - prevent unnecessary recalculations
   const {
     filteredMaterials,
     materialsByRegion,
@@ -35,13 +34,11 @@ const MaterialDatabase = () => {
     searchTerm,
     selectedRegion: "Australia", // Always Australia
     selectedAlternative,
-    selectedTag
-  }) || { filteredMaterials: [], materialsByRegion: {}, allTags: [], baseOptions: [], materialCount: 0, allRegions: [] };
+    selectedTag,
+    materials // Pass materials directly to avoid dependency on context
+  });
   
-  // Use the filter hook for sorting and filtering
-  const filterResult = useMaterialFiltering(filteredMaterials || []);
-  
-  // Extract categories from materials on load
+  // Extract categories from materials on load - only when materials change
   useEffect(() => {
     if (materials && materials.length > 0) {
       // Extract unique categories
@@ -57,15 +54,10 @@ const MaterialDatabase = () => {
     }
   }, [materials]);
   
-  // Combine all data for the UI
-  const displayMaterials = filterResult.filteredMaterials;
-  const isCategoriesLoading = loading && (!categoriesList || categoriesList.length === 0);
-  const totalMaterials = materials ? materials.length : 0;
-  
   // Make sure we have safe arrays to work with
   const safeTags = Array.isArray(allTags) ? allTags : [];
   const safeCategories = Array.isArray(categoriesList) ? categoriesList : [];
-  const safeMaterials = Array.isArray(displayMaterials) ? displayMaterials : [];
+  const safeMaterials = Array.isArray(filteredMaterials) ? filteredMaterials : [];
   const safeBaseOptions = Array.isArray(baseOptions) ? baseOptions : [];
 
   const resetFilters = () => {
@@ -146,14 +138,14 @@ const MaterialDatabase = () => {
             allTags={safeTags}
             baseOptions={safeBaseOptions}
             categories={safeCategories}
-            loading={isCategoriesLoading}
+            loading={loading && (!categoriesList || categoriesList.length === 0)}
           />
           
           <DatabaseResultsCard
             filteredMaterials={safeMaterials}
             resetFilters={resetFilters}
             materialCount={materialCount || 0}
-            totalCount={totalMaterials || 0}
+            totalCount={materials ? materials.length : 0}
             loading={loading && safeMaterials.length > 0}
           />
         </div>
