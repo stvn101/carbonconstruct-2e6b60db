@@ -19,7 +19,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { toast } from 'sonner';
 
 const ProjectsBrowser: React.FC = () => {
-  const { projects, isLoading, fetchError } = useProjects();
+  const { projects, isLoading, fetchError, loadProjects } = useProjects();
   const { user, profile } = useAuth();
   const isPremiumUser = user && profile?.subscription_tier === 'premium';
   const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -27,6 +27,26 @@ const ProjectsBrowser: React.FC = () => {
   const { isOfflineMode, checkConnection, connectionAttempts, isCheckingConnection } = useOfflineMode();
   const pageInitializedRef = useRef(false);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Setup loading timeout
+  useEffect(() => {
+    if (isLoading) {
+      // Set a timeout to prevent infinite loading
+      loadingTimeoutRef.current = setTimeout(() => {
+        if (isLoading) {
+          toast.error("Loading projects timed out. Please try refreshing.");
+          setIsPageLoaded(true); // Force page to show even if loading
+        }
+      }, 15000); // 15 second timeout
+    }
+    
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [isLoading]);
   
   // Delay setting page loaded status to prevent flickering
   useEffect(() => {
@@ -57,6 +77,14 @@ const ProjectsBrowser: React.FC = () => {
     retryTimeoutRef.current = setTimeout(() => {
       toast.dismiss("retry-connection-check");
       
+      // Try to load projects again
+      if (loadProjects) {
+        loadProjects().catch(err => {
+          console.error("Error reloading projects:", err);
+          toast.error("Failed to load projects. Please try again later.");
+        });
+      }
+      
       // Instead of full page refresh, just show loading state again
       setIsPageLoaded(false);
       setTimeout(() => {
@@ -64,13 +92,16 @@ const ProjectsBrowser: React.FC = () => {
         retryTimeoutRef.current = null;
       }, 300);
     }, 1500);
-  }, [checkConnection]);
+  }, [checkConnection, loadProjects]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
+      }
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
       }
     };
   }, []);
@@ -98,7 +129,7 @@ const ProjectsBrowser: React.FC = () => {
           >
             <ScrollArea className="h-full w-full">
               <div className="container mx-auto">
-                <div className="mb-6">
+                <div className="mb-6 pt-16">
                   <Button variant="ghost" asChild className="mb-4">
                     <Link to="/dashboard">
                       <ArrowLeft className="h-4 w-4 mr-2" />
@@ -141,7 +172,7 @@ const ProjectsBrowser: React.FC = () => {
                   isRetrying={!!retryTimeoutRef.current || isCheckingConnection}
                 />
 
-                {isLoading ? (
+                {isLoading && (!projects || projects.length === 0) ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[...Array(3)].map((_, i) => (
                       <ProjectCardSkeleton key={i} />
@@ -167,10 +198,24 @@ const ProjectsBrowser: React.FC = () => {
                   </div>
                 ) : (
                   <ProjectsList 
-                    projects={projects} 
+                    projects={projects || []} 
                     title="All Projects" 
                     showSearch={true} 
                   />
+                )}
+
+                {/* Add a manual refresh button for stuck loading states */}
+                {(isLoading && projects && projects.length > 0) && (
+                  <div className="flex justify-center mt-8">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleRetryLoad}
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Refresh Projects
+                    </Button>
+                  </div>
                 )}
               </div>
             </ScrollArea>

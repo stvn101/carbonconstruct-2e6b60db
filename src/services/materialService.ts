@@ -26,3 +26,12 @@ export {
   calculateSustainabilityScore,
   determineRecyclability
 } from './materials/materialDataProcessor';
+
+// Background fetch of materials for better availability
+// This will prime the cache when the service is first loaded
+setTimeout(() => {
+  console.log("Preloading materials cache in background");
+  import('./materials/materialFetchService')
+    .then(({ fetchMaterials }) => fetchMaterials(false))
+    .catch(err => console.error("Failed to preload materials cache:", err));
+}, 1000);

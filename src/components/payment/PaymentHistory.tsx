@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -24,6 +24,7 @@ const PaymentHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadPayments = async () => {
     if (!user) {
@@ -35,13 +36,15 @@ const PaymentHistory = () => {
       setLoading(true);
       setError(null);
       
-      // Add timeout to prevent infinite loading
-      const timeout = setTimeout(() => {
-        if (loading) {
-          setLoading(false);
-          setError("Request timed out. Please try again.");
-        }
-      }, 10000);
+      // Set a timeout to prevent infinite loading
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+      
+      loadTimeoutRef.current = setTimeout(() => {
+        setLoading(false);
+        setError("Request timed out. Please try again.");
+      }, 15000); // 15 seconds timeout
       
       const { data, error } = await supabase
         .from('payments')
@@ -49,7 +52,11 @@ const PaymentHistory = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
-      clearTimeout(timeout);
+      // Clear timeout on success
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
         
       if (error) throw error;
       
@@ -61,6 +68,11 @@ const PaymentHistory = () => {
       toast.error("Failed to load payment history");
     } finally {
       setLoading(false);
+      // Ensure timeout is cleared
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
     }
   };
 
@@ -70,7 +82,16 @@ const PaymentHistory = () => {
     try {
       setRefreshing(true);
       
+      // Set a timeout for verification
+      const verifyTimeout = setTimeout(() => {
+        setRefreshing(false);
+        toast.error("Verification request timed out. Please try again later.");
+      }, 15000); // 15 seconds timeout
+      
       const { data, error } = await supabase.functions.invoke('verify-payment');
+      
+      // Clear timeout on success
+      clearTimeout(verifyTimeout);
       
       if (error) throw error;
       
@@ -87,6 +108,15 @@ const PaymentHistory = () => {
       setRefreshing(false);
     }
   };
+
+  // Clean up any timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     loadPayments();
@@ -114,6 +144,7 @@ const PaymentHistory = () => {
     }
   };
 
+  // Show a better fallback loading state
   if (loading && !refreshing) {
     return (
       <Card className="w-full">
@@ -124,6 +155,19 @@ const PaymentHistory = () => {
           <div className="flex justify-center items-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-carbon-600"></div>
             <span className="ml-3">Loading payment history...</span>
+          </div>
+          {/* Add a button to force refresh if loading takes too long */}
+          <div className="flex justify-center mt-4">
+            <Button 
+              onClick={() => {
+                setLoading(false);
+                loadPayments();
+              }} 
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" /> Force Refresh
+            </Button>
           </div>
         </CardContent>
       </Card>
