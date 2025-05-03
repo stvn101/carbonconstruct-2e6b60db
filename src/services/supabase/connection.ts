@@ -1,3 +1,4 @@
+
 /**
  * Supabase connection utilities with improved reliability
  */

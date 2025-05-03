@@ -59,6 +59,7 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
 
 /**
  * Fetch material categories with improved fallbacks
+ * Now using the secure database function
  */
 export async function fetchMaterialCategories(): Promise<string[]> {
   // First check if we're offline
