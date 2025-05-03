@@ -63,8 +63,9 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
     const matchesSearch = debouncedSearchTerm.trim() === '' || 
       materialName.includes(debouncedSearchTerm.toLowerCase());
     
-    // Fix the type comparison error - convert selectedRegion to string before comparison
-    const matchesRegion = selectedRegion === "all" || selectedRegion === materialRegion;
+    // Fix the type comparison error - ensure both sides are string type
+    const matchesRegion = selectedRegion === "all" || 
+      materialRegion.includes(String(selectedRegion));
     
     const matchesAlternative = selectedAlternative === "none" || materialAltTo === selectedAlternative;
     
@@ -106,9 +107,6 @@ export const useMaterialFiltering = (initialOptions: Partial<MaterialFilterOptio
         if (Array.isArray(material?.tags)) {
           material.tags.forEach(tag => tag && allTags.add(tag));
         }
-        
-        // Fix for accessing category - don't access it directly from ExtendedMaterialData
-        // This information should come from separate categories fetch API call
       });
     }
 

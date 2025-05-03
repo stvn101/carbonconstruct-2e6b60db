@@ -95,6 +95,8 @@ export async function fetchMaterialCategories(): Promise<string[]> {
   
   try {
     console.log('Fetching categories from API');
+    // Since we're using the category column from the database,
+    // we need to query that column directly
     const { data, error } = await supabase
       .from('materials')
       .select('category')
