@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
-import { validateCalculationInput } from "@/utils/calculatorValidation";
 
 // Default calculation input with initial values
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {

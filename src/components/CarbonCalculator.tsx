@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ErrorBoundary } from "react-error-boundary";
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorAlerts from "./calculator/CalculatorAlerts";

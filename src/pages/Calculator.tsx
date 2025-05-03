@@ -64,7 +64,7 @@ function Calculator() {
     focusMainContentOnRouteChange: true
   });
   
-  // Memoize the effect to avoid triggering it on every render
+  // Use effect to setup initial state
   useEffect(() => {
     // Check if we're in demo mode from navigation state or if user is not logged in
     setDemoMode(location.state?.demoMode || !user);
@@ -120,21 +120,20 @@ function Calculator() {
           </Alert>
         )}
         
-        {/* Only mount components when we're ready to avoid race conditions */}
         {calculatorReady ? (
-          <ProjectProvider>
-            <CalculatorProvider>
-              <ErrorBoundary 
-                FallbackComponent={CalculatorLoadError}
-                onReset={handleResetCalculatorError}
-                resetKeys={[location.key, isOffline, calculatorReady]}
-              >
+          <ErrorBoundary 
+            FallbackComponent={CalculatorLoadError}
+            onReset={handleResetCalculatorError}
+            resetKeys={[location.key, isOffline, calculatorReady]}
+          >
+            <ProjectProvider>
+              <CalculatorProvider>
                 <Suspense fallback={<CalculatorLoading />}>
                   <CarbonCalculator demoMode={effectiveDemoMode} />
                 </Suspense>
-              </ErrorBoundary>
-            </CalculatorProvider>
-          </ProjectProvider>
+              </CalculatorProvider>
+            </ProjectProvider>
+          </ErrorBoundary>
         ) : (
           <CalculatorLoading />
         )}

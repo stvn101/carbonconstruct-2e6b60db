@@ -29,6 +29,9 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   let projects: SavedProject[] = [];
   let hasProjectsContext = true;
   let error = false;
+  let calculatorContext;
+  let isCalculating = false;
+  let setIsCalculating = () => {};
 
   try {
     // Try to dynamically import to avoid context errors if not in provider
@@ -47,10 +50,6 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   );
 
   // Access calculator context - but wrap in try/catch to avoid errors
-  let calculatorContext;
-  let isCalculating = false;
-  let setIsCalculating = () => {};
-  
   try {
     calculatorContext = useCalculator();
     isCalculating = calculatorContext.isCalculating;
