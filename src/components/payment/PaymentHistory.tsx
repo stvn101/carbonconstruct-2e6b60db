@@ -26,11 +26,22 @@ const PaymentHistory = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const loadPayments = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
       setError(null);
+      
+      // Add timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        if (loading) {
+          setLoading(false);
+          setError("Request timed out. Please try again.");
+        }
+      }, 10000);
       
       const { data, error } = await supabase
         .from('payments')
@@ -38,8 +49,11 @@ const PaymentHistory = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
+      clearTimeout(timeout);
+        
       if (error) throw error;
       
+      // If no data returned, set empty array
       setPayments(data || []);
     } catch (err: any) {
       console.error("Error loading payments:", err);
@@ -60,7 +74,7 @@ const PaymentHistory = () => {
       
       if (error) throw error;
       
-      if (data.updated_payments?.length > 0) {
+      if (data?.updated_payments?.length > 0) {
         toast.success(`${data.updated_payments.length} payment(s) updated`);
         loadPayments();
       } else {

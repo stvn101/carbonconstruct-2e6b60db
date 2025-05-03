@@ -2,7 +2,7 @@
 /**
  * Hook for refreshing material cache
  */
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { clearMaterialsCache, fetchMaterials } from '@/services/materialService';
 import { toast } from 'sonner';
 
@@ -23,8 +23,8 @@ export const useRefreshCache = (
   const [refreshAttempts, setRefreshAttempts] = useState(0);
   const MAX_REFRESH_ATTEMPTS = 3;
   
-  // Refresh cache handler - with debounce to prevent multiple refreshes
-  const refreshCache = useCallback(debounce(async () => {
+  // Refresh cache handler - fixed debounced function to properly return Promise<void>
+  const refreshCache = useCallback(async () => {
     if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
       toast.error("Too many refresh attempts. Please try again later.");
       return;
@@ -58,7 +58,8 @@ export const useRefreshCache = (
     } finally {
       setLoading(false);
     }
-  }, 500), [refreshAttempts, setError, setLoading, setMaterials]);
+  }, [refreshAttempts, setError, setLoading, setMaterials]);
 
+  // Return the non-debounced version to fix the TypeScript error
   return refreshCache;
 };
