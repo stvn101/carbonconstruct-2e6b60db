@@ -74,25 +74,49 @@ export type Database = {
       }
       materials: {
         Row: {
+          alternativeto: string | null
           carbon_footprint_kgco2e_kg: number | null
           carbon_footprint_kgco2e_tonne: number | null
           category: string | null
+          factor: number | null
           id: string
           name: string | null
+          notes: string | null
+          recyclability: string | null
+          region: string | null
+          sustainabilityscore: number | null
+          tags: string[] | null
+          unit: string | null
         }
         Insert: {
+          alternativeto?: string | null
           carbon_footprint_kgco2e_kg?: number | null
           carbon_footprint_kgco2e_tonne?: number | null
           category?: string | null
+          factor?: number | null
           id?: string
           name?: string | null
+          notes?: string | null
+          recyclability?: string | null
+          region?: string | null
+          sustainabilityscore?: number | null
+          tags?: string[] | null
+          unit?: string | null
         }
         Update: {
+          alternativeto?: string | null
           carbon_footprint_kgco2e_kg?: number | null
           carbon_footprint_kgco2e_tonne?: number | null
           category?: string | null
+          factor?: number | null
           id?: string
           name?: string | null
+          notes?: string | null
+          recyclability?: string | null
+          region?: string | null
+          sustainabilityscore?: number | null
+          tags?: string[] | null
+          unit?: string | null
         }
         Relationships: []
       }
@@ -248,7 +272,12 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      material_categories: {
+        Row: {
+          category: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
