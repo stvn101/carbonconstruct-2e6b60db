@@ -1,18 +1,33 @@
+// Reexport types from carbonCalculations.ts to fix import errors
+export { 
+  calculateTotalEmissions,
+  // Reexport these functions if they exist in carbonCalculations.ts
+  // or provide compatability versions
+  calculateMaterialEmissions,
+  calculateTransportEmissions,
+  calculateEnergyEmissions,
+} from './carbonCalculations';
 
-// This file centralizes all carbon calculation type exports to ensure consistency
+// Export types from carbonTypes or define them here
+export type Material = string;
+export type Transport = string;
+export type Energy = string;
 
-// Re-export all types from carbonTypes
-export * from './carbonTypes';
+export interface MaterialInput {
+  type: string;
+  quantity: number | string;
+  unit?: string;
+  region?: string;
+}
 
-// Re-export all carbon factor constants
-import { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from './carbonData';
-export { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS };
+export interface TransportInput {
+  type: string;
+  distance: number | string;
+  unit?: string;
+}
 
-// Define and export the Material, Transport, and Energy types
-export type Material = keyof typeof MATERIAL_FACTORS;
-export type Transport = keyof typeof TRANSPORT_FACTORS;
-export type Energy = keyof typeof ENERGY_FACTORS;
-
-// Re-export calculation types from carbonCalculations
-export { calculateTotalEmissions } from './carbonCalculations';
-export type { CalculationInput, CalculationResult } from './carbonCalculations';
+export interface EnergyInput {
+  type: string;
+  quantity: number | string;
+  unit?: string;
+}

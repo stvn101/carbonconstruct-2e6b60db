@@ -1,14 +1,14 @@
-
 export interface ExtendedMaterialData {
   name: string;
   factor: number;
-  unit: string;
+  unit?: string;
   region?: string;
-  alternativeTo?: string;
-  notes?: string;
   tags?: string[];
   sustainabilityScore?: number;
-  recyclability?: "High" | "Medium" | "Low";
+  recyclability?: 'High' | 'Medium' | 'Low';
+  alternativeTo?: string;
+  notes?: string;
+  category?: string;
 }
 
 export type MaterialsByRegion = Record<string, number>;
