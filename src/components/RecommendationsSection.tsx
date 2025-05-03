@@ -1,7 +1,7 @@
 
 import React, { memo } from "react";
 import { motion } from "framer-motion";
-import { CalculationInput, CalculationResult } from "@/lib/carbonCalculations";
+import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { CarbonReduction } from "./recommendations/CarbonReduction";
 import { AreasOfConcern } from "./recommendations/AreasOfConcern";
 

@@ -1,7 +1,6 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import ResultsSection from "../../ResultsSection";
-import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonCalculations";
+import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 
 interface ResultsTabContentProps {
   calculationResult: CalculationResult | null;

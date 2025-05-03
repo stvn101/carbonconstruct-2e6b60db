@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recha
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { CalculationResult } from "@/lib/carbonCalculations";
+import { CalculationResult } from "@/lib/carbonExports";
 import { useMemo } from "react";
 
 interface EmissionsBreakdownChartProps {

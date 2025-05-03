@@ -1,7 +1,6 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import TransportInputSection from "../../TransportInputSection";
-import { TransportInput } from "@/lib/carbonCalculations";
+import { TransportInput } from "@/lib/carbonExports";
 
 interface TransportTabContentProps {
   transportItems: TransportInput[];

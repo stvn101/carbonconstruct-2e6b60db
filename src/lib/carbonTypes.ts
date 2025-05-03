@@ -34,6 +34,11 @@ export interface CalculationResult {
   transportEmissions: number;
   energyEmissions: number;
   totalEmissions: number;
+  breakdown: {
+    materials: number;
+    transport: number;
+    energy: number;
+  };
   breakdownByMaterial: {
     [key in Material]?: number;
   };

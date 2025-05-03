@@ -1,7 +1,6 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import EnergyInputSection from "../../EnergyInputSection";
-import { EnergyInput } from "@/lib/carbonCalculations";
+import { EnergyInput } from "@/lib/carbonExports";
 
 interface EnergyTabContentProps {
   energyItems: EnergyInput[];
