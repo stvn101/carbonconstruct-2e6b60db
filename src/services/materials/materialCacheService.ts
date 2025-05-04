@@ -1,3 +1,4 @@
+
 /**
  * In-memory cache service for storing and retrieving material data.
  * This service also handles periodic cache refresh and connection change events.
@@ -12,6 +13,15 @@ const CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
 const CACHE_REFRESH_INTERVAL = 24 * 60 * 60 * 1000;
 // Connection timeout for database requests
 const CONNECTION_TIMEOUT = 15000;
+
+// Helper function to ensure recyclability is a valid value
+function validateRecyclability(value: string | null | undefined): "High" | "Medium" | "Low" {
+  if (value === "High" || value === "Medium" || value === "Low") {
+    return value;
+  }
+  // Default to Medium if the value is not one of the expected values
+  return "Medium";
+}
 
 class MaterialCacheService {
   private cache: ExtendedMaterialData[] = [];
@@ -112,12 +122,26 @@ class MaterialCacheService {
       }
 
       if (data && data.length > 0) {
-        this.cache = data;
+        // Map the data to ensure types match our ExtendedMaterialData interface
+        const mappedData: ExtendedMaterialData[] = data.map(item => ({
+          name: item.name || '',
+          factor: item.factor || 0,
+          unit: item.unit || 'kg',
+          region: item.region || '',
+          tags: item.tags || [],
+          sustainabilityScore: item.sustainabilityscore,
+          recyclability: validateRecyclability(item.recyclability),
+          alternativeTo: item.alternativeto,
+          notes: item.notes,
+          category: item.category
+        }));
+        
+        this.cache = mappedData;
         this.lastUpdated = new Date();
-        localStorage.setItem('materialsCache', JSON.stringify(data));
+        localStorage.setItem('materialsCache', JSON.stringify(mappedData));
         localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
-        console.log(`Materials cache synced with database: ${data.length} items`);
-        return data;
+        console.log(`Materials cache synced with database: ${mappedData.length} items`);
+        return mappedData;
       } else {
         console.warn('No materials returned from database');
       }
