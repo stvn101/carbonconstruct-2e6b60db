@@ -21,7 +21,7 @@ export async function withTimeout<T>(
     const timeout = setTimeout(() => {
       if (fallbackValue !== undefined) {
         console.warn(timeoutMessage);
-        resolve(fallbackValue);
+        resolve(fallbackValue as T);
       } else {
         reject(new Error(timeoutMessage));
       }
@@ -30,7 +30,7 @@ export async function withTimeout<T>(
     Promise.resolve(promiseToUse)
       .then((result) => {
         clearTimeout(timeout);
-        resolve(result);
+        resolve(result as T);
       })
       .catch((error) => {
         clearTimeout(timeout);
