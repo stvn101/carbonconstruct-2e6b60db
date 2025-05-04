@@ -72,15 +72,18 @@ class MaterialCacheService {
     try {
       console.log('Syncing materials cache with database');
       
-      // Fix #1: Convert Supabase query to Promise before passing to withTimeout
+      // Create a proper promise from the Supabase query
       const queryPromise = supabase.from('materials').select('*').order('id').limit(5000);
+      
+      // Use a properly typed fallback value for withTimeout
+      const fallbackValue = { data: null, error: new Error('Fetch timed out') as any };
       
       // Use the withTimeout utility to prevent hanging operations
       const { data, error } = await withTimeout(
         queryPromise,
         CONNECTION_TIMEOUT,
         'Materials fetch timed out',
-        { data: null, error: new Error('Fetch timed out') }
+        fallbackValue
       );
 
       if (error) {
@@ -132,12 +135,11 @@ class MaterialCacheService {
   }
 
   /**
-   * Retrieves a material from the cache by its ID.
-   * @param id The ID of the material to retrieve.
+   * Retrieves a material from the cache by its name.
+   * @param name The name of the material to retrieve.
    * @returns The ExtendedMaterialData object if found, otherwise undefined.
    */
   public getMaterialByName(name: string) {
-    // Fix #2: Use name property instead of id since ExtendedMaterialData doesn't have id
     return this.cache.find(material => material.name === name);
   }
 
@@ -162,7 +164,6 @@ const materialCacheService = new MaterialCacheService();
 // Export these functions for use in other modules
 export async function cacheMaterials(materials: ExtendedMaterialData[]) {
   try {
-    // Fix #3: Access the cache through a proper method
     materialCacheService.clearCache(); // Clear first
     // Create a new mechanism to replace the cache
     const result = await materialCacheService.syncMaterialsCache();
@@ -196,4 +197,3 @@ export async function getCacheMetadata() {
 }
 
 export default materialCacheService;
-
