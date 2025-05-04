@@ -1,4 +1,3 @@
-
 /**
  * In-memory cache service for storing and retrieving material data.
  * This service also handles periodic cache refresh and connection change events.
@@ -75,8 +74,26 @@ class MaterialCacheService {
       // First create the Supabase query
       const query = supabase.from('materials').select('*').order('id').limit(5000);
       
-      // Use Promise constructor to properly handle the Supabase query result
-      // This avoids the TypeScript error with .catch() not being on PromiseLike
+      // SOLUTION #1: Using standard promise handling pattern
+      // This explicitly casts the query to Promise<any> to ensure .catch is available
+      const { data, error } = await Promise.resolve(query)
+        .then(response => response)
+        .catch(error => {
+          throw error;
+        });
+      
+      /* SOLUTION #2: Alternative approach using async/await with try/catch
+      let data, error;
+      try {
+        const response = await query;
+        data = response.data;
+        error = response.error;
+      } catch (e) {
+        throw new Error(`Error fetching materials: ${e instanceof Error ? e.message : String(e)}`);
+      }
+      */
+      
+      /* SOLUTION #3: Using Promise constructor with proper typing
       const response = await new Promise<{data: any[], error: any}>((resolve, reject) => {
         query
           .then(response => {
@@ -87,8 +104,8 @@ class MaterialCacheService {
           });
       });
       
-      // Extract data and error from the response
       const { data, error } = response;
+      */
       
       if (error) {
         throw new Error(`Error fetching materials: ${error.message}`);
