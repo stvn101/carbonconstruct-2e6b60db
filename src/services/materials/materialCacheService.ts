@@ -1,4 +1,3 @@
-
 /**
  * In-memory cache service for storing and retrieving material data.
  * This service also handles periodic cache refresh and connection change events.
