@@ -72,20 +72,23 @@ class MaterialCacheService {
     try {
       console.log('Syncing materials cache with database');
       
-      // Create a proper promise from the Supabase query
-      const queryPromise = supabase.from('materials').select('*').order('id').limit(5000);
+      // First create the Supabase query
+      const query = supabase.from('materials').select('*').order('id').limit(5000);
       
-      // Use a properly typed fallback value for withTimeout
-      const fallbackValue = { data: null, error: new Error('Fetch timed out') as any };
+      // Use proper .then() chaining pattern as requested by the user
+      const response = await new Promise((resolve, reject) => {
+        query
+          .then(response => {
+            resolve(response);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      });
       
-      // Use the withTimeout utility to prevent hanging operations
-      const { data, error } = await withTimeout(
-        queryPromise,
-        CONNECTION_TIMEOUT,
-        'Materials fetch timed out',
-        fallbackValue
-      );
-
+      // Cast to the expected type
+      const { data, error } = response as { data: any[], error: any };
+      
       if (error) {
         throw new Error(`Error fetching materials: ${error.message}`);
       }
