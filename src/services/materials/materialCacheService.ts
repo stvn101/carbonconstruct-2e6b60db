@@ -75,8 +75,9 @@ class MaterialCacheService {
       // First create the Supabase query
       const query = supabase.from('materials').select('*').order('id').limit(5000);
       
-      // Use proper .then() chaining pattern as requested by the user
-      const response = await new Promise((resolve, reject) => {
+      // Use Promise constructor to properly handle the Supabase query result
+      // This avoids the TypeScript error with .catch() not being on PromiseLike
+      const response = await new Promise<{data: any[], error: any}>((resolve, reject) => {
         query
           .then(response => {
             resolve(response);
@@ -86,8 +87,8 @@ class MaterialCacheService {
           });
       });
       
-      // Cast to the expected type
-      const { data, error } = response as { data: any[], error: any };
+      // Extract data and error from the response
+      const { data, error } = response;
       
       if (error) {
         throw new Error(`Error fetching materials: ${error.message}`);
