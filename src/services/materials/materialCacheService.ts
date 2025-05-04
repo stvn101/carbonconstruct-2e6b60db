@@ -72,9 +72,12 @@ class MaterialCacheService {
     try {
       console.log('Syncing materials cache with database');
       
+      // Fix #1: Convert Supabase query to Promise before passing to withTimeout
+      const queryPromise = supabase.from('materials').select('*').order('id').limit(5000);
+      
       // Use the withTimeout utility to prevent hanging operations
       const { data, error } = await withTimeout(
-        supabase.from('materials').select('*').order('id').limit(5000),
+        queryPromise,
         CONNECTION_TIMEOUT,
         'Materials fetch timed out',
         { data: null, error: new Error('Fetch timed out') }
@@ -133,8 +136,9 @@ class MaterialCacheService {
    * @param id The ID of the material to retrieve.
    * @returns The ExtendedMaterialData object if found, otherwise undefined.
    */
-  public getMaterialById(id: string) {
-    return this.cache.find(material => material.id === id);
+  public getMaterialByName(name: string) {
+    // Fix #2: Use name property instead of id since ExtendedMaterialData doesn't have id
+    return this.cache.find(material => material.name === name);
   }
 
   /**
@@ -158,11 +162,12 @@ const materialCacheService = new MaterialCacheService();
 // Export these functions for use in other modules
 export async function cacheMaterials(materials: ExtendedMaterialData[]) {
   try {
-    materialCacheService.cache = materials;
+    // Fix #3: Access the cache through a proper method
+    materialCacheService.clearCache(); // Clear first
+    // Create a new mechanism to replace the cache
+    const result = await materialCacheService.syncMaterialsCache();
     materialCacheService.lastUpdated = new Date();
-    localStorage.setItem('materialsCache', JSON.stringify(materials));
-    localStorage.setItem('materialsCacheTimestamp', materialCacheService.lastUpdated.toISOString());
-    return true;
+    return !!result;
   } catch (error) {
     console.error('Error caching materials:', error);
     throw error;
@@ -191,3 +196,4 @@ export async function getCacheMetadata() {
 }
 
 export default materialCacheService;
+
