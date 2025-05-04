@@ -7,13 +7,16 @@
  * @param fallbackValue Optional fallback value to return on timeout
  */
 export async function withTimeout<T>(
-  promise: Promise<T> | { then: (onfulfilled: any) => Promise<T> },
+  promise: Promise<T> | { then: (onfulfilled: any) => Promise<T> } | any,
   ms: number,
   timeoutMessage: string = 'Operation timed out',
   fallbackValue?: T
 ): Promise<T> {
+  // Check if the promise is a Supabase query object (has then method)
+  const isThenable = promise && typeof promise === 'object' && typeof promise.then === 'function';
+  
   // Handle both regular Promises and Supabase query objects which are "thenable"
-  const promiseToUse = 'then' in promise && typeof promise.then === 'function'
+  const promiseToUse = isThenable
     ? promise
     : Promise.reject(new Error('Invalid promise'));
 
