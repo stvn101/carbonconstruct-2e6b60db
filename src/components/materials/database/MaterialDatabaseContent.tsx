@@ -6,7 +6,7 @@ import DatabaseFilterCard from '../DatabaseFilterCard';
 import DatabaseResultsCard from '../DatabaseResultsCard';
 import MaterialLoadingState from './MaterialLoadingState';
 import MaterialErrorState from './MaterialErrorState';
-import { Button } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
 interface MaterialDatabaseContentProps {
