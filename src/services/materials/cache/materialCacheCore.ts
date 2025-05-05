@@ -13,6 +13,9 @@ class MaterialCacheService {
   public lastUpdated: Date | null = null;
   private isSyncing = false;
   private refreshInterval: number | null = null;
+  private retryTimeout: number | null = null;
+  private retryCount = 0;
+  private MAX_RETRIES = 3;
 
   constructor() {
     this.initializeCache();
@@ -29,15 +32,22 @@ class MaterialCacheService {
       const cachedTimestamp = localStorage.getItem('materialsCacheTimestamp');
 
       if (cachedData && cachedTimestamp) {
-        this.cache = JSON.parse(cachedData);
-        this.lastUpdated = new Date(cachedTimestamp);
-        console.log('Materials cache loaded from local storage');
-        
-        // Check if cache is expired
-        const now = new Date();
-        if (now.getTime() - new Date(cachedTimestamp).getTime() > CACHE_EXPIRATION) {
-          console.log('Cache is expired, refreshing...');
-          this.syncMaterialsCache();
+        try {
+          this.cache = JSON.parse(cachedData);
+          this.lastUpdated = new Date(cachedTimestamp);
+          console.log('Materials cache loaded from local storage:', this.cache.length, 'items');
+          
+          // Check if cache is expired
+          const now = new Date();
+          if (now.getTime() - new Date(cachedTimestamp).getTime() > CACHE_EXPIRATION) {
+            console.log('Cache is expired, refreshing...');
+            this.syncMaterialsCache();
+          }
+        } catch (parseError) {
+          console.error('Error parsing cached materials:', parseError);
+          localStorage.removeItem('materialsCache');
+          localStorage.removeItem('materialsCacheTimestamp');
+          await this.syncMaterialsCache();
         }
       } else {
         await this.syncMaterialsCache();
@@ -50,6 +60,20 @@ class MaterialCacheService {
       this.refreshInterval = window.setInterval(() => this.syncMaterialsCache(), CACHE_REFRESH_INTERVAL);
     } catch (error) {
       console.error('Error initializing materials cache:', error);
+      
+      // Schedule a retry if initialization fails
+      if (this.retryCount < this.MAX_RETRIES) {
+        this.retryCount++;
+        console.log(`Scheduling cache initialization retry ${this.retryCount}/${this.MAX_RETRIES}...`);
+        
+        if (this.retryTimeout) {
+          clearTimeout(this.retryTimeout);
+        }
+        
+        this.retryTimeout = window.setTimeout(() => {
+          this.initializeCache();
+        }, 5000 * Math.pow(2, this.retryCount - 1)); // Exponential backoff
+      }
     }
   }
 
@@ -65,6 +89,11 @@ class MaterialCacheService {
     this.isSyncing = true;
     try {
       console.log('Syncing materials cache with database');
+      
+      // Check if supabase is available
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
       
       // First create the Supabase query
       const query = supabase.from('materials').select('*').order('id').limit(5000);
@@ -86,8 +115,23 @@ class MaterialCacheService {
         
         this.cache = mappedData;
         this.lastUpdated = new Date();
-        localStorage.setItem('materialsCache', JSON.stringify(mappedData));
-        localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
+        
+        // Save to localStorage with error handling
+        try {
+          localStorage.setItem('materialsCache', JSON.stringify(mappedData));
+          localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
+        } catch (storageError) {
+          console.warn('Failed to save materials to localStorage:', storageError);
+          // Could be quota exceeded - try to clear some space
+          try {
+            localStorage.removeItem('materialsCache');
+            localStorage.setItem('materialsCache', JSON.stringify(mappedData));
+            localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
+          } catch (retryError) {
+            console.error('Failed to store materials after clearing cache:', retryError);
+          }
+        }
+        
         console.log(`Materials cache synced with database: ${mappedData.length} items`);
         return mappedData;
       } else {
@@ -106,6 +150,9 @@ class MaterialCacheService {
    * @returns An array of ExtendedMaterialData objects.
    */
   public getMaterials() {
+    if (!this.cache || this.cache.length === 0) {
+      console.warn('Cache is empty when requesting materials');
+    }
     return this.cache;
   }
 

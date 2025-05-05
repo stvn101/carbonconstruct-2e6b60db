@@ -1,43 +1,73 @@
 
 /**
- * Utility to add timeout to async operations
- * @param promise The promise to add timeout to
+ * Wraps a promise with a timeout
+ * @param promise The promise to wrap
  * @param ms Timeout in milliseconds
- * @param timeoutMessage Optional message for timeout error
- * @param fallbackValue Optional fallback value to return on timeout
+ * @param errorMsg Custom error message
+ * @returns Promise that rejects if the original promise doesn't resolve within the timeout
  */
-export async function withTimeout<T>(
-  promise: Promise<T> | { then: (onfulfilled: any) => Promise<T> } | any,
+export function withTimeout<T>(
+  promise: Promise<T>,
   ms: number,
-  timeoutMessage: string = 'Operation timed out',
-  fallbackValue?: T
+  errorMsg = 'Operation timed out'
 ): Promise<T> {
-  // Check if the promise is a Supabase query object (has then method)
-  const isThenable = promise && typeof promise === 'object' && typeof promise.then === 'function';
-  
-  // Handle both regular Promises and Supabase query objects which are "thenable"
-  const promiseToUse = isThenable
-    ? promise
-    : Promise.reject(new Error('Invalid promise'));
-
-  return new Promise<T>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      if (fallbackValue !== undefined) {
-        console.warn(timeoutMessage);
-        resolve(fallbackValue as T);
-      } else {
-        reject(new Error(timeoutMessage));
-      }
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(errorMsg));
     }, ms);
-
-    Promise.resolve(promiseToUse)
-      .then((result) => {
-        clearTimeout(timeout);
-        resolve(result as T);
-      })
-      .catch((error) => {
-        clearTimeout(timeout);
-        reject(error);
-      });
+    
+    // Clean up the timeout if the promise resolves or rejects
+    promise.finally(() => clearTimeout(timeoutId));
   });
+  
+  return Promise.race([promise, timeoutPromise]);
+}
+
+/**
+ * Creates a promise that resolves after the specified time
+ * @param ms Time to wait in milliseconds
+ * @returns Promise that resolves after the specified time
+ */
+export function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Create a cancel token for aborting operations
+ * @returns Object with abort function and AbortSignal
+ */
+export function createCancelToken() {
+  const abortController = new AbortController();
+  const signal = abortController.signal;
+  
+  return {
+    abort: () => abortController.abort(),
+    signal
+  };
+}
+
+/**
+ * Run an operation with retry and timeout
+ * @param operation Function to execute
+ * @param retries Number of retries
+ * @param timeoutMs Timeout in milliseconds
+ * @returns Result of the operation
+ */
+export async function withRetryAndTimeout<T>(
+  operation: () => Promise<T>,
+  retries = 3,
+  timeoutMs = 10000
+): Promise<T> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      return await withTimeout(operation(), timeoutMs);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      await delay(Math.pow(2, attempt) * 500); // Exponential backoff
+    }
+  }
+  
+  throw lastError || new Error('Operation failed after retries');
 }
