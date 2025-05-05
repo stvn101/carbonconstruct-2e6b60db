@@ -1,4 +1,3 @@
-
 /**
  * Creates a timeout promise that rejects after specified milliseconds
  */
@@ -91,4 +90,3 @@ export const retryWithBackoff = async <T>(
     }
   }
 };
-
