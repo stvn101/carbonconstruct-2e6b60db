@@ -4,6 +4,5 @@ export * from './networkListeners';
 export * from './toastHelpers';
 export * from './networkErrorHandler';
 export * from './timeoutHelper';
-// We explicitly re-export isNetworkError from networkChecker to avoid ambiguity
-export { isNetworkError } from './networkChecker';
+// We're now directly exporting all functions from networkChecker
 export * from './networkChecker';
