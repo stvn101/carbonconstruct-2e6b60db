@@ -19,6 +19,52 @@ export function isOffline(): boolean {
 }
 
 /**
+ * Check if the application can connect to the network
+ * @returns Promise<boolean> indicating whether the app has internet connectivity
+ */
+export async function checkNetworkStatus(): Promise<boolean> {
+  // First check basic browser API
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return false;
+  }
+  
+  // Then try to fetch a small resource from a reliable CDN
+  // Using a timeout to prevent hanging if network is unstable
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch('https://www.cloudflare.com/cdn-cgi/trace', {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-cache',
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    return true;
+  } catch (error) {
+    console.warn('Network check failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Determine if an error is related to network connectivity issues
+ */
+export function isNetworkError(error: Error): boolean {
+  if (!error) return false;
+  
+  const message = error.message ? error.message.toLowerCase() : '';
+  return message.includes('network') || 
+         message.includes('failed to fetch') ||
+         message.includes('offline') ||
+         message.includes('connection') ||
+         message.includes('timed out') ||
+         message.includes('unreachable');
+}
+
+/**
  * Register callbacks for online/offline events
  * @param onOffline Callback when going offline
  * @param onOnline Callback when going online
