@@ -106,6 +106,17 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
     }
   }, [materials, isInitialLoad]);
 
+  // Add diagnostic logging
+  useEffect(() => {
+    console.log("MaterialDatabaseContent rendered:", { 
+      materialsCount: materials?.length || 0, 
+      filteredCount: filteredMaterials?.length || 0,
+      isLoading: loading,
+      hasError: !!error,
+      errorMessage: error?.message
+    });
+  }, [materials, filteredMaterials, loading, error]);
+
   // Make sure we have safe arrays to work with
   const safeTags = Array.isArray(allTags) ? allTags : [];
   const safeCategories = Array.isArray(categoriesList) ? categoriesList : [];

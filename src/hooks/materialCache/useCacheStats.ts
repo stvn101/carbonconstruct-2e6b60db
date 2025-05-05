@@ -1,33 +1,53 @@
 
+/**
+ * Hook for monitoring material cache statistics
+ */
 import { useState, useEffect } from 'react';
-import { getCacheMetadata } from '@/services/materialService';
-import { CacheStats } from './types';
+import { getCacheMetadata } from '@/services/materials/cache';
 
-export const useCacheStats = (materialsCount: number): CacheStats => {
-  const [stats, setStats] = useState<CacheStats>({
+interface CacheStats {
+  lastUpdated: Date | null;
+  itemCount: number | null;
+}
+
+export const useCacheStats = (materialCount: number): CacheStats => {
+  const [cacheStats, setCacheStats] = useState<CacheStats>({
     lastUpdated: null,
-    itemCount: materialsCount || null
+    itemCount: null
   });
   
   useEffect(() => {
-    const updateStats = async () => {
+    let isMounted = true;
+    
+    const fetchCacheStats = async () => {
       try {
         const metadata = await getCacheMetadata();
-        setStats({
-          lastUpdated: metadata.lastUpdated,
-          itemCount: metadata.count || materialsCount
-        });
-      } catch (err) {
-        console.error('Error fetching cache stats:', err);
+        
+        if (isMounted) {
+          setCacheStats({
+            lastUpdated: metadata.lastUpdated,
+            itemCount: metadata.count || materialCount // Fall back to material count if necessary
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to fetch cache stats:', error);
+        
+        // If we failed to get stats but have material count, use that
+        if (isMounted && materialCount) {
+          setCacheStats(prev => ({
+            ...prev,
+            itemCount: materialCount
+          }));
+        }
       }
     };
     
-    updateStats();
+    fetchCacheStats();
     
-    // Update stats every minute
-    const intervalId = setInterval(updateStats, 60000);
-    return () => clearInterval(intervalId);
-  }, [materialsCount]);
+    return () => {
+      isMounted = false;
+    };
+  }, [materialCount]);
   
-  return stats;
+  return cacheStats;
 };

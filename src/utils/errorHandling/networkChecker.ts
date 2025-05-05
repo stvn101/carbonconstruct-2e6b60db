@@ -1,94 +1,62 @@
 
 /**
- * Utility for checking network status with improved error handling
+ * Utility for checking network connectivity status
  */
 
-// Enhanced network status check with multiple signals
-export const isOffline = (): boolean => {
-  // First check the navigator.onLine property
-  const navigatorOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
-  
-  // Log for debugging
-  console.info('Checking if offline, navigator.onLine:', navigator.onLine);
-  
-  return navigatorOffline;
-};
-
-// Function to check if a fetch request has timed out
-export const hasTimedOut = (error: any): boolean => {
-  if (!error) return false;
-  
-  const errorMessage = error.message || error.toString();
-  return (
-    errorMessage.includes('timeout') || 
-    errorMessage.includes('timed out') ||
-    errorMessage.includes('abort')
-  );
-};
-
-// Function to check if an error is a network error
-export const isNetworkError = (error: any): boolean => {
-  if (!error) return false;
-  
-  const errorMessage = error.message || error.toString();
-  return (
-    errorMessage.includes('Failed to fetch') ||
-    errorMessage.includes('Network request failed') ||
-    errorMessage.includes('Network Error') ||
-    errorMessage.includes('NetworkError') ||
-    errorMessage.includes('ETIMEDOUT')
-  );
-};
-
-// Helper to create a timeout promise
-export const createTimeoutPromise = <T>(ms: number): Promise<T> => {
-  return new Promise((_, reject) => {
-    setTimeout(() => reject(new Error(`Request timed out after ${ms}ms`)), ms);
-  });
-};
-
-// Fetch with timeout
-export const fetchWithTimeout = <T>(fetchPromise: Promise<T>, timeoutMs = 10000): Promise<T> => {
-  return Promise.race([
-    fetchPromise,
-    createTimeoutPromise<T>(timeoutMs)
-  ]);
-};
-
-// Test connection to a specific URL - implementation of checkNetworkStatus
-export const checkNetworkStatus = async (): Promise<boolean> => {
-  try {
-    const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
-    
-    if (!isOnline) {
-      return false;
-    }
-    
-    // Attempt a lightweight connection test
-    const result = await testConnection();
-    return result;
-  } catch (error) {
-    console.error('Network check failed:', error);
-    return false;
-  }
-};
-
-// Test connection to a specific URL
-export const testConnection = async (url: string = 'https://jaqzoyouuzhchuyzafii.supabase.co/rest/v1/', 
-                                   timeoutMs = 5000): Promise<boolean> => {
-  try {
-    await fetchWithTimeout(
-      fetch(url, { 
-        method: 'HEAD',
-        headers: { 
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcXpveW91dXpoY2h1eXphZmlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MTQyNjgsImV4cCI6MjA1OTM5MDI2OH0.NRKgoHt0rISen_jzkJpztRwmc4DFMeQDAinCu3eCDRE' 
-        }
-      }),
-      timeoutMs
-    );
+/**
+ * Check if the application is currently offline
+ * @returns boolean indicating whether the app is offline
+ */
+export function isOffline(): boolean {
+  // Check navigator.onLine first (most browsers)
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     return true;
-  } catch (error) {
-    console.error('Connection test failed:', error);
-    return false;
   }
-};
+  
+  // For environments where navigator.onLine might not be reliable,
+  // we could expand this with more sophisticated checks
+  return false;
+}
+
+/**
+ * Register callbacks for online/offline events
+ * @param onOffline Callback when going offline
+ * @param onOnline Callback when going online
+ * @returns Cleanup function to remove event listeners
+ */
+export function registerNetworkListeners(
+  onOffline: () => void,
+  onOnline: () => void
+): () => void {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+  
+  window.addEventListener('offline', onOffline);
+  window.addEventListener('online', onOnline);
+  
+  return () => {
+    window.removeEventListener('offline', onOffline);
+    window.removeEventListener('online', onOnline);
+  };
+}
+
+/**
+ * Add debug utility to monitor online/offline status
+ * This should only be used during development
+ */
+export function monitorNetworkStatus(): () => void {
+  if (process.env.NODE_ENV !== 'development') {
+    return () => {};
+  }
+  
+  const handleOffline = () => {
+    console.log('Network status: OFFLINE');
+  };
+  
+  const handleOnline = () => {
+    console.log('Network status: ONLINE');
+  };
+  
+  return registerNetworkListeners(handleOffline, handleOnline);
+}

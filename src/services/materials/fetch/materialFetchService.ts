@@ -8,9 +8,12 @@ import { isOffline } from '@/utils/errorHandling/networkChecker';
 import { fetchMaterialsFromApi, fetchCategoriesFromApi } from '../api/materialApiClient';
 import { getFallbackMaterials, getDefaultCategories } from '../fallback/materialFallbackProvider';
 import { handleMaterialApiError } from '../notifications/materialNotifications';
+import { toast } from 'sonner';
 
 // Keep track of current fetch to prevent duplicate requests
 let currentFetchPromise: Promise<ExtendedMaterialData[]> | null = null;
+let lastFetchTime = 0;
+const FETCH_COOLDOWN = 3000; // 3 seconds cooldown between fetch attempts
 
 /**
  * Fetch all materials with improved caching and fallbacks
@@ -18,11 +21,20 @@ let currentFetchPromise: Promise<ExtendedMaterialData[]> | null = null;
 export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMaterialData[]> {
   console.log('fetchMaterials called with forceRefresh:', forceRefresh);
   
-  // Return existing promise if there's already a fetch in progress
-  if (currentFetchPromise && !forceRefresh) {
-    console.log('Using existing fetch promise');
-    return currentFetchPromise;
+  // Prevent rapid repeated fetch calls
+  const now = Date.now();
+  if (now - lastFetchTime < FETCH_COOLDOWN && !forceRefresh) {
+    console.log('Fetch called too frequently, using existing promise or cache');
+    
+    // Return existing promise if there's already a fetch in progress
+    if (currentFetchPromise) {
+      console.log('Using existing fetch promise');
+      return currentFetchPromise;
+    }
   }
+  
+  // Update last fetch time
+  lastFetchTime = now;
   
   const fetchOperation = async () => {
     try {
@@ -32,7 +44,11 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
         if (cachedMaterials && cachedMaterials.length > 0) {
           console.log('Using cached materials:', cachedMaterials.length);
           return cachedMaterials;
+        } else {
+          console.log('No cached materials found or cache is empty');
         }
+      } else {
+        console.log('Force refresh requested, bypassing cache');
       }
       
       // If offline, use fallback without trying network request
@@ -57,6 +73,12 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
           timeoutPromise
         ]);
         
+        // Sanity check for data
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          console.warn('API returned empty or invalid material data');
+          throw new Error('Invalid material data returned from API');
+        }
+        
         // Process the data
         console.log('Processing data from API:', data.length, 'rows');
         const processedData = processDataInBatches(data);
@@ -70,6 +92,18 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
       } catch (err) {
         console.error('API fetch error:', err);
         handleMaterialApiError(err, 'load materials from database');
+        
+        // Try to get data from cache as fallback even though we bypassed it earlier
+        // This handles the case where forceRefresh was true but API call failed
+        if (forceRefresh) {
+          console.log('API fetch failed on forced refresh, trying cache as fallback');
+          const cachedMaterials = await getCachedMaterials();
+          if (cachedMaterials && cachedMaterials.length > 0) {
+            toast.info('Using cached material data after refresh failure');
+            return cachedMaterials;
+          }
+        }
+        
         return getFallbackMaterials();
       }
     } catch (err) {
@@ -104,13 +138,35 @@ export async function fetchMaterialCategories(): Promise<string[]> {
     });
     
     // Race the categories fetch against the timeout
-    return await Promise.race([
+    const categories = await Promise.race([
       fetchCategoriesFromApi(),
       timeoutPromise
     ]);
+    
+    // Log categories retrieved
+    console.log('Categories fetched:', categories?.length || 0);
+    
+    if (!categories || categories.length === 0) {
+      console.warn('API returned empty categories, using defaults');
+      return getDefaultCategories();
+    }
+    
+    return categories;
   } catch (error) {
     console.error('Error fetching categories:', error);
     // Return some sensible default categories on error
     return getDefaultCategories();
   }
+}
+
+// Add immediate prefetch on module load
+try {
+  setTimeout(() => {
+    console.log('Starting initial background materials prefetch');
+    fetchMaterials(false).catch(err => {
+      console.warn('Initial prefetch failed:', err);
+    });
+  }, 100);
+} catch (err) {
+  console.error('Error in initial prefetch:', err);
 }
