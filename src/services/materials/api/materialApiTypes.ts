@@ -1,27 +1,54 @@
 
 /**
- * Types for the material API responses and requests
+ * Type definitions for the Material API client
  */
-import { SupabaseMaterial } from '../materialTypes';
 
 /**
- * API response types and interfaces
- */
-export interface MaterialApiResponse {
-  data: SupabaseMaterial[] | null;
-  error: Error | null;
-}
-
-export interface CategoriesApiResponse {
-  data: string[] | null;
-  error: Error | null;
-}
-
-/**
- * API request configuration
+ * Interface for API request options
  */
 export interface ApiRequestOptions {
-  timeout?: number;
+  /**
+   * Maximum number of retries for the request
+   */
   maxRetries?: number;
+  
+  /**
+   * Timeout in milliseconds
+   */
+  timeout?: number;
+  
+  /**
+   * Callback function to run on retry
+   */
   onRetry?: (attempt: number) => void;
+}
+
+/**
+ * Interface for material API response
+ */
+export interface MaterialApiResponse<T> {
+  /**
+   * The data returned by the API
+   */
+  data?: T[];
+  
+  /**
+   * Any error that occurred during the request
+   */
+  error?: Error;
+}
+
+/**
+ * Interface for categories API response
+ */
+export interface CategoriesApiResponse {
+  /**
+   * The categories returned by the API
+   */
+  categories?: string[];
+  
+  /**
+   * Any error that occurred during the request
+   */
+  error?: Error;
 }
