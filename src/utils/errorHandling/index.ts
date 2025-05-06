@@ -1,4 +1,7 @@
 
+// Import withTimeout for local use in this file
+import { withTimeout as localWithTimeout } from './timeoutHelper';
+
 // Export all error handling utilities from this central file
 export * from './networkListeners';
 export * from './toastHelpers';
@@ -22,8 +25,8 @@ export const withNetworkErrorHandling = async <T>(
 ): Promise<T> => {
   try {
     // First try with timeout
-    // Use the explicitly imported withTimeout function
-    return await withTimeout(promise, timeoutMs);
+    // Use the locally imported withTimeout function
+    return await localWithTimeout(promise, timeoutMs);
   } catch (error) {
     // Check if it's a network error
     const { isNetworkError } = await import('./networkChecker');
