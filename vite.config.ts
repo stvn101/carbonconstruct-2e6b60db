@@ -11,7 +11,14 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   server: {
     host: "::",
-    port: 8080
+    port: 8080,
+    allowedHosts: [
+      // Allow the specific host mentioned in the error
+      '40569afc-2265-4f8d-91d9-12353c695c88.lovableproject.com',
+      // Allow all lovable domains for future flexibility
+      '*.lovableproject.com',
+      '*.lovable.app'
+    ]
   },
   resolve: {
     alias: {
