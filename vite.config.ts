@@ -18,4 +18,10 @@ export default defineConfig(({ mode }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    // Ensure sourcemaps are generated in production
+    sourcemap: true,
+    // Optimize chunk size for better performance
+    chunkSizeWarningLimit: 1000,
+  }
 }));
