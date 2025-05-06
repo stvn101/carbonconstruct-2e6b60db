@@ -22,6 +22,7 @@ export const withNetworkErrorHandling = async <T>(
 ): Promise<T> => {
   try {
     // First try with timeout
+    // Use the explicitly imported withTimeout function
     return await withTimeout(promise, timeoutMs);
   } catch (error) {
     // Check if it's a network error
