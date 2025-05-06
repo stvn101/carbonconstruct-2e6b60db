@@ -1,14 +1,13 @@
 
 import { useContext } from 'react';
 import { CalculatorContext } from './CalculatorContext';
-import { CalculatorContextType } from './types';
 
-export function useCalculator(): CalculatorContextType {
+export const useCalculator = () => {
   const context = useContext(CalculatorContext);
   
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useCalculator must be used within a CalculatorProvider');
   }
   
   return context;
-}
+};

@@ -1,11 +1,12 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { MaterialInput } from "@/lib/carbonExports";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle } from "lucide-react";
+import { MATERIAL_FACTORS } from "@/lib/carbonExports";
 
 interface MaterialFormFieldsProps {
   material: MaterialInput;
@@ -22,17 +23,25 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
   onRemove,
   onUpdate
 }) => {
-  // Define material options
-  const materialOptions = [
-    { value: "concrete", label: "Concrete" },
-    { value: "steel", label: "Steel" },
-    { value: "timber", label: "Timber" },
-    { value: "glass", label: "Glass" },
-    { value: "brick", label: "Brick" },
-    { value: "aluminium", label: "Aluminium" },
-    { value: "insulation", label: "Insulation" },
-    { value: "plastic", label: "Plastic" }
-  ];
+  // Generate material options dynamically from MATERIAL_FACTORS
+  const materialOptions = useMemo(() => {
+    try {
+      return Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
+        value: key,
+        label: value.name || key
+      }));
+    } catch (err) {
+      console.error("Error loading material options:", err);
+      return [
+        { value: "concrete", label: "Concrete" },
+        { value: "steel", label: "Steel" },
+        { value: "timber", label: "Timber" },
+        { value: "glass", label: "Glass" },
+        { value: "brick", label: "Brick" },
+        { value: "insulation", label: "Insulation" }
+      ];
+    }
+  }, []);
 
   return (
     <div className="grid grid-cols-1 gap-3 items-end border border-gray-200 dark:border-gray-700 p-3 md:p-4 rounded-lg">
