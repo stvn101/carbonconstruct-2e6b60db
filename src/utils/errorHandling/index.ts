@@ -13,3 +13,25 @@ export { timeoutPromise, withTimeout, retryWithBackoff } from './timeoutHelper';
 
 // Export everything from networkChecker (including its isNetworkError)
 export * from './networkChecker';
+
+// Utility to combine errors with timeout handling
+export const withNetworkErrorHandling = async <T>(
+  promise: Promise<T>, 
+  timeoutMs: number = 15000,
+  maxRetries: number = 2
+): Promise<T> => {
+  try {
+    // First try with timeout
+    return await withTimeout(promise, timeoutMs);
+  } catch (error) {
+    // Check if it's a network error
+    const { isNetworkError } = await import('./networkChecker');
+    if (isNetworkError(error)) {
+      // Retry with backoff for network errors
+      const { retryWithBackoff } = await import('./timeoutHelper');
+      return retryWithBackoff(() => promise, maxRetries);
+    }
+    // If not a network error, rethrow
+    throw error;
+  }
+};

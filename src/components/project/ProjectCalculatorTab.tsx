@@ -2,7 +2,8 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator } from "lucide-react";
+import { Calculator, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ProjectCalculatorTabProps {
   calculationInput?: any;
@@ -21,6 +22,14 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
      calculationInput.transport?.length > 0 || 
      calculationInput.energy?.length > 0);
 
+  // Function to format material type for display
+  const formatMaterialType = (type: string) => {
+    // Convert camelCase to Title Case with spaces
+    return type
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase());
+  };
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -37,13 +46,18 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
             {calculationInput.materials && calculationInput.materials.length > 0 && (
               <div className="mb-4">
                 <h4 className="font-medium mb-2">Materials</h4>
-                <ul className="list-disc pl-5">
-                  {calculationInput.materials.map((material: any, index: number) => (
-                    <li key={index}>
-                      {material.type}: {material.quantity} {material.unit}
-                    </li>
-                  ))}
-                </ul>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md">
+                  <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {calculationInput.materials.map((material: any, index: number) => (
+                      <li key={index} className="py-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">{formatMaterialType(material.type)}</span>
+                          <span>{material.quantity} kg</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
             
@@ -51,13 +65,18 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
             {calculationInput.transport && calculationInput.transport.length > 0 && (
               <div className="mb-4">
                 <h4 className="font-medium mb-2">Transport</h4>
-                <ul className="list-disc pl-5">
-                  {calculationInput.transport.map((transport: any, index: number) => (
-                    <li key={index}>
-                      {transport.type}: {transport.distance} km, {transport.weight} kg
-                    </li>
-                  ))}
-                </ul>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md">
+                  <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {calculationInput.transport.map((transport: any, index: number) => (
+                      <li key={index} className="py-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">{formatMaterialType(transport.type)}</span>
+                          <span>{transport.distance} km, {transport.weight} kg</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
             
@@ -65,13 +84,18 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
             {calculationInput.energy && calculationInput.energy.length > 0 && (
               <div className="mb-4">
                 <h4 className="font-medium mb-2">Energy</h4>
-                <ul className="list-disc pl-5">
-                  {calculationInput.energy.map((energy: any, index: number) => (
-                    <li key={index}>
-                      {energy.type}: {energy.amount} {energy.unit}
-                    </li>
-                  ))}
-                </ul>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md">
+                  <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {calculationInput.energy.map((energy: any, index: number) => (
+                      <li key={index} className="py-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">{formatMaterialType(energy.type)}</span>
+                          <span>{energy.amount} {energy.unit || 'kWh'}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
             
@@ -116,6 +140,15 @@ const ProjectCalculatorTab: React.FC<ProjectCalculatorTabProps> = ({
                 Recalculate Emissions
               </Button>
             </div>
+            
+            {!calculationResult && (
+              <Alert className="mt-4 bg-amber-50 border-amber-200">
+                <Info className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800">
+                  No calculation results available yet. Click the button above to calculate emissions.
+                </AlertDescription>
+              </Alert>
+            )}
           </>
         ) : (
           <div className="text-center py-8">
