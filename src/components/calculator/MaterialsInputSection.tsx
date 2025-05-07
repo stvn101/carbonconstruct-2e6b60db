@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { MaterialInput } from "@/lib/carbonExports";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonContent } from "@/components/ui/skeleton-content";
 import MaterialFormFields from "./materials/MaterialFormFields";
+import { fetchMaterials } from "@/services/materialService";
 
 const MAX_QUANTITY = 10000;
 
@@ -28,6 +30,26 @@ const MaterialsInputSection = ({
   const isMobile = useIsMobile().isMobile;
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Ensure materials data is loaded
+  useEffect(() => {
+    // Only run this once
+    if (!initialLoadComplete) {
+      console.log("MaterialsInputSection: Ensuring materials are loaded");
+      // Prefetch materials in the background
+      fetchMaterials(false)
+        .then(materials => {
+          console.log(`MaterialsInputSection: Successfully prefetched ${materials.length} materials`);
+        })
+        .catch(error => {
+          console.error("MaterialsInputSection: Failed to prefetch materials", error);
+        })
+        .finally(() => {
+          setInitialLoadComplete(true);
+        });
+    }
+  }, [initialLoadComplete]);
 
   const handleQuantityChange = (index: number, value: string) => {
     const numValue = Number(value);

@@ -9,19 +9,21 @@ import { fetchMaterialsFromApi, fetchCategoriesFromApi } from '../api/materialAp
 import { getFallbackMaterials, getDefaultCategories } from '../fallback/materialFallbackProvider';
 import { handleMaterialApiError } from '../notifications/materialNotifications';
 import { toast } from 'sonner';
+import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
 
 // Keep track of current fetch to prevent duplicate requests
 let currentFetchPromise: Promise<ExtendedMaterialData[]> | null = null;
 let lastFetchTime = 0;
-const FETCH_COOLDOWN = 3000; // 3 seconds cooldown between fetch attempts
+const FETCH_COOLDOWN = 1000; // 1 second cooldown between fetch attempts (reduced from 3s)
+const MAX_RETRIES = 3; // Maximum number of retries for loading materials
 
 /**
- * Fetch all materials with improved caching and fallbacks
+ * Enhanced material fetch with better caching, retry logic, and fallbacks
  */
 export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMaterialData[]> {
   console.log('fetchMaterials called with forceRefresh:', forceRefresh);
   
-  // Prevent rapid repeated fetch calls
+  // Prevent rapid repeated fetch calls but allow forced refreshes
   const now = Date.now();
   if (now - lastFetchTime < FETCH_COOLDOWN && !forceRefresh) {
     console.log('Fetch called too frequently, using existing promise or cache');
@@ -43,7 +45,13 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
         const cachedMaterials = await getCachedMaterials();
         if (cachedMaterials && cachedMaterials.length > 0) {
           console.log('Using cached materials:', cachedMaterials.length);
-          return cachedMaterials;
+          // Verify cache has sufficient data
+          if (cachedMaterials.length >= 100) { // Expect at least 100 materials
+            return cachedMaterials;
+          } else {
+            console.log('Cache has insufficient data, trying full refresh');
+            // Continue to API fetch if cache seems insufficient
+          }
         } else {
           console.log('No cached materials found or cache is empty');
         }
@@ -55,7 +63,7 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
       if (isOffline()) {
         console.log('Offline mode detected, using fallback materials');
         handleMaterialApiError(new Error('Network offline'), 'load materials');
-        return getFallbackMaterials();
+        return getComprehensiveFallbackMaterials();
       }
       
       // Try to fetch from API with timeout
@@ -64,7 +72,7 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
         
         // Create a timeout promise
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('API request timed out')), 15000);
+          setTimeout(() => reject(new Error('API request timed out')), 20000); // Increased timeout to 20s
         });
         
         // Race the API fetch against the timeout
@@ -104,12 +112,12 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
           }
         }
         
-        return getFallbackMaterials();
+        return getComprehensiveFallbackMaterials();
       }
     } catch (err) {
       console.error('Error loading materials:', err);
       handleMaterialApiError(err, 'load materials');
-      return getFallbackMaterials();
+      return getComprehensiveFallbackMaterials();
     } finally {
       // Clear current promise reference when done
       currentFetchPromise = null;
@@ -119,6 +127,77 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
   // Set the current promise and return it
   currentFetchPromise = fetchOperation();
   return currentFetchPromise;
+}
+
+/**
+ * Get comprehensive fallback materials using all available sources
+ */
+function getComprehensiveFallbackMaterials(): ExtendedMaterialData[] {
+  try {
+    // Get base fallback materials
+    const baseMaterials = getFallbackMaterials();
+    
+    // Also generate materials from MATERIAL_FACTORS
+    const factorMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => {
+      return {
+        id: `factor-${key}`,
+        name: value.name || key,
+        factor: value.factor,
+        carbon_footprint_kgco2e_kg: value.factor,
+        carbon_footprint_kgco2e_tonne: value.factor * 1000,
+        unit: value.unit || 'kg',
+        region: 'Australia',
+        tags: ['construction'],
+        sustainabilityScore: Math.floor(Math.random() * 20) + 60, // More variation: 60-80
+        recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low',
+        alternativeTo: key.includes('recycled') || key.includes('low-carbon') ? key.replace(/recycled |low-carbon /, '') : undefined,
+        notes: '',
+        category: determineCategoryFromName(key)
+      };
+    });
+    
+    // Combine both sources, removing duplicates by name
+    const materialMap = new Map<string, ExtendedMaterialData>();
+    
+    // Add base materials first
+    baseMaterials.forEach(material => {
+      if (material && material.name) {
+        materialMap.set(material.name.toLowerCase(), material);
+      }
+    });
+    
+    // Add factor materials if not already present
+    factorMaterials.forEach(material => {
+      if (material && material.name && !materialMap.has(material.name.toLowerCase())) {
+        materialMap.set(material.name.toLowerCase(), material);
+      }
+    });
+    
+    // Convert back to array
+    const combinedMaterials = Array.from(materialMap.values());
+    console.log(`Combined ${combinedMaterials.length} fallback materials from multiple sources`);
+    
+    return combinedMaterials;
+  } catch (error) {
+    console.error('Error creating comprehensive fallback materials:', error);
+    return getFallbackMaterials();
+  }
+}
+
+/**
+ * Determine category from material name for better organization
+ */
+function determineCategoryFromName(name: string): string {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('concrete')) return 'Concrete';
+  if (lowerName.includes('steel') || lowerName.includes('metal') || lowerName.includes('iron')) return 'Metals';
+  if (lowerName.includes('wood') || lowerName.includes('timber')) return 'Wood';
+  if (lowerName.includes('glass')) return 'Glass';
+  if (lowerName.includes('brick') || lowerName.includes('tile')) return 'Ceramics';
+  if (lowerName.includes('insulation')) return 'Insulation';
+  if (lowerName.includes('plastic')) return 'Plastics';
+  if (lowerName.includes('rock') || lowerName.includes('stone') || lowerName.includes('aggregate')) return 'Aggregates';
+  return 'Other';
 }
 
 /**
@@ -159,14 +238,27 @@ export async function fetchMaterialCategories(): Promise<string[]> {
   }
 }
 
-// Add immediate prefetch on module load
-try {
-  setTimeout(() => {
-    console.log('Starting initial background materials prefetch');
-    fetchMaterials(false).catch(err => {
-      console.warn('Initial prefetch failed:', err);
-    });
-  }, 100);
-} catch (err) {
-  console.error('Error in initial prefetch:', err);
-}
+// Add immediate prefetch on module load with retry capability
+(function initializeMaterialPrefetch() {
+  let retryCount = 0;
+  
+  function attemptPrefetch() {
+    console.log(`Starting background materials prefetch (attempt ${retryCount + 1})`);
+    fetchMaterials(false)
+      .then(materials => {
+        console.log(`Background prefetch complete: ${materials.length} materials loaded`);
+      })
+      .catch(err => {
+        console.warn('Background prefetch failed:', err);
+        if (retryCount < MAX_RETRIES) {
+          retryCount++;
+          const delay = Math.min(2000 * Math.pow(2, retryCount), 30000); // Exponential backoff with max 30s
+          console.log(`Will retry in ${delay}ms`);
+          setTimeout(attemptPrefetch, delay);
+        }
+      });
+  }
+  
+  // Start with a short delay
+  setTimeout(attemptPrefetch, 500);
+})();
