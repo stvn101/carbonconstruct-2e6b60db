@@ -141,7 +141,6 @@ export const useLoadMaterials = (
         else sustainabilityScore = Math.floor(Math.random() * 30) + 60; // 60-90
         
         return {
-          id: `material-${key}`,
           name: value.name || key,
           factor: value.factor || 0,
           carbon_footprint_kgco2e_kg: value.factor || 0,
@@ -191,7 +190,7 @@ export const useLoadMaterials = (
     }
   };
   
-  // Helper function to create a material entry
+  // Helper function to create a material entry - fixed to match ExtendedMaterialData type
   const createMaterial = (
     name: string, 
     factor: number, 
@@ -200,7 +199,6 @@ export const useLoadMaterials = (
     sustainabilityScore: number = 70
   ): ExtendedMaterialData => {
     return {
-      id: `material-${name.replace(/\s+/g, '-').toLowerCase()}`,
       name,
       factor,
       carbon_footprint_kgco2e_kg: factor,
