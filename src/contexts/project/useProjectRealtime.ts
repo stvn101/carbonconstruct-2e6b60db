@@ -9,6 +9,10 @@ import { createProjectChannel, removeChannel } from './realtime/channelUtils';
 import { createSubscriptionHandler } from './realtime/subscriptionHandler';
 import { useHealthCheck } from './realtime/useHealthCheck';
 
+/**
+ * Hook to manage realtime project updates with optimized performance
+ * to address issues with realtime.list_changes
+ */
 export const useProjectRealtime = (
   userId: string | undefined, 
   setProjects: Dispatch<SetStateAction<SavedProject[]>>

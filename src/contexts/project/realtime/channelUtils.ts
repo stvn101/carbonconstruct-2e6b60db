@@ -8,6 +8,7 @@ import ErrorTrackingService from '@/services/error/errorTrackingService';
 
 /**
  * Creates and configures a Supabase realtime channel for project updates
+ * with optimized connection handling and error recovery
  */
 export const createProjectChannel = (
   userId: string,
@@ -15,8 +16,18 @@ export const createProjectChannel = (
   handleSubscriptionStatus: (status: string) => void
 ): RealtimeChannel | null => {
   try {
-    // Create a new channel
-    const projectChannel = supabase.channel(`projects:user_id=eq.${userId}`)
+    // Create a new channel with optimized configuration
+    // Using a specific filter reduces the load on realtime.list_changes
+    const channelName = `projects:user_id=eq.${userId}`;
+    const projectChannel = supabase.channel(channelName, {
+      config: {
+        broadcast: { self: false },
+        presence: { key: userId },
+        // Add retry configuration to improve reliability
+        retryIntervalMs: 5000,
+        retryMaxCount: 10
+      }
+    })
       .on('postgres_changes', { 
         event: 'INSERT', 
         schema: 'public', 

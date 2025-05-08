@@ -1,11 +1,12 @@
 
 import { useEffect } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { checkSupabaseConnection } from '@/services/supabase/connection';
+import { isOffline } from '@/utils/errorHandling';
 
 /**
- * Hook to periodically check connection health and reconnect if needed
+ * Hook that provides health checks for realtime subscriptions
+ * with optimized reconnection strategy to prevent excessive 
+ * realtime.list_changes queries
  */
 export const useHealthCheck = (
   userId: string | undefined,
@@ -13,53 +14,55 @@ export const useHealthCheck = (
   mountedRef: React.MutableRefObject<boolean>,
   reconnectTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
   isSubscribingRef: React.MutableRefObject<boolean>,
-  subscribeToProjects: () => RealtimeChannel | null
+  subscribeToProjects: () => any
 ) => {
+  // Set up health check monitoring
   useEffect(() => {
-    if (!userId || !mountedRef.current) return;
+    if (!userId) return;
     
-    const healthCheckInterval = setInterval(async () => {
-      // Skip health check if we're already trying to subscribe or if unmounted
-      if (isSubscribingRef.current || !mountedRef.current) return;
+    // Create initial subscription
+    if (mountedRef.current && !channelRef.current && !isSubscribingRef.current) {
+      subscribeToProjects();
+    }
+    
+    // Set up periodic health checks
+    const healthCheckInterval = setInterval(() => {
+      if (!mountedRef.current) return;
       
-      try {
-        const isConnected = await checkSupabaseConnection();
-        
-        // If we detected a disconnection, try to reconnect
-        if (!isConnected && channelRef.current && mountedRef.current) {
-          console.log('Health check failed, attempting to reconnect realtime subscription');
-          
-          if (reconnectTimeoutRef.current) {
-            clearTimeout(reconnectTimeoutRef.current);
-          }
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            if (!mountedRef.current) return;
-            
-            try {
-              if (channelRef.current) {
-                supabase.removeChannel(channelRef.current);
-              }
-              channelRef.current = null;
-              
-              if (mountedRef.current) {
-                const newChannel = subscribeToProjects();
-                if (newChannel) {
-                  console.log("Re-established realtime subscription after health check");
-                }
-              }
-            } catch (err) {
-              console.error("Error during channel reconnection:", err);
-            }
-          }, 2000);
-        }
-      } catch (err) {
-        console.warn("Error during health check:", err);
+      // Skip health check if offline
+      if (isOffline()) {
+        console.log('Network offline, skipping realtime health check');
+        return;
       }
-    }, 30000); // Check every 30 seconds
+      
+      // Check if channel needs to be reestablished
+      if (!isSubscribingRef.current && !channelRef.current) {
+        console.log('No active realtime channel found, attempting to subscribe');
+        subscribeToProjects();
+      }
+    }, 60000); // Health check every minute (reduced frequency to limit database load)
     
     return () => {
       clearInterval(healthCheckInterval);
     };
-  }, [userId, channelRef, mountedRef, reconnectTimeoutRef, isSubscribingRef, subscribeToProjects]);
+  }, [userId, mountedRef, channelRef, isSubscribingRef, subscribeToProjects]);
+  
+  // Add network reconnection handler
+  useEffect(() => {
+    if (!userId) return;
+    
+    const handleOnline = () => {
+      console.log('Network online, checking realtime connection');
+      if (mountedRef.current && !channelRef.current && !isSubscribingRef.current) {
+        console.log('Reestablishing realtime connection after network reconnect');
+        subscribeToProjects();
+      }
+    };
+    
+    window.addEventListener('online', handleOnline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [userId, mountedRef, channelRef, isSubscribingRef, subscribeToProjects]);
 };
