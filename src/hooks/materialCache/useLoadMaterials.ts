@@ -143,8 +143,6 @@ export const useLoadMaterials = (
         return {
           name: value.name || key,
           factor: value.factor || 0,
-          carbon_footprint_kgco2e_kg: value.factor || 0,
-          carbon_footprint_kgco2e_tonne: (value.factor || 0) * 1000,
           unit: value.unit || 'kg',
           region: 'Australia',
           tags: tags,
@@ -201,8 +199,6 @@ export const useLoadMaterials = (
     return {
       name,
       factor,
-      carbon_footprint_kgco2e_kg: factor,
-      carbon_footprint_kgco2e_tonne: factor * 1000,
       unit: 'kg',
       region: 'Australia',
       tags,
