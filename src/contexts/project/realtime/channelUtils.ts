@@ -22,10 +22,9 @@ export const createProjectChannel = (
     const projectChannel = supabase.channel(channelName, {
       config: {
         broadcast: { self: false },
-        presence: { key: userId },
-        // Add retry configuration to improve reliability
-        retryIntervalMs: 5000,
-        retryMaxCount: 10
+        presence: { key: userId }
+        // Remove invalid retry configuration properties
+        // We'll handle retries in the subscription handler instead
       }
     })
       .on('postgres_changes', { 
