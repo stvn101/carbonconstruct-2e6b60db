@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "utils": "./utils.ts",
+    "suggestions": "./suggestions.ts"
+  }
+}
