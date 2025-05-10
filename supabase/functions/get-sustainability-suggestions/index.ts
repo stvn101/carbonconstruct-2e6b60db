@@ -1,5 +1,5 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.200.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +23,7 @@ serve(async (req) => {
     console.log('Request received:', { materials, transport, energy });
 
     // Generate some sample suggestions based on input
-    const suggestions = [];
+    const suggestions: string[] = [];
 
     // Material suggestions
     if (materials && materials.length > 0) {
