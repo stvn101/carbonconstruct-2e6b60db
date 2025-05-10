@@ -19,11 +19,6 @@ interface TransportInputSectionProps {
   demoMode?: boolean;
 }
 
-// Fix the TransportFieldError type issue
-interface TransportFieldError {
-  [key: string]: string; // Add index signature
-}
-
 const TransportInputSection = ({
   transport,
   onUpdateTransport,

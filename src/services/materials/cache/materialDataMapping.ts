@@ -7,12 +7,26 @@ import { SupabaseMaterial } from '../materialTypes';
 import { MAX_BATCH_SIZE } from './cacheConstants';
 import { calculateSustainabilityScore, determineRecyclability } from '../materialDataProcessor';
 
+interface MaterialSourceData {
+  name?: string;
+  carbon_footprint_kgco2e_kg?: number;
+  factor?: number;
+  unit?: string;
+  region?: string;
+  tags?: string[];
+  sustainabilityscore?: number;
+  recyclability?: string;
+  alternativeto?: string;
+  notes?: string;
+  category?: string;
+}
+
 /**
  * Maps database materials to application format
  * @param data Raw materials from database
  * @returns Mapped materials in application format
  */
-export function mapDatabaseMaterials(data: any[]): ExtendedMaterialData[] {
+export function mapDatabaseMaterials(data: MaterialSourceData[]): ExtendedMaterialData[] {
   console.time('Map materials');
   
   try {
@@ -40,9 +54,9 @@ export function mapDatabaseMaterials(data: any[]): ExtendedMaterialData[] {
             tags: Array.isArray(item.tags) ? item.tags : 
                   item.category ? [item.category] : ['construction'],
             sustainabilityScore: item.sustainabilityscore || 
-                               calculateSustainabilityScore(item.carbon_footprint_kgco2e_kg || item.factor),
+                               calculateSustainabilityScore(item.carbon_footprint_kgco2e_kg || item.factor || 0),
             recyclability: item.recyclability || 
-                         determineRecyclability(item.category) as 'High' | 'Medium' | 'Low',
+                         determineRecyclability(item.category || '') as 'High' | 'Medium' | 'Low',
             alternativeTo: item.alternativeto || undefined,
             notes: item.notes || '',
             category: item.category || 'Other'
@@ -51,7 +65,7 @@ export function mapDatabaseMaterials(data: any[]): ExtendedMaterialData[] {
           console.warn('Error mapping material item:', itemError, item);
           return null;
         }
-      }).filter(Boolean); // Remove null items
+      }).filter((item): item is ExtendedMaterialData => item !== null);
       
       result.push(...mappedBatch);
     }

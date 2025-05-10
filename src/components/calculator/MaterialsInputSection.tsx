@@ -42,7 +42,7 @@ const MaterialsInputSection = ({
         .then(materials => {
           console.log(`MaterialsInputSection: Successfully prefetched ${materials.length} materials`);
         })
-        .catch(error => {
+        .catch((error: Error) => {
           console.error("MaterialsInputSection: Failed to prefetch materials", error);
         })
         .finally(() => {
