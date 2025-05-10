@@ -3,6 +3,7 @@ import React from 'react';
 import CalculatorErrorBoundaryWrapper from "./error/CalculatorErrorBoundaryWrapper";
 import CalculatorTabSection from "./tabs/CalculatorTabSection";
 import { CalculatorContextType } from "@/contexts/calculator/types";
+import { CalculationInput, CalculationResult, EnergyInput, MaterialInput, TransportInput } from '@/lib/carbonExports';
 
 interface CalculatorContentProps {
   activeTab: string;
@@ -10,15 +11,15 @@ interface CalculatorContentProps {
   handleCalculateWithTracking: () => void;
   isMobile: boolean;
   isPremiumUser: boolean;
-  calculationInput: any;
-  calculationResult: any;
-  handleUpdateMaterial: any;
+  calculationInput: CalculationInput;
+  calculationResult: CalculationResult | null;
+  handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: string | number) => void;
   handleAddMaterial: () => void;
   handleRemoveMaterial: (index: number) => void;
-  handleUpdateTransport: any;
+  handleUpdateTransport: (index: number, field: keyof TransportInput, value: string | number) => void;
   handleAddTransport: () => void;
   handleRemoveTransport: (index: number) => void;
-  handleUpdateEnergy: any;
+  handleUpdateEnergy: (index: number, field: keyof EnergyInput, value: string | number) => void;
   handleAddEnergy: () => void;
   handleRemoveEnergy: (index: number) => void;
   handlePrevTab: () => void;

@@ -6,12 +6,35 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth';
 import { showErrorToast } from '@/utils/errorHandling/simpleToastHandler';
+import { CalculatorContextType } from '@/contexts/calculator/types';
+import { SavedProject } from '@/types/project';
 
 export interface UseCalculatorActionsProps {
   demoMode?: boolean;
 }
 
-export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsProps) {
+interface UseCalculatorActionsResult {
+  error: boolean;
+  projectName: string;
+  setProjectName: (name: string) => void;
+  authError: Error | null;
+  setAuthError: (error: Error | null) => void;
+  savingError: Error | null;
+  setSavingError: (error: Error | null) => void;
+  isSaving: boolean;
+  setIsSaving: (saving: boolean) => void;
+  showSaveDialog: boolean;
+  setShowSaveDialog: (show: boolean) => void;
+  isCalculating: boolean;
+  setIsCalculating: (isCalculating: boolean) => void;
+  handleSaveClick: () => void;
+  handleSaveConfirm: () => Promise<void>;
+  handleSignIn: () => void;
+  isExistingProject: boolean;
+  calculatorContext: CalculatorContextType | null;
+}
+
+export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsProps): UseCalculatorActionsResult {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { saveProject, projects } = useProjects();
@@ -22,7 +45,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
   const [savingError, setSavingError] = useState<Error | null>(null);
 
   // Access calculator context
-  let calculatorContext;
+  let calculatorContext: CalculatorContextType | null = null;
   try {
     calculatorContext = useCalculator();
   } catch (error) {
@@ -111,7 +134,7 @@ export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsP
         tags: ["carbon", "calculation"],
         status: 'draft' as const,
         total_emissions: calculationResult.totalEmissions || 0,
-        premium_only: false // Adding the missing field
+        premium_only: false
       };
       
       // Save the project

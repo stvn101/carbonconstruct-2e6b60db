@@ -9,7 +9,7 @@ export interface CacheStats {
 }
 
 export interface UseMaterialCacheResult {
-  materials: any[];
+  materials: Array<any>; // This will be replaced with ExtendedMaterialData[] in client code
   loading: boolean;
   error: Error | null;
   refreshCache: () => Promise<void>;

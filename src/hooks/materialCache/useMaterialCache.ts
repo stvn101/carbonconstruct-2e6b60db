@@ -1,6 +1,7 @@
 
 /**
  * Refactored material cache hook that composes smaller, more focused hooks
+ * with improved type safety
  */
 import { useState, useEffect } from 'react';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
@@ -40,7 +41,7 @@ export const useMaterialCache = (): UseMaterialCacheResult => {
               toast.success(`Materials loaded successfully on retry ${retryCount + 1}`);
             }
           })
-          .catch(err => {
+          .catch((err: Error) => {
             console.error(`Retry ${retryCount + 1} failed:`, err);
           });
         
@@ -62,7 +63,7 @@ export const useMaterialCache = (): UseMaterialCacheResult => {
         if (materials.length < 50) {
           console.log('Initial load returned insufficient materials, trying again with force refresh');
           // Try again with force refresh if we didn't get many materials
-          loadMaterials(true).catch(err => {
+          loadMaterials(true).catch((err: Error) => {
             console.error('Forced refresh after initial load failed:', err);
           });
         }
