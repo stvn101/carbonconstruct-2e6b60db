@@ -1,0 +1,32 @@
+{
+  "importMap": "./import_map.json",
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "strict": true,
+    "noImplicitAny": false,
+    "types": ["./deno.d.ts"]
+  },
+  "lint": {
+    "files": {
+      "include": ["*.ts"]
+    },
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "files": {
+      "include": ["*.ts"]
+    },
+    "options": {
+      "useTabs": false,
+      "lineWidth": 80,
+      "indentWidth": 2,
+      "singleQuote": true,
+      "proseWrap": "preserve"
+    }
+  },
+  "tasks": {
+    "start": "deno run --allow-net --allow-env index.ts"
+  }
+}
