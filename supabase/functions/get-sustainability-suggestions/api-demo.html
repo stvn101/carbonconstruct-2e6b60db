@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability Suggestions API Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .output-section {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .options {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .checkbox-item {
+            margin-right: 15px;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            overflow: auto;
+            max-height: 500px;
+        }
+        .metrics {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 5px;
+        }
+        .suggestions {
+            margin-top: 20px;
+        }
+        .suggestion-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db;
+            background-color: #f0f8ff;
+        }
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fadbd8;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .loading {
+            display: none;
+            margin-top: 10px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sustainability Suggestions API Demo</h1>
+    <p>This demo shows how to use the Sustainability Suggestions API to get recommendations based on material, transport, and energy data.</p>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>Input Data</h2>
+            <p>Enter your JSON data below or use the sample data:</p>
+            <textarea id="input-data"></textarea>
+            <button id="load-sample">Load Sample Data</button>
+            <button id="send-request">Send Request</button>
+            <div class="loading" id="loading">Processing request...</div>
+            
+            <div class="options">
+                <h3>Options</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="detailed" checked>
+                        <label for="detailed">Detailed Report</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lifecycle" checked>
+                        <label for="lifecycle">Include Lifecycle Assessment</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="circular" checked>
+                        <label for="circular">Include Circular Economy Metrics</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="benchmarking">
+                        <label for="benchmarking">Include Benchmarking</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="compliance">
+                        <label for="compliance">Include Regulatory Compliance</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="output-section">
+            <h2>API Response</h2>
+            <div id="error-message" class="error" style="display: none;"></div>
+            
+            <div id="results" style="display: none;">
+                <div class="metrics" id="metrics-section">
+                    <h3>Sustainability Metrics</h3>
+                    <div id="metrics-content"></div>
+                </div>
+                
+                <div class="suggestions">
+                    <h3>Suggestions</h3>
+                    <div id="suggestions-list"></div>
+                </div>
+                
+                <h3>Raw Response</h3>
+                <pre id="raw-response"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API URL - Change this to your actual API URL
+        const API_URL = 'http://localhost:8000';
+        
+        // Sample data
+        const sampleData = {
+            materials: [
+                {
+                    name: "Concrete",
+                    embodiedCarbon: 0.85,
+                    recycledContent: 20,
+                    locallySourced: false
+                },
+                {
+                    name: "Steel",
+                    embodiedCarbon: 0.7,
+                    recycledContent: 60,
+                    locallySourced: true
+                },
+                {
+                    name: "Timber",
+                    embodiedCarbon: 0.3,
+                    recycledContent: 0,
+                    locallySourced: true,
+                    sustainabilityScore: 85
+                }
+            ],
+            transport: [
+                {
+                    type: "Truck",
+                    distance: 150,
+                    emissionsFactor: 0.9,
+                    efficiency: 0.65,
+                    fuel: "diesel"
+                },
+                {
+                    type: "Electric Vehicle",
+                    distance: 50,
+                    emissionsFactor: 0.2,
+                    efficiency: 0.9,
+                    isElectric: true
+                }
+            ],
+            energy: [
+                {
+                    source: "Grid Electricity",
+                    consumption: 5000,
+                    carbonIntensity: 0.5,
+                    renewable: false
+                },
+                {
+                    source: "Solar",
+                    consumption: 2000,
+                    carbonIntensity: 0.05,
+                    renewable: true
+                }
+            ]
+        };
+        
+        // DOM elements
+        const inputDataEl = document.getElementById('input-data');
+        const loadSampleBtn = document.getElementById('load-sample');
+        const sendRequestBtn = document.getElementById('send-request');
+        const loadingEl = document.getElementById('loading');
+        const errorMessageEl = document.getElementById('error-message');
+        const resultsEl = document.getElementById('results');
+        const metricsContentEl = document.getElementById('metrics-content');
+        const suggestionsListEl = document.getElementById('suggestions-list');
+        const rawResponseEl = document.getElementById('raw-response');
+        
+        // Option checkboxes
+        const detailedCheckbox = document.getElementById('detailed');
+        const lifecycleCheckbox = document.getElementById('lifecycle');
+        const circularCheckbox = document.getElementById('circular');
+        const benchmarkingCheckbox = document.getElementById('benchmarking');
+        const complianceCheckbox = document.getElementById('compliance');
+        
+        // Load sample data
+        loadSampleBtn.addEventListener('click', () => {
+            inputDataEl.value = JSON.stringify(sampleData, null, 2);
+        });
+        
+        // Load sample data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            inputDataEl.value = JSON.stringify(sampleData, null, 2);
+        });
+        
+        // Send request to API
+        sendRequestBtn.addEventListener('click', async () => {
+            // Clear previous results
+            errorMessageEl.style.display = 'none';
+            resultsEl.style.display = 'none';
+            loadingEl.style.display = 'block';
+            
+            try {
+                // Parse input data
+                const inputData = JSON.parse(inputDataEl.value);
+                
+                // Build URL with query parameters
+                let url = API_URL;
+                const params = new URLSearchParams();
+                
+                if (detailedCheckbox.checked) {
+                    params.append('detailed', 'true');
+                }
+                
+                if (lifecycleCheckbox.checked) {
+                    params.append('includeLifecycleAssessment', 'true');
+                }
+                
+                if (circularCheckbox.checked) {
+                    params.append('includeCircularEconomyMetrics', 'true');
+                }
+                
+                if (benchmarkingCheckbox.checked) {
+                    params.append('includeBenchmarking', 'true');
+                }
+                
+                if (complianceCheckbox.checked) {
+                    params.append('includeRegulatoryCompliance', 'true');
+                }
+                
+                // Add query parameters to URL
+                if (params.toString()) {
+                    url += '?' + params.toString();
+                }
+                
+                // Send request to API
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(inputData)
+                });
+                
+                // Parse response
+                const data = await response.json();
+                
+                // Display raw response
+                rawResponseEl.textContent = JSON.stringify(data, null, 2);
+                
+                // Check if response was successful
+                if (!data.success) {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+                
+                // Display metrics
+                if (data.metrics) {
+                    let metricsHtml = `
+                        <p><strong>Sustainability Score:</strong> ${data.metrics.sustainabilityScore.toFixed(1)}/100</p>
+                        <p><strong>Estimated Carbon Savings:</strong> ${(data.metrics.estimatedCarbonSavings * 100).toFixed(1)}%</p>
+                    `;
+                    
+                    if (data.metrics.improvementAreas && data.metrics.improvementAreas.length > 0) {
+                        metricsHtml += `<p><strong>Improvement Areas:</strong> ${data.metrics.improvementAreas.join(', ')}</p>`;
+                    }
+                    
+                    metricsContentEl.innerHTML = metricsHtml;
+                }
+                
+                // Display suggestions
+                if (data.suggestions && data.suggestions.length > 0) {
+                    let suggestionsHtml = '';
+                    
+                    data.suggestions.forEach(suggestion => {
+                        suggestionsHtml += `
+                            <div class="suggestion-item">
+                                <p><strong>${suggestion.category}:</strong> ${suggestion.text}</p>
+                                <p><strong>Impact:</strong> ${suggestion.impact}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    suggestionsListEl.innerHTML = suggestionsHtml;
+                } else {
+                    suggestionsListEl.innerHTML = '<p>No suggestions available.</p>';
+                }
+                
+                // Show results
+                resultsEl.style.display = 'block';
+            } catch (error) {
+                // Display error message
+                errorMessageEl.textContent = `Error: ${error.message}`;
+                errorMessageEl.style.display = 'block';
+                console.error('API request failed:', error);
+            } finally {
+                // Hide loading indicator
+                loadingEl.style.display = 'none';
+            }
+        });
+    </script>
