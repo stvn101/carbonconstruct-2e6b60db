@@ -4,7 +4,6 @@
  */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { supabase } from '@/integrations/supabase/client';
-import { withTimeout } from '@/utils/timeoutUtils';
 import { mapDatabaseMaterials } from './materialDataMapping';
 import { CONNECTION_TIMEOUT, CACHE_EXPIRATION, CACHE_REFRESH_INTERVAL } from './cacheConstants';
 
@@ -16,6 +15,7 @@ class MaterialCacheService {
   private retryTimeout: number | null = null;
   private retryCount = 0;
   private MAX_RETRIES = 3;
+  private isInitialized = false;
 
   constructor() {
     this.initializeCache();
@@ -36,6 +36,7 @@ class MaterialCacheService {
           this.cache = JSON.parse(cachedData);
           this.lastUpdated = new Date(cachedTimestamp);
           console.log('Materials cache loaded from local storage:', this.cache.length, 'items');
+          this.isInitialized = true;
           
           // Check if cache is expired
           const now = new Date();
@@ -95,10 +96,14 @@ class MaterialCacheService {
         throw new Error('Supabase client not initialized');
       }
       
-      // First create the Supabase query
-      const query = supabase.from('materials').select('*').order('id').limit(5000);
+      // Build optimized query - only select needed columns
+      const query = supabase
+        .from('materials')
+        .select('id,name,factor,carbon_footprint_kgco2e_kg,unit,region,tags,sustainabilityscore,recyclability,alternativeto,notes,category')
+        .order('id')
+        .limit(1000); // Limit to reasonable batch size
       
-      // Using standard promise handling pattern
+      // Use standard promise handling pattern
       const { data, error } = await Promise.resolve(query)
         .then(response => response)
         .catch(error => {
@@ -115,18 +120,23 @@ class MaterialCacheService {
         
         this.cache = mappedData;
         this.lastUpdated = new Date();
+        this.isInitialized = true;
         
-        // Save to localStorage with error handling
+        // Save to localStorage with error handling and chunk if necessary
         try {
-          localStorage.setItem('materialsCache', JSON.stringify(mappedData));
+          const jsonString = JSON.stringify(mappedData);
+          localStorage.setItem('materialsCache', jsonString);
           localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
         } catch (storageError) {
           console.warn('Failed to save materials to localStorage:', storageError);
-          // Could be quota exceeded - try to clear some space
+          // Could be quota exceeded - try to clear some space and store fewer items
           try {
             localStorage.removeItem('materialsCache');
-            localStorage.setItem('materialsCache', JSON.stringify(mappedData));
+            // Store only the first 500 items if the full set is too large
+            const reducedData = mappedData.slice(0, 500);
+            localStorage.setItem('materialsCache', JSON.stringify(reducedData));
             localStorage.setItem('materialsCacheTimestamp', this.lastUpdated.toISOString());
+            console.warn('Stored reduced set of materials due to storage limitations');
           } catch (retryError) {
             console.error('Failed to store materials after clearing cache:', retryError);
           }
@@ -150,9 +160,14 @@ class MaterialCacheService {
    * @returns An array of ExtendedMaterialData objects.
    */
   public getMaterials() {
+    if (!this.isInitialized) {
+      console.warn('Cache is not yet initialized when requesting materials');
+    }
+    
     if (!this.cache || this.cache.length === 0) {
       console.warn('Cache is empty when requesting materials');
     }
+    
     return this.cache;
   }
 

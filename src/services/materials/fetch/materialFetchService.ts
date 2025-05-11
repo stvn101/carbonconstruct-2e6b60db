@@ -1,3 +1,4 @@
+
 /**
  * Core material fetch service with improved caching and fallbacks
  */
@@ -16,6 +17,7 @@ let currentFetchPromise: Promise<ExtendedMaterialData[]> | null = null;
 let lastFetchTime = 0;
 const FETCH_COOLDOWN = 1000; // 1 second cooldown between fetch attempts (reduced from 3s)
 const MAX_RETRIES = 3; // Maximum number of retries for loading materials
+const QUERY_LIMIT = 500; // Limit number of materials to fetch at once
 
 /**
  * Enhanced material fetch with better caching, retry logic, and fallbacks
@@ -75,9 +77,46 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
           setTimeout(() => reject(new Error('API request timed out')), 20000); // Increased timeout to 20s
         });
         
-        // Race the API fetch against the timeout
+        // Fetch with pagination to avoid large queries
+        const fetchWithPagination = async () => {
+          let allData: any[] = [];
+          let currentOffset = 0;
+          let hasMore = true;
+          
+          while (hasMore) {
+            // Use optimized query with only needed columns and limit/offset
+            const query = fetchMaterialsFromApi({
+              limit: QUERY_LIMIT,
+              offset: currentOffset,
+              columns: 'id,name,factor,carbon_footprint_kgco2e_kg,unit,region,tags,sustainabilityscore,recyclability,alternativeto,notes,category'
+            });
+            
+            const partialData = await query;
+            
+            if (partialData && partialData.length > 0) {
+              allData = [...allData, ...partialData];
+              currentOffset += QUERY_LIMIT;
+              
+              // Stop if we received fewer items than the limit
+              if (partialData.length < QUERY_LIMIT) {
+                hasMore = false;
+              }
+              
+              // Safety check to avoid too many requests
+              if (currentOffset >= 2000) {
+                hasMore = false;
+              }
+            } else {
+              hasMore = false;
+            }
+          }
+          
+          return allData;
+        };
+        
+        // Race the paginated fetch against the timeout
         const data = await Promise.race([
-          fetchMaterialsFromApi(),
+          fetchWithPagination(),
           timeoutPromise
         ]);
         
@@ -198,6 +237,17 @@ function determineCategoryFromName(name: string): string {
   if (lowerName.includes('plastic')) return 'Plastics';
   if (lowerName.includes('rock') || lowerName.includes('stone') || lowerName.includes('aggregate')) return 'Aggregates';
   return 'Other';
+}
+
+/**
+ * Fetch materials from API with enhanced options
+ */
+export interface MaterialFetchOptions {
+  limit?: number;
+  offset?: number;
+  columns?: string;
+  category?: string;
+  region?: string;
 }
 
 /**
