@@ -456,9 +456,9 @@ export function startServer() {
           errorMessage = "Invalid request parameters";
         }
         
-        // Include stack trace in development environments
-        if (Deno.env.get("ENVIRONMENT") === "development" && error.stack) {
-          errorDetails = error.stack;
+        // Log stack trace on the server side for debugging
+        if (error.stack) {
+          console.error("Stack trace:", error.stack);
         }
       }
       
@@ -466,7 +466,6 @@ export function startServer() {
         JSON.stringify({
           success: false,
           error: errorMessage,
-          details: errorDetails,
           metadata: {
             version: API_VERSION,
             timestamp: new Date().toISOString(),
