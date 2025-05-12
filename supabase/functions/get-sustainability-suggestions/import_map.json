@@ -2,6 +2,17 @@
 {
   "imports": {
     "utils": "./utils.ts",
-    "suggestions": "./suggestions.ts"
+    "suggestions": "./suggestions.ts",
+    "material": "./Material.ts",
+    "transport": "./Transport.ts",
+    "energy": "./Energy.ts",
+    "report": "./Report.ts",
+    "interfaces/": "./",
+    "interfaces/material": "./Material.ts",
+    "interfaces/transport": "./Transport.ts",
+    "interfaces/energy": "./Energy.ts",
+    "interfaces/report": "./Report.ts",
+    "std/": "https://deno.land/std@0.168.0/",
+    "testing/": "https://deno.land/std@0.168.0/testing/"
   }
 }

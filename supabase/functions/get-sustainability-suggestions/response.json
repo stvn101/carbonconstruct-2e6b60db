@@ -1,0 +1,400 @@
+{
+  "success": true,
+  "suggestions": [
+    {
+      "category": "MATERIAL",
+      "text": "Consider replacing concrete with engineered wood products for appropriate applications.",
+      "impact": "HIGH",
+      "estimatedSavings": {
+        "carbon": 0.35,
+        "cost": 0.05
+      },
+      "implementationTimeframe": "MEDIUM_TERM",
+      "implementationComplexity": "MODERATE",
+      "tags": ["concrete", "wood", "embodied carbon"]
+    },
+    {
+      "category": "MATERIAL",
+      "text": "Look into low-carbon cement alternatives that can reduce emissions by up to 30%.",
+      "impact": "MEDIUM",
+      "estimatedSavings": {
+        "carbon": 0.3
+      },
+      "implementationTimeframe": "SHORT_TERM",
+      "implementationComplexity": "SIMPLE",
+      "tags": ["cement", "low-carbon", "alternatives"]
+    },
+    {
+      "category": "TRANSPORT",
+      "text": "Optimize delivery routes to minimize fuel consumption.",
+      "impact": "MEDIUM",
+      "estimatedSavings": {
+        "carbon": 0.15,
+        "cost": 0.2
+      },
+      "implementationTimeframe": "SHORT_TERM",
+      "implementationComplexity": "MODERATE",
+      "tags": ["route optimization", "fuel efficiency", "logistics"]
+    },
+    {
+      "category": "ENERGY",
+      "text": "Install solar panels or wind turbines on-site to generate clean energy during construction.",
+      "impact": "HIGH",
+      "estimatedSavings": {
+        "carbon": 0.5,
+        "cost": 0.2
+      },
+      "implementationTimeframe": "MEDIUM_TERM",
+      "implementationComplexity": "MODERATE",
+      "tags": ["renewable energy", "solar", "wind", "on-site generation"]
+    }
+  ],
+  "metrics": {
+    "sustainabilityScore": 72.5,
+    "estimatedCarbonSavings": 0.45,
+    "estimatedCostSavings": 0.3,
+    "estimatedWaterSavings": 0.25,
+    "estimatedEnergyReduction": 0.35,
+    "estimatedWasteReduction": 0.4,
+    "materialScore": 70,
+    "transportScore": 65,
+    "energyScore": 80,
+    "improvementAreas": ["Material selection", "Transport efficiency"],
+    "industryAverage": 60,
+    "bestInClass": 85,
+    "percentileRanking": 50,
+    "regulatoryCompliance": {
+      "status": "PARTIALLY_COMPLIANT",
+      "standards": ["ISO 14001", "GHG Protocol"],
+      "gaps": ["Material selection", "Transport efficiency"]
+    }
+  },
+  "summary": "Sustainability assessment completed with an overall score of 72.5/100. Estimated carbon savings potential of 45.0%. Key improvement areas include Material selection, Transport efficiency. 2 high-impact recommendations identified.",
+  "timestamp": "2025-05-10T14:35:00.000Z",
+  "reportId": "SR-1683727200000",
+  "materialAnalysis": {
+    "totalMaterials": 5,
+    "sustainableMaterialPercentage": 40,
+    "highImpactMaterials": ["Concrete", "Steel"],
+    "recommendedAlternatives": [
+      {
+        "material": "Concrete",
+        "alternatives": ["Cross-laminated timber", "Mass timber", "Recycled aggregate concrete"],
+        "potentialSavings": {
+          "carbon": 0.6,
+          "cost": -0.1
+        }
+      },
+      {
+        "material": "Steel",
+        "alternatives": ["High-recycled content steel", "Engineered bamboo"],
+        "potentialSavings": {
+          "carbon": 0.3,
+          "cost": 0.05
+        }
+      }
+    ],
+    "detailedMetrics": {
+      "totalWeight": 1250,
+      "averageEmbodiedCarbon": 0.64,
+      "recycledContentPercentage": 37,
+      "localContentPercentage": 20,
+      "materialsByCategory": {
+        "structural": 3,
+        "envelope": 2
+      },
+      "materialsByEmbodiedCarbon": {
+        "high": 2,
+        "medium": 1,
+        "low": 2
+      }
+    }
+  },
+  "transportAnalysis": {
+    "totalDistance": 4800,
+    "averageEmissionsFactor": 0.46,
+    "sustainableTransportPercentage": 60,
+    "highEmissionRoutes": [
+      {
+        "origin": "Factory A",
+        "destination": "Site",
+        "distance": 500,
+        "emissions": 0.9
+      }
+    ],
+    "routeOptimizationPotential": 0.25,
+    "detailedMetrics": {
+      "transportByType": {
+        "truck": 3,
+        "rail": 1,
+        "ship": 1
+      },
+      "transportByFuel": {
+        "diesel": 2,
+        "biodiesel": 1,
+        "electric": 1
+      },
+      "averageLoad": 119,
+      "emissionsPerTonKm": 0.0038,
+      "potentialElectrificationSavings": 0.35
+    }
+  },
+  "energyAnalysis": {
+    "totalConsumption": 12500,
+    "renewablePercentage": 20,
+    "peakDemandReductionPotential": 0.3,
+    "energyEfficiencyOpportunities": [
+      {
+        "area": "Lighting",
+        "potentialSavings": 0.3,
+        "investmentRequired": 5000,
+        "paybackPeriod": 2.5
+      },
+      {
+        "area": "HVAC",
+        "potentialSavings": 0.25,
+        "investmentRequired": 12000,
+        "paybackPeriod": 4
+      },
+      {
+        "area": "Equipment",
+        "potentialSavings": 0.2,
+        "investmentRequired": 8000,
+        "paybackPeriod": 3
+      }
+    ],
+    "detailedMetrics": {
+      "totalEnergyItems": 5,
+      "averageCarbonIntensity": 0.496,
+      "energyEfficiency": 0.875,
+      "peakDemandReduction": 0.2,
+      "energyBySource": {
+        "grid": 8000,
+        "diesel generator": 2000,
+        "solar": 1500,
+        "wind": 1000
+      },
+      "energyByUnit": {
+        "kWh": 12500
+      },
+      "smartMonitoringPercentage": 20,
+      "demandResponseCapability": 20
+    }
+  },
+  "lifecycleAssessment": {
+    "stages": [
+      {
+        "name": "Raw Material Extraction",
+        "carbonFootprint": 0.3,
+        "waterFootprint": 0.4,
+        "energyConsumption": 0.25,
+        "description": "Extraction and processing of raw materials",
+        "hotspots": ["Energy-intensive extraction processes", "Water usage in processing"],
+        "improvementPotential": 0.4
+      },
+      {
+        "name": "Manufacturing",
+        "carbonFootprint": 0.25,
+        "waterFootprint": 0.15,
+        "energyConsumption": 0.35,
+        "description": "Manufacturing and fabrication processes",
+        "hotspots": ["Energy consumption", "Process emissions"],
+        "improvementPotential": 0.35
+      },
+      {
+        "name": "Transportation",
+        "carbonFootprint": 0.2,
+        "waterFootprint": 0.1,
+        "energyConsumption": 0.3,
+        "description": "Transportation of materials and products",
+        "hotspots": ["Fuel consumption", "Logistics efficiency"],
+        "improvementPotential": 0.3
+      },
+      {
+        "name": "Construction",
+        "carbonFootprint": 0.15,
+        "waterFootprint": 0.2,
+        "energyConsumption": 0.25,
+        "description": "On-site construction activities",
+        "hotspots": ["Equipment emissions", "Material waste"],
+        "improvementPotential": 0.25
+      },
+      {
+        "name": "Use Phase",
+        "carbonFootprint": 0.1,
+        "waterFootprint": 0.2,
+        "energyConsumption": 0.2,
+        "description": "Operation and maintenance during use",
+        "hotspots": ["Operational energy use", "Maintenance activities"],
+        "improvementPotential": 0.2
+      },
+      {
+        "name": "End of Life",
+        "carbonFootprint": 0.1,
+        "waterFootprint": 0.1,
+        "energyConsumption": 0.1,
+        "description": "Demolition, disposal, recycling, or reuse",
+        "hotspots": ["Waste management", "Recycling efficiency"],
+        "improvementPotential": 0.45
+      }
+    ],
+    "totalCarbonFootprint": 1.1,
+    "totalWaterFootprint": 1.15,
+    "totalEnergyConsumption": 1.45,
+    "hotspots": [
+      "Raw Material Extraction carbon emissions",
+      "Manufacturing carbon emissions",
+      "Raw Material Extraction water usage",
+      "Manufacturing energy consumption"
+    ],
+    "improvementPotential": 0.33,
+    "uncertaintyLevel": "Medium",
+    "dataQuality": 0.7,
+    "functionalUnit": "Per project",
+    "systemBoundaries": ["Cradle-to-grave", "Excludes some indirect processes"],
+    "allocationMethod": "Mass-based allocation"
+  },
+  "circularEconomyMetrics": {
+    "resourceReuseRate": 0.4,
+    "wasteRecyclingRate": 0.6,
+    "productLifespan": 15,
+    "closedLoopPotential": 0.56,
+    "materialCircularityIndex": 0.42,
+    "repairabilityScore": 0.6,
+    "remanufacturingPotential": 0.55,
+    "biodegradableContent": 0.2,
+    "recycledContentRate": 0.37,
+    "wasteDiversionRate": 0.52,
+    "byproductSynergyPotential": 0.4,
+    "circularProcurementRate": 0.38,
+    "designForDisassembly": 0.5
+  },
+  "circularEconomyRecommendations": [
+    {
+      "recommendation": "Implement material reuse strategies to capture value from existing materials",
+      "impact": "High",
+      "implementationDifficulty": "Medium",
+      "timeframe": "Medium-term",
+      "potentialBenefits": [
+        "Reduced raw material costs",
+        "Lower embodied carbon",
+        "Decreased waste disposal costs",
+        "Potential for unique design elements"
+      ]
+    },
+    {
+      "recommendation": "Enhance on-site waste segregation and recycling processes",
+      "impact": "Medium",
+      "implementationDifficulty": "Low",
+      "timeframe": "Short-term",
+      "potentialBenefits": [
+        "Reduced waste disposal costs",
+        "Potential revenue from recyclable materials",
+        "Improved regulatory compliance",
+        "Enhanced sustainability reporting metrics"
+      ]
+    },
+    {
+      "recommendation": "Design for longevity and adaptability to extend useful life",
+      "impact": "High",
+      "implementationDifficulty": "Medium",
+      "timeframe": "Long-term",
+      "potentialBenefits": [
+        "Reduced lifecycle costs",
+        "Increased asset value",
+        "Improved resilience to changing requirements",
+        "Reduced embodied carbon over time"
+      ]
+    },
+    {
+      "recommendation": "Develop closed-loop material flows through take-back programs and partnerships",
+      "impact": "High",
+      "implementationDifficulty": "High",
+      "timeframe": "Long-term",
+      "potentialBenefits": [
+        "Secure material supply",
+        "Reduced exposure to price volatility",
+        "Enhanced brand reputation",
+        "Potential for innovative business models"
+      ]
+    }
+  ],
+  "lifecycleCostAnalysis": {
+    "initialCost": 1000000,
+    "operationalCost": 1073746.31,
+    "maintenanceCost": 536873.15,
+    "endOfLifeCost": 55207.54,
+    "totalLifecycleCost": 2665826.99,
+    "netPresentValue": -2665826.99,
+    "annualizedCost": 138623.00,
+    "costBreakdown": [
+      {
+        "category": "Initial Cost",
+        "percentage": 37.51,
+        "npv": 1000000
+      },
+      {
+        "category": "Operational Cost",
+        "percentage": 40.28,
+        "npv": 1073746.31
+      },
+      {
+        "category": "Maintenance Cost",
+        "percentage": 20.14,
+        "npv": 536873.15
+      },
+      {
+        "category": "End of Life Cost",
+        "percentage": 2.07,
+        "npv": 55207.54
+      }
+    ],
+    "sensitivityAnalysis": [
+      {
+        "parameter": "Discount Rate",
+        "impact": -5.2
+      },
+      {
+        "parameter": "Lifespan",
+        "impact": 0.8
+      },
+      {
+        "parameter": "Energy Cost Escalation",
+        "impact": 1.5
+      },
+      {
+        "parameter": "Operational Cost",
+        "impact": 0.9
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.1.0",
+    "requestId": "f8c3de2d-5b5e-4d1a-9614-c7e94b3a6e21",
+    "processingTime": 235.67,
+    "requestType": "detailed",
+    "reportFormat": "DETAILED",
+    "reportOptions": {
+      "format": "DETAILED",
+      "includeLifecycleAssessment": true,
+      "includeCircularEconomyMetrics": true,
+      "includeBenchmarking": true,
+      "includeRegulatoryCompliance": true,
+      "includeRecommendations": true,
+      "includeImplementationDetails": true
+    },
+    "dataQuality": {
+      "completeness": 0.85,
+      "accuracy": 0.85,
+      "consistency": 0.9
+    },
+    "calculationModels": [
+      "Material Carbon Footprint",
+      "Transport Emissions",
+      "Energy Consumption",
+      "Lifecycle Assessment",
+      "Circular Economy Metrics"
+    ],
+    "generatedAt": "2025-05-10T14:35:00.000Z"
+  }
+}
