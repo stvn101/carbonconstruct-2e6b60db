@@ -103,6 +103,39 @@ export interface SustainabilityMetrics {
 }
 
 /**
+ * Circular economy recommendation interface
+ */
+export interface CircularEconomyRecommendation {
+  recommendation: string;
+  impact: string;
+  implementationDifficulty: string;
+  timeframe: string;
+  potentialBenefits: string[];
+}
+
+/**
+ * Lifecycle cost analysis interface
+ */
+export interface LifecycleCostAnalysis {
+  initialCost: number;
+  operationalCost: number;
+  maintenanceCost: number;
+  endOfLifeCost: number;
+  totalLifecycleCost: number;
+  netPresentValue: number;
+  annualizedCost: number;
+  costBreakdown: {
+    category: string;
+    percentage: number;
+    npv: number;
+  }[];
+  sensitivityAnalysis: {
+    parameter: string;
+    impact: number;
+  }[];
+}
+
+/**
  * Comprehensive sustainability report interface
  */
 export interface SustainabilityReport {
@@ -162,6 +195,25 @@ export interface SustainabilityReport {
     wasteRecyclingRate: number;
     productLifespan: number;
     closedLoopPotential: number;
+  };
+  circularEconomyRecommendations?: CircularEconomyRecommendation[];
+  lifecycleCostAnalysis?: LifecycleCostAnalysis;
+  metadata?: {
+    version: string;
+    requestId: string;
+    processingTime: number;
+    requestType: string;
+    reportFormat?: ReportFormat;
+    reportOptions?: ReportRequestOptions;
+    dataQuality?: {
+      completeness: number;
+      accuracy: number;
+      consistency: number;
+    };
+    calculationModels?: string[];
+    generatedAt: string;
+    source?: string;
+    timestamp?: string;
   };
 }
 
