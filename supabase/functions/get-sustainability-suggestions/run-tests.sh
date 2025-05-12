@@ -8,12 +8,12 @@ echo ""
 
 # Run the basic API tests
 echo "=== Running Basic API Tests ==="
-deno run --allow-net test-api.ts
+deno run --allow-net --import-map=import_map.json test-api.ts
 
 echo ""
 echo "=== Running Comprehensive Test Suite ==="
 # Run the comprehensive test suite
-deno run --allow-net test.ts
+deno run --allow-net --import-map=import_map.json test.ts
 
 echo ""
 echo "Tests completed."
