@@ -69,7 +69,7 @@ const MaterialDatabaseContainer: React.FC = () => {
     setSelectedTag("all");
   };
   
-  // Manual refresh handler with UX feedback
+  // Manual refresh handler with UX feedback that properly returns the Promise
   const handleManualRefresh = (): Promise<void> => {
     toast.info("Refreshing materials data...");
     return refreshCache()
@@ -79,6 +79,7 @@ const MaterialDatabaseContainer: React.FC = () => {
       .catch(err => {
         console.error("Manual refresh failed:", err);
         toast.error("Failed to refresh materials. Please try again later.");
+        return Promise.reject(err); // Make sure to propagate the rejection
       });
   };
   
