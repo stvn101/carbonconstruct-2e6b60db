@@ -21,6 +21,31 @@ export interface ApiRequestOptions {
    * Callback function to run on retry
    */
   onRetry?: (attempt: number) => void;
+
+  /**
+   * Maximum number of records to return
+   */
+  limit?: number;
+  
+  /**
+   * Number of records to skip
+   */
+  offset?: number;
+  
+  /**
+   * Specific columns to select
+   */
+  columns?: string;
+  
+  /**
+   * Filter by category
+   */
+  category?: string;
+  
+  /**
+   * Filter by region
+   */
+  region?: string;
 }
 
 /**
