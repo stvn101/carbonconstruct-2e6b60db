@@ -1,4 +1,3 @@
-
 /**
  * Core material fetch service with improved caching and fallbacks
  */
@@ -11,16 +10,17 @@ import { getFallbackMaterials, getDefaultCategories } from '../fallback/material
 import { handleMaterialApiError } from '../notifications/materialNotifications';
 import { toast } from 'sonner';
 import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
+import { ApiRequestOptions } from '../api/materialApiTypes';
 
 // Keep track of current fetch to prevent duplicate requests
 let currentFetchPromise: Promise<ExtendedMaterialData[]> | null = null;
 let lastFetchTime = 0;
-const FETCH_COOLDOWN = 1000; // 1 second cooldown between fetch attempts (reduced from 3s)
+const FETCH_COOLDOWN = 1000; // 1 second cooldown between fetch attempts
 const MAX_RETRIES = 3; // Maximum number of retries for loading materials
 const QUERY_LIMIT = 500; // Limit number of materials to fetch at once
 
 /**
- * Enhanced material fetch with better caching, retry logic, and fallbacks
+ * Unified material fetch with simplified caching, retry logic, and fallbacks
  */
 export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMaterialData[]> {
   console.log('fetchMaterials called with forceRefresh:', forceRefresh);
@@ -47,13 +47,7 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
         const cachedMaterials = await getCachedMaterials();
         if (cachedMaterials && cachedMaterials.length > 0) {
           console.log('Using cached materials:', cachedMaterials.length);
-          // Verify cache has sufficient data
-          if (cachedMaterials.length >= 100) { // Expect at least 100 materials
-            return cachedMaterials;
-          } else {
-            console.log('Cache has insufficient data, trying full refresh');
-            // Continue to API fetch if cache seems insufficient
-          }
+          return cachedMaterials;
         } else {
           console.log('No cached materials found or cache is empty');
         }
@@ -68,67 +62,22 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
         return getComprehensiveFallbackMaterials();
       }
       
-      // Try to fetch from API with timeout
+      // Try to fetch from API
       try {
         console.log('Fetching materials from API');
         
-        // Create a timeout promise
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('API request timed out')), 20000); // Increased timeout to 20s
-        });
-        
         // Fetch with pagination to avoid large queries
-        const fetchWithPagination = async () => {
-          let allData: any[] = [];
-          let currentOffset = 0;
-          let hasMore = true;
-          
-          while (hasMore) {
-            // Use optimized query with only needed columns and limit/offset
-            const query = fetchMaterialsFromApi({
-              limit: QUERY_LIMIT,
-              offset: currentOffset,
-              columns: 'id,name,factor,carbon_footprint_kgco2e_kg,unit,region,tags,sustainabilityscore,recyclability,alternativeto,notes,category'
-            });
-            
-            const partialData = await query;
-            
-            if (partialData && partialData.length > 0) {
-              allData = [...allData, ...partialData];
-              currentOffset += QUERY_LIMIT;
-              
-              // Stop if we received fewer items than the limit
-              if (partialData.length < QUERY_LIMIT) {
-                hasMore = false;
-              }
-              
-              // Safety check to avoid too many requests
-              if (currentOffset >= 2000) {
-                hasMore = false;
-              }
-            } else {
-              hasMore = false;
-            }
-          }
-          
-          return allData;
-        };
-        
-        // Race the paginated fetch against the timeout
-        const data = await Promise.race([
-          fetchWithPagination(),
-          timeoutPromise
-        ]);
+        const allData = await fetchMaterialsWithPagination();
         
         // Sanity check for data
-        if (!data || !Array.isArray(data) || data.length === 0) {
+        if (!allData || !Array.isArray(allData) || allData.length === 0) {
           console.warn('API returned empty or invalid material data');
           throw new Error('Invalid material data returned from API');
         }
         
         // Process the data
-        console.log('Processing data from API:', data.length, 'rows');
-        const processedData = processDataInBatches(data);
+        console.log('Processing data from API:', allData.length, 'rows');
+        const processedData = processDataInBatches(allData);
         
         // Cache the materials for future use
         cacheMaterials(processedData)
@@ -166,6 +115,52 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
   // Set the current promise and return it
   currentFetchPromise = fetchOperation();
   return currentFetchPromise;
+}
+
+/**
+ * Fetch materials with pagination to handle large datasets
+ */
+async function fetchMaterialsWithPagination(): Promise<any[]> {
+  let allData: any[] = [];
+  let currentOffset = 0;
+  let hasMore = true;
+  
+  while (hasMore) {
+    // Use optimized query with only needed columns and limit/offset
+    const options: ApiRequestOptions = {
+      limit: QUERY_LIMIT,
+      offset: currentOffset,
+      columns: 'id,name,factor,carbon_footprint_kgco2e_kg,unit,region,tags,sustainabilityscore,recyclability,alternativeto,notes,category'
+    };
+    
+    try {
+      const partialData = await fetchMaterialsFromApi(options);
+      
+      if (partialData && partialData.length > 0) {
+        allData = [...allData, ...partialData];
+        currentOffset += QUERY_LIMIT;
+        
+        // Stop if we received fewer items than the limit
+        if (partialData.length < QUERY_LIMIT) {
+          hasMore = false;
+        }
+        
+        // Safety check to avoid too many requests
+        if (currentOffset >= 2000) {
+          hasMore = false;
+        }
+      } else {
+        hasMore = false;
+      }
+    } catch (error) {
+      console.error('Error in pagination fetch:', error);
+      // Break the loop on error
+      hasMore = false;
+      throw error;
+    }
+  }
+  
+  return allData;
 }
 
 /**
@@ -240,17 +235,6 @@ function determineCategoryFromName(name: string): string {
 }
 
 /**
- * Fetch materials from API with enhanced options
- */
-export interface MaterialFetchOptions {
-  limit?: number;
-  offset?: number;
-  columns?: string;
-  category?: string;
-  region?: string;
-}
-
-/**
  * Fetch material categories with improved fallbacks
  */
 export async function fetchMaterialCategories(): Promise<string[]> {
@@ -261,16 +245,7 @@ export async function fetchMaterialCategories(): Promise<string[]> {
   }
   
   try {
-    // Create a timeout promise
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Categories request timed out')), 8000);
-    });
-    
-    // Race the categories fetch against the timeout
-    const categories = await Promise.race([
-      fetchCategoriesFromApi(),
-      timeoutPromise
-    ]);
+    const categories = await fetchCategoriesFromApi();
     
     // Log categories retrieved
     console.log('Categories fetched:', categories?.length || 0);

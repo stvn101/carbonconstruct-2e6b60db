@@ -18,7 +18,7 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
   }
   
   try {
-    console.log('Fetching materials from API');
+    console.log('Fetching materials from API with options:', options);
     
     // Check if supabase client is initialized
     if (!supabase) {
@@ -26,14 +26,37 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       throw new Error('Database connection not available');
     }
     
+    // Build optimized query with the provided options
+    let query = supabase
+      .from('materials')
+      .select(options.columns || '*');
+      
+    // Apply limit if specified
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+      
+    // Apply offset if specified
+    if (options.offset !== undefined) {
+      query = query.range(options.offset, options.offset + (options.limit || 1000) - 1);
+    }
+      
+    // Apply category filter if specified
+    if (options.category) {
+      query = query.eq('category', options.category);
+    }
+      
+    // Apply region filter if specified
+    if (options.region) {
+      query = query.eq('region', options.region);
+    }
+      
+    // Always order by name for consistency
+    query = query.order('name');
+    
+    // Use standard promise handling pattern
     const { data, error } = await retryWithBackoff(
-      async () => {
-        console.log('Executing Supabase materials query');
-        return supabase
-          .from('materials')
-          .select('*')
-          .order('name');
-      },
+      async () => query,
       options.maxRetries || 2,
       2000,
       {
@@ -55,7 +78,16 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       
       // Fallback to direct query without retry - sometimes the retry mechanism itself can fail
       console.log('Attempting direct materials query without retry mechanism');
-      const directResult = await supabase.from('materials').select('*');
+      
+      // Build the same query but without retry
+      let directQuery = supabase.from('materials').select(options.columns || '*');
+      if (options.limit) directQuery = directQuery.limit(options.limit);
+      if (options.offset !== undefined) directQuery = directQuery.range(options.offset, options.offset + (options.limit || 1000) - 1);
+      if (options.category) directQuery = directQuery.eq('category', options.category);
+      if (options.region) directQuery = directQuery.eq('region', options.region);
+      directQuery = directQuery.order('name');
+      
+      const directResult = await directQuery;
       
       if (directResult.error) {
         console.error('Direct query error:', directResult.error);

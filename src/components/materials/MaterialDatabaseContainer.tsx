@@ -70,9 +70,9 @@ const MaterialDatabaseContainer: React.FC = () => {
   };
   
   // Manual refresh handler with UX feedback
-  const handleManualRefresh = () => {
+  const handleManualRefresh = (): Promise<void> => {
     toast.info("Refreshing materials data...");
-    refreshCache()
+    return refreshCache()
       .then(() => {
         toast.success("Materials data refreshed successfully!");
       })

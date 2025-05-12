@@ -56,13 +56,13 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [loadTimeout, setLoadTimeout] = useState<NodeJS.Timeout | null>(null);
   
-  // Handle manual refresh
-  const handleRefresh = async () => {
+  // Handle manual refresh with consistent promise handling
+  const handleRefresh = async (): Promise<void> => {
     // Show loading indicator
     toast.loading("Refreshing materials...", { id: "materials-refresh" });
     
     try {
-      // Call refresh function
+      // Call refresh function - make sure to await the promise
       await refreshCache();
       toast.dismiss("materials-refresh");
       toast.success("Materials refreshed successfully!");
