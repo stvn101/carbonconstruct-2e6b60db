@@ -96,15 +96,15 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       
       if (!directResult.data || directResult.data.length === 0) {
         console.error('Direct query returned no materials');
-        throw new Error('No materials found');
+        return [] as SupabaseMaterial[]; // Return empty array instead of throwing
       }
       
       console.log('Direct query successful:', directResult.data.length, 'materials');
-      return directResult.data;
+      return directResult.data as SupabaseMaterial[];
     }
     
     console.log('Supabase API returned', data.length, 'materials');
-    return data;
+    return data as SupabaseMaterial[];
   } catch (err) {
     console.error('Error fetching materials from API:', err);
     throw err;
@@ -163,7 +163,7 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     }
     
     console.log('No categories found');
-    throw new Error('No categories found');
+    return []; // Return empty array instead of throwing
   } catch (error) {
     console.error('Error fetching categories:', error);
     throw error;
