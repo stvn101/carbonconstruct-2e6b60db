@@ -1,16 +1,16 @@
 // test.ts - Comprehensive test suite for the Sustainability Suggestions API
 
 // Import necessary types
-import { Material, SustainableMaterial } from 'interfaces/material';
-import { TransportItem, SustainableTransport } from 'interfaces/transport';
-import { EnergyItem, SustainableEnergy } from 'interfaces/energy';
+import { Material as _Material, SustainableMaterial as _SustainableMaterial } from 'interfaces/material';
+import { TransportItem as _TransportItem, SustainableTransport as _SustainableTransport } from 'interfaces/transport';
+import { EnergyItem as _EnergyItem, SustainableEnergy as _SustainableEnergy } from 'interfaces/energy';
 import { 
   SuggestionCategory, 
-  ImpactLevel, 
-  Timeframe, 
-  ComplexityLevel,
-  ComplianceStatus,
-  ReportFormat
+  ImpactLevel as _ImpactLevel, 
+  Timeframe as _Timeframe, 
+  ComplexityLevel as _ComplexityLevel,
+  ComplianceStatus as _ComplianceStatus,
+  ReportFormat as _ReportFormat
 } from 'interfaces/report';
 
 // Configuration
