@@ -1,77 +1,100 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders, handleCors } from "utils";
-import {
-  generateMaterialSuggestions,
-  generateTransportSuggestions,
-  generateEnergySuggestions,
-  generateGeneralSuggestions
-} from "suggestions";
+/**
+ * Main entry point for the sustainability suggestions API
+ * 
+ * This module imports and re-exports all necessary components and starts the server.
+ */
 
-// Define interfaces for the request data
-interface Material {
-  name: string;
-  quantity?: number;
-  type?: string;
-  [key: string]: unknown;
-}
+// Import and start the server
+import { startServer } from './api-server.ts';
 
-interface TransportItem {
-  type: string;
-  distance?: number;
-  fuel?: string;
-  [key: string]: unknown;
-}
+// Import and re-export material interfaces
+import type { Material, SustainableMaterial } from 'interfaces/material';
+import { MaterialCategory } from 'interfaces/material';
 
-interface EnergyItem {
-  source: string;
-  consumption?: number;
-  [key: string]: unknown;
-}
+// Import and re-export transport interfaces
+import type { TransportItem, SustainableTransport } from 'interfaces/transport';
+import { TransportType, FuelType } from 'interfaces/transport';
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+// Import and re-export energy interfaces
+import type { EnergyItem, SustainableEnergy } from 'interfaces/energy';
+import { EnergySource, EnergyUnit } from 'interfaces/energy';
 
-  try {
-    // Parse request body
-    const body = await req.json();
-    const { materials, transport, energy } = body;
+// Import and re-export report interfaces
+import type { 
+  Suggestion, 
+  SustainabilityMetrics, 
+  SustainabilityReport,
+  ReportRequestOptions,
+  CircularEconomyRecommendation,
+  LifecycleCostAnalysis
+} from './Report.ts';
+import { 
+  SuggestionCategory, 
+  ImpactLevel, 
+  Timeframe, 
+  ComplexityLevel,
+  ComplianceStatus,
+  ReportFormat
+} from './Report.ts';
 
-    console.log('Request received:', { materials, transport, energy });
+// Re-export material interfaces
+export type { Material, SustainableMaterial };
+export { MaterialCategory };
 
-    // Generate suggestions
-    const suggestions = [
-      ...generateMaterialSuggestions({ materials }),
-      ...generateTransportSuggestions(transport),
-      ...generateEnergySuggestions(energy),
-      ...generateGeneralSuggestions(),
-    ];
+// Re-export transport interfaces
+export type { TransportItem, SustainableTransport };
+export { TransportType, FuelType };
 
-    console.log('Generated suggestions:', suggestions);
+// Re-export energy interfaces
+export type { EnergyItem, SustainableEnergy };
+export { EnergySource, EnergyUnit };
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        suggestions,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
-  } catch (error) {
-    console.error("Error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: errorMessage,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
-  }
-});
+// Re-export report interfaces
+export type { 
+  Suggestion, 
+  SustainabilityMetrics, 
+  SustainabilityReport,
+  ReportRequestOptions,
+  CircularEconomyRecommendation,
+  LifecycleCostAnalysis
+};
+export { 
+  SuggestionCategory, 
+  ImpactLevel, 
+  Timeframe, 
+  ComplexityLevel,
+  ComplianceStatus,
+  ReportFormat
+};
+
+// Re-export helper functions
+export { 
+  calculateSustainableMaterialPercentage,
+  identifyHighImpactMaterials,
+  generateMaterialAlternatives
+} from './material-helpers.ts';
+
+export {
+  calculateTotalDistance,
+  calculateAverageEmissionsFactor,
+  calculateSustainableTransportPercentage,
+  identifyHighEmissionRoutes,
+  calculateRouteOptimizationPotential
+} from './transport-helpers.ts';
+
+export {
+  calculateTotalEnergyConsumption,
+  calculateRenewablePercentage,
+  calculatePeakDemandReductionPotential,
+  identifyEnergyEfficiencyOpportunities
+} from './energy-helpers.ts';
+
+// Re-export report generation functions
+export {
+  generateBasicSustainabilityReport,
+  generateDetailedSustainabilityReport,
+  calculateDataCompleteness
+} from './report-generation.ts';
+
+// Start the server
+startServer();
