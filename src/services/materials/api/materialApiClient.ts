@@ -96,15 +96,32 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       
       if (!directResult.data || directResult.data.length === 0) {
         console.error('Direct query returned no materials');
-        return [] as SupabaseMaterial[]; // Return empty array instead of throwing
+        // Fix TS2352: Return an empty array with proper typing instead of casting errors
+        return [] as SupabaseMaterial[];
       }
       
       console.log('Direct query successful:', directResult.data.length, 'materials');
-      return directResult.data as SupabaseMaterial[];
+      // Ensure proper typing by checking if the data matches the expected structure
+      const validMaterials = directResult.data.filter(item => 
+        typeof item === 'object' && 
+        item !== null && 
+        'id' in item && 
+        'name' in item
+      ) as SupabaseMaterial[];
+      
+      return validMaterials;
     }
     
     console.log('Supabase API returned', data.length, 'materials');
-    return data as SupabaseMaterial[];
+    // Ensure proper typing by checking if the data matches the expected structure
+    const validMaterials = data.filter(item => 
+      typeof item === 'object' && 
+      item !== null && 
+      'id' in item && 
+      'name' in item
+    ) as SupabaseMaterial[];
+    
+    return validMaterials;
   } catch (err) {
     console.error('Error fetching materials from API:', err);
     throw err;
