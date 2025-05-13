@@ -1,3 +1,4 @@
+
 /**
  * Main entry point for the sustainability suggestions API
  * 
@@ -8,16 +9,17 @@
 import { startServer } from './api-server.ts';
 
 // Import and re-export material interfaces
-import type { Material, SustainableMaterial } from 'interfaces/material';
-import { MaterialCategory } from 'interfaces/material';
+// Fix the import paths by adding ./ prefix
+import type { Material, SustainableMaterial } from './Material.ts';
+import { MaterialCategory } from './Material.ts';
 
 // Import and re-export transport interfaces
-import type { TransportItem, SustainableTransport } from 'interfaces/transport';
-import { TransportType, FuelType } from 'interfaces/transport';
+import type { TransportItem, SustainableTransport } from './Transport.ts';
+import { TransportType, FuelType } from './Transport.ts';
 
 // Import and re-export energy interfaces
-import type { EnergyItem, SustainableEnergy } from 'interfaces/energy';
-import { EnergySource, EnergyUnit } from 'interfaces/energy';
+import type { EnergyItem, SustainableEnergy } from './Energy.ts';
+import { EnergySource, EnergyUnit } from './Energy.ts';
 
 // Import and re-export report interfaces
 import type { 

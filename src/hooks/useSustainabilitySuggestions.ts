@@ -140,17 +140,29 @@ export function useSustainabilitySuggestions() {
     
     // Check if concrete is used in large quantities
     const concreteInputs = materials.filter(m => m.type.includes('concrete'));
-    if (concreteInputs.some(m => m.quantity > 100)) {
+    if (concreteInputs.some(m => {
+      // Fix TS2365: Ensure we're comparing numbers
+      const quantity = typeof m.quantity === 'string' ? parseFloat(m.quantity) : m.quantity;
+      return !isNaN(Number(quantity)) && Number(quantity) > 100;
+    })) {
       priorities.push('Priority: Replace traditional concrete with lower-carbon alternatives');
     }
     
     // Check if there's long-distance transport
-    if (transport.some(t => t.distance > 200)) {
+    if (transport.some(t => {
+      // Fix TS2365: Ensure we're comparing numbers
+      const distance = typeof t.distance === 'string' ? parseFloat(t.distance) : t.distance;
+      return !isNaN(Number(distance)) && Number(distance) > 200;
+    })) {
       priorities.push('Priority: Source materials locally to reduce transportation emissions');
     }
     
     // Check if there's high energy use
-    if (energy.some(e => e.amount > 1000)) {
+    if (energy.some(e => {
+      // Fix TS2365: Ensure we're comparing numbers
+      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
+      return !isNaN(Number(amount)) && Number(amount) > 1000;
+    })) {
       priorities.push('Priority: Implement on-site renewable energy generation');
     }
     
