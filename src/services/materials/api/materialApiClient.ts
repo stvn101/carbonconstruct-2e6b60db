@@ -106,8 +106,10 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       const safeData = Array.isArray(directResult.data) ? directResult.data : [];
       const validMaterials: SupabaseMaterial[] = [];
       
-      for (const item of safeData) {
-        if (item && 
+      for (let i = 0; i < safeData.length; i++) {
+        const item = safeData[i];
+        // Explicit null check before accessing properties
+        if (item !== null && 
             typeof item === 'object' && 
             'id' in item && 
             'name' in item && 
@@ -127,8 +129,10 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     const safeData = Array.isArray(data) ? data : [];
     const validMaterials: SupabaseMaterial[] = [];
     
-    for (const item of safeData) {
-      if (item && 
+    for (let i = 0; i < safeData.length; i++) {
+      const item = safeData[i];
+      // Explicit null check before accessing properties
+      if (item !== null &&
           typeof item === 'object' && 
           'id' in item && 
           'name' in item && 
