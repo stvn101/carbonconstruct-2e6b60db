@@ -96,32 +96,51 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       
       if (!directResult.data || directResult.data.length === 0) {
         console.error('Direct query returned no materials');
-        // Fix TS2352: Return an empty array with proper typing instead of casting errors
-        return [] as SupabaseMaterial[];
+        // Return an empty array instead of trying to cast
+        return [];
       }
       
       console.log('Direct query successful:', directResult.data.length, 'materials');
-      // Ensure proper typing by checking if the data matches the expected structure
-      const validMaterials = directResult.data.filter(item => 
-        typeof item === 'object' && 
-        item !== null && 
-        'id' in item && 
-        'name' in item
-      ) as SupabaseMaterial[];
+      
+      // Make sure we have valid material objects before returning
+      const safeData = Array.isArray(directResult.data) ? directResult.data : [];
+      const validMaterials: SupabaseMaterial[] = [];
+      
+      for (const item of safeData) {
+        if (item && 
+            typeof item === 'object' && 
+            'id' in item && 
+            'name' in item && 
+            'carbon_footprint_kgco2e_kg' in item && 
+            'carbon_footprint_kgco2e_tonne' in item && 
+            'category' in item) {
+          validMaterials.push(item as SupabaseMaterial);
+        }
+      }
       
       return validMaterials;
     }
     
     console.log('Supabase API returned', data.length, 'materials');
-    // Ensure proper typing by checking if the data matches the expected structure
-    const validMaterials = data.filter(item => 
-      typeof item === 'object' && 
-      item !== null && 
-      'id' in item && 
-      'name' in item
-    ) as SupabaseMaterial[];
+    
+    // Make sure we have valid material objects before returning
+    const safeData = Array.isArray(data) ? data : [];
+    const validMaterials: SupabaseMaterial[] = [];
+    
+    for (const item of safeData) {
+      if (item && 
+          typeof item === 'object' && 
+          'id' in item && 
+          'name' in item && 
+          'carbon_footprint_kgco2e_kg' in item && 
+          'carbon_footprint_kgco2e_tonne' in item && 
+          'category' in item) {
+        validMaterials.push(item as SupabaseMaterial);
+      }
+    }
     
     return validMaterials;
+    
   } catch (err) {
     console.error('Error fetching materials from API:', err);
     throw err;
