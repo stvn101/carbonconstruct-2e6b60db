@@ -3,13 +3,21 @@
  * Material data types and interfaces shared across material services
  */
 
-// Supabase material type definition - match actual database columns
+// Supabase material type definition - match actual database view columns
 export interface SupabaseMaterial {
   id: string;
   name: string;
   carbon_footprint_kgco2e_kg: number;
   carbon_footprint_kgco2e_tonne: number;
   category: string;
+  factor?: number;
+  unit?: string;
+  region?: string;
+  tags?: string[];
+  sustainabilityscore?: number;
+  recyclability?: string;
+  alternativeto?: string;
+  notes?: string;
 }
 
 // Material pagination interface
