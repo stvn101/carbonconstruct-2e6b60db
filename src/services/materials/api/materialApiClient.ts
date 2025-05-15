@@ -131,17 +131,17 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     const validMaterials: SupabaseMaterial[] = [];
     
     for (let i = 0; i < safeData.length; i++) {
-      const item = safeData[i];
-      // Explicit null check before accessing properties
-      if (item !== null &&
-          typeof item === 'object' && 
-          'id' in item && 
-          'name' in item && 
-          'carbon_footprint_kgco2e_kg' in item && 
-          'carbon_footprint_kgco2e_tonne' in item && 
-          'category' in item) {
-        validMaterials.push(item as SupabaseMaterial);
-      }
+        const item = safeData[i];
+        // Explicit null check before accessing properties
+        if (item !== null &&
+            typeof item === 'object' && 
+            'id' in item && 
+            'name' in item && 
+            'carbon_footprint_kgco2e_kg' in item && 
+            'carbon_footprint_kgco2e_tonne' in item && 
+            'category' in item) {
+          validMaterials.push(item as SupabaseMaterial);
+        }
     }
     
     return validMaterials;
@@ -182,9 +182,9 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
       throw error;
     }
     
-    // Extract unique categories
-    if (data && data.length > 0) {
-      const categories = data.map(item => item.category).filter(Boolean);
+    // Extract categories safely
+    if (data && Array.isArray(data)) {
+      const categories = data.map(item => item?.category).filter(Boolean);
       console.log('Categories fetched:', categories);
       return categories;
     }
@@ -193,8 +193,8 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     console.log('No categories found, trying direct query');
     const directResult = await supabase.rpc('get_material_categories');
       
-    if (directResult.data && directResult.data.length > 0) {
-      const categories = directResult.data.map(item => item.category).filter(Boolean);
+    if (directResult.data && Array.isArray(directResult.data)) {
+      const categories = directResult.data.map(item => item?.category).filter(Boolean);
       console.log('Categories fetched (direct):', categories);
       return categories;
     }

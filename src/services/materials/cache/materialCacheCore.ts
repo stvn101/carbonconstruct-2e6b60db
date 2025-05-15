@@ -6,6 +6,7 @@ import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { mapDatabaseMaterials } from './materialDataMapping';
 import { CONNECTION_TIMEOUT, CACHE_EXPIRATION, CACHE_REFRESH_INTERVAL } from './cacheConstants';
+import { SupabaseMaterial } from '../materialTypes';
 
 class MaterialCacheService {
   private cache: ExtendedMaterialData[] = [];
@@ -97,8 +98,9 @@ class MaterialCacheService {
       }
       
       // Build optimized query - only select needed columns
+      // Now using materials_view instead of materials
       const query = supabase
-        .from('materials')
+        .from('materials_view')
         .select('id,name,factor,carbon_footprint_kgco2e_kg,unit,region,tags,sustainabilityscore,recyclability,alternativeto,notes,category')
         .order('id')
         .limit(1000); // Limit to reasonable batch size
@@ -115,8 +117,11 @@ class MaterialCacheService {
       }
 
       if (data && data.length > 0) {
+        // Safely cast the data to ensure it matches our expected type
+        const typedData = data as SupabaseMaterial[];
+        
         // Map the data to ensure types match our ExtendedMaterialData interface
-        const mappedData = mapDatabaseMaterials(data);
+        const mappedData = mapDatabaseMaterials(typedData);
         
         this.cache = mappedData;
         this.lastUpdated = new Date();

@@ -20,7 +20,7 @@ export async function fetchMaterialsFromApi(): Promise<SupabaseMaterial[]> {
   try {
     console.log('Fetching materials from API');
     const { data, error } = await retryWithBackoff(
-      async () => supabase.from('materials').select('*').order('name'),
+      async () => supabase.from('materials_view').select('*').order('name'),
       2,
       2000,
       {
@@ -42,7 +42,8 @@ export async function fetchMaterialsFromApi(): Promise<SupabaseMaterial[]> {
       throw new Error('No materials found');
     }
     
-    return data;
+    // Type assertion to ensure it matches our expected type
+    return data as SupabaseMaterial[];
   } catch (err) {
     console.error('Error fetching materials from API:', err);
     throw err;
@@ -60,10 +61,9 @@ export async function fetchCategoriesFromApi(): Promise<string[]> {
   
   try {
     console.log('Fetching categories from API');
-    // Since we're using the category column from the database,
-    // we need to query that column directly
+    // Using the RPC function we created
     const { data, error } = await retryWithBackoff(
-      async () => supabase.from('materials').select('category').not('category', 'is', null),
+      async () => supabase.rpc('get_material_categories'),
       2,
       2000
     );
@@ -73,9 +73,9 @@ export async function fetchCategoriesFromApi(): Promise<string[]> {
       throw error;
     }
     
-    // Extract unique categories
-    if (data && data.length > 0) {
-      const categories = [...new Set(data.map(item => item.category).filter(Boolean))].sort();
+    // Extract categories safely
+    if (data && Array.isArray(data)) {
+      const categories = data.map(item => item?.category).filter(Boolean);
       console.log('Categories fetched:', categories);
       return categories;
     }
