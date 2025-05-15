@@ -8,6 +8,19 @@ import { retryWithBackoff } from '@/utils/errorHandling/retryUtils';
 import { SupabaseMaterial, CONNECTION_TIMEOUT } from '../materialTypes';
 import { ApiRequestOptions, MaterialApiResponse, CategoriesApiResponse } from './materialApiTypes';
 
+// Type guard to check if an object is a valid material
+function isValidMaterial(item: any): item is SupabaseMaterial {
+  return (
+    item !== null &&
+    typeof item === 'object' &&
+    'id' in item &&
+    'name' in item &&
+    'carbon_footprint_kgco2e_kg' in item &&
+    'carbon_footprint_kgco2e_tonne' in item &&
+    'category' in item
+  );
+}
+
 /**
  * Fetch materials from the Supabase API with retry capability
  */
@@ -111,35 +124,25 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
         // Skip if the item is null or undefined
         if (!rawItem) continue;
         
-        // Create a properly typed item to avoid TypeScript errors
-        const item: Partial<SupabaseMaterial> = rawItem;
-        
-        // Explicit null check and type guard before accessing properties
-        if (typeof item === 'object') {
-          // Check if all required properties exist
-          if (
-            item.id !== undefined && 
-            item.name !== undefined && 
-            item.carbon_footprint_kgco2e_kg !== undefined && 
-            item.carbon_footprint_kgco2e_tonne !== undefined && 
-            item.category !== undefined
-          ) {
-            validMaterials.push({
-              id: item.id,
-              name: item.name,
-              carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
-              carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
-              category: item.category,
-              factor: item.factor,
-              unit: item.unit,
-              region: item.region,
-              tags: item.tags,
-              sustainabilityscore: item.sustainabilityscore,
-              recyclability: item.recyclability,
-              alternativeto: item.alternativeto,
-              notes: item.notes
-            });
-          }
+        // Use our type guard to ensure the item is a valid material
+        if (isValidMaterial(rawItem)) {
+          validMaterials.push({
+            id: rawItem.id,
+            name: rawItem.name,
+            carbon_footprint_kgco2e_kg: rawItem.carbon_footprint_kgco2e_kg,
+            carbon_footprint_kgco2e_tonne: rawItem.carbon_footprint_kgco2e_tonne,
+            category: rawItem.category,
+            factor: rawItem.factor,
+            unit: rawItem.unit,
+            region: rawItem.region,
+            tags: rawItem.tags,
+            sustainabilityscore: rawItem.sustainabilityscore,
+            recyclability: rawItem.recyclability,
+            alternativeto: rawItem.alternativeto,
+            notes: rawItem.notes
+          });
+        } else {
+          console.warn('Invalid material object found in results, skipping:', rawItem);
         }
       }
       
@@ -156,35 +159,25 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       // Skip if the item is null or undefined
       if (!rawItem) continue;
       
-      // Create a properly typed item to avoid TypeScript errors
-      const item: Partial<SupabaseMaterial> = rawItem;
-      
-      // Explicit null check and type guard before accessing properties
-      if (typeof item === 'object') {
-        // Check if all required properties exist
-        if (
-          item.id !== undefined && 
-          item.name !== undefined && 
-          item.carbon_footprint_kgco2e_kg !== undefined && 
-          item.carbon_footprint_kgco2e_tonne !== undefined && 
-          item.category !== undefined
-        ) {
-          validMaterials.push({
-            id: item.id,
-            name: item.name,
-            carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
-            carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
-            category: item.category,
-            factor: item.factor,
-            unit: item.unit,
-            region: item.region,
-            tags: item.tags,
-            sustainabilityscore: item.sustainabilityscore,
-            recyclability: item.recyclability,
-            alternativeto: item.alternativeto,
-            notes: item.notes
-          });
-        }
+      // Use our type guard to ensure the item is a valid material
+      if (isValidMaterial(rawItem)) {
+        validMaterials.push({
+          id: rawItem.id,
+          name: rawItem.name,
+          carbon_footprint_kgco2e_kg: rawItem.carbon_footprint_kgco2e_kg,
+          carbon_footprint_kgco2e_tonne: rawItem.carbon_footprint_kgco2e_tonne,
+          category: rawItem.category,
+          factor: rawItem.factor,
+          unit: rawItem.unit,
+          region: rawItem.region,
+          tags: rawItem.tags,
+          sustainabilityscore: rawItem.sustainabilityscore,
+          recyclability: rawItem.recyclability,
+          alternativeto: rawItem.alternativeto,
+          notes: rawItem.notes
+        });
+      } else {
+        console.warn('Invalid material object found in results, skipping:', rawItem);
       }
     }
     
