@@ -107,26 +107,29 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       const safeData = Array.isArray(directResult.data) ? directResult.data : [];
       const validMaterials: SupabaseMaterial[] = [];
       
-      for (const item of safeData) {
-        if (!item) continue;
+      for (const rawItem of safeData) {
+        // Skip if the item is null or undefined
+        if (!rawItem) continue;
+        
+        // Create a properly typed item to avoid TypeScript errors
+        const item: Partial<SupabaseMaterial> = rawItem;
         
         // Explicit null check and type guard before accessing properties
         if (typeof item === 'object') {
-          const id = item.id;
-          const name = item.name;
-          const carbon_footprint_kgco2e_kg = item.carbon_footprint_kgco2e_kg;
-          const carbon_footprint_kgco2e_tonne = item.carbon_footprint_kgco2e_tonne;
-          const category = item.category;
-          
-          // Only include materials that have all required fields
-          if (id && name && carbon_footprint_kgco2e_kg !== undefined && 
-              carbon_footprint_kgco2e_tonne !== undefined && category) {
+          // Check if all required properties exist
+          if (
+            item.id !== undefined && 
+            item.name !== undefined && 
+            item.carbon_footprint_kgco2e_kg !== undefined && 
+            item.carbon_footprint_kgco2e_tonne !== undefined && 
+            item.category !== undefined
+          ) {
             validMaterials.push({
-              id,
-              name,
-              carbon_footprint_kgco2e_kg,
-              carbon_footprint_kgco2e_tonne,
-              category,
+              id: item.id,
+              name: item.name,
+              carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
+              carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
+              category: item.category,
               factor: item.factor,
               unit: item.unit,
               region: item.region,
@@ -149,26 +152,29 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     const safeData = Array.isArray(data) ? data : [];
     const validMaterials: SupabaseMaterial[] = [];
     
-    for (const item of safeData) {
-      if (!item) continue;
+    for (const rawItem of safeData) {
+      // Skip if the item is null or undefined
+      if (!rawItem) continue;
+      
+      // Create a properly typed item to avoid TypeScript errors
+      const item: Partial<SupabaseMaterial> = rawItem;
       
       // Explicit null check and type guard before accessing properties
       if (typeof item === 'object') {
-        const id = item.id;
-        const name = item.name;
-        const carbon_footprint_kgco2e_kg = item.carbon_footprint_kgco2e_kg;
-        const carbon_footprint_kgco2e_tonne = item.carbon_footprint_kgco2e_tonne;
-        const category = item.category;
-        
-        // Only include materials that have all required fields
-        if (id && name && carbon_footprint_kgco2e_kg !== undefined && 
-            carbon_footprint_kgco2e_tonne !== undefined && category) {
+        // Check if all required properties exist
+        if (
+          item.id !== undefined && 
+          item.name !== undefined && 
+          item.carbon_footprint_kgco2e_kg !== undefined && 
+          item.carbon_footprint_kgco2e_tonne !== undefined && 
+          item.category !== undefined
+        ) {
           validMaterials.push({
-            id,
-            name,
-            carbon_footprint_kgco2e_kg,
-            carbon_footprint_kgco2e_tonne,
-            category,
+            id: item.id,
+            name: item.name,
+            carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
+            carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
+            category: item.category,
             factor: item.factor,
             unit: item.unit,
             region: item.region,
@@ -224,7 +230,10 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     if (data && Array.isArray(data)) {
       const categories = data
         .filter(item => item !== null && typeof item === 'object')
-        .map(item => item?.category)
+        .map(item => {
+          // Use optional chaining to safely access the category property
+          return item?.category;
+        })
         .filter((category): category is string => typeof category === 'string');
       
       console.log('Categories fetched:', categories);
@@ -238,7 +247,10 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     if (directResult.data && Array.isArray(directResult.data)) {
       const categories = directResult.data
         .filter(item => item !== null && typeof item === 'object')
-        .map(item => item?.category)
+        .map(item => {
+          // Use optional chaining to safely access the category property
+          return item?.category;
+        })
         .filter((category): category is string => typeof category === 'string');
       
       console.log('Categories fetched (direct):', categories);
