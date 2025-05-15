@@ -112,12 +112,25 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
         // Explicit null check before accessing properties
         if (item !== null && 
             typeof item === 'object' && 
-            'id' in item && 
-            'name' in item && 
+            item.id && item.name && 
             'carbon_footprint_kgco2e_kg' in item && 
             'carbon_footprint_kgco2e_tonne' in item && 
             'category' in item) {
-          validMaterials.push(item as SupabaseMaterial);
+          validMaterials.push({
+            id: item.id,
+            name: item.name,
+            carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
+            carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
+            category: item.category,
+            factor: item.factor,
+            unit: item.unit,
+            region: item.region,
+            tags: item.tags,
+            sustainabilityscore: item.sustainabilityscore,
+            recyclability: item.recyclability,
+            alternativeto: item.alternativeto,
+            notes: item.notes
+          });
         }
       }
       
@@ -133,14 +146,27 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     for (let i = 0; i < safeData.length; i++) {
         const item = safeData[i];
         // Explicit null check before accessing properties
-        if (item !== null &&
+        if (item !== null && 
             typeof item === 'object' && 
-            'id' in item && 
-            'name' in item && 
+            item.id && item.name && 
             'carbon_footprint_kgco2e_kg' in item && 
             'carbon_footprint_kgco2e_tonne' in item && 
             'category' in item) {
-          validMaterials.push(item as SupabaseMaterial);
+          validMaterials.push({
+            id: item.id,
+            name: item.name,
+            carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
+            carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
+            category: item.category,
+            factor: item.factor,
+            unit: item.unit,
+            region: item.region,
+            tags: item.tags,
+            sustainabilityscore: item.sustainabilityscore,
+            recyclability: item.recyclability,
+            alternativeto: item.alternativeto,
+            notes: item.notes
+          });
         }
     }
     
