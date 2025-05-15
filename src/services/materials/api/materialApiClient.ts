@@ -107,30 +107,36 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       const safeData = Array.isArray(directResult.data) ? directResult.data : [];
       const validMaterials: SupabaseMaterial[] = [];
       
-      for (let i = 0; i < safeData.length; i++) {
-        const item = safeData[i];
-        // Explicit null check before accessing properties
-        if (item !== null && 
-            typeof item === 'object' && 
-            item.id && item.name && 
-            'carbon_footprint_kgco2e_kg' in item && 
-            'carbon_footprint_kgco2e_tonne' in item && 
-            'category' in item) {
-          validMaterials.push({
-            id: item.id,
-            name: item.name,
-            carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
-            carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
-            category: item.category,
-            factor: item.factor,
-            unit: item.unit,
-            region: item.region,
-            tags: item.tags,
-            sustainabilityscore: item.sustainabilityscore,
-            recyclability: item.recyclability,
-            alternativeto: item.alternativeto,
-            notes: item.notes
-          });
+      for (const item of safeData) {
+        if (!item) continue;
+        
+        // Explicit null check and type guard before accessing properties
+        if (typeof item === 'object') {
+          const id = item.id;
+          const name = item.name;
+          const carbon_footprint_kgco2e_kg = item.carbon_footprint_kgco2e_kg;
+          const carbon_footprint_kgco2e_tonne = item.carbon_footprint_kgco2e_tonne;
+          const category = item.category;
+          
+          // Only include materials that have all required fields
+          if (id && name && carbon_footprint_kgco2e_kg !== undefined && 
+              carbon_footprint_kgco2e_tonne !== undefined && category) {
+            validMaterials.push({
+              id,
+              name,
+              carbon_footprint_kgco2e_kg,
+              carbon_footprint_kgco2e_tonne,
+              category,
+              factor: item.factor,
+              unit: item.unit,
+              region: item.region,
+              tags: item.tags,
+              sustainabilityscore: item.sustainabilityscore,
+              recyclability: item.recyclability,
+              alternativeto: item.alternativeto,
+              notes: item.notes
+            });
+          }
         }
       }
       
@@ -143,21 +149,26 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     const safeData = Array.isArray(data) ? data : [];
     const validMaterials: SupabaseMaterial[] = [];
     
-    for (let i = 0; i < safeData.length; i++) {
-        const item = safeData[i];
-        // Explicit null check before accessing properties
-        if (item !== null && 
-            typeof item === 'object' && 
-            item.id && item.name && 
-            'carbon_footprint_kgco2e_kg' in item && 
-            'carbon_footprint_kgco2e_tonne' in item && 
-            'category' in item) {
+    for (const item of safeData) {
+      if (!item) continue;
+      
+      // Explicit null check and type guard before accessing properties
+      if (typeof item === 'object') {
+        const id = item.id;
+        const name = item.name;
+        const carbon_footprint_kgco2e_kg = item.carbon_footprint_kgco2e_kg;
+        const carbon_footprint_kgco2e_tonne = item.carbon_footprint_kgco2e_tonne;
+        const category = item.category;
+        
+        // Only include materials that have all required fields
+        if (id && name && carbon_footprint_kgco2e_kg !== undefined && 
+            carbon_footprint_kgco2e_tonne !== undefined && category) {
           validMaterials.push({
-            id: item.id,
-            name: item.name,
-            carbon_footprint_kgco2e_kg: item.carbon_footprint_kgco2e_kg,
-            carbon_footprint_kgco2e_tonne: item.carbon_footprint_kgco2e_tonne,
-            category: item.category,
+            id,
+            name,
+            carbon_footprint_kgco2e_kg,
+            carbon_footprint_kgco2e_tonne,
+            category,
             factor: item.factor,
             unit: item.unit,
             region: item.region,
@@ -168,6 +179,7 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
             notes: item.notes
           });
         }
+      }
     }
     
     return validMaterials;
@@ -210,7 +222,11 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     
     // Extract categories safely
     if (data && Array.isArray(data)) {
-      const categories = data.map(item => item?.category).filter(Boolean);
+      const categories = data
+        .filter(item => item !== null && typeof item === 'object')
+        .map(item => item?.category)
+        .filter((category): category is string => typeof category === 'string');
+      
       console.log('Categories fetched:', categories);
       return categories;
     }
@@ -220,7 +236,11 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     const directResult = await supabase.rpc('get_material_categories');
       
     if (directResult.data && Array.isArray(directResult.data)) {
-      const categories = directResult.data.map(item => item?.category).filter(Boolean);
+      const categories = directResult.data
+        .filter(item => item !== null && typeof item === 'object')
+        .map(item => item?.category)
+        .filter((category): category is string => typeof category === 'string');
+      
       console.log('Categories fetched (direct):', categories);
       return categories;
     }
