@@ -27,8 +27,9 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     }
     
     // Build optimized query with the provided options
+    // Use the materials_view that's connected to our private schema
     let query = supabase
-      .from('materials')
+      .from('materials_view')
       .select(options.columns || '*');
       
     // Apply limit if specified
@@ -80,7 +81,7 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       console.log('Attempting direct materials query without retry mechanism');
       
       // Build the same query but without retry
-      let directQuery = supabase.from('materials').select(options.columns || '*');
+      let directQuery = supabase.from('materials_view').select(options.columns || '*');
       if (options.limit) directQuery = directQuery.limit(options.limit);
       if (options.offset !== undefined) directQuery = directQuery.range(options.offset, options.offset + (options.limit || 1000) - 1);
       if (options.category) directQuery = directQuery.eq('category', options.category);
@@ -169,10 +170,9 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
       throw new Error('Database connection not available');
     }
     
-    // Since we're using the category column from the database,
-    // we need to query that column directly
+    // Use the dedicated function we created for categories
     const { data, error } = await retryWithBackoff(
-      async () => supabase.from('materials').select('category').not('category', 'is', null),
+      async () => supabase.rpc('get_material_categories'),
       options.maxRetries || 2,
       2000
     );
@@ -184,20 +184,17 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     
     // Extract unique categories
     if (data && data.length > 0) {
-      const categories = [...new Set(data.map(item => item.category).filter(Boolean))].sort();
+      const categories = data.map(item => item.category).filter(Boolean);
       console.log('Categories fetched:', categories);
       return categories;
     }
     
     // Fallback to direct query
     console.log('No categories found, trying direct query');
-    const directResult = await supabase
-      .from('materials')
-      .select('category')
-      .not('category', 'is', null);
+    const directResult = await supabase.rpc('get_material_categories');
       
     if (directResult.data && directResult.data.length > 0) {
-      const categories = [...new Set(directResult.data.map(item => item.category).filter(Boolean))].sort();
+      const categories = directResult.data.map(item => item.category).filter(Boolean);
       console.log('Categories fetched (direct):', categories);
       return categories;
     }

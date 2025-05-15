@@ -72,7 +72,7 @@ export type Database = {
         }
         Relationships: []
       }
-      materials: {
+      materials_backup: {
         Row: {
           alternativeto: string | null
           carbon_footprint_kgco2e_kg: number | null
@@ -296,7 +296,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      materials_view: {
+        Row: {
+          alternativeto: string | null
+          carbon_footprint_kgco2e_kg: number | null
+          carbon_footprint_kgco2e_tonne: number | null
+          category: string | null
+          factor: number | null
+          id: string | null
+          name: string | null
+          notes: string | null
+          recyclability: string | null
+          region: string | null
+          sustainabilityscore: number | null
+          tags: string[] | null
+          unit: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_material_categories: {
@@ -304,6 +321,10 @@ export type Database = {
         Returns: {
           category: string
         }[]
+      }
+      get_materials: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown[]
       }
       gtrgm_compress: {
         Args: { "": unknown }
