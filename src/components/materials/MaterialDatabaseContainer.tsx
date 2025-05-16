@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRegion } from "@/contexts/RegionContext";
-import { useMaterialCache } from "@/hooks/useMaterialCache";
+import { useMaterialCache } from "@/hooks/materialCache";
 import { useMaterialData } from "@/hooks/useMaterialData";
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 import MaterialDatabaseContent from "./database/MaterialDatabaseContent";
@@ -14,11 +14,6 @@ const MaterialDatabaseContainer: React.FC = () => {
   const [selectedTag, setSelectedTag] = React.useState<string>("all");
   const { selectedRegion } = useRegion();
   const [loadAttempts, setLoadAttempts] = React.useState(0);
-  
-  // Add console debug for initial render
-  useEffect(() => {
-    console.log("MaterialDatabaseContainer rendered");
-  }, []);
   
   // Use the material cache hook for efficient data loading
   const { materials, loading, error, refreshCache, cacheStats } = useMaterialCache();

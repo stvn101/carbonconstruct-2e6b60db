@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { isOffline } from '@/utils/errorHandling/networkChecker';
 import { retryWithBackoff } from '@/utils/errorHandling/retryUtils';
 import { SupabaseMaterial, CONNECTION_TIMEOUT } from '../materialTypes';
-import { ApiRequestOptions, MaterialApiResponse, CategoriesApiResponse } from './materialApiTypes';
+import { ApiRequestOptions, MaterialApiResponse, CategoriesApiResponse, MaterialMapResult } from './materialApiTypes';
 
 // Type guard to check if an object is a valid material
 function isValidMaterial(item: any): item is SupabaseMaterial {
@@ -19,6 +19,51 @@ function isValidMaterial(item: any): item is SupabaseMaterial {
     'carbon_footprint_kgco2e_tonne' in item &&
     'category' in item
   );
+}
+
+/**
+ * Maps array of materials ensuring they match the expected structure
+ */
+function mapMaterialsData(data: any[]): MaterialMapResult {
+  if (!Array.isArray(data)) {
+    console.warn('Invalid data format received:', data);
+    return { validMaterials: [], invalidCount: 0 };
+  }
+  
+  const validMaterials: SupabaseMaterial[] = [];
+  let invalidCount = 0;
+  
+  for (const rawItem of data) {
+    // Skip if the item is null or undefined
+    if (!rawItem) {
+      invalidCount++;
+      continue;
+    }
+    
+    // Use our type guard to ensure the item is a valid material
+    if (isValidMaterial(rawItem)) {
+      validMaterials.push({
+        id: rawItem.id,
+        name: rawItem.name,
+        carbon_footprint_kgco2e_kg: rawItem.carbon_footprint_kgco2e_kg,
+        carbon_footprint_kgco2e_tonne: rawItem.carbon_footprint_kgco2e_tonne,
+        category: rawItem.category,
+        factor: rawItem.factor,
+        unit: rawItem.unit,
+        region: rawItem.region,
+        tags: rawItem.tags,
+        sustainabilityscore: rawItem.sustainabilityscore,
+        recyclability: rawItem.recyclability,
+        alternativeto: rawItem.alternativeto,
+        notes: rawItem.notes
+      });
+    } else {
+      console.warn('Invalid material object found in results, skipping:', rawItem);
+      invalidCount++;
+    }
+  }
+  
+  return { validMaterials, invalidCount };
 }
 
 /**
@@ -110,40 +155,16 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       
       if (!directResult.data || directResult.data.length === 0) {
         console.error('Direct query returned no materials');
-        // Return an empty array instead of trying to cast
         return [];
       }
       
       console.log('Direct query successful:', directResult.data.length, 'materials');
       
-      // Make sure we have valid material objects before returning
-      const safeData = Array.isArray(directResult.data) ? directResult.data : [];
-      const validMaterials: SupabaseMaterial[] = [];
+      // Process the materials to ensure they're valid
+      const { validMaterials, invalidCount } = mapMaterialsData(directResult.data);
       
-      for (const rawItem of safeData) {
-        // Skip if the item is null or undefined
-        if (!rawItem) continue;
-        
-        // Use our type guard to ensure the item is a valid material
-        if (isValidMaterial(rawItem)) {
-          validMaterials.push({
-            id: rawItem.id,
-            name: rawItem.name,
-            carbon_footprint_kgco2e_kg: rawItem.carbon_footprint_kgco2e_kg,
-            carbon_footprint_kgco2e_tonne: rawItem.carbon_footprint_kgco2e_tonne,
-            category: rawItem.category,
-            factor: rawItem.factor,
-            unit: rawItem.unit,
-            region: rawItem.region,
-            tags: rawItem.tags,
-            sustainabilityscore: rawItem.sustainabilityscore,
-            recyclability: rawItem.recyclability,
-            alternativeto: rawItem.alternativeto,
-            notes: rawItem.notes
-          });
-        } else {
-          console.warn('Invalid material object found in results, skipping:', rawItem);
-        }
+      if (invalidCount > 0) {
+        console.warn(`Filtered out ${invalidCount} invalid materials from direct query`);
       }
       
       return validMaterials;
@@ -151,34 +172,11 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     
     console.log('Supabase API returned', data.length, 'materials');
     
-    // Make sure we have valid material objects before returning
-    const safeData = Array.isArray(data) ? data : [];
-    const validMaterials: SupabaseMaterial[] = [];
+    // Process the materials to ensure they're valid
+    const { validMaterials, invalidCount } = mapMaterialsData(data);
     
-    for (const rawItem of safeData) {
-      // Skip if the item is null or undefined
-      if (!rawItem) continue;
-      
-      // Use our type guard to ensure the item is a valid material
-      if (isValidMaterial(rawItem)) {
-        validMaterials.push({
-          id: rawItem.id,
-          name: rawItem.name,
-          carbon_footprint_kgco2e_kg: rawItem.carbon_footprint_kgco2e_kg,
-          carbon_footprint_kgco2e_tonne: rawItem.carbon_footprint_kgco2e_tonne,
-          category: rawItem.category,
-          factor: rawItem.factor,
-          unit: rawItem.unit,
-          region: rawItem.region,
-          tags: rawItem.tags,
-          sustainabilityscore: rawItem.sustainabilityscore,
-          recyclability: rawItem.recyclability,
-          alternativeto: rawItem.alternativeto,
-          notes: rawItem.notes
-        });
-      } else {
-        console.warn('Invalid material object found in results, skipping:', rawItem);
-      }
+    if (invalidCount > 0) {
+      console.warn(`Filtered out ${invalidCount} invalid materials from API response`);
     }
     
     return validMaterials;
