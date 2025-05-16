@@ -3,6 +3,8 @@ export interface ExtendedMaterialData {
   id?: string;
   name: string;
   factor: number;
+  carbon_footprint_kgco2e_kg?: number;
+  carbon_footprint_kgco2e_tonne?: number;
   unit?: string;
   region?: string;
   tags?: string[];
