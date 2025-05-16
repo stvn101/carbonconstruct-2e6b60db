@@ -40,12 +40,12 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
 
   return (
     <motion.div 
-      className="space-y-6"
+      className="space-y-6 dark:bg-gray-800 dark:bg-opacity-40 dark:border dark:border-gray-700 dark:rounded-lg dark:p-4"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} className="dark:text-carbon-200">
         <CarbonReduction
           calculationInput={calculationInput}
           calculationResult={calculationResult}
@@ -53,7 +53,7 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
         />
       </motion.div>
 
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} className="dark:text-carbon-200">
         <AreasOfConcern calculationResult={calculationResult} />
       </motion.div>
     </motion.div>
