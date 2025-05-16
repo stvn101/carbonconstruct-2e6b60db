@@ -1,80 +1,38 @@
 
-import React, { useState, useEffect } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import React from "react";
+import { Loader2, Database } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface MaterialLoadingStateProps {
-  handleRefresh: () => void;
-}
-
-const MaterialLoadingState: React.FC<MaterialLoadingStateProps> = ({ handleRefresh }) => {
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [loadingTime, setLoadingTime] = useState(0);
-  const [showRetry, setShowRetry] = useState(false);
-
-  // Simulate loading progress and monitor time
-  useEffect(() => {
-    const startTime = Date.now();
-    const progressInterval = setInterval(() => {
-      setLoadingProgress(prev => {
-        // Start fast, then slow down as we approach 100
-        const remaining = 100 - prev;
-        const increment = Math.max(1, Math.min(5, remaining * 0.1));
-        return Math.min(95, prev + increment); // Never reach 100 automatically
-      });
-      
-      // Update elapsed time
-      setLoadingTime(Math.floor((Date.now() - startTime) / 1000));
-    }, 250);
-    
-    // Show retry option after 10 seconds
-    const retryTimer = setTimeout(() => {
-      setShowRetry(true);
-    }, 10000);
-    
-    return () => {
-      clearInterval(progressInterval);
-      clearTimeout(retryTimer);
-    };
-  }, []);
-
-  // Determine loading message based on time elapsed
-  const loadingMessage = loadingTime < 3 ? 'Connecting to database...' :
-                         loadingTime < 6 ? 'Fetching materials...' :
-                         loadingTime < 10 ? 'Processing material data...' :
-                         'Still working on it...';
-
+const MaterialLoadingState: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8 content-top-spacing pt-24">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-carbon-600" />
-          <h2 className="text-2xl font-bold">Loading Material Database...</h2>
-          <p className="text-muted-foreground mb-6">{loadingMessage}</p>
-          
-          <div className="max-w-md mx-auto mb-6">
-            <Progress value={loadingProgress} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-1">
-              {loadingTime > 0 && `Loading for ${loadingTime} seconds`}
-            </p>
+    <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
+      <div className="text-center mb-8">
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-carbon-100 dark:bg-carbon-800/30">
+            <Database className="h-6 w-6 text-carbon-700 dark:text-carbon-300" />
           </div>
-          
-          {/* Show retry button after delay */}
-          {showRetry && (
-            <div className="mt-4">
-              <p className="text-sm mb-2">Taking longer than expected? Try refreshing manually:</p>
-              <Button 
-                variant="outline" 
-                onClick={handleRefresh}
-                className="mx-auto"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Materials
-              </Button>
-            </div>
-          )}
         </div>
+        <h1 className="text-3xl font-bold mb-2">
+          Australian Material Database
+        </h1>
+        <Skeleton className="h-6 w-full max-w-md mx-auto mb-4" />
+      </div>
+      
+      <div className="mb-8 border border-dashed p-8 rounded-lg flex flex-col items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-carbon-600 mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Loading Material Database</h2>
+        <p className="text-muted-foreground text-center max-w-md mb-4">
+          We're retrieving sustainable materials data from our database. This should only take a moment.
+        </p>
+        <div className="w-full max-w-md bg-muted rounded-full h-2.5 mb-1 overflow-hidden">
+          <div className="bg-carbon-600 h-2.5 rounded-full animate-pulse"></div>
+        </div>
+        <p className="text-xs text-muted-foreground">This may take a few seconds on first load</p>
+      </div>
+      
+      <div className="space-y-4">
+        <Skeleton className="h-64 w-full rounded-lg" />
+        <Skeleton className="h-[500px] w-full rounded-lg" />
       </div>
     </div>
   );

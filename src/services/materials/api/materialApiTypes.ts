@@ -1,79 +1,29 @@
 
-/**
- * Type definitions for the Material API client
- */
+import { SupabaseMaterial } from '../materialTypes';
 
-/**
- * Interface for API request options
- */
 export interface ApiRequestOptions {
-  /**
-   * Maximum number of retries for the request
-   */
-  maxRetries?: number;
-  
-  /**
-   * Timeout in milliseconds
-   */
-  timeout?: number;
-  
-  /**
-   * Callback function to run on retry
-   */
-  onRetry?: (attempt: number) => void;
-
-  /**
-   * Maximum number of records to return
-   */
-  limit?: number;
-  
-  /**
-   * Number of records to skip
-   */
-  offset?: number;
-  
-  /**
-   * Specific columns to select
-   */
   columns?: string;
-  
-  /**
-   * Filter by category
-   */
+  limit?: number;
+  offset?: number;
   category?: string;
-  
-  /**
-   * Filter by region
-   */
   region?: string;
+  maxRetries?: number;
+  onRetry?: (attempt: number) => void;
+  timeout?: number;
+  forceRefresh?: boolean;
 }
 
-/**
- * Interface for material API response
- */
-export interface MaterialApiResponse<T> {
-  /**
-   * The data returned by the API
-   */
-  data?: T[];
-  
-  /**
-   * Any error that occurred during the request
-   */
-  error?: Error;
+export interface MaterialApiResponse {
+  data: SupabaseMaterial[] | null;
+  error: Error | null;
 }
 
-/**
- * Interface for categories API response
- */
 export interface CategoriesApiResponse {
-  /**
-   * The categories returned by the API
-   */
-  categories?: string[];
-  
-  /**
-   * Any error that occurred during the request
-   */
-  error?: Error;
+  data: string[];
+  error: Error | null;
+}
+
+export interface MaterialMapResult {
+  validMaterials: SupabaseMaterial[];
+  invalidCount: number;
 }

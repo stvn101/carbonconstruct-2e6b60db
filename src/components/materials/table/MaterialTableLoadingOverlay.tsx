@@ -1,11 +1,10 @@
 
 import React from "react";
-import { TableRow, TableCell } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
-import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
+import { TableRow, TableCell } from "@/components/ui/table";
 
 interface MaterialTableLoadingOverlayProps {
-  materials: ExtendedMaterialData[];
+  materials: any[];
   isLoading: boolean;
 }
 
@@ -13,19 +12,22 @@ export const MaterialTableLoadingOverlay: React.FC<MaterialTableLoadingOverlayPr
   materials, 
   isLoading 
 }) => {
-  if (!isLoading || materials.length === 0) return null;
-  
+  if (!isLoading || !Array.isArray(materials) || materials.length === 0) {
+    return null;
+  }
+
   return (
-    <>
-      {materials.map((material, index) => (
-        <TableRow key={`loading-row-${index}`} className="opacity-50">
-          <TableCell colSpan={7} className="h-16 relative">
-            <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </div>
-          </TableCell>
-        </TableRow>
-      ))}
-    </>
+    <TableRow className="relative">
+      <TableCell colSpan={5} className="p-0 border-b-0">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-carbon-600" />
+            <p className="mt-2 text-sm text-carbon-700 dark:text-carbon-300">
+              Updating materials...
+            </p>
+          </div>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 };

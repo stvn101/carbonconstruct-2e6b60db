@@ -72,6 +72,86 @@ export type Database = {
         }
         Relationships: []
       }
+      material_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      materials: {
+        Row: {
+          applicable_standards: string | null
+          category_id: number | null
+          co2e_avg: number | null
+          co2e_max: number | null
+          co2e_min: number | null
+          created_at: string | null
+          description: string | null
+          id: number
+          material: string
+          ncc_requirements: string | null
+          sustainability_notes: string | null
+          sustainability_score: number | null
+          sustainability_score_is_manual: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          applicable_standards?: string | null
+          category_id?: number | null
+          co2e_avg?: number | null
+          co2e_max?: number | null
+          co2e_min?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          material: string
+          ncc_requirements?: string | null
+          sustainability_notes?: string | null
+          sustainability_score?: number | null
+          sustainability_score_is_manual?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          applicable_standards?: string | null
+          category_id?: number | null
+          co2e_avg?: number | null
+          co2e_max?: number | null
+          co2e_min?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          material?: string
+          ncc_requirements?: string | null
+          sustainability_notes?: string | null
+          sustainability_score?: number | null
+          sustainability_score_is_manual?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "material_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials_backup: {
         Row: {
           alternativeto: string | null
@@ -296,6 +376,128 @@ export type Database = {
       }
     }
     Views: {
+      dependent_view1: {
+        Row: {
+          applicable_standards: string | null
+          category_id: number | null
+          co2e_avg: number | null
+          co2e_max: number | null
+          co2e_min: number | null
+          created_at: string | null
+          description: string | null
+          id: number | null
+          material: string | null
+          ncc_requirements: string | null
+          sustainability_notes: string | null
+          sustainability_score: number | null
+          sustainability_score_is_manual: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          applicable_standards?: string | null
+          category_id?: number | null
+          co2e_avg?: number | null
+          co2e_max?: number | null
+          co2e_min?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number | null
+          material?: string | null
+          ncc_requirements?: string | null
+          sustainability_notes?: string | null
+          sustainability_score?: number | null
+          sustainability_score_is_manual?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          applicable_standards?: string | null
+          category_id?: number | null
+          co2e_avg?: number | null
+          co2e_max?: number | null
+          co2e_min?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number | null
+          material?: string | null
+          ncc_requirements?: string | null
+          sustainability_notes?: string | null
+          sustainability_score?: number | null
+          sustainability_score_is_manual?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "material_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dependent_view2: {
+        Row: {
+          applicable_standards: string | null
+          category_id: number | null
+          co2e_avg: number | null
+          co2e_max: number | null
+          co2e_min: number | null
+          created_at: string | null
+          description: string | null
+          id: number | null
+          material: string | null
+          ncc_requirements: string | null
+          sustainability_notes: string | null
+          sustainability_score: number | null
+          sustainability_score_is_manual: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          applicable_standards?: string | null
+          category_id?: number | null
+          co2e_avg?: number | null
+          co2e_max?: number | null
+          co2e_min?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number | null
+          material?: string | null
+          ncc_requirements?: string | null
+          sustainability_notes?: string | null
+          sustainability_score?: number | null
+          sustainability_score_is_manual?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          applicable_standards?: string | null
+          category_id?: number | null
+          co2e_avg?: number | null
+          co2e_max?: number | null
+          co2e_min?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number | null
+          material?: string | null
+          ncc_requirements?: string | null
+          sustainability_notes?: string | null
+          sustainability_score?: number | null
+          sustainability_score_is_manual?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "material_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_sustainability_ranking: {
+        Row: {}
+        Relationships: []
+      }
       materials_view: {
         Row: {
           alternativeto: string | null
@@ -312,10 +514,56 @@ export type Database = {
           tags: string[] | null
           unit: string | null
         }
+        Insert: {
+          alternativeto?: string | null
+          carbon_footprint_kgco2e_kg?: number | null
+          carbon_footprint_kgco2e_tonne?: number | null
+          category?: string | null
+          factor?: number | null
+          id?: string | null
+          name?: string | null
+          notes?: string | null
+          recyclability?: string | null
+          region?: string | null
+          sustainabilityscore?: number | null
+          tags?: string[] | null
+          unit?: string | null
+        }
+        Update: {
+          alternativeto?: string | null
+          carbon_footprint_kgco2e_kg?: number | null
+          carbon_footprint_kgco2e_tonne?: number | null
+          category?: string | null
+          factor?: number | null
+          id?: string | null
+          name?: string | null
+          notes?: string | null
+          recyclability?: string | null
+          region?: string | null
+          sustainabilityscore?: number | null
+          tags?: string[] | null
+          unit?: string | null
+        }
         Relationships: []
       }
     }
     Functions: {
+      calculate_sustainability_scores: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      calculate_total_co2e: {
+        Args: { material_quantities: Json }
+        Returns: Json
+      }
+      calculate_weighted_sustainability: {
+        Args: {
+          carbon_fp: number
+          recyclability: number
+          regional_factor: number
+        }
+        Returns: number
+      }
       get_material_categories: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -324,7 +572,7 @@ export type Database = {
       }
       get_materials: {
         Args: Record<PropertyKey, never>
-        Returns: unknown[]
+        Returns: Database["public"]["Tables"]["materials"]["Row"][]
       }
       gtrgm_compress: {
         Args: { "": unknown }
@@ -349,6 +597,10 @@ export type Database = {
       set_limit: {
         Args: { "": number }
         Returns: number
+      }
+      set_manual_sustainability_score: {
+        Args: { material_id: number; score: number; notes: string }
+        Returns: undefined
       }
       show_limit: {
         Args: Record<PropertyKey, never>
