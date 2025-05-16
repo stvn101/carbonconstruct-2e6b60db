@@ -1,6 +1,8 @@
+
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { fetchMaterialsFromApi } from '@/services/materials/api/materialApiClient';
 import { createBasicFallbackMaterials } from './basicFallbacks';
+import { adaptSupabaseMaterialsToExtended } from './typeAdapters';
 
 /**
  * Determines if materials should be updated based on comparison
@@ -25,11 +27,12 @@ export const shouldUpdateMaterials = (
   
   // If same count, check if the data is fresher (different first element)
   if (newMaterials.length === currentMaterials.length && newMaterials.length > 0) {
-    // Use simple sample comparison (first item id)
+    // Use simple comparison of properties rather than ids
     const firstNewItem = newMaterials[0];
     const firstCurrentItem = currentMaterials[0];
     
-    if (firstNewItem?.id !== firstCurrentItem?.id) {
+    if (firstNewItem.name !== firstCurrentItem.name || 
+        firstNewItem.category !== firstCurrentItem.category) {
       console.log('Materials data changed, updating');
       return true;
     }
@@ -88,15 +91,18 @@ export const loadMaterialsWithFallback = async (
     if (Array.isArray(apiMaterials) && apiMaterials.length > 0) {
       console.log(`API returned ${apiMaterials.length} materials`);
       
+      // Convert Supabase materials to our ExtendedMaterialData type
+      const adaptedMaterials = adaptSupabaseMaterialsToExtended(apiMaterials);
+      
       // Cache these results
       try {
-        localStorage.setItem('materialsCache', JSON.stringify(apiMaterials));
+        localStorage.setItem('materialsCache', JSON.stringify(adaptedMaterials));
         localStorage.setItem('materialsCacheTimestamp', new Date().toISOString());
       } catch (storageError) {
         console.warn('Failed to save materials to localStorage:', storageError);
       }
       
-      return apiMaterials;
+      return adaptedMaterials;
     }
     
     // If API fails, return current materials if we have any
