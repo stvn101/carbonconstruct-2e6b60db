@@ -1,12 +1,12 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { DatabaseX, RefreshCw } from "lucide-react";
+import { Database, RefreshCw } from "lucide-react";
 
 export const MaterialTableNoData: React.FC = () => {
   return (
     <div className="text-center py-12 px-4 bg-muted/20 rounded-lg border border-dashed flex flex-col items-center">
-      <DatabaseX className="h-16 w-16 mb-4 text-muted-foreground" />
+      <Database className="h-16 w-16 mb-4 text-muted-foreground" />
       <h3 className="text-xl font-medium mb-2">Material Data Unavailable</h3>
       <p className="text-muted-foreground mb-6 max-w-md">
         We're unable to load the materials data at this time. This could be due to a connection issue or server unavailability.

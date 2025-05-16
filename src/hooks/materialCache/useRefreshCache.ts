@@ -2,6 +2,7 @@
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { fetchMaterialsFromApi } from '@/services/materials/api/materialApiClient';
+import { adaptSupabaseMaterialsToExtended } from './utils/typeAdapters';
 
 export const useRefreshCache = (
   setMaterials: Dispatch<SetStateAction<ExtendedMaterialData[]>>,
@@ -26,11 +27,13 @@ export const useRefreshCache = (
       });
       
       if (materials && Array.isArray(materials) && materials.length > 0) {
-        setMaterials(materials);
+        // Convert SupabaseMaterial[] to ExtendedMaterialData[] 
+        const adaptedMaterials = adaptSupabaseMaterialsToExtended(materials);
+        setMaterials(adaptedMaterials);
         
         // Update localStorage with fresh data
         try {
-          localStorage.setItem('materialsCache', JSON.stringify(materials));
+          localStorage.setItem('materialsCache', JSON.stringify(adaptedMaterials));
           localStorage.setItem('materialsCacheTimestamp', new Date().toISOString());
         } catch (storageError) {
           console.warn('Failed to save refreshed materials to localStorage:', storageError);

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { InfoCircle } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -21,7 +21,7 @@ export const MaterialTableHeader = () => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoCircle className="h-4 w-4 ml-1 text-muted-foreground cursor-help" />
+                  <Info className="h-4 w-4 ml-1 text-muted-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[200px] text-xs">
                   <p>Carbon footprint in kg CO2e per kg of material</p>

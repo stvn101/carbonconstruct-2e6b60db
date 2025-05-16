@@ -1,4 +1,6 @@
+
 export interface ExtendedMaterialData {
+  id?: string;
   name: string;
   factor: number;
   unit?: string;
