@@ -19,6 +19,8 @@ export function adaptSupabaseMaterialToExtended(material: SupabaseMaterial): Ext
     alternativeTo: material.alternativeto,
     notes: material.notes,
     category: material.category,
+    carbon_footprint_kgco2e_kg: material.carbon_footprint_kgco2e_kg,
+    carbon_footprint_kgco2e_tonne: material.carbon_footprint_kgco2e_tonne
   };
 }
 

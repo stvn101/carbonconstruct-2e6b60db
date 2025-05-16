@@ -1,4 +1,3 @@
-
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { fetchMaterialsFromApi } from '@/services/materials/api/materialApiClient';
 import { createBasicFallbackMaterials } from './basicFallbacks';
