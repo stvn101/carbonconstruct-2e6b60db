@@ -30,26 +30,26 @@ export const CarbonReduction: React.FC<CarbonReductionProps> = ({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center text-xl text-carbon-800">
-          <Leaf className="h-5 w-5 mr-2 text-carbon-600" />
+        <CardTitle className="flex items-center text-xl text-carbon-800 dark:text-carbon-100">
+          <Leaf className="h-5 w-5 mr-2 text-carbon-600 dark:text-carbon-400" />
           Carbon Reduction Opportunities
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="dark:text-carbon-300">
           Recommendations based on your specific project inputs and Australian construction practices
         </CardDescription>
       </CardHeader>
       <CardContent>
         {percentageSaving > 0 && (
-          <div className="mb-4 p-4 bg-carbon-50 rounded-lg border border-carbon-100">
+          <div className="mb-4 p-4 bg-carbon-50 rounded-lg border border-carbon-100 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium text-carbon-800">Potential Carbon Reduction</h3>
-              <Badge className="bg-carbon-600">
+              <h3 className="font-medium text-carbon-800 dark:text-carbon-100">Potential Carbon Reduction</h3>
+              <Badge className="bg-carbon-600 dark:bg-carbon-500">
                 Save up to {percentageSaving.toFixed(1)}%
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mb-2">
+            <p className="text-sm text-muted-foreground mb-2 dark:text-carbon-300">
               By implementing our recommendations, you could reduce emissions by approximately&nbsp;
-              <strong>{totalPotentialSavings.toLocaleString(undefined, { 
+              <strong className="dark:text-carbon-100">{totalPotentialSavings.toLocaleString(undefined, { 
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               })} kg CO2e</strong>, 

@@ -27,16 +27,16 @@ export const PotentialSavings: React.FC<PotentialSavingsProps> = ({
   const alternativeMaterialName = getMaterialName(alternative);
 
   return (
-    <div className="p-3 rounded-lg border border-carbon-100 bg-carbon-50/50">
+    <div className="p-3 rounded-lg border border-carbon-100 bg-carbon-50/50 dark:bg-gray-800 dark:border-gray-700">
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center">
-          <span className="font-medium text-carbon-800">{originalMaterialName}</span>
-          <ArrowRight className="h-4 w-4 mx-2 text-carbon-400" />
-          <span className="font-medium text-carbon-700">{alternativeMaterialName}</span>
+          <span className="font-medium text-carbon-800 dark:text-carbon-100">{originalMaterialName}</span>
+          <ArrowRight className="h-4 w-4 mx-2 text-carbon-400 dark:text-carbon-500" />
+          <span className="font-medium text-carbon-700 dark:text-carbon-200">{alternativeMaterialName}</span>
         </div>
-        <div className="flex items-center bg-carbon-100 px-2 py-0.5 rounded-full">
-          <TrendingDown className="h-3.5 w-3.5 mr-1 text-carbon-600" />
-          <span className="text-xs font-medium text-carbon-700">
+        <div className="flex items-center bg-carbon-100 dark:bg-carbon-700 px-2 py-0.5 rounded-full">
+          <TrendingDown className="h-3.5 w-3.5 mr-1 text-carbon-600 dark:text-carbon-400" />
+          <span className="text-xs font-medium text-carbon-700 dark:text-carbon-200">
             {savingsPercentage.toFixed(1)}% reduction
           </span>
         </div>
@@ -44,16 +44,16 @@ export const PotentialSavings: React.FC<PotentialSavingsProps> = ({
       
       <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
         <div className="text-center">
-          <p className="text-carbon-500 mb-0.5">Original</p>
-          <p className="font-medium text-carbon-700">{originalEmissions.toFixed(2)} kg</p>
+          <p className="text-carbon-500 dark:text-carbon-400 mb-0.5">Original</p>
+          <p className="font-medium text-carbon-700 dark:text-carbon-200">{originalEmissions.toFixed(2)} kg</p>
         </div>
         <div className="text-center">
-          <p className="text-carbon-500 mb-0.5">Alternative</p>
-          <p className="font-medium text-carbon-700">{potentialEmissions.toFixed(2)} kg</p>
+          <p className="text-carbon-500 dark:text-carbon-400 mb-0.5">Alternative</p>
+          <p className="font-medium text-carbon-700 dark:text-carbon-200">{potentialEmissions.toFixed(2)} kg</p>
         </div>
         <div className="text-center">
-          <p className="text-carbon-500 mb-0.5">Savings</p>
-          <p className="font-medium text-green-600">{savings.toFixed(2)} kg</p>
+          <p className="text-carbon-500 dark:text-carbon-400 mb-0.5">Savings</p>
+          <p className="font-medium text-green-600 dark:text-green-400">{savings.toFixed(2)} kg</p>
         </div>
       </div>
     </div>
