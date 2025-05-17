@@ -1,112 +1,70 @@
 
-import React, { Suspense, useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
-import { ThemeProvider } from './components/ThemeProvider';
-import { Toaster } from './components/ui/sonner';
-import { RegionProvider } from './contexts/RegionContext';
-import { AuthProvider } from './contexts/auth';
-import { ProjectProvider } from './contexts/ProjectContext';
-import { CalculatorProvider } from './contexts/calculator';
-import { NetworkProvider } from './contexts/network/NetworkContext';
-import ErrorBoundaryWrapper from './components/error/ErrorBoundaryWrapper';
-import PageLoading from './components/ui/page-loading';
-import SkipToContent from './components/SkipToContent';
-import { AppContent } from './components/AppContent';
-import ErrorTrackingService from './services/errorTrackingService';
-import performanceMonitoringService from './services/performanceMonitoringService';
+import { Route, Routes } from "react-router-dom";
+import HomePage from "./pages/Home";
+import AboutPage from "./pages/About";
+import CalculatorPage from "./pages/Calculator";
+import MaterialDatabasePage from "./pages/MaterialDatabase";
+import { Helmet } from "react-helmet-async";
+import { ColorModeProvider } from "./contexts/ColorMode";
+import { RegionProvider } from "./contexts/RegionContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "./components/ui/sonner";
+import { useEffect } from "react";
+import { fetchMaterials } from "./services/materialService";
+import { refreshMaterialFactors } from "./lib/carbonFactors";
 
-// Loading fallback for Suspense
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <PageLoading isLoading={true} text="Loading application..." />
-  </div>
-);
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
-// Initialize theme before rendering to prevent flickering
-const initializeTheme = () => {
-  // Check localStorage first
-  const storedTheme = localStorage.getItem('carbon-construct-theme');
-  
-  if (storedTheme) {
-    if (storedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    }
-    return;
-  }
-  
-  // If no stored theme, check system preference
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (prefersDark) {
-    document.documentElement.classList.add('dark');
-  }
-};
-
-// Run theme initialization immediately
-if (typeof window !== 'undefined') {
-  initializeTheme();
-}
-
-const App: React.FC = () => {
+function App() {
+  // Initialize material factors from database
   useEffect(() => {
-    // Initialize error tracking on app mount
-    ErrorTrackingService.initialize();
-    
-    // Initialize performance monitoring
-    performanceMonitoringService.initialize();
-    
-    // Use page visibility API instead of unload event
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        ErrorTrackingService.flush();
-        performanceMonitoringService.cleanup();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    console.log("App: Loading materials from database for factors");
+    fetchMaterials(false)
+      .then(materials => {
+        // Convert format for refreshMaterialFactors
+        if (materials && materials.length > 0) {
+          const dbMaterials = materials.map(mat => ({
+            id: mat.id ? Number(mat.id) : 0,
+            material: mat.name,
+            co2e_avg: mat.factor || mat.carbon_footprint_kgco2e_kg
+          }));
+          
+          refreshMaterialFactors(dbMaterials);
+        }
+      })
+      .catch(error => {
+        console.error("Failed to load materials for factors:", error);
+      });
   }, []);
-  
+
   return (
-    <ErrorBoundaryWrapper 
-      feature="Application" 
-      className="min-h-screen flex flex-col overflow-x-hidden"
-      onReset={() => {
-        // Force page reload on critical error
-        window.location.reload();
-      }}
-    >
-      <HelmetProvider>
-        <ThemeProvider defaultTheme="system" storageKey="carbon-construct-theme">
-          <BrowserRouter>
-            <NetworkProvider>
-              <RegionProvider>
-                <AuthProvider>
-                  <ErrorBoundaryWrapper feature="Project Data">
-                    <ProjectProvider>
-                      <CalculatorProvider>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <AppContent />
-                          <Toaster 
-                            closeButton 
-                            theme="system" 
-                            className="dark:bg-gray-800 dark:text-carbon-200" 
-                          />
-                        </Suspense>
-                      </CalculatorProvider>
-                    </ProjectProvider>
-                  </ErrorBoundaryWrapper>
-                </AuthProvider>
-              </RegionProvider>
-            </NetworkProvider>
-          </BrowserRouter>
-        </ThemeProvider>
-      </HelmetProvider>
-    </ErrorBoundaryWrapper>
+    <>
+      <Helmet>
+        <meta name="theme-color" content="#006064" />
+      </Helmet>
+      <QueryClientProvider client={queryClient}>
+        <ColorModeProvider>
+          <RegionProvider>
+            <Toaster position="top-center" />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/calculator" element={<CalculatorPage />} />
+              <Route path="/materials" element={<MaterialDatabasePage />} />
+            </Routes>
+          </RegionProvider>
+        </ColorModeProvider>
+      </QueryClientProvider>
+    </>
   );
-};
+}
 
 export default App;

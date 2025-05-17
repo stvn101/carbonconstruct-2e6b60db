@@ -13,9 +13,17 @@ import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 export async function cacheMaterials(materials: ExtendedMaterialData[]) {
   try {
     materialCacheService.clearCache(); // Clear first
-    // Create a new mechanism to replace the cache
-    const result = await materialCacheService.syncMaterialsCache();
-    materialCacheService.lastUpdated = new Date();
+    
+    // Store the materials in cache
+    const result = await materialCacheService.setMaterials(materials);
+    
+    if (result) {
+      materialCacheService.setLastUpdated(new Date());
+      console.log(`Cached ${materials.length} materials successfully`);
+    } else {
+      console.warn('Failed to cache materials, unknown error');
+    }
+    
     return !!result;
   } catch (error) {
     console.error('Error caching materials:', error);
@@ -51,7 +59,7 @@ export async function clearMaterialsCache() {
  */
 export async function getCacheMetadata() {
   return {
-    lastUpdated: materialCacheService.lastUpdated,
-    count: materialCacheService.getMaterialsCount()
+    lastUpdated: materialCacheService.getLastUpdated(),
+    itemCount: materialCacheService.getMaterialsCount()
   };
 }

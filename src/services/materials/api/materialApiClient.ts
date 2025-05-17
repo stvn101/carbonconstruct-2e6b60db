@@ -5,71 +5,14 @@
 import { supabase } from '@/integrations/supabase/client';
 import { isOffline } from '@/utils/errorHandling/networkChecker';
 import { retryWithBackoff } from '@/utils/errorHandling/retryUtils';
-import { SupabaseMaterial, CONNECTION_TIMEOUT } from '../materialTypes';
+import { CONNECTION_TIMEOUT } from '../materialTypes';
 import { ApiRequestOptions, MaterialApiResponse, CategoriesApiResponse, MaterialMapResult } from './materialApiTypes';
-
-// Type guard to check if an object is a valid material
-function isValidMaterial(item: any): item is SupabaseMaterial {
-  return (
-    item !== null &&
-    typeof item === 'object' &&
-    'id' in item &&
-    'name' in item &&
-    'carbon_footprint_kgco2e_kg' in item &&
-    'carbon_footprint_kgco2e_tonne' in item &&
-    'category' in item
-  );
-}
-
-/**
- * Maps array of materials ensuring they match the expected structure
- */
-function mapMaterialsData(data: any[]): MaterialMapResult {
-  if (!Array.isArray(data)) {
-    console.warn('Invalid data format received:', data);
-    return { validMaterials: [], invalidCount: 0 };
-  }
-  
-  const validMaterials: SupabaseMaterial[] = [];
-  let invalidCount = 0;
-  
-  for (const rawItem of data) {
-    // Skip if the item is null or undefined
-    if (!rawItem) {
-      invalidCount++;
-      continue;
-    }
-    
-    // Use our type guard to ensure the item is a valid material
-    if (isValidMaterial(rawItem)) {
-      validMaterials.push({
-        id: rawItem.id,
-        name: rawItem.name,
-        carbon_footprint_kgco2e_kg: rawItem.carbon_footprint_kgco2e_kg,
-        carbon_footprint_kgco2e_tonne: rawItem.carbon_footprint_kgco2e_tonne,
-        category: rawItem.category,
-        factor: rawItem.factor,
-        unit: rawItem.unit,
-        region: rawItem.region,
-        tags: rawItem.tags,
-        sustainabilityscore: rawItem.sustainabilityscore,
-        recyclability: rawItem.recyclability,
-        alternativeto: rawItem.alternativeto,
-        notes: rawItem.notes
-      });
-    } else {
-      console.warn('Invalid material object found in results, skipping:', rawItem);
-      invalidCount++;
-    }
-  }
-  
-  return { validMaterials, invalidCount };
-}
+import { DbMaterial, adaptDbMaterialToApp } from '../adapters/materialDbAdapter';
 
 /**
  * Fetch materials from the Supabase API with retry capability
  */
-export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Promise<SupabaseMaterial[]> {
+export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Promise<any[]> {
   if (isOffline()) {
     console.log('Offline mode detected, skipping API request');
     throw new Error('Network offline');
@@ -85,9 +28,9 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
     }
     
     // Build optimized query with the provided options
-    // Use the materials_view that's connected to our private schema
+    // Use the new materials table in the public schema
     let query = supabase
-      .from('materials_view')
+      .from('materials')
       .select(options.columns || '*');
       
     // Apply limit if specified
@@ -102,16 +45,11 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       
     // Apply category filter if specified
     if (options.category) {
-      query = query.eq('category', options.category);
+      query = query.eq('applicable_standards', options.category);
     }
       
-    // Apply region filter if specified
-    if (options.region) {
-      query = query.eq('region', options.region);
-    }
-      
-    // Always order by name for consistency
-    query = query.order('name');
+    // Always order by material name for consistency
+    query = query.order('material');
     
     // Use standard promise handling pattern
     const { data, error } = await retryWithBackoff(
@@ -139,12 +77,11 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       console.log('Attempting direct materials query without retry mechanism');
       
       // Build the same query but without retry
-      let directQuery = supabase.from('materials_view').select(options.columns || '*');
+      let directQuery = supabase.from('materials').select(options.columns || '*');
       if (options.limit) directQuery = directQuery.limit(options.limit);
       if (options.offset !== undefined) directQuery = directQuery.range(options.offset, options.offset + (options.limit || 1000) - 1);
-      if (options.category) directQuery = directQuery.eq('category', options.category);
-      if (options.region) directQuery = directQuery.eq('region', options.region);
-      directQuery = directQuery.order('name');
+      if (options.category) directQuery = directQuery.eq('applicable_standards', options.category);
+      directQuery = directQuery.order('material');
       
       const directResult = await directQuery;
       
@@ -167,7 +104,7 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
         console.warn(`Filtered out ${invalidCount} invalid materials from direct query`);
       }
       
-      return validMaterials;
+      return validMaterials.map(material => adaptDbMaterialToApp(material));
     }
     
     console.log('Supabase API returned', data.length, 'materials');
@@ -179,12 +116,55 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       console.warn(`Filtered out ${invalidCount} invalid materials from API response`);
     }
     
-    return validMaterials;
+    return validMaterials.map(material => adaptDbMaterialToApp(material));
     
   } catch (err) {
     console.error('Error fetching materials from API:', err);
     throw err;
   }
+}
+
+/**
+ * Type guard to check if an object is a valid material
+ */
+function isValidMaterial(item: any): item is DbMaterial {
+  return (
+    item !== null &&
+    typeof item === 'object' &&
+    'id' in item &&
+    'material' in item
+  );
+}
+
+/**
+ * Maps array of materials ensuring they match the expected structure
+ */
+function mapMaterialsData(data: any[]): MaterialMapResult {
+  if (!Array.isArray(data)) {
+    console.warn('Invalid data format received:', data);
+    return { validMaterials: [], invalidCount: 0 };
+  }
+  
+  const validMaterials: DbMaterial[] = [];
+  let invalidCount = 0;
+  
+  for (const rawItem of data) {
+    // Skip if the item is null or undefined
+    if (!rawItem) {
+      invalidCount++;
+      continue;
+    }
+    
+    // Use our type guard to ensure the item is a valid material
+    if (isValidMaterial(rawItem)) {
+      validMaterials.push(rawItem as DbMaterial);
+    } else {
+      console.warn('Invalid material object found in results, skipping:', rawItem);
+      invalidCount++;
+    }
+  }
+  
+  return { validMaterials, invalidCount };
 }
 
 /**
@@ -233,19 +213,22 @@ export async function fetchCategoriesFromApi(options: ApiRequestOptions = {}): P
     
     // Fallback to direct query
     console.log('No categories found, trying direct query');
-    const directResult = await supabase.rpc('get_material_categories');
+    
+    // Query distinct applicable standards from materials table
+    const directResult = await supabase
+      .from('materials')
+      .select('applicable_standards')
+      .not('applicable_standards', 'is', null)
+      .order('applicable_standards');
       
     if (directResult.data && Array.isArray(directResult.data)) {
       const categories = directResult.data
-        .filter(item => item !== null && typeof item === 'object')
-        .map(item => {
-          // Use optional chaining to safely access the category property
-          return item?.category;
-        })
-        .filter((category): category is string => typeof category === 'string');
+        .map(item => item.applicable_standards)
+        .filter((category): category is string => 
+          typeof category === 'string' && category.trim() !== '');
       
       console.log('Categories fetched (direct):', categories);
-      return categories;
+      return Array.from(new Set(categories)); // Remove duplicates
     }
     
     console.log('No categories found');

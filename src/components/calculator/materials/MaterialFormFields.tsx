@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertCircle } from "lucide-react";
 import { MATERIAL_FACTORS } from "@/lib/carbonExports";
 import { fetchMaterials } from "@/services/materialService";
+import { useState } from "react";
 
 interface MaterialFormFieldsProps {
   material: MaterialInput;
@@ -24,7 +25,23 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
   onRemove,
   onUpdate
 }) => {
-  // Generate material options dynamically from MATERIAL_FACTORS and Supabase data
+  const [databaseMaterials, setDatabaseMaterials] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  useEffect(() => {
+    setIsLoading(true);
+    fetchMaterials(false)
+      .then(materials => {
+        setDatabaseMaterials(materials || []);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.warn("Background material fetch failed in MaterialFormFields:", err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  // Generate material options dynamically from MATERIAL_FACTORS and database materials
   const materialOptions = useMemo(() => {
     try {
       const baseOptions = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
@@ -32,9 +49,28 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
         label: value.name || key
       }));
       
+      // Add options from database materials
+      const dbOptions = databaseMaterials.map(mat => ({
+        value: `db-${mat.id}`,
+        label: mat.name
+      }));
+      
+      // Combine and remove duplicates
+      const combinedOptions = [...baseOptions];
+      
+      // Add DB materials that don't already exist by name
+      const existingLabels = new Set(baseOptions.map(opt => opt.label.toLowerCase()));
+      
+      dbOptions.forEach(option => {
+        if (!existingLabels.has(option.label.toLowerCase())) {
+          combinedOptions.push(option);
+          existingLabels.add(option.label.toLowerCase());
+        }
+      });
+      
       // Ensure we have at least the default options
-      if (baseOptions.length === 0) {
-        console.warn("No material options found in MATERIAL_FACTORS");
+      if (combinedOptions.length === 0) {
+        console.warn("No material options found");
         return [
           { value: "concrete", label: "Concrete" },
           { value: "steel", label: "Steel" },
@@ -45,7 +81,8 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
         ];
       }
       
-      return baseOptions;
+      // Sort by label
+      return combinedOptions.sort((a, b) => a.label.localeCompare(b.label));
     } catch (err) {
       console.error("Error loading material options:", err);
       return [
@@ -57,14 +94,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
         { value: "insulation", label: "Insulation" }
       ];
     }
-  }, []);
-  
-  // Prefetch materials in the background to ensure they're available
-  useEffect(() => {
-    fetchMaterials(false).catch(err => {
-      console.warn("Background material fetch failed in MaterialFormFields:", err);
-    });
-  }, []);
+  }, [databaseMaterials]);
 
   return (
     <div className="grid grid-cols-1 gap-3 items-end border border-gray-200 dark:border-gray-700 p-3 md:p-4 rounded-lg">
@@ -74,9 +104,10 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
           <Select
             value={material.type}
             onValueChange={(value) => onUpdate("type", value)}
+            disabled={isLoading}
           >
             <SelectTrigger id={`material-type-${index}`}>
-              <SelectValue placeholder="Select material" />
+              <SelectValue placeholder={isLoading ? "Loading materials..." : "Select material"} />
             </SelectTrigger>
             <SelectContent className="max-h-[300px]">
               {materialOptions.map((option) => (

@@ -1,3 +1,4 @@
+
 /**
  * Core material fetch service with improved caching and fallbacks
  */
@@ -75,16 +76,15 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
           throw new Error('Invalid material data returned from API');
         }
         
-        // Process the data
+        // Process the data - no need for additional processing since our adapter already did that
         console.log('Processing data from API:', allData.length, 'rows');
-        const processedData = processDataInBatches(allData);
         
         // Cache the materials for future use
-        cacheMaterials(processedData)
+        cacheMaterials(allData)
           .then(() => console.log('Materials cached successfully'))
           .catch(err => console.warn('Failed to cache materials:', err));
         
-        return processedData;
+        return allData;
       } catch (err) {
         console.error('API fetch error:', err);
         handleMaterialApiError(err, 'load materials from database');
@@ -120,8 +120,8 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
 /**
  * Fetch materials with pagination to handle large datasets
  */
-async function fetchMaterialsWithPagination(): Promise<any[]> {
-  let allData: any[] = [];
+async function fetchMaterialsWithPagination(): Promise<ExtendedMaterialData[]> {
+  let allData: ExtendedMaterialData[] = [];
   let currentOffset = 0;
   let hasMore = true;
   
@@ -130,7 +130,7 @@ async function fetchMaterialsWithPagination(): Promise<any[]> {
     const options: ApiRequestOptions = {
       limit: QUERY_LIMIT,
       offset: currentOffset,
-      columns: 'id,name,factor,carbon_footprint_kgco2e_kg,unit,region,tags,sustainabilityscore,recyclability,alternativeto,notes,category'
+      columns: 'id,material,description,co2e_min,co2e_max,co2e_avg,sustainability_score,applicable_standards,ncc_requirements,sustainability_notes'
     };
     
     try {
@@ -263,7 +263,7 @@ export async function fetchMaterialCategories(): Promise<string[]> {
   }
 }
 
-// Add immediate prefetch on module load with retry capability
+// Initialize materials prefetch
 (function initializeMaterialPrefetch() {
   let retryCount = 0;
   

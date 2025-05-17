@@ -1,176 +1,11 @@
 
 /**
- * Provides fallback materials when API or cache fails
+ * Provides fallback materials and categories when database connections fail
  */
-import { MATERIAL_FACTORS } from '@/lib/materials';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 
 /**
- * Get default fallback materials from local material factors
- */
-export function getFallbackMaterials(): ExtendedMaterialData[] {
-  console.log('Using fallback materials');
-  
-  try {
-    // Check if MATERIAL_FACTORS is available
-    if (!MATERIAL_FACTORS || Object.keys(MATERIAL_FACTORS).length === 0) {
-      console.warn('MATERIAL_FACTORS is empty, using hard-coded defaults');
-      return getHardCodedMaterials();
-    }
-    
-    // Create material data from our static definitions
-    return Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
-      name: value.name || key,
-      factor: value.factor || 0,
-      unit: value.unit || 'kg',
-      region: 'Australia', // Default region 
-      tags: ['construction'], // Default tags
-      sustainabilityScore: 70, // Default score
-      recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
-      alternativeTo: undefined,
-      notes: '',
-      category: key.includes('concrete') ? 'Concrete' : 
-               key.includes('steel') ? 'Metals' :
-               key.includes('timber') || key.includes('wood') ? 'Wood' :
-               key.includes('glass') ? 'Glass' : 'Other'
-    }));
-  } catch (error) {
-    console.error('Error creating fallback materials:', error);
-    return getHardCodedMaterials();
-  }
-}
-
-/**
- * Last resort hard-coded materials if everything else fails
- */
-function getHardCodedMaterials(): ExtendedMaterialData[] {
-  console.log('Using hard-coded materials fallback');
-  return [
-    {
-      name: "Concrete",
-      factor: 0.159,
-      unit: "kg",
-      region: "Australia",
-      tags: ["construction"],
-      sustainabilityScore: 70,
-      recyclability: "Medium" as "High" | "Medium" | "Low",
-      alternativeTo: undefined,
-      notes: "",
-      category: "Concrete"
-    },
-    {
-      name: "Steel",
-      factor: 1.77,
-      unit: "kg",
-      region: "Australia",
-      tags: ["construction"],
-      sustainabilityScore: 65,
-      recyclability: "High" as "High" | "Medium" | "Low",
-      alternativeTo: undefined,
-      notes: "",
-      category: "Metals"
-    },
-    {
-      name: "Timber",
-      factor: 0.42,
-      unit: "kg",
-      region: "Australia",
-      tags: ["construction"],
-      sustainabilityScore: 85,
-      recyclability: "High" as "High" | "Medium" | "Low",
-      alternativeTo: undefined,
-      notes: "",
-      category: "Wood"
-    },
-    {
-      name: "Glass",
-      factor: 0.85,
-      unit: "kg",
-      region: "Australia",
-      tags: ["construction"],
-      sustainabilityScore: 75,
-      recyclability: "High" as "High" | "Medium" | "Low",
-      alternativeTo: undefined,
-      notes: "",
-      category: "Glass"
-    },
-    {
-      name: "Aluminum",
-      factor: 8.24,
-      unit: "kg",
-      region: "Australia",
-      tags: ["construction"],
-      sustainabilityScore: 60,
-      recyclability: "High" as "High" | "Medium" | "Low",
-      alternativeTo: undefined,
-      notes: "",
-      category: "Metals"
-    },
-    {
-      name: "Brick",
-      factor: 0.24,
-      unit: "kg",
-      region: "Australia",
-      tags: ["construction"],
-      sustainabilityScore: 80,
-      recyclability: "Medium" as "High" | "Medium" | "Low",
-      alternativeTo: undefined,
-      notes: "",
-      category: "Ceramics"
-    },
-    {
-      name: "Insulation",
-      factor: 1.86,
-      unit: "kg",
-      region: "Australia",
-      tags: ["construction"],
-      sustainabilityScore: 75,
-      recyclability: "Low" as "High" | "Medium" | "Low",
-      alternativeTo: undefined,
-      notes: "",
-      category: "Insulation"
-    },
-    {
-      name: "Low-Carbon Concrete",
-      factor: 0.110,
-      unit: "kg",
-      region: "Australia",
-      tags: ["sustainable", "construction"],
-      sustainabilityScore: 85,
-      recyclability: "Medium" as "High" | "Medium" | "Low",
-      alternativeTo: "Concrete",
-      notes: "30% lower carbon footprint than standard concrete",
-      category: "Concrete"
-    },
-    {
-      name: "Recycled Steel",
-      factor: 0.98,
-      unit: "kg",
-      region: "Australia",
-      tags: ["recycled", "construction"],
-      sustainabilityScore: 82,
-      recyclability: "High" as "High" | "Medium" | "Low",
-      alternativeTo: "Steel",
-      notes: "Made from recycled materials",
-      category: "Metals"
-    },
-    {
-      name: "Sustainable Timber",
-      factor: 0.31,
-      unit: "kg",
-      region: "Australia",
-      tags: ["sustainable", "construction"],
-      sustainabilityScore: 90,
-      recyclability: "High" as "High" | "Medium" | "Low",
-      alternativeTo: "Timber",
-      notes: "Sourced from certified sustainable forests",
-      category: "Wood"
-    }
-  ];
-}
-
-/**
- * Get default material categories when API or cache fails
+ * Default categories for materials when API can't be reached
  */
 export function getDefaultCategories(): string[] {
   return [
@@ -178,11 +13,132 @@ export function getDefaultCategories(): string[] {
     'Metals',
     'Wood',
     'Glass',
-    'Insulation',
     'Ceramics',
+    'Insulation',
     'Plastics',
-    'Composites',
-    'Finishes',
+    'Aggregate',
     'Other'
+  ];
+}
+
+/**
+ * Generate fallback materials for offline use or when database is unavailable
+ */
+export function getFallbackMaterials(): ExtendedMaterialData[] {
+  return [
+    {
+      id: '1',
+      name: 'Concrete (standard)',
+      factor: 0.159,
+      carbon_footprint_kgco2e_kg: 0.159,
+      carbon_footprint_kgco2e_tonne: 159,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Concrete', 'Structural', 'Foundation'],
+      sustainabilityScore: 60,
+      recyclability: 'Medium',
+      notes: 'Standard concrete mix commonly used in construction.',
+      category: 'Concrete'
+    },
+    {
+      id: '2',
+      name: 'Low-carbon concrete',
+      factor: 0.119,
+      carbon_footprint_kgco2e_kg: 0.119,
+      carbon_footprint_kgco2e_tonne: 119,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Concrete', 'Sustainable', 'Foundation'],
+      sustainabilityScore: 75,
+      recyclability: 'High',
+      alternativeTo: 'Concrete (standard)',
+      notes: 'Concrete with reduced carbon impact through alternative binders or SCMs.',
+      category: 'Concrete'
+    },
+    {
+      id: '3',
+      name: 'Steel (virgin)',
+      factor: 2.81,
+      carbon_footprint_kgco2e_kg: 2.81,
+      carbon_footprint_kgco2e_tonne: 2810,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Metal', 'Structural'],
+      sustainabilityScore: 40,
+      recyclability: 'Medium',
+      notes: 'Primary steel production from iron ore.',
+      category: 'Metals'
+    },
+    {
+      id: '4',
+      name: 'Steel (recycled)',
+      factor: 0.47,
+      carbon_footprint_kgco2e_kg: 0.47,
+      carbon_footprint_kgco2e_tonne: 470,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Metal', 'Recycled', 'Structural'],
+      sustainabilityScore: 80,
+      recyclability: 'High',
+      alternativeTo: 'Steel (virgin)',
+      notes: 'Steel produced from recycled scrap through electric arc furnace process.',
+      category: 'Metals'
+    },
+    {
+      id: '5',
+      name: 'Timber (softwood)',
+      factor: 0.63,
+      carbon_footprint_kgco2e_kg: 0.63,
+      carbon_footprint_kgco2e_tonne: 630,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Wood', 'Natural', 'Renewable'],
+      sustainabilityScore: 85,
+      recyclability: 'High',
+      notes: 'Softwood timber from managed forests.',
+      category: 'Wood'
+    },
+    {
+      id: '6',
+      name: 'Glass (float)',
+      factor: 1.44,
+      carbon_footprint_kgco2e_kg: 1.44,
+      carbon_footprint_kgco2e_tonne: 1440,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Glass', 'Building Envelope'],
+      sustainabilityScore: 50,
+      recyclability: 'Medium',
+      notes: 'Standard architectural flat glass.',
+      category: 'Glass'
+    },
+    {
+      id: '7',
+      name: 'Brick (standard)',
+      factor: 0.24,
+      carbon_footprint_kgco2e_kg: 0.24,
+      carbon_footprint_kgco2e_tonne: 240,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Ceramics', 'Building Envelope'],
+      sustainabilityScore: 70,
+      recyclability: 'Medium',
+      notes: 'Standard fired clay brick.',
+      category: 'Ceramics'
+    },
+    {
+      id: '8',
+      name: 'Insulation (mineral wool)',
+      factor: 1.28,
+      carbon_footprint_kgco2e_kg: 1.28,
+      carbon_footprint_kgco2e_tonne: 1280,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['Insulation', 'Building Envelope', 'Thermal'],
+      sustainabilityScore: 60,
+      recyclability: 'Low',
+      notes: 'Standard mineral wool insulation for thermal applications.',
+      category: 'Insulation'
+    }
   ];
 }
