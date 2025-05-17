@@ -6,7 +6,7 @@ import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { cacheMaterials, getCachedMaterials } from '@/services/materials/cache';
 import { processDataInBatches } from '../materialDataProcessor';
 import { isOffline } from '@/utils/errorHandling/networkChecker';
-import { fetchMaterialsFromApi, fetchCategoriesFromApi } from '../api/materialApiClient';
+import { fetchMaterialsFromApi, fetchMaterialCategoriesFromApi } from '../api/materialApiClient';
 import { getFallbackMaterials, getDefaultCategories } from '../fallback/materialFallbackProvider';
 import { handleMaterialApiError } from '../notifications/materialNotifications';
 import { toast } from 'sonner';
@@ -68,23 +68,23 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
         console.log('Fetching materials from API');
         
         // Fetch with pagination to avoid large queries
-        const allData = await fetchMaterialsWithPagination();
+        const apiResponse = await fetchMaterialsWithPagination();
         
         // Sanity check for data
-        if (!allData || !Array.isArray(allData) || allData.length === 0) {
+        if (!apiResponse.data || !Array.isArray(apiResponse.data) || apiResponse.data.length === 0) {
           console.warn('API returned empty or invalid material data');
           throw new Error('Invalid material data returned from API');
         }
         
         // Process the data - no need for additional processing since our adapter already did that
-        console.log('Processing data from API:', allData.length, 'rows');
+        console.log('Processing data from API:', apiResponse.data.length, 'rows');
         
         // Cache the materials for future use
-        cacheMaterials(allData)
+        cacheMaterials(apiResponse.data)
           .then(() => console.log('Materials cached successfully'))
           .catch(err => console.warn('Failed to cache materials:', err));
         
-        return allData;
+        return apiResponse.data;
       } catch (err) {
         console.error('API fetch error:', err);
         handleMaterialApiError(err, 'load materials from database');
@@ -120,7 +120,7 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
 /**
  * Fetch materials with pagination to handle large datasets
  */
-async function fetchMaterialsWithPagination(): Promise<ExtendedMaterialData[]> {
+async function fetchMaterialsWithPagination() {
   let allData: ExtendedMaterialData[] = [];
   let currentOffset = 0;
   let hasMore = true;
@@ -134,14 +134,14 @@ async function fetchMaterialsWithPagination(): Promise<ExtendedMaterialData[]> {
     };
     
     try {
-      const partialData = await fetchMaterialsFromApi(options);
+      const response = await fetchMaterialsFromApi(options);
       
-      if (partialData && partialData.length > 0) {
-        allData = [...allData, ...partialData];
+      if (response.data && response.data.length > 0) {
+        allData = [...allData, ...response.data];
         currentOffset += QUERY_LIMIT;
         
         // Stop if we received fewer items than the limit
-        if (partialData.length < QUERY_LIMIT) {
+        if (response.data.length < QUERY_LIMIT) {
           hasMore = false;
         }
         
@@ -160,7 +160,7 @@ async function fetchMaterialsWithPagination(): Promise<ExtendedMaterialData[]> {
     }
   }
   
-  return allData;
+  return { data: allData, error: null };
 }
 
 /**
@@ -245,17 +245,17 @@ export async function fetchMaterialCategories(): Promise<string[]> {
   }
   
   try {
-    const categories = await fetchCategoriesFromApi();
+    const categoriesResponse = await fetchMaterialCategoriesFromApi();
     
     // Log categories retrieved
-    console.log('Categories fetched:', categories?.length || 0);
+    console.log('Categories fetched:', categoriesResponse.data?.length || 0);
     
-    if (!categories || categories.length === 0) {
+    if (!categoriesResponse.data || categoriesResponse.data.length === 0) {
       console.warn('API returned empty categories, using defaults');
       return getDefaultCategories();
     }
     
-    return categories;
+    return categoriesResponse.data;
   } catch (error) {
     console.error('Error fetching categories:', error);
     // Return some sensible default categories on error

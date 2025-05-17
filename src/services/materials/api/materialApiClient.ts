@@ -63,7 +63,8 @@ export async function fetchMaterialsFromApi(options: ApiRequestOptions = {}): Pr
       // Map the data from database format to app format
       const mappedData = data.map(item => {
         // Need to adapt the database material format to our app format
-        return adaptDbMaterialToApp(item as DbMaterial);
+        // Type assertion here to handle potential mapping issues
+        return adaptDbMaterialToApp(item as unknown as DbMaterial);
       });
       
       return { data: mappedData, error: null };
@@ -135,7 +136,7 @@ export async function fetchMaterialsByIds(ids: number[]): Promise<MaterialApiRes
     }
     
     // Map the data from database format to app format
-    const mappedData = data.map(item => adaptDbMaterialToApp(item as DbMaterial));
+    const mappedData = data.map(item => adaptDbMaterialToApp(item as unknown as DbMaterial));
     
     return { data: mappedData, error: null };
   } catch (error) {
@@ -143,3 +144,6 @@ export async function fetchMaterialsByIds(ids: number[]): Promise<MaterialApiRes
     return { data: null, error: error as Error };
   }
 }
+
+// Export this for compatibility with other code
+export const fetchCategoriesFromApi = fetchMaterialCategoriesFromApi;

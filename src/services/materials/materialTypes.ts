@@ -40,3 +40,21 @@ export interface SupabaseMaterial extends ExtendedMaterialData {
   notes?: string;
   tags?: string[];
 }
+
+// Database material as returned from the public.materials table
+export interface DbMaterial {
+  id: number;
+  material: string;
+  description?: string;
+  co2e_avg?: number;
+  co2e_min?: number;
+  co2e_max?: number;
+  sustainability_score?: number;
+  applicable_standards?: string;
+  ncc_requirements?: string;
+  sustainability_notes?: string;
+  category_id?: number;
+}
+
+// Constant for connection timeout
+export const CONNECTION_TIMEOUT = 15000; // 15 seconds
