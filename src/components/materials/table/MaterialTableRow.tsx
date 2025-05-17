@@ -15,57 +15,67 @@ export const MaterialTableRow: React.FC<MaterialTableRowProps> = ({ material, in
   const rowVariant = index % 2 === 0 ? "bg-background" : "bg-muted/30";
   
   // Format carbon footprint value with 2 decimal places if it exists
-  const formattedCarbonFootprint = material.carbon_footprint_kgco2e_kg !== undefined && 
-    material.carbon_footprint_kgco2e_kg !== null
-    ? `${material.carbon_footprint_kgco2e_kg.toFixed(2)} kg CO₂e/kg`
-    : "N/A";
+  // Use either the carbon_footprint_kgco2e_kg or factor field
+  const carbonFootprint = material.carbon_footprint_kgco2e_kg ?? material.factor ?? 0;
+  const formattedCarbonFootprint = `${carbonFootprint.toFixed(2)} kg CO₂e/kg`;
+
+  // Use the category field instead of directly accessing the category property
+  const materialCategory = material.category || "Uncategorized";
+  
+  // Extract tags - either use the tags array or create from category
+  const materialTags = Array.isArray(material.tags) && material.tags.length > 0
+    ? material.tags
+    : [materialCategory];
+    
+  // Determine if this is an alternative material
+  const isAlternative = !!material.alternativeTo;
 
   return (
     <TableRow className={rowVariant}>
       <TableCell className="font-medium">
         <div>{material.name}</div>
         <div className="sm:hidden text-xs text-muted-foreground mt-1">
-          {material.category || "Uncategorized"}
+          {materialCategory}
         </div>
       </TableCell>
       
-      <TableCell className="hidden sm:table-cell">{material.category || "Uncategorized"}</TableCell>
+      <TableCell className="hidden sm:table-cell">{materialCategory}</TableCell>
       
       <TableCell>
         <span className="font-medium">{formattedCarbonFootprint}</span>
-        {material.alternativeto && (
+        {material.alternativeTo && (
           <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-            Alternative to: {material.alternativeto}
+            Alternative to: {material.alternativeTo}
           </div>
         )}
       </TableCell>
       
       <TableCell className="hidden md:table-cell">
-        {material.region || "Global"}
+        {material.region || "Australia"}
       </TableCell>
       
       <TableCell className="hidden lg:table-cell">
         <div className="flex flex-wrap gap-1">
-          {Array.isArray(material.tags) && material.tags.length > 0 ? (
+          {materialTags.length > 0 ? (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex flex-wrap gap-1 max-w-[150px] overflow-hidden">
-                    {material.tags.slice(0, 2).map((tag: string, i: number) => (
+                    {materialTags.slice(0, 2).map((tag: string, i: number) => (
                       <Badge key={i} variant="outline" className="text-xs whitespace-nowrap">
                         {tag}
                       </Badge>
                     ))}
-                    {material.tags.length > 2 && (
+                    {materialTags.length > 2 && (
                       <Badge variant="outline" className="text-xs">
-                        +{material.tags.length - 2}
+                        +{materialTags.length - 2}
                       </Badge>
                     )}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[250px]">
                   <div className="flex flex-wrap gap-1">
-                    {material.tags.map((tag: string, i: number) => (
+                    {materialTags.map((tag: string, i: number) => (
                       <Badge key={i} variant="outline" className="text-xs">
                         {tag}
                       </Badge>
