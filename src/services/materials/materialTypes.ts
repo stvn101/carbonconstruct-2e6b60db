@@ -1,36 +1,42 @@
 
 /**
- * Material data types and interfaces shared across material services
+ * Types for materials from different data sources
  */
 
-// Supabase material type definition - match actual database view columns
-export interface SupabaseMaterial {
+// Common core material data structure
+export interface BaseMaterialData {
   id: string;
   name: string;
-  carbon_footprint_kgco2e_kg: number;
-  carbon_footprint_kgco2e_tonne: number;
-  category: string;
   factor?: number;
-  unit?: string;
   region?: string;
+  category?: string;
+  unit?: string;
+}
+
+// Extended material data with additional fields
+export interface ExtendedMaterialData extends BaseMaterialData {
+  carbon_footprint_kgco2e_kg?: number;
+  carbon_footprint_kgco2e_tonne?: number;
+  sustainabilityScore?: number;
+  recyclability?: 'High' | 'Medium' | 'Low';
   tags?: string[];
-  sustainabilityscore?: number;
-  recyclability?: string;
-  alternativeto?: string;
+  alternativeTo?: string;
   notes?: string;
 }
 
-// Material pagination interface
-export interface MaterialPagination {
-  page: number;
-  pageSize: number;
-  search?: string;
-  category?: string;
-  sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
+// Material as stored in Supabase
+export interface SupabaseMaterial extends ExtendedMaterialData {
+  id: string;
+  name: string; // Maps to 'material' in the new DB schema
+  carbon_footprint_kgco2e_kg?: number; // Maps to 'co2e_avg' in the new DB schema
+  carbon_footprint_kgco2e_tonne?: number;
+  sustainabilityScore?: number; // Maps to 'sustainability_score' in the new DB schema
+  recyclability?: 'High' | 'Medium' | 'Low';
+  factor?: number; // For backward compatibility
+  category?: string; // Maps to 'applicable_standards' in the new DB schema
+  region?: string;
+  unit?: string;
+  alternativeTo?: string;
+  notes?: string;
+  tags?: string[];
 }
-
-// Connection timeout values
-export const CONNECTION_TIMEOUT = 15000; // 15 seconds
-export const MAX_RETRIES = 2;
-export const DEFAULT_PAGE_SIZE = 100;
