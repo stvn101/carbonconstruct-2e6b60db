@@ -1,5 +1,5 @@
 
-import { SupabaseMaterial } from '../materialTypes';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 
 export interface ApiRequestOptions {
   columns?: string;
@@ -14,7 +14,7 @@ export interface ApiRequestOptions {
 }
 
 export interface MaterialApiResponse {
-  data: SupabaseMaterial[] | null;
+  data: ExtendedMaterialData[] | null;
   error: Error | null;
 }
 
@@ -24,6 +24,6 @@ export interface CategoriesApiResponse {
 }
 
 export interface MaterialMapResult {
-  validMaterials: SupabaseMaterial[];
+  validMaterials: ExtendedMaterialData[];
   invalidCount: number;
 }

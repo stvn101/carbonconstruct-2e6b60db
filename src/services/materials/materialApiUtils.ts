@@ -6,7 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { isOffline } from '@/utils/errorHandling';
 import { toast } from 'sonner';
 import { retryWithBackoff } from '@/utils/errorHandling/retryUtils';
-import { SupabaseMaterial, CONNECTION_TIMEOUT } from './materialTypes';
+import { SupabaseMaterial } from './materialTypes';
+import { CONNECTION_TIMEOUT } from './materialTypes';
 
 /**
  * Fetch materials from the Supabase API with retry capability
