@@ -8,21 +8,17 @@ import { Toaster } from './ui/sonner';
 import { useAccessibility } from '../hooks/useAccessibility';
 import ErrorTrackingService from '../services/errorTrackingService';
 import performanceMonitoringService from '../services/performanceMonitoringService';
-import { lazyLoad } from '../utils/lazyLoad';
+import HomePage from '../pages/Home';
+import AboutPage from '../pages/About';
+import CalculatorPage from '../pages/Calculator';
+import MaterialDatabasePage from '../pages/MaterialDatabase';
 import { authRoutes } from '../routes/authRoutes';
 import { marketingRoutes } from '../routes/marketingRoutes';
 import { projectRoutes } from '../routes/projectRoutes';
 import { protectedRoutes } from '../routes/protectedRoutes';
 
-// Import critical pages directly to avoid dynamic import failures
-import Index from '../pages/Index';
-const NotFound = lazyLoad(() => import('../pages/NotFound'));
-
 export const AppContent: React.FC = () => {
   // Apply app-wide accessibility improvements
-  useAccessibility();
-  
-  // Log route change performance
   useEffect(() => {
     // Initialize performance monitoring
     performanceMonitoringService.trackRouteChange(window.location.pathname);
@@ -45,7 +41,10 @@ export const AppContent: React.FC = () => {
         }}
       >
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/calculator" element={<CalculatorPage />} />
+          <Route path="/materials" element={<MaterialDatabasePage />} />
           
           {/* Auth routes */}
           {authRoutes}
@@ -56,14 +55,12 @@ export const AppContent: React.FC = () => {
           {/* Protected routes */}
           {protectedRoutes}
 
-          {/* Project routes including calculator */}
+          {/* Project routes */}
           {projectRoutes}
 
-          <Route path="/case-studies" element={<Navigate to="/" />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundaryWrapper>
-      <Toaster richColors position="top-right" />
     </div>
   );
 };

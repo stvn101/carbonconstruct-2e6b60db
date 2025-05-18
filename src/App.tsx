@@ -12,6 +12,9 @@ import { Toaster } from "./components/ui/sonner";
 import { useEffect } from "react";
 import { fetchMaterials } from "./services/materialService";
 import { refreshMaterialFactors } from "./lib/carbonFactors";
+import { AuthProvider } from "./contexts/auth/AuthProvider";
+import { ProjectProvider } from "./contexts/ProjectContext";
+import { AppContent } from "./components/AppContent";
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -53,13 +56,12 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ColorModeProvider>
           <RegionProvider>
-            <Toaster position="top-center" />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/calculator" element={<CalculatorPage />} />
-              <Route path="/materials" element={<MaterialDatabasePage />} />
-            </Routes>
+            <AuthProvider>
+              <ProjectProvider>
+                <AppContent />
+                <Toaster position="top-center" />
+              </ProjectProvider>
+            </AuthProvider>
           </RegionProvider>
         </ColorModeProvider>
       </QueryClientProvider>

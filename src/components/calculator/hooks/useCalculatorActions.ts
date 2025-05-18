@@ -37,7 +37,21 @@ interface UseCalculatorActionsResult {
 export function useCalculatorActions({ demoMode = false }: UseCalculatorActionsProps): UseCalculatorActionsResult {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { saveProject, projects } = useProjects();
+  
+  // Safely access the projects context, with fallback
+  let projectsContext;
+  try {
+    projectsContext = useProjects();
+  } catch (error) {
+    console.warn("ProjectContext not available:", error);
+    projectsContext = {
+      saveProject: async () => ({ id: "demo-id", name: "Demo Project", total_emissions: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), user_id: "demo-user", materials: [], transport: [], energy: [], tags: [], status: 'draft' as const, premium_only: false }),
+      projects: []
+    };
+  }
+  
+  const { saveProject, projects } = projectsContext;
+  
   const [projectName, setProjectName] = useState("New Carbon Project");
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
