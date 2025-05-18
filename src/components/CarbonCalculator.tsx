@@ -3,12 +3,43 @@ import { useCalculatorActions } from './calculator/hooks/useCalculatorActions';
 import CalculatorError from "./calculator/CalculatorError";
 import CalculatorAlerts from "./calculator/CalculatorAlerts";
 import CalculatorContainer from "./calculator/CalculatorContainer";
+import { ErrorBoundary } from 'react-error-boundary';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Button } from './ui/button';
 
 export interface CarbonCalculatorProps {
   demoMode?: boolean;
 }
 
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => {
+  return (
+    <Alert className="mb-6 bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800">
+      <AlertTitle className="text-red-800 dark:text-red-300">Calculator Error</AlertTitle>
+      <AlertDescription className="text-red-700 dark:text-red-400">
+        An error occurred while loading the calculator: {error.message}
+        <div className="mt-2">
+          <Button 
+            onClick={resetErrorBoundary} 
+            className="bg-red-600 hover:bg-red-700 text-white"
+            size="sm"
+          >
+            Try Again
+          </Button>
+        </div>
+      </AlertDescription>
+    </Alert>
+  );
+};
+
 const CarbonCalculator = ({ demoMode = false }: CarbonCalculatorProps) => {
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => console.log("Calculator error reset")}>
+      <CarbonCalculatorContent demoMode={demoMode} />
+    </ErrorBoundary>
+  );
+};
+
+const CarbonCalculatorContent = ({ demoMode = false }: CarbonCalculatorProps) => {
   const {
     error,
     projectName,
