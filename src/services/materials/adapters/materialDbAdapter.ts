@@ -1,6 +1,22 @@
 
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { DbMaterial } from '../materialTypes';
+
+/**
+ * Database material as returned from the public.materials table
+ */
+export interface DbMaterial {
+  id: number;
+  material: string;
+  description?: string;
+  co2e_avg?: number;
+  co2e_min?: number;
+  co2e_max?: number;
+  sustainability_score?: number;
+  applicable_standards?: string;
+  ncc_requirements?: string;
+  sustainability_notes?: string;
+  category_id?: number;
+}
 
 /**
  * Adapts material data from the database format to the application format

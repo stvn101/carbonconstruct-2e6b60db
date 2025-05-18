@@ -1,28 +1,36 @@
 
 import React from 'react';
 import HeroSection from '../components/HeroSection';
+import FeatureCard from '../components/FeatureCard';
 import FeaturesSection from '../components/FeaturesSection';
-import CTASection from '../components/CTASection';
 import TestimonialsSection from '../components/TestimonialsSection';
+import CTASection from '../components/CTASection';
+import BenefitsSection from '../components/BenefitsSection';
+import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 
-function HomePage() {
+const HomePage: React.FC = () => {
   return (
     <>
-      <Helmet>
-        <title>CarbonConstruct - Sustainable Construction Management</title>
-        <meta name="description" content="Track, manage, and optimize carbon emissions in construction projects with CarbonConstruct's sustainability-focused solution." />
-      </Helmet>
-      <main>
+      <SEO 
+        title="CarbonConstruct - Sustainable Construction Management"
+        description="Track, manage and reduce your construction project's carbon footprint with our comprehensive sustainability platform."
+      />
+      
+      <Navbar />
+      
+      <main className="flex-grow">
         <HeroSection />
         <FeaturesSection />
+        <BenefitsSection />
         <TestimonialsSection />
         <CTASection />
       </main>
+      
       <Footer />
     </>
   );
-}
+};
 
 export default HomePage;
