@@ -1,6 +1,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 import errorTrackingService from './services/errorTrackingService';
 import performanceMonitoringService from './services/performanceMonitoringService';
@@ -59,9 +61,13 @@ try {
   // Mount React app with priority
   root.render(
     <React.StrictMode>
-      <CachedCalculationsProvider>
-        <App />
-      </CachedCalculationsProvider>
+      <BrowserRouter>
+        <HelmetProvider>
+          <CachedCalculationsProvider>
+            <App />
+          </CachedCalculationsProvider>
+        </HelmetProvider>
+      </BrowserRouter>
     </React.StrictMode>
   );
 
