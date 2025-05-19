@@ -9,7 +9,6 @@
 import { startServer } from './api-server.ts';
 
 // Import and re-export material interfaces
-// Fix the import paths by adding ./ prefix
 import type { Material, SustainableMaterial } from './Material.ts';
 import { MaterialCategory } from './Material.ts';
 
