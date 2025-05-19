@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
@@ -21,6 +20,26 @@ export interface SuggestionsResponse {
   prioritySuggestions?: string[];
   metadata?: SuggestionMetadata;
   report?: any; // Full report object
+}
+
+// Extended interfaces for the API request
+interface ExtendedMaterialInput extends MaterialInput {
+  id?: string;
+  factor?: number;
+  recyclable?: boolean;
+  recycledContent?: number;
+  locallySourced?: boolean;
+}
+
+interface ExtendedTransportInput extends TransportInput {
+  id?: string;
+  factor?: number;
+  fuelType?: string;
+}
+
+interface ExtendedEnergyInput extends EnergyInput {
+  id?: string;
+  factor?: number;
 }
 
 export function useSustainabilitySuggestions() {
@@ -70,9 +89,15 @@ export function useSustainabilitySuggestions() {
     
     try {
       console.log('Fetching sustainability suggestions from API...');
+      
+      // Cast the inputs to the extended types for the API request
+      const extendedMaterials = materials as ExtendedMaterialInput[];
+      const extendedTransport = transport as ExtendedTransportInput[];
+      const extendedEnergy = energy as ExtendedEnergyInput[];
+      
       const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
         body: { 
-          materials: materials.map(m => ({
+          materials: extendedMaterials.map(m => ({
             id: `material-${m.id || Math.random().toString(36).substring(7)}`,
             name: m.type,
             carbonFootprint: m.factor || 1,
@@ -81,7 +106,7 @@ export function useSustainabilitySuggestions() {
             recycledContent: m.recycledContent,
             locallySourced: m.locallySourced
           })),
-          transport: transport.map(t => ({
+          transport: extendedTransport.map(t => ({
             id: `transport-${t.id || Math.random().toString(36).substring(7)}`,
             type: t.type,
             distance: Number(t.distance) || 0,
@@ -89,7 +114,7 @@ export function useSustainabilitySuggestions() {
             fuelType: t.fuelType,
             emissionsFactor: t.factor || 0.1
           })),
-          energy: energy.map(e => ({
+          energy: extendedEnergy.map(e => ({
             id: `energy-${e.id || Math.random().toString(36).substring(7)}`,
             source: e.type,
             quantity: Number(e.amount) || 0,
