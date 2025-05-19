@@ -1,3 +1,4 @@
+
 /**
  * Report generation functions for sustainability analysis
  * 
@@ -6,15 +7,15 @@
  * report formats with various optional components.
  */
 
-import type { Material, SustainableMaterial } from 'interfaces/material';
-import type { TransportItem, SustainableTransport } from 'interfaces/transport';
-import type { EnergyItem, SustainableEnergy } from 'interfaces/energy';
+import type { Material, SustainableMaterial } from './Material.ts';
+import type { TransportItem, SustainableTransport } from './Transport.ts';
+import type { EnergyItem, SustainableEnergy } from './Energy.ts';
 import type { 
   Suggestion, 
   SustainabilityMetrics, 
   SustainabilityReport,
   ReportRequestOptions
-} from 'interfaces/report';
+} from './Report.ts';
 import { 
   SuggestionCategory, 
   ImpactLevel, 
@@ -22,7 +23,7 @@ import {
   ComplexityLevel,
   ComplianceStatus,
   ReportFormat
-} from 'interfaces/report';
+} from './Report.ts';
 
 // Import helper functions
 import { 
