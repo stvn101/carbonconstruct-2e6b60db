@@ -1,269 +1,194 @@
-/**
- * Energy-related helper functions for sustainability analysis
- * 
- * This module provides utility functions for analyzing energy data,
- * calculating consumption metrics, and generating recommendations
- * for sustainable energy use in construction projects.
- */
-
-import type { EnergyItem, SustainableEnergy } from 'interfaces/energy';
+import { EnergyItem, SustainableEnergy, EnergySource, EnergyUnit } from './Energy.ts';
 
 /**
- * Calculate the total energy consumption across all energy items
- * 
- * @param energy Array of energy data
- * @returns Total energy consumption
+ * Calculate total energy consumption across all energy items
  */
-export function calculateTotalEnergyConsumption(energy: (EnergyItem | SustainableEnergy)[]): number {
-  return energy.reduce((total, e) => 
-    total + (('consumption' in e && typeof e.consumption === 'number') ? e.consumption : 0), 0);
+export function calculateTotalEnergyConsumption(
+  energyItems: EnergyItem[]
+): { total: number; unit: EnergyUnit } {
+  if (!energyItems || energyItems.length === 0) {
+    return { total: 0, unit: EnergyUnit.KWH };
+  }
+  
+  // Convert all energy to kWh for consistent calculation
+  let totalKwh = 0;
+  
+  energyItems.forEach(item => {
+    let itemKwh = item.quantity;
+    
+    // Convert to kWh based on unit
+    switch(item.unit) {
+      case EnergyUnit.MWH:
+        itemKwh = item.quantity * 1000; // 1 MWh = 1000 kWh
+        break;
+      case EnergyUnit.LITER:
+        // Diesel conversion - approximate 10 kWh per liter
+        if (item.source === EnergySource.DIESEL_GENERATOR) {
+          itemKwh = item.quantity * 10;
+        }
+        break;
+      case EnergyUnit.M3:
+        // Natural gas conversion - approximate 10 kWh per m3
+        itemKwh = item.quantity * 10;
+        break;
+      case EnergyUnit.KWH:
+      default:
+        // Already in kWh
+        break;
+    }
+    
+    totalKwh += itemKwh;
+  });
+  
+  return { total: totalKwh, unit: EnergyUnit.KWH };
 }
 
 /**
- * Calculate the percentage of renewable energy sources
- * 
- * @param energy Array of energy data
- * @returns Percentage of renewable energy
+ * Calculate percentage of renewable energy used
  */
-export function calculateRenewablePercentage(energy: (EnergyItem | SustainableEnergy)[]): number {
-  if (energy.length === 0) return 0;
+export function calculateRenewablePercentage(
+  energyItems: EnergyItem[]
+): number {
+  if (!energyItems || energyItems.length === 0) return 0;
   
-  const renewableEnergyCount = energy.filter(e => 
-    ('renewable' in e && e.renewable === true) ||
-    ('source' in e && typeof e.source === 'string' && 
-      ['solar', 'wind', 'geothermal', 'biomass'].some(r => e.source.toLowerCase().includes(r)))
-  ).length;
+  const consumption = calculateTotalEnergyConsumption(energyItems);
   
-  return (renewableEnergyCount / energy.length) * 100;
+  if (consumption.total === 0) return 0;
+  
+  // Calculate renewable energy in kWh
+  let renewableKwh = 0;
+  
+  energyItems.forEach(item => {
+    // Only count renewable sources
+    if (item.source === EnergySource.SOLAR || 
+        item.source === EnergySource.WIND || 
+        item.source === EnergySource.BATTERY) {
+      
+      let itemKwh = item.quantity;
+      
+      // Convert to kWh based on unit
+      switch(item.unit) {
+        case EnergyUnit.MWH:
+          itemKwh = item.quantity * 1000; // 1 MWh = 1000 kWh
+          break;
+        case EnergyUnit.KWH:
+          // Already in kWh
+          break;
+        default:
+          // Other units don't apply to renewables in this simplified model
+          itemKwh = 0;
+          break;
+      }
+      
+      renewableKwh += itemKwh;
+    }
+  });
+  
+  return (renewableKwh / consumption.total) * 100;
 }
 
 /**
- * Calculate the potential for peak demand reduction
- * 
- * @param energy Array of energy data
- * @returns Potential reduction factor (0-1)
+ * Calculate potential peak demand reduction
  */
-export function calculatePeakDemandReductionPotential(energy: (EnergyItem | SustainableEnergy)[]): number {
-  // Count energy items with high peak demand
-  const highPeakDemandCount = energy.filter(e => 
-    'peakDemand' in e && typeof e.peakDemand === 'number' && e.peakDemand > 0.7).length;
+export function calculatePeakDemandReductionPotential(
+  energyItems: EnergyItem[]
+): number {
+  if (!energyItems || energyItems.length === 0) return 0;
   
-  // Count energy items with smart monitoring or demand response
-  const smartEnergyCount = energy.filter(e => 
-    ('smartMonitoring' in e && e.smartMonitoring === true) ||
-    ('demandResponse' in e && e.demandResponse === true)).length;
+  // This is a simplified calculation
+  // In a real scenario, this would analyze time-of-use patterns
   
-  if (energy.length === 0) return 0;
+  // Check if there are already battery storage systems
+  const hasBatteryStorage = energyItems.some(item => item.source === EnergySource.BATTERY);
   
-  // Calculate potential based on high peak demand items without smart features
-  const potentialReduction = (highPeakDemandCount - smartEnergyCount) / energy.length * 0.4;
-  return Math.max(0, Math.min(0.5, potentialReduction));
+  // Calculate grid energy percentage
+  const gridItems = energyItems.filter(item => item.source === EnergySource.GRID);
+  const consumption = calculateTotalEnergyConsumption(energyItems);
+  const gridConsumption = calculateTotalEnergyConsumption(gridItems);
+  
+  const gridPercentage = consumption.total > 0 ? 
+    (gridConsumption.total / consumption.total) * 100 : 0;
+  
+  // Estimate peak reduction potential
+  if (hasBatteryStorage) {
+    // With existing batteries, less additional potential
+    return Math.min(15, gridPercentage * 0.2);
+  } else {
+    // Without batteries, higher potential
+    return Math.min(30, gridPercentage * 0.3);
+  }
 }
 
 /**
  * Identify energy efficiency opportunities
- * 
- * @param energy Array of energy data
- * @returns Array of efficiency opportunities with details
  */
-export function identifyEnergyEfficiencyOpportunities(energy: (EnergyItem | SustainableEnergy)[]): {
-  area: string;
-  potentialSavings: number;
-  investmentRequired?: number;
-  paybackPeriod?: number;
-}[] {
-  // In a real implementation, this would analyze energy data to identify specific opportunities
-  // For now, we'll return standard opportunities
+export function identifyEnergyEfficiencyOpportunities(
+  energyItems: EnergyItem[]
+): SustainableEnergy[] {
+  if (!energyItems || energyItems.length === 0) return [];
   
-  const opportunities = [
-    {
-      area: "Lighting",
-      potentialSavings: 0.3,
-      investmentRequired: 5000,
-      paybackPeriod: 2.5
-    },
-    {
-      area: "HVAC",
-      potentialSavings: 0.25,
-      investmentRequired: 12000,
-      paybackPeriod: 4
-    },
-    {
-      area: "Equipment",
-      potentialSavings: 0.2,
-      investmentRequired: 8000,
-      paybackPeriod: 3
-    }
-  ];
+  const opportunities: SustainableEnergy[] = [];
   
-  // If we have energy data, we can customize the opportunities
-  if (energy.length > 0) {
-    // Check if there's a high proportion of non-renewable energy
-    const renewablePercentage = calculateRenewablePercentage(energy);
-    if (renewablePercentage < 30) {
+  // Look for non-renewable energy sources to replace
+  energyItems.forEach(item => {
+    if (item.source === EnergySource.GRID) {
+      // Suggest solar for grid electricity
       opportunities.push({
-        area: "Renewable Energy Installation",
-        potentialSavings: 0.4,
-        investmentRequired: 25000,
-        paybackPeriod: 6
+        ...item,
+        id: `opt-${item.id}-solar`,
+        source: EnergySource.SOLAR,
+        emissionsFactor: item.emissionsFactor * 0.05, // 95% reduction
+        sustainabilityScore: 95,
+        alternativeTo: item.id,
+        carbonReduction: 95,
+        costDifference: 20, // Higher upfront cost
+        implementationComplexity: 'moderate'
+      });
+      
+      // Suggest battery storage
+      opportunities.push({
+        ...item,
+        id: `opt-${item.id}-battery`,
+        source: EnergySource.BATTERY,
+        quantity: item.quantity * 0.3, // Size for 30% of consumption
+        emissionsFactor: 0,
+        sustainabilityScore: 90,
+        alternativeTo: item.id,
+        carbonReduction: 30, // For peak shaving
+        costDifference: 25,
+        implementationComplexity: 'moderate'
       });
     }
     
-    // Check if there's a high average carbon intensity
-    const averageCarbonIntensity = calculateAverageCarbonIntensity(energy);
-    if (averageCarbonIntensity > 0.6) {
+    if (item.source === EnergySource.DIESEL_GENERATOR) {
+      // Suggest hydrogen fuel cell
       opportunities.push({
-        area: "Low-Carbon Energy Sources",
-        potentialSavings: 0.35,
-        investmentRequired: 15000,
-        paybackPeriod: 5
+        ...item,
+        id: `opt-${item.id}-hydrogen`,
+        source: EnergySource.HYDROGEN,
+        emissionsFactor: item.emissionsFactor * 0.1, // 90% reduction
+        sustainabilityScore: 85,
+        alternativeTo: item.id,
+        carbonReduction: 90,
+        costDifference: 40, // Significantly higher cost
+        implementationComplexity: 'complex'
+      });
+      
+      // Suggest hybrid system with solar
+      opportunities.push({
+        ...item,
+        id: `opt-${item.id}-hybrid`,
+        source: EnergySource.SOLAR,
+        quantity: item.quantity * 0.7, // 70% solar, 30% diesel remains
+        emissionsFactor: item.emissionsFactor * 0.3,
+        sustainabilityScore: 80,
+        alternativeTo: item.id,
+        carbonReduction: 70,
+        costDifference: 15,
+        implementationComplexity: 'moderate'
       });
     }
-  }
+  });
   
   return opportunities;
-}
-
-/**
- * Calculate the average carbon intensity of energy sources
- * 
- * @param energy Array of energy data
- * @returns Average carbon intensity
- */
-export function calculateAverageCarbonIntensity(energy: (EnergyItem | SustainableEnergy)[]): number {
-  const energyWithCarbonIntensity = energy.filter(e => 
-    'carbonIntensity' in e && typeof e.carbonIntensity === 'number');
-  
-  if (energyWithCarbonIntensity.length === 0) return 0;
-  
-  const totalCarbonIntensity = energyWithCarbonIntensity.reduce((total, e) => 
-    total + ('carbonIntensity' in e && typeof e.carbonIntensity === 'number' ? e.carbonIntensity : 0), 0);
-  
-  return totalCarbonIntensity / energyWithCarbonIntensity.length;
-}
-
-/**
- * Calculate the overall energy efficiency
- * 
- * @param energy Array of energy data
- * @returns Average efficiency (0-1)
- */
-export function calculateEnergyEfficiency(energy: (EnergyItem | SustainableEnergy)[]): number {
-  const energyWithEfficiency = energy.filter(e => 
-    'efficiency' in e && typeof e.efficiency === 'number');
-  
-  if (energyWithEfficiency.length === 0) return 0;
-  
-  const totalEfficiency = energyWithEfficiency.reduce((total, e) => 
-    total + ('efficiency' in e && typeof e.efficiency === 'number' ? e.efficiency : 0), 0);
-  
-  return totalEfficiency / energyWithEfficiency.length;
-}
-
-/**
- * Group energy items by source
- * 
- * @param energy Array of energy data
- * @returns Object with energy consumption by source
- */
-export function groupEnergyBySource(energy: (EnergyItem | SustainableEnergy)[]): Record<string, number> {
-  const sources: Record<string, number> = {};
-  
-  energy.forEach(e => {
-    if ('source' in e && typeof e.source === 'string' && 
-        'consumption' in e && typeof e.consumption === 'number') {
-      const source = e.source.toLowerCase();
-      sources[source] = (sources[source] || 0) + e.consumption;
-    }
-  });
-  
-  return sources;
-}
-
-/**
- * Group energy items by unit
- * 
- * @param energy Array of energy data
- * @returns Object with energy consumption by unit
- */
-export function groupEnergyByUnit(energy: (EnergyItem | SustainableEnergy)[]): Record<string, number> {
-  const units: Record<string, number> = {};
-  
-  energy.forEach(e => {
-    if ('unit' in e && typeof e.unit === 'string' && 
-        'consumption' in e && typeof e.consumption === 'number') {
-      const unit = e.unit.toLowerCase();
-      units[unit] = (units[unit] || 0) + e.consumption;
-    } else if ('consumption' in e && typeof e.consumption === 'number') {
-      // Default unit if not specified
-      const unit = 'kWh';
-      units[unit] = (units[unit] || 0) + e.consumption;
-    }
-  });
-  
-  return units;
-}
-
-/**
- * Calculate the percentage of energy with smart monitoring
- * 
- * @param energy Array of energy data
- * @returns Percentage with smart monitoring
- */
-export function calculateSmartMonitoringPercentage(energy: (EnergyItem | SustainableEnergy)[]): number {
-  if (energy.length === 0) return 0;
-  
-  const smartMonitoringCount = energy.filter(e => 
-    'smartMonitoring' in e && e.smartMonitoring === true).length;
-  
-  return (smartMonitoringCount / energy.length) * 100;
-}
-
-/**
- * Calculate the percentage of energy with demand response capability
- * 
- * @param energy Array of energy data
- * @returns Percentage with demand response
- */
-export function calculateDemandResponseCapability(energy: (EnergyItem | SustainableEnergy)[]): number {
-  if (energy.length === 0) return 0;
-  
-  const demandResponseCount = energy.filter(e => 
-    'demandResponse' in e && e.demandResponse === true).length;
-  
-  return (demandResponseCount / energy.length) * 100;
-}
-
-/**
- * Calculate energy data completeness score
- * 
- * @param energy Array of energy data
- * @returns Completeness score between 0 and 1
- */
-export function calculateEnergyDataCompleteness(energy: (EnergyItem | SustainableEnergy)[]): number {
-  if (energy.length === 0) return 0;
-  
-  let totalScore = 0;
-  
-  energy.forEach(e => {
-    let itemScore = 0;
-    
-    // Check for essential properties
-    if ('source' in e && typeof e.source === 'string') itemScore += 0.2;
-    if ('consumption' in e && typeof e.consumption === 'number') itemScore += 0.2;
-    if ('carbonIntensity' in e && typeof e.carbonIntensity === 'number') itemScore += 0.2;
-    
-    // Check for additional properties
-    if ('renewable' in e) itemScore += 0.1;
-    if ('efficiency' in e && typeof e.efficiency === 'number') itemScore += 0.1;
-    if ('unit' in e && typeof e.unit === 'string') itemScore += 0.05;
-    if ('costPerUnit' in e && typeof e.costPerUnit === 'number') itemScore += 0.05;
-    if ('peakDemand' in e && typeof e.peakDemand === 'number') itemScore += 0.05;
-    if ('smartMonitoring' in e) itemScore += 0.025;
-    if ('demandResponse' in e) itemScore += 0.025;
-    
-    totalScore += itemScore;
-  });
-  
-  return totalScore / energy.length;
 }

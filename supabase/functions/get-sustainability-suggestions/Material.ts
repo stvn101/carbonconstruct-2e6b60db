@@ -1,38 +1,32 @@
-// Material interface definition
-export interface Material {
-  name: string;
-  quantity?: number;
-  type?: string;
-  unit?: string;
-  embodiedCarbon?: number;
-  recycledContent?: number;
-  locallySourced?: boolean;
-  certifications?: string[];
-  alternatives?: string[];
-  manufacturer?: string;
-  description?: string;
-  cost?: number;
-  [key: string]: unknown;
-}
 
-// Material category enum
+// Material types and enums for sustainability suggestions
+
 export enum MaterialCategory {
-  STRUCTURAL = "structural",
-  FINISHING = "finishing",
-  INSULATION = "insulation",
-  ROOFING = "roofing",
-  FLOORING = "flooring",
-  OTHER = "other"
+  CONCRETE = 'concrete',
+  STEEL = 'steel',
+  TIMBER = 'timber',
+  GLASS = 'glass',
+  INSULATION = 'insulation',
+  FINISHES = 'finishes',
+  OTHER = 'other'
 }
 
-// Material with sustainability metrics
+export interface Material {
+  id: string;
+  name: string;
+  category: MaterialCategory;
+  carbonFootprint: number; // kg CO2e per unit
+  unit: string;
+  recyclable: boolean;
+  recycledContent?: number; // percentage
+  locallySourced?: boolean;
+  quantity?: number;
+}
+
 export interface SustainableMaterial extends Material {
-  sustainabilityScore: number;
-  carbonFootprint: number;
-  recyclability: number;
-  renewableContent?: number;
-  biodegradable?: boolean;
-  lifespan?: number;
-  maintenanceRequirements?: string[];
-  waterFootprint?: number;
+  sustainabilityScore: number; // 0-100
+  alternativeTo?: string; // ID of material this can replace
+  carbonReduction?: number; // percentage reduction compared to conventional
+  costDifference?: number; // percentage difference in cost (+ more expensive, - cheaper)
+  availability: 'high' | 'medium' | 'low';
 }
