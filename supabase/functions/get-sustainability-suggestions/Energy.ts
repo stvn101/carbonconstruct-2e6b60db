@@ -1,34 +1,17 @@
 
-// Energy types and enums for sustainability suggestions
-
-export enum EnergySource {
-  GRID = 'grid',
-  DIESEL_GENERATOR = 'diesel_generator',
-  SOLAR = 'solar',
-  WIND = 'wind',
-  BATTERY = 'battery',
-  HYDROGEN = 'hydrogen'
-}
-
-export enum EnergyUnit {
-  KWH = 'kwh',
-  MWH = 'mwh',
-  LITER = 'liter',
-  M3 = 'cubic_meter'
-}
+// Energy type definitions for sustainability analysis
 
 export interface EnergyItem {
   id: string;
-  source: EnergySource;
+  source: string;
   quantity: number;
-  unit: EnergyUnit;
-  emissionsFactor: number; // kg CO2e per unit
+  unit?: string;
+  emissionsFactor: number;
 }
 
-export interface SustainableEnergy extends EnergyItem {
-  sustainabilityScore: number; // 0-100
-  alternativeTo?: string; // ID of energy this can replace
-  carbonReduction?: number; // percentage reduction compared to conventional
-  costDifference?: number; // percentage difference in cost (+ more expensive, - cheaper)
+export interface EnergyAlternative {
+  source: string;
+  carbonFootprint: number;
+  costDifference: number; // percentage relative to original (positive = more expensive)
   implementationComplexity: 'high' | 'medium' | 'low';
 }

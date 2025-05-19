@@ -1,32 +1,22 @@
 
-// Material types and enums for sustainability suggestions
-
-export enum MaterialCategory {
-  CONCRETE = 'concrete',
-  STEEL = 'steel',
-  TIMBER = 'timber',
-  GLASS = 'glass',
-  INSULATION = 'insulation',
-  FINISHES = 'finishes',
-  OTHER = 'other'
-}
+// Material type definitions for sustainability analysis
 
 export interface Material {
   id: string;
   name: string;
-  category: MaterialCategory;
-  carbonFootprint: number; // kg CO2e per unit
-  unit: string;
-  recyclable: boolean;
-  recycledContent?: number; // percentage
+  category?: string;
+  carbonFootprint: number;
+  unit?: string;
+  recyclable?: boolean;
+  recycledContent?: number;
   locallySourced?: boolean;
-  quantity?: number;
+  quantity: number;
 }
 
-export interface SustainableMaterial extends Material {
-  sustainabilityScore: number; // 0-100
-  alternativeTo?: string; // ID of material this can replace
-  carbonReduction?: number; // percentage reduction compared to conventional
-  costDifference?: number; // percentage difference in cost (+ more expensive, - cheaper)
+export interface MaterialAlternative {
+  name: string;
+  carbonFootprint: number;
+  costDifference: number; // percentage relative to original (positive = more expensive)
   availability: 'high' | 'medium' | 'low';
+  benefits: string[];
 }

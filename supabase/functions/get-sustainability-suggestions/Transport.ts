@@ -1,35 +1,18 @@
 
-// Transport types and enums for sustainability suggestions
-
-export enum TransportType {
-  ROAD = 'road',
-  RAIL = 'rail',
-  SEA = 'sea',
-  AIR = 'air'
-}
-
-export enum FuelType {
-  DIESEL = 'diesel',
-  PETROL = 'petrol',
-  ELECTRIC = 'electric',
-  HYBRID = 'hybrid',
-  BIOFUEL = 'biofuel',
-  LNG = 'lng'
-}
+// Transport type definitions for sustainability analysis
 
 export interface TransportItem {
   id: string;
-  type: TransportType;
-  distance: number; // km
-  weight: number; // tonnes
-  fuelType: FuelType;
-  emissionsFactor: number; // kg CO2e per tonne-km
+  type: string;
+  distance: number;
+  weight: number;
+  fuelType?: string;
+  emissionsFactor: number;
 }
 
-export interface SustainableTransport extends TransportItem {
-  sustainabilityScore: number; // 0-100
-  alternativeTo?: string; // ID of transport this can replace
-  carbonReduction?: number; // percentage reduction compared to conventional
-  costDifference?: number; // percentage difference in cost (+ more expensive, - cheaper)
+export interface TransportAlternative {
+  mode: string;
+  carbonFootprint: number;
+  costDifference: number; // percentage relative to original (positive = more expensive)
   feasibility: 'high' | 'medium' | 'low';
 }

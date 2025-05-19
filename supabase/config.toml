@@ -3,18 +3,15 @@ project_id = "jaqzoyouuzhchuyzafii"
 
 [api]
 enabled = true
+port = 54321
+schemas = ["public", "storage"]
 
 [db]
-enabled = true
+port = 54322
 
-[realtime]
-enabled = true
+[studio]
+port = 54323
 
-[storage]
-enabled = true
-
-[edge_functions]
-enabled = true
-
-[functions.grok-ai]
-verify_jwt = true
+[functions]
+[functions.get-sustainability-suggestions]
+verify_jwt = false
