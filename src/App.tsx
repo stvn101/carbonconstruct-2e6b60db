@@ -4,6 +4,7 @@ import HomePage from "./pages/Home";
 import AboutPage from "./pages/About";
 import CalculatorPage from "./pages/Calculator";
 import MaterialDatabasePage from "./pages/MaterialDatabase";
+import GrokAIPage from "./pages/GrokAI";
 import { Helmet } from "react-helmet-async";
 import { ColorModeProvider } from "./contexts/ColorMode";
 import { RegionProvider } from "./contexts/RegionContext";
