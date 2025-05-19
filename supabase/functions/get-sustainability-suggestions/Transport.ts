@@ -1,52 +1,35 @@
-// Transport interface definition
-export interface TransportItem {
-  type: string;
-  distance?: number;
-  fuel?: string;
-  emissionsFactor?: number;
-  loadCapacity?: number;
-  efficiency?: number;
-  isElectric?: boolean;
-  routeOptimization?: boolean;
-  maintenanceStatus?: string;
-  vehicleAge?: number;
-  operator?: string;
-  operatingHours?: number;
-  idlingTime?: number;
-  [key: string]: unknown;
-}
 
-// Transport type enum
+// Transport types and enums for sustainability suggestions
+
 export enum TransportType {
-  TRUCK = "truck",
-  TRAIN = "train",
-  SHIP = "ship",
-  PLANE = "plane",
-  CRANE = "crane",
-  EXCAVATOR = "excavator",
-  OTHER = "other"
+  ROAD = 'road',
+  RAIL = 'rail',
+  SEA = 'sea',
+  AIR = 'air'
 }
 
-// Fuel type enum
 export enum FuelType {
-  DIESEL = "diesel",
-  GASOLINE = "gasoline",
-  ELECTRICITY = "electricity",
-  BIODIESEL = "biodiesel",
-  HYDROGEN = "hydrogen",
-  NATURAL_GAS = "natural_gas",
-  OTHER = "other"
+  DIESEL = 'diesel',
+  PETROL = 'petrol',
+  ELECTRIC = 'electric',
+  HYBRID = 'hybrid',
+  BIOFUEL = 'biofuel',
+  LNG = 'lng'
 }
 
-// Transport with sustainability metrics
+export interface TransportItem {
+  id: string;
+  type: TransportType;
+  distance: number; // km
+  weight: number; // tonnes
+  fuelType: FuelType;
+  emissionsFactor: number; // kg CO2e per tonne-km
+}
+
 export interface SustainableTransport extends TransportItem {
-  carbonFootprint: number;
-  fuelEfficiency: number;
-  alternativeFuelOptions?: FuelType[];
-  emissionsReductionPotential?: number;
-  noiseLevel?: number;
-  airQualityImpact?: number;
-  lifecycleEmissions?: number;
-  maintenanceSchedule?: string;
-  ecoDriverTraining?: boolean;
+  sustainabilityScore: number; // 0-100
+  alternativeTo?: string; // ID of transport this can replace
+  carbonReduction?: number; // percentage reduction compared to conventional
+  costDifference?: number; // percentage difference in cost (+ more expensive, - cheaper)
+  feasibility: 'high' | 'medium' | 'low';
 }
