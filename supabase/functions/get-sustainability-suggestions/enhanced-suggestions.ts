@@ -1,6 +1,7 @@
-import { Material, SustainableMaterial } from 'interfaces/material';
-import { TransportItem, SustainableTransport } from 'interfaces/transport';
-import { EnergyItem, SustainableEnergy } from 'interfaces/energy';
+
+import { Material, SustainableMaterial } from './Material.ts';
+import { TransportItem, SustainableTransport } from './Transport.ts';
+import { EnergyItem, SustainableEnergy } from './Energy.ts';
 import { 
   Suggestion, 
   SuggestionCategory, 
@@ -9,7 +10,7 @@ import {
   ComplexityLevel,
   SustainabilityMetrics,
   SustainabilityReport,
-  ComplianceStatus} from 'interfaces/report';
+  ComplianceStatus} from './Report.ts';
 
 /**
  * Generate material suggestions as simple text
