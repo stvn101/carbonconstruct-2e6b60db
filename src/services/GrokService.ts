@@ -20,6 +20,17 @@ export interface GrokResponse {
   error?: string;
 }
 
+export interface SustainabilityAnalysisParams {
+  materials?: any[];
+  transport?: any[];
+  energy?: any[];
+  options?: {
+    format?: 'basic' | 'detailed' | 'comprehensive';
+    includeLifecycleAnalysis?: boolean;
+    includeComplianceDetails?: boolean;
+  };
+}
+
 class GrokService {
   private apiKey: string | null = null;
   private isConfigured: boolean = false;
@@ -97,6 +108,58 @@ class GrokService {
   public async checkCompliance(projectData: any): Promise<GrokResponse> {
     return this.queryGrok({
       prompt: "Check if this project complies with NCC 2025 and NABERS standards.",
+      context: projectData,
+      mode: 'compliance_check'
+    });
+  }
+
+  // New method to get sustainability suggestions from the edge function
+  public async getSustainabilitySuggestions(params: SustainabilityAnalysisParams): Promise<any> {
+    try {
+      console.log("Requesting sustainability suggestions");
+      
+      const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
+        body: {
+          materials: params.materials || [],
+          transport: params.transport || [],
+          energy: params.energy || [],
+          options: params.options || { format: 'basic' }
+        }
+      });
+
+      if (error) {
+        console.error("Error getting sustainability suggestions:", error);
+        throw error;
+      }
+
+      console.log("Sustainability suggestions received:", data);
+      return data;
+    } catch (error) {
+      console.error("Failed to get sustainability suggestions:", error);
+      throw error;
+    }
+  }
+  
+  // New method to analyze the sustainability of materials
+  public async analyzeMaterialSustainability(materials: any[]): Promise<GrokResponse> {
+    if (!Array.isArray(materials) || materials.length === 0) {
+      return {
+        response: "Please provide at least one material to analyze.",
+        error: "Invalid input"
+      };
+    }
+
+    return this.queryGrok({
+      prompt: "Analyze these construction materials for sustainability. Provide insights on their carbon footprint, recyclability, and suggest sustainable alternatives where applicable.",
+      context: { materials },
+      mode: 'material_analysis'
+    });
+  }
+
+  // New method to provide NCC 2025 and NABERS compliance insights
+  public async getComplianceInsights(projectData: any): Promise<GrokResponse> {
+    return this.queryGrok({
+      prompt: "Provide detailed insights on this project's compliance with NCC 2025 and NABERS standards. Identify any compliance issues and suggest specific improvements to meet or exceed requirements.",
       context: projectData,
       mode: 'compliance_check'
     });
