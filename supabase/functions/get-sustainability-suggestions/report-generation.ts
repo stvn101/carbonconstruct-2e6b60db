@@ -4,363 +4,112 @@ import { TransportItem } from "./Transport.ts";
 import { EnergyItem } from "./Energy.ts";
 import { 
   ReportFormat, 
-  ReportRequestOptions, 
   SustainabilityReport, 
-  MaterialRecommendation, 
-  TransportRecommendation, 
-  EnergyRecommendation 
+  ReportRequestOptions,
+  MaterialRecommendation,
+  TransportRecommendation,
+  EnergyRecommendation,
+  LifecycleAnalysis,
+  ImplementationStep
 } from "./Report.ts";
 
-// Calculate data completeness to determine if we have enough information for a good report
+// Calculate the completeness of the provided data to determine report quality
 export function calculateDataCompleteness(
-  materials: Material[], 
-  transport: TransportItem[], 
+  materials: Material[],
+  transport: TransportItem[],
   energy: EnergyItem[]
 ): number {
   let score = 0;
   
-  // Material data quality
+  // Score based on number of materials
   if (materials.length > 0) {
-    score += 30; // Base score for having materials
+    score += Math.min(materials.length * 10, 40);
     
-    // Add points for comprehensive material data
-    const materialsWithFullData = materials.filter(
-      m => m.recycledContent !== undefined && m.locallySourced !== undefined && m.quantity !== undefined
-    ).length;
-    
-    score += Math.min(20, (materialsWithFullData / Math.max(1, materials.length)) * 20);
+    // Additional points for material details
+    const detailedMaterials = materials.filter(m => 
+      m.recyclable !== undefined || 
+      m.recycledContent !== undefined || 
+      m.locallySourced !== undefined
+    );
+    score += Math.min(detailedMaterials.length * 5, 20);
   }
   
-  // Transport data quality
+  // Score based on transport data
   if (transport.length > 0) {
-    score += 20; // Base score for having transport data
+    score += Math.min(transport.length * 10, 30);
     
-    // Add points for comprehensive transport data
-    const detailedTransport = transport.filter(
-      t => t.distance > 0 && t.weight > 0 && t.emissionsFactor > 0
-    ).length;
-    
-    score += Math.min(15, (detailedTransport / Math.max(1, transport.length)) * 15);
+    // Additional points for transport details
+    const detailedTransport = transport.filter(t => t.fuelType !== undefined);
+    score += detailedTransport.length * 5;
   }
   
-  // Energy data quality
+  // Score based on energy data
   if (energy.length > 0) {
-    score += 10; // Base score for having energy data
-    
-    // Add points for comprehensive energy data
-    const detailedEnergy = energy.filter(
-      e => e.quantity > 0 && e.emissionsFactor > 0
-    ).length;
-    
-    score += Math.min(5, (detailedEnergy / Math.max(1, energy.length)) * 5);
+    score += Math.min(energy.length * 10, 30);
   }
   
-  return Math.min(100, score);
+  return Math.min(score, 100);
 }
 
-// Generate a basic sustainability report
-export function generateBasicSustainabilityReport(
-  materials: Material[], 
-  transport: TransportItem[], 
-  energy: EnergyItem[]
-): SustainabilityReport {
-  const suggestions: string[] = [];
-  const prioritySuggestions: string[] = [];
-  
-  // Generate material-based suggestions
-  if (materials.length > 0) {
-    // Check for high-carbon materials
-    const highCarbonMaterials = materials.filter(m => m.carbonFootprint > 2.0);
-    if (highCarbonMaterials.length > 0) {
-      prioritySuggestions.push(`Priority: Consider replacing high-carbon materials like ${highCarbonMaterials[0].name} with low-carbon alternatives`);
-    }
-    
-    // Check for non-recyclable materials
-    const nonRecyclableMaterials = materials.filter(m => !m.recyclable);
-    if (nonRecyclableMaterials.length > 0) {
-      suggestions.push("Use recyclable materials where possible to improve end-of-life sustainability");
-    }
-    
-    // Check for local sourcing
-    const nonLocalMaterials = materials.filter(m => m.locallySourced === false);
-    if (nonLocalMaterials.length > 0) {
-      suggestions.push("Source materials locally where possible to reduce transportation emissions");
-    }
-    
-    suggestions.push("Consider materials with high recycled content to reduce embodied carbon");
-  } else {
-    suggestions.push("Add material information to receive specific material-based sustainability recommendations");
-  }
-  
-  // Generate transport-based suggestions
-  if (transport.length > 0) {
-    // Check for long-distance transport
-    const longDistanceTransport = transport.filter(t => t.distance > 1000);
-    if (longDistanceTransport.length > 0) {
-      prioritySuggestions.push("Priority: Reduce long-distance transportation by sourcing materials locally");
-    }
-    
-    // Check for high-emission transport modes
-    const highEmissionTransport = transport.filter(t => t.fuelType === 'diesel' || t.fuelType === 'petrol');
-    if (highEmissionTransport.length > 0) {
-      suggestions.push("Transition to electric or hybrid vehicles for material transport");
-    }
-    
-    suggestions.push("Optimize delivery routes to minimize fuel consumption and emissions");
-    suggestions.push("Consider rail or sea transport for long-distance material delivery where feasible");
-  } else {
-    suggestions.push("Add transportation information to receive specific transport-based sustainability recommendations");
-  }
-  
-  // Generate energy-based suggestions
-  if (energy.length > 0) {
-    // Check for fossil fuel energy sources
-    const fossilFuelEnergy = energy.filter(e => e.source === 'grid' || e.source === 'diesel_generator');
-    if (fossilFuelEnergy.length > 0) {
-      prioritySuggestions.push("Priority: Switch from fossil fuel energy sources to renewable alternatives on construction sites");
-    }
-    
-    suggestions.push("Implement energy-efficient practices on construction sites");
-    suggestions.push("Consider using battery storage with renewable energy to reduce reliance on diesel generators");
-  } else {
-    suggestions.push("Add energy usage information to receive specific energy-based sustainability recommendations");
-  }
-  
-  // Add general sustainability suggestions
-  suggestions.push("Develop a comprehensive waste management plan for the construction site");
-  suggestions.push("Train staff on sustainability best practices to reduce resource waste");
-  suggestions.push("Monitor and report on sustainability metrics throughout the project lifecycle");
-  suggestions.push("Implement a sustainability management system aligned with ISO 14001");
-  
-  // Generate the report
-  return {
-    generatedAt: new Date().toISOString(),
-    format: ReportFormat.BASIC,
-    suggestions,
-    prioritySuggestions,
-    score: {
-      overall: Math.round(calculateOverallScore(materials, transport, energy)),
-      materials: materials.length > 0 ? Math.round(calculateMaterialsScore(materials)) : 0,
-      transport: transport.length > 0 ? Math.round(calculateTransportScore(transport)) : 0,
-      energy: energy.length > 0 ? Math.round(calculateEnergyScore(energy)) : 0
-    }
-  };
-}
-
-// Generate a detailed sustainability report with additional analysis
-export function generateDetailedSustainabilityReport(
-  materials: Material[], 
-  transport: TransportItem[], 
-  energy: EnergyItem[],
-  options: ReportRequestOptions
-): SustainabilityReport {
-  // Start with the basic report
-  const baseReport = generateBasicSustainabilityReport(materials, transport, energy);
-  
-  // Add material recommendations
-  const materialRecommendations = materials.length > 0 
-    ? generateMaterialRecommendations(materials)
-    : undefined;
-  
-  // Add transport recommendations
-  const transportRecommendations = transport.length > 0
-    ? generateTransportRecommendations(transport)
-    : undefined;
-  
-  // Add energy recommendations
-  const energyRecommendations = energy.length > 0
-    ? generateEnergyRecommendations(energy)
-    : undefined;
-  
-  // Add lifecycle analysis if requested
-  const lifeCycleAnalysis = options.includeLifecycleAnalysis 
-    ? generateLifecycleAnalysis(materials, transport, energy)
-    : undefined;
-  
-  // Add implementation roadmap if requested
-  const implementationRoadmap = options.includeImplementationRoadmap
-    ? generateImplementationRoadmap(baseReport.suggestions, baseReport.prioritySuggestions || [])
-    : undefined;
-  
-  // Check compliance status if requested
-  const complianceStatus = options.includeComplianceDetails
-    ? checkComplianceStatus(materials, transport, energy)
-    : undefined;
-  
-  return {
-    ...baseReport,
-    format: ReportFormat.DETAILED,
-    materialRecommendations,
-    transportRecommendations,
-    energyRecommendations,
-    lifeCycleAnalysis,
-    implementationRoadmap,
-    complianceStatus
-  };
-}
-
-// Helper function to calculate overall sustainability score
-function calculateOverallScore(
-  materials: Material[], 
-  transport: TransportItem[], 
-  energy: EnergyItem[]
-): number {
-  const materialsScore = materials.length > 0 ? calculateMaterialsScore(materials) : 0;
-  const transportScore = transport.length > 0 ? calculateTransportScore(transport) : 0;
-  const energyScore = energy.length > 0 ? calculateEnergyScore(energy) : 0;
-  
-  // Weight the scores based on typical impact ratios in construction
-  const materialWeight = 0.6;
-  const transportWeight = 0.2;
-  const energyWeight = 0.2;
-  
-  // Calculate weighted scores
-  let totalWeight = 0;
-  let weightedScore = 0;
-  
-  if (materials.length > 0) {
-    weightedScore += materialsScore * materialWeight;
-    totalWeight += materialWeight;
-  }
-  
-  if (transport.length > 0) {
-    weightedScore += transportScore * transportWeight;
-    totalWeight += transportWeight;
-  }
-  
-  if (energy.length > 0) {
-    weightedScore += energyScore * energyWeight;
-    totalWeight += energyWeight;
-  }
-  
-  return totalWeight > 0 ? weightedScore / totalWeight : 0;
-}
-
-// Helper function to calculate materials sustainability score
-function calculateMaterialsScore(materials: Material[]): number {
-  if (materials.length === 0) return 0;
-  
-  let score = 0;
-  
-  // Base score from carbon footprint
-  // Assuming higher carbon footprint means lower score
-  const totalCarbonFootprint = materials.reduce((sum, m) => {
-    const quantity = m.quantity || 1;
-    return sum + (m.carbonFootprint * quantity);
-  }, 0);
-  
-  // Normalize to 0-100 scale (assuming 0.1 is excellent, 10 is poor kg CO2e per kg)
-  const carbonScore = Math.max(0, 100 - (totalCarbonFootprint / materials.length / 0.1));
-  
-  // Bonus for recyclable materials
-  const recyclablePercentage = materials.filter(m => m.recyclable).length / materials.length * 100;
-  
-  // Bonus for recycled content
-  const avgRecycledContent = materials.reduce((sum, m) => sum + (m.recycledContent || 0), 0) / materials.length;
-  
-  // Bonus for locally sourced
-  const locallySourcedPercentage = materials.filter(m => m.locallySourced).length / materials.length * 100;
-  
-  // Calculate final score with appropriate weights
-  score = (carbonScore * 0.6) + (recyclablePercentage * 0.1) + (avgRecycledContent * 0.2) + (locallySourcedPercentage * 0.1);
-  
-  return Math.min(100, score);
-}
-
-// Helper function to calculate transport sustainability score
-function calculateTransportScore(transport: TransportItem[]): number {
-  if (transport.length === 0) return 0;
-  
-  let score = 0;
-  
-  // Calculate average emissions factor
-  const avgEmissionsFactor = transport.reduce((sum, t) => sum + t.emissionsFactor, 0) / transport.length;
-  
-  // Calculate score based on emissions factor (lower is better)
-  // Assuming 0.01 is excellent, 0.5 is poor kg CO2e per tonne-km
-  const emissionsScore = Math.max(0, 100 - (avgEmissionsFactor / 0.01) * 20);
-  
-  // Calculate score based on fuel types
-  const lowEmissionFuels = ['electric', 'biofuel', 'hybrid'];
-  const lowEmissionPercentage = transport.filter(t => lowEmissionFuels.includes(t.fuelType)).length / transport.length * 100;
-  
-  // Calculate score based on transport types
-  const sustainableModes = ['rail', 'sea'];
-  const sustainableModesPercentage = transport.filter(t => sustainableModes.includes(t.type)).length / transport.length * 100;
-  
-  // Calculate final score with weights
-  score = (emissionsScore * 0.5) + (lowEmissionPercentage * 0.3) + (sustainableModesPercentage * 0.2);
-  
-  return Math.min(100, score);
-}
-
-// Helper function to calculate energy sustainability score
-function calculateEnergyScore(energy: EnergyItem[]): number {
-  if (energy.length === 0) return 0;
-  
-  let score = 0;
-  
-  // Calculate average emissions factor
-  const avgEmissionsFactor = energy.reduce((sum, e) => sum + e.emissionsFactor, 0) / energy.length;
-  
-  // Calculate score based on emissions factor (lower is better)
-  // Assuming 0.05 is excellent, 1.0 is poor kg CO2e per kWh
-  const emissionsScore = Math.max(0, 100 - (avgEmissionsFactor / 0.05) * 10);
-  
-  // Calculate score based on energy sources
-  const renewableSources = ['solar', 'wind', 'hydrogen'];
-  const renewablePercentage = energy.filter(e => renewableSources.includes(e.source)).length / energy.length * 100;
-  
-  // Calculate final score with weights
-  score = (emissionsScore * 0.6) + (renewablePercentage * 0.4);
-  
-  return Math.min(100, score);
-}
-
-// Helper function to generate material recommendations
+// Generate material recommendations based on input
 function generateMaterialRecommendations(materials: Material[]): MaterialRecommendation[] {
   const recommendations: MaterialRecommendation[] = [];
   
   for (const material of materials) {
-    // Skip materials with good sustainability profile
-    if (material.carbonFootprint < 0.5 && material.recyclable) continue;
+    // Skip materials with very small quantities
+    if (material.quantity <= 0) continue;
     
-    // Generate recommendation based on material category
-    if (material.category === MaterialCategory.CONCRETE) {
+    // Generate recommendations based on material type
+    if (material.name.toLowerCase().includes('concrete')) {
       recommendations.push({
         originalMaterial: material.name,
-        recommendedAlternative: "Low-Carbon Concrete",
+        recommendedAlternative: 'Low-carbon concrete',
         carbonReduction: 30,
-        costImpact: 5,
+        costImpact: 15,
         availability: 'high',
-        additionalBenefits: ["Improved durability", "Reduced water consumption"]
+        additionalBenefits: ['Comparable strength properties', 'Reduces cement content']
       });
-    } else if (material.category === MaterialCategory.STEEL) {
+    }
+    else if (material.name.toLowerCase().includes('steel')) {
       recommendations.push({
         originalMaterial: material.name,
-        recommendedAlternative: "Recycled Steel",
+        recommendedAlternative: 'Recycled steel',
         carbonReduction: 40,
-        costImpact: -2,
+        costImpact: -5,
         availability: 'high',
-        additionalBenefits: ["Reduced mining impact", "Lower energy requirements"]
+        additionalBenefits: ['Reduces virgin material use', 'Same structural properties']
       });
-    } else if (material.category === MaterialCategory.TIMBER && !material.locallySourced) {
+    }
+    else if (material.name.toLowerCase().includes('insulation')) {
       recommendations.push({
         originalMaterial: material.name,
-        recommendedAlternative: "Locally Sourced Certified Timber",
-        carbonReduction: 25,
-        costImpact: 0,
-        availability: 'medium',
-        additionalBenefits: ["Supports local economy", "Reduced transportation emissions"]
-      });
-    } else if (material.category === MaterialCategory.INSULATION) {
-      recommendations.push({
-        originalMaterial: material.name,
-        recommendedAlternative: "Bio-based Insulation",
+        recommendedAlternative: 'Bio-based insulation',
         carbonReduction: 45,
-        costImpact: 10,
+        costImpact: 20,
         availability: 'medium',
-        additionalBenefits: ["Non-toxic", "Better indoor air quality"]
+        additionalBenefits: ['Natural material', 'Non-toxic', 'Biodegradable']
+      });
+    }
+    else if (material.name.toLowerCase().includes('timber') || 
+             material.name.toLowerCase().includes('wood')) {
+      recommendations.push({
+        originalMaterial: material.name,
+        recommendedAlternative: 'FSC-certified engineered timber',
+        carbonReduction: 60,
+        costImpact: 10,
+        availability: 'high',
+        additionalBenefits: ['Carbon sequestration', 'Renewable resource']
+      });
+    }
+    else {
+      // Generic recommendation for other materials
+      recommendations.push({
+        originalMaterial: material.name,
+        recommendedAlternative: 'Recycled or locally-sourced alternative',
+        carbonReduction: 20,
+        costImpact: 5,
+        availability: 'medium',
+        additionalBenefits: ['Reduced carbon footprint', 'Supports circular economy']
       });
     }
   }
@@ -368,37 +117,54 @@ function generateMaterialRecommendations(materials: Material[]): MaterialRecomme
   return recommendations;
 }
 
-// Helper function to generate transport recommendations
+// Generate transport recommendations
 function generateTransportRecommendations(transport: TransportItem[]): TransportRecommendation[] {
   const recommendations: TransportRecommendation[] = [];
   
   for (const item of transport) {
-    if (item.type === TransportType.ROAD && item.distance > 500) {
+    // Skip items with no distance
+    if (item.distance <= 0) continue;
+    
+    if (item.type.toLowerCase().includes('truck') || item.type.toLowerCase().includes('road')) {
+      if (item.distance > 500) {
+        recommendations.push({
+          currentMode: item.type,
+          recommendedMode: 'Rail freight',
+          distance: item.distance,
+          carbonReduction: 70,
+          costImpact: -10,
+          feasibility: 'medium'
+        });
+      } else {
+        recommendations.push({
+          currentMode: item.type,
+          recommendedMode: 'Electric truck',
+          distance: item.distance,
+          carbonReduction: 40,
+          costImpact: 15,
+          feasibility: 'high'
+        });
+      }
+    }
+    else if (item.type.toLowerCase().includes('air')) {
       recommendations.push({
-        currentMode: `${item.fuelType} ${item.type}`,
-        recommendedMode: "Rail transport",
-        distance: item.distance,
-        carbonReduction: 70,
-        costImpact: -5,
-        feasibility: 'medium'
-      });
-    } else if (item.type === TransportType.ROAD && item.fuelType === FuelType.DIESEL) {
-      recommendations.push({
-        currentMode: `${item.fuelType} ${item.type}`,
-        recommendedMode: "Electric or hybrid vehicles",
-        distance: item.distance,
-        carbonReduction: 40,
-        costImpact: 15,
-        feasibility: 'high'
-      });
-    } else if (item.type === TransportType.AIR) {
-      recommendations.push({
-        currentMode: `${item.fuelType} ${item.type}`,
-        recommendedMode: "Sea freight",
+        currentMode: item.type,
+        recommendedMode: 'Sea freight',
         distance: item.distance,
         carbonReduction: 85,
-        costImpact: -20,
-        feasibility: 'medium'
+        costImpact: -30,
+        feasibility: item.distance > 1000 ? 'high' : 'low'
+      });
+    }
+    else {
+      // Generic recommendation
+      recommendations.push({
+        currentMode: item.type,
+        recommendedMode: 'Optimized logistics',
+        distance: item.distance,
+        carbonReduction: 15,
+        costImpact: -5,
+        feasibility: 'high'
       });
     }
   }
@@ -406,25 +172,52 @@ function generateTransportRecommendations(transport: TransportItem[]): Transport
   return recommendations;
 }
 
-// Helper function to generate energy recommendations
+// Generate energy recommendations
 function generateEnergyRecommendations(energy: EnergyItem[]): EnergyRecommendation[] {
   const recommendations: EnergyRecommendation[] = [];
   
   for (const item of energy) {
-    if (item.source === EnergySource.DIESEL_GENERATOR) {
+    // Skip items with no quantity
+    if (item.quantity <= 0) continue;
+    
+    if (item.source.toLowerCase().includes('grid') || 
+        item.source.toLowerCase().includes('electricity')) {
       recommendations.push({
-        currentSource: "Diesel generator",
-        recommendedSource: "Solar + battery storage",
-        carbonReduction: 90,
-        costImpact: 20,
+        currentSource: item.source,
+        recommendedSource: 'On-site solar PV',
+        carbonReduction: 80,
+        costImpact: -5,
         implementationComplexity: 'medium'
       });
-    } else if (item.source === EnergySource.GRID) {
+    }
+    else if (item.source.toLowerCase().includes('diesel') || 
+             item.source.toLowerCase().includes('petrol') ||
+             item.source.toLowerCase().includes('gas')) {
       recommendations.push({
-        currentSource: "Grid electricity",
-        recommendedSource: "100% renewable energy tariff",
-        carbonReduction: 60,
-        costImpact: 5,
+        currentSource: item.source,
+        recommendedSource: 'Electric equipment with renewable energy',
+        carbonReduction: 65,
+        costImpact: 25,
+        implementationComplexity: 'medium'
+      });
+    }
+    else if (item.source.toLowerCase().includes('coal') || 
+             item.source.toLowerCase().includes('oil')) {
+      recommendations.push({
+        currentSource: item.source,
+        recommendedSource: 'Renewable energy sources',
+        carbonReduction: 90,
+        costImpact: 15,
+        implementationComplexity: 'high'
+      });
+    }
+    else {
+      // Generic recommendation
+      recommendations.push({
+        currentSource: item.source,
+        recommendedSource: 'Energy-efficient alternative',
+        carbonReduction: 30,
+        costImpact: 0,
         implementationComplexity: 'low'
       });
     }
@@ -433,152 +226,433 @@ function generateEnergyRecommendations(energy: EnergyItem[]): EnergyRecommendati
   return recommendations;
 }
 
-// Helper function to check compliance status with standards
-function checkComplianceStatus(
-  materials: Material[], 
-  transport: TransportItem[], 
-  energy: EnergyItem[]
-): { ncc2025: boolean; nabers: string; issues?: string[] } {
-  // This is a simplified compliance check
-  // In a real system, this would be much more detailed and accurate
-  
-  const issues: string[] = [];
-  let nccCompliant = true;
-  let nabersRating = "0-star";
-  
-  // Check materials for NCC compliance
-  const nonCompliantMaterials = materials.filter(m => {
-    // Simplified check - in reality would check against specific NCC requirements
-    return m.carbonFootprint > 5.0;
-  });
-  
-  if (nonCompliantMaterials.length > 0) {
-    nccCompliant = false;
-    issues.push(`Materials like ${nonCompliantMaterials[0].name} exceed carbon footprint limits for NCC 2025`);
-  }
-  
-  // Check energy efficiency for NABERS rating
-  const avgEnergyScore = calculateEnergyScore(energy);
-  
-  if (avgEnergyScore > 90) {
-    nabersRating = "6-star";
-  } else if (avgEnergyScore > 80) {
-    nabersRating = "5-star";
-  } else if (avgEnergyScore > 70) {
-    nabersRating = "4-star";
-  } else if (avgEnergyScore > 60) {
-    nabersRating = "3-star";
-  } else if (avgEnergyScore > 50) {
-    nabersRating = "2-star";
-  } else if (avgEnergyScore > 30) {
-    nabersRating = "1-star";
-  }
-  
-  return {
-    ncc2025: nccCompliant,
-    nabers: nabersRating,
-    issues: issues.length > 0 ? issues : undefined
-  };
-}
-
-// Helper function to generate lifecycle analysis
+// Generate lifecycle analysis
 function generateLifecycleAnalysis(
-  materials: Material[], 
-  transport: TransportItem[], 
+  materials: Material[],
+  transport: TransportItem[],
   energy: EnergyItem[]
 ): LifecycleAnalysis {
-  // In a real system, this would be much more detailed and accurate
-  // This is a simplified example
+  // Calculate approximate emissions distribution based on input data
+  const totalMaterialEmissions = materials.reduce((sum, m) => sum + (m.carbonFootprint * m.quantity), 0);
+  const totalTransportEmissions = transport.reduce((sum, t) => sum + (t.emissionsFactor * t.distance * t.weight), 0);
+  const totalEnergyEmissions = energy.reduce((sum, e) => sum + (e.emissionsFactor * e.quantity), 0);
+  
+  const totalEmissions = totalMaterialEmissions + totalTransportEmissions + totalEnergyEmissions;
+  
+  // Default distribution if we don't have enough data
+  let extractionPct = 25;
+  let manufacturingPct = 20;
+  let transportationPct = 15;
+  let constructionPct = 10;
+  let operationPct = 25;
+  let endOfLifePct = 5;
+  
+  // Adjust based on actual data
+  if (totalEmissions > 0) {
+    if (totalMaterialEmissions > 0) {
+      // Materials affect extraction, manufacturing and end-of-life
+      extractionPct = Math.round((totalMaterialEmissions / totalEmissions) * 40) + 10;
+      manufacturingPct = Math.round((totalMaterialEmissions / totalEmissions) * 30) + 10;
+      endOfLifePct = Math.round((totalMaterialEmissions / totalEmissions) * 10) + 2;
+    }
+    
+    if (totalTransportEmissions > 0) {
+      transportationPct = Math.round((totalTransportEmissions / totalEmissions) * 80) + 5;
+    }
+    
+    if (totalEnergyEmissions > 0) {
+      constructionPct = Math.round((totalEnergyEmissions / totalEmissions) * 30) + 5;
+      operationPct = Math.round((totalEnergyEmissions / totalEmissions) * 40) + 10;
+    }
+    
+    // Normalize percentages to total 100%
+    const total = extractionPct + manufacturingPct + transportationPct + 
+                 constructionPct + operationPct + endOfLifePct;
+                 
+    const factor = 100 / total;
+    
+    extractionPct = Math.round(extractionPct * factor);
+    manufacturingPct = Math.round(manufacturingPct * factor);
+    transportationPct = Math.round(transportationPct * factor);
+    constructionPct = Math.round(constructionPct * factor);
+    operationPct = Math.round(operationPct * factor);
+    endOfLifePct = Math.round(endOfLifePct * factor);
+    
+    // Ensure we still total to 100 after rounding
+    const finalTotal = extractionPct + manufacturingPct + transportationPct + 
+                     constructionPct + operationPct + endOfLifePct;
+                     
+    if (finalTotal < 100) {
+      operationPct += (100 - finalTotal);
+    } else if (finalTotal > 100) {
+      operationPct -= (finalTotal - 100);
+    }
+  }
   
   return {
     stages: {
-      extraction: 25,
-      manufacturing: 30,
-      transportation: 10,
-      construction: 5,
-      operation: 20,
-      endOfLife: 10
+      extraction: extractionPct,
+      manufacturing: manufacturingPct,
+      transportation: transportationPct,
+      construction: constructionPct,
+      operation: operationPct,
+      endOfLife: endOfLifePct
     },
-    totalLifecycleEmissions: calculateTotalLifecycleEmissions(materials, transport, energy),
+    totalLifecycleEmissions: Math.round(totalEmissions * 1.2), // Approximate full lifecycle
     recommendations: [
-      "Focus on reducing embodied carbon in materials as they represent the largest share of emissions",
-      "Implement circular economy principles to minimize waste and maximize reuse",
-      "Design for deconstruction to enable material recovery at end-of-life",
-      "Consider operational energy efficiency throughout the building lifecycle"
+      "Consider material substitution to reduce extraction emissions",
+      "Source materials from manufacturers with renewable energy",
+      "Optimize transportation routes and use low-carbon transport modes",
+      "Implement energy-efficient construction methods",
+      "Design for energy efficiency during operation",
+      "Plan for material reuse and recycling at end of life"
     ]
   };
 }
 
-// Helper function to calculate total lifecycle emissions
-function calculateTotalLifecycleEmissions(
-  materials: Material[], 
-  transport: TransportItem[], 
-  energy: EnergyItem[]
-): number {
-  let total = 0;
-  
-  // Material emissions
-  total += materials.reduce((sum, m) => {
-    const quantity = m.quantity || 1;
-    return sum + (m.carbonFootprint * quantity);
-  }, 0);
-  
-  // Transport emissions
-  total += transport.reduce((sum, t) => {
-    return sum + (t.emissionsFactor * t.distance * t.weight);
-  }, 0);
-  
-  // Energy emissions
-  total += energy.reduce((sum, e) => {
-    return sum + (e.emissionsFactor * e.quantity);
-  }, 0);
-  
-  // Multiply by a factor to account for full lifecycle (simplified)
-  return total * 1.8;
-}
-
-// Helper function to generate implementation roadmap
+// Generate implementation roadmap
 function generateImplementationRoadmap(
-  suggestions: string[], 
-  prioritySuggestions: string[]
+  materialRecs: MaterialRecommendation[],
+  transportRecs: TransportRecommendation[],
+  energyRecs: EnergyRecommendation[]
 ): ImplementationStep[] {
   const roadmap: ImplementationStep[] = [];
   
-  // Immediate actions (from priority suggestions)
+  // Immediate steps (quick wins)
   roadmap.push({
     phase: 'immediate',
-    actions: prioritySuggestions.map(s => s.replace('Priority: ', '')),
+    actions: [
+      "Source recycled steel instead of virgin steel",
+      "Optimize transport routes to minimize distances",
+      "Use energy-efficient equipment on site"
+    ],
     estimatedTimeframe: "1-4 weeks",
-    estimatedCostRange: "Low to Medium",
+    estimatedCostRange: "Low",
     estimatedCarbonSavings: 500
   });
   
-  // Short-term actions
-  roadmap.push({
-    phase: 'short-term',
-    actions: suggestions.slice(0, 3),
-    estimatedTimeframe: "1-3 months",
-    estimatedCostRange: "Medium",
-    estimatedCarbonSavings: 1200
-  });
+  // Short-term steps
+  const shortTermActions: string[] = [];
   
-  // Medium-term actions
-  roadmap.push({
-    phase: 'medium-term',
-    actions: suggestions.slice(3, 6),
-    estimatedTimeframe: "3-12 months",
-    estimatedCostRange: "Medium to High",
-    estimatedCarbonSavings: 2500
-  });
+  // Add material actions for high availability items
+  materialRecs
+    .filter(r => r.availability === 'high')
+    .forEach(r => {
+      shortTermActions.push(`Replace ${r.originalMaterial} with ${r.recommendedAlternative}`);
+    });
+    
+  // Add transport actions for high feasibility items
+  transportRecs
+    .filter(r => r.feasibility === 'high')
+    .forEach(r => {
+      shortTermActions.push(`Switch from ${r.currentMode} to ${r.recommendedMode} for applicable routes`);
+    });
   
-  // Long-term actions
+  // Add energy actions for low complexity items
+  energyRecs
+    .filter(r => r.implementationComplexity === 'low')
+    .forEach(r => {
+      shortTermActions.push(`Transition from ${r.currentSource} to ${r.recommendedSource} where possible`);
+    });
+  
+  if (shortTermActions.length > 0) {
+    roadmap.push({
+      phase: 'short-term',
+      actions: shortTermActions.slice(0, 5), // Limit to 5 actions
+      estimatedTimeframe: "1-3 months",
+      estimatedCostRange: "Low to Medium",
+      estimatedCarbonSavings: 1200
+    });
+  }
+  
+  // Medium-term steps
+  const mediumTermActions: string[] = [];
+  
+  // Add material actions for medium availability items
+  materialRecs
+    .filter(r => r.availability === 'medium')
+    .forEach(r => {
+      mediumTermActions.push(`Implement ${r.recommendedAlternative} across all applicable use cases`);
+    });
+    
+  // Add transport actions for medium feasibility items
+  transportRecs
+    .filter(r => r.feasibility === 'medium')
+    .forEach(r => {
+      mediumTermActions.push(`Develop infrastructure for ${r.recommendedMode} transport`);
+    });
+  
+  // Add energy actions for medium complexity items
+  energyRecs
+    .filter(r => r.implementationComplexity === 'medium')
+    .forEach(r => {
+      mediumTermActions.push(`Install ${r.recommendedSource} systems`);
+    });
+  
+  if (mediumTermActions.length > 0) {
+    roadmap.push({
+      phase: 'medium-term',
+      actions: mediumTermActions.slice(0, 5), // Limit to 5 actions
+      estimatedTimeframe: "3-12 months",
+      estimatedCostRange: "Medium",
+      estimatedCarbonSavings: 3000
+    });
+  }
+  
+  // Long-term steps
   roadmap.push({
     phase: 'long-term',
-    actions: suggestions.slice(6),
+    actions: [
+      "Develop closed-loop material recycling system",
+      "Transition to fully electric transport fleet",
+      "Implement on-site renewable energy generation",
+      "Establish carbon offsetting program for residual emissions"
+    ],
     estimatedTimeframe: "1-3 years",
     estimatedCostRange: "High",
-    estimatedCarbonSavings: 5000
+    estimatedCarbonSavings: 8000
   });
   
   return roadmap;
+}
+
+// Calculate basic score based on input data
+function calculateSustainabilityScore(
+  materials: Material[],
+  transport: TransportItem[],
+  energy: EnergyItem[]
+): {
+  overall: number;
+  materials: number;
+  transport: number;
+  energy: number;
+} {
+  // Start with a baseline score
+  let materialsScore = 50;
+  let transportScore = 50;
+  let energyScore = 50;
+  
+  // Adjust materials score
+  if (materials.length > 0) {
+    // Adjust for recyclable materials
+    const recyclableMaterials = materials.filter(m => m.recyclable === true);
+    if (recyclableMaterials.length > 0) {
+      materialsScore += (recyclableMaterials.length / materials.length) * 25;
+    }
+    
+    // Adjust for locally sourced materials
+    const localMaterials = materials.filter(m => m.locallySourced === true);
+    if (localMaterials.length > 0) {
+      materialsScore += (localMaterials.length / materials.length) * 15;
+    }
+    
+    // Adjust for materials with recycled content
+    const recycledMaterials = materials.filter(m => (m.recycledContent || 0) > 0);
+    if (recycledMaterials.length > 0) {
+      const avgRecycledContent = recycledMaterials.reduce((sum, m) => sum + (m.recycledContent || 0), 0) / recycledMaterials.length;
+      materialsScore += (avgRecycledContent / 100) * 10;
+    }
+  }
+  
+  // Adjust transport score
+  if (transport.length > 0) {
+    // Adjust for transport distances
+    const avgDistance = transport.reduce((sum, t) => sum + t.distance, 0) / transport.length;
+    if (avgDistance < 100) {
+      transportScore += 30;
+    } else if (avgDistance < 500) {
+      transportScore += 15;
+    } else if (avgDistance > 1000) {
+      transportScore -= 15;
+    }
+    
+    // Adjust for transport types
+    const lowEmissionTransport = transport.filter(t => 
+      t.type.toLowerCase().includes('electric') || 
+      t.type.toLowerCase().includes('rail') ||
+      t.type.toLowerCase().includes('sea')
+    );
+    
+    if (lowEmissionTransport.length > 0) {
+      transportScore += (lowEmissionTransport.length / transport.length) * 20;
+    }
+  }
+  
+  // Adjust energy score
+  if (energy.length > 0) {
+    // Adjust for renewable energy sources
+    const renewableEnergy = energy.filter(e => 
+      e.source.toLowerCase().includes('solar') || 
+      e.source.toLowerCase().includes('wind') ||
+      e.source.toLowerCase().includes('hydro') ||
+      e.source.toLowerCase().includes('renewable')
+    );
+    
+    if (renewableEnergy.length > 0) {
+      energyScore += (renewableEnergy.length / energy.length) * 40;
+    }
+    
+    // Adjust for high-emission energy sources
+    const highEmissionEnergy = energy.filter(e => 
+      e.source.toLowerCase().includes('coal') || 
+      e.source.toLowerCase().includes('oil') ||
+      e.source.toLowerCase().includes('diesel') ||
+      e.source.toLowerCase().includes('petrol')
+    );
+    
+    if (highEmissionEnergy.length > 0) {
+      energyScore -= (highEmissionEnergy.length / energy.length) * 30;
+    }
+  }
+  
+  // Ensure scores are within 0-100 range
+  materialsScore = Math.max(0, Math.min(100, Math.round(materialsScore)));
+  transportScore = Math.max(0, Math.min(100, Math.round(transportScore)));
+  energyScore = Math.max(0, Math.min(100, Math.round(energyScore)));
+  
+  // Calculate overall score (weighted average)
+  const overall = Math.round((materialsScore * 0.5) + (transportScore * 0.3) + (energyScore * 0.2));
+  
+  return {
+    overall,
+    materials: materialsScore,
+    transport: transportScore,
+    energy: energyScore
+  };
+}
+
+// Generate a list of general sustainability suggestions
+function generateSustainabilitySuggestions(
+  materials: Material[],
+  transport: TransportItem[],
+  energy: EnergyItem[]
+): string[] {
+  const suggestions: string[] = [];
+  
+  // Material-related suggestions
+  if (materials.length > 0) {
+    const concreteUsed = materials.some(m => m.name.toLowerCase().includes('concrete'));
+    if (concreteUsed) {
+      suggestions.push("Priority: Replace traditional concrete with geopolymer or low-carbon alternatives");
+      suggestions.push("Consider using fly ash or slag as cement replacement to reduce embodied carbon");
+    }
+    
+    const steelUsed = materials.some(m => m.name.toLowerCase().includes('steel'));
+    if (steelUsed) {
+      suggestions.push("Priority: Source steel with high recycled content");
+      suggestions.push("Consider using steel certified under responsible production schemes");
+    }
+    
+    suggestions.push("Select materials with Environmental Product Declarations (EPDs)");
+    suggestions.push("Prioritize materials with low embodied carbon");
+    suggestions.push("Source locally manufactured materials where possible to reduce transport emissions");
+  }
+  
+  // Transport-related suggestions
+  if (transport.length > 0) {
+    const longDistance = transport.some(t => t.distance > 500);
+    if (longDistance) {
+      suggestions.push("Priority: Consolidate shipments to reduce number of deliveries");
+      suggestions.push("Consider rail freight for long-distance material transport");
+    }
+    
+    suggestions.push("Optimize delivery routes to minimize travel distances");
+    suggestions.push("Use electric or hybrid vehicles for material transport where feasible");
+    suggestions.push("Implement a just-in-time delivery system to reduce unnecessary trips");
+  }
+  
+  // Energy-related suggestions
+  if (energy.length > 0) {
+    const highEnergyUse = energy.some(e => e.quantity > 1000);
+    if (highEnergyUse) {
+      suggestions.push("Priority: Implement on-site renewable energy generation");
+      suggestions.push("Use energy-efficient equipment and machinery on construction sites");
+    }
+    
+    suggestions.push("Switch to LED lighting for construction sites");
+    suggestions.push("Use smart meters to monitor and manage energy usage");
+    suggestions.push("Consider battery storage systems to optimize renewable energy use");
+  }
+  
+  // General suggestions to ensure we have enough
+  if (suggestions.length < 10) {
+    suggestions.push("Implement a comprehensive waste management plan focusing on reduction and recycling");
+    suggestions.push("Train staff on sustainability best practices and energy-efficient operations");
+    suggestions.push("Consider pursuing green building certification (e.g., Green Star, NABERS)");
+    suggestions.push("Design buildings for disassembly to facilitate future material reuse");
+    suggestions.push("Install water-efficient fixtures to reduce water consumption");
+    suggestions.push("Incorporate passive design principles to reduce operational energy needs");
+    suggestions.push("Use low-VOC paints and finishes to improve indoor air quality");
+    suggestions.push("Implement a sustainable procurement policy for all materials and services");
+  }
+  
+  return suggestions;
+}
+
+// Generate a basic sustainability report
+export function generateBasicSustainabilityReport(
+  materials: Material[],
+  transport: TransportItem[],
+  energy: EnergyItem[]
+): SustainabilityReport {
+  const suggestions = generateSustainabilitySuggestions(materials, transport, energy);
+  
+  // Identify priority suggestions
+  const prioritySuggestions = suggestions.filter(s => s.startsWith("Priority:"));
+  
+  // Generate score
+  const score = calculateSustainabilityScore(materials, transport, energy);
+  
+  return {
+    generatedAt: new Date().toISOString(),
+    format: ReportFormat.BASIC,
+    suggestions,
+    prioritySuggestions,
+    score
+  };
+}
+
+// Generate a detailed sustainability report with more comprehensive analysis
+export function generateDetailedSustainabilityReport(
+  materials: Material[],
+  transport: TransportItem[],
+  energy: EnergyItem[],
+  options: ReportRequestOptions
+): SustainabilityReport {
+  // Start with a basic report
+  const basicReport = generateBasicSustainabilityReport(materials, transport, energy);
+  
+  // Generate material recommendations
+  const materialRecommendations = generateMaterialRecommendations(materials);
+  
+  // Generate transport recommendations
+  const transportRecommendations = generateTransportRecommendations(transport);
+  
+  // Generate energy recommendations
+  const energyRecommendations = generateEnergyRecommendations(energy);
+  
+  // Create the detailed report
+  const detailedReport: SustainabilityReport = {
+    ...basicReport,
+    format: ReportFormat.DETAILED,
+    materialRecommendations,
+    transportRecommendations,
+    energyRecommendations
+  };
+  
+  // Add lifecycle analysis if requested
+  if (options.includeLifecycleAnalysis) {
+    detailedReport.lifeCycleAnalysis = generateLifecycleAnalysis(materials, transport, energy);
+  }
+  
+  // Add implementation roadmap if requested
+  if (options.includeImplementationRoadmap) {
+    detailedReport.implementationRoadmap = generateImplementationRoadmap(
+      materialRecommendations,
+      transportRecommendations,
+      energyRecommendations
+    );
+  }
+  
+  return detailedReport;
 }

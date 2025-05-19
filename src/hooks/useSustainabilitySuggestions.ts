@@ -20,22 +20,25 @@ export interface SuggestionsResponse {
   suggestions: string[];
   prioritySuggestions?: string[];
   metadata?: SuggestionMetadata;
+  report?: any; // Full report object
 }
 
 export function useSustainabilitySuggestions() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [prioritySuggestions, setPrioritySuggestions] = useState<string[]>([]);
   const [metadata, setMetadata] = useState<SuggestionMetadata | null>(null);
+  const [report, setReport] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasCachedResult, setHasCachedResult] = useState(false);
 
   // Create a simple cache key based on inputs
-  const createCacheKey = (materials: MaterialInput[], transport: TransportInput[], energy: EnergyInput[]) => {
+  const createCacheKey = (materials: MaterialInput[], transport: TransportInput[], energy: EnergyInput[], options?: any) => {
     const materialsKey = materials.map(m => `${m.type}-${m.quantity}`).join('|');
     const transportKey = transport.map(t => `${t.type}-${t.distance}`).join('|');
     const energyKey = energy.map(e => `${e.type}-${e.amount}`).join('|');
-    return `${materialsKey}_${transportKey}_${energyKey}`;
+    const optionsKey = options ? JSON.stringify(options) : '';
+    return `${materialsKey}_${transportKey}_${energyKey}_${optionsKey}`;
   };
 
   // In-memory cache for suggestions (will be cleared on page refresh)
@@ -44,13 +47,14 @@ export function useSustainabilitySuggestions() {
   const getSuggestions = async (
     materials: MaterialInput[],
     transport: TransportInput[],
-    energy: EnergyInput[]
+    energy: EnergyInput[],
+    options?: { format?: 'basic' | 'detailed' | 'comprehensive', includeLifecycleAnalysis?: boolean }
   ): Promise<SuggestionsResponse> => {
     setIsLoading(true);
     setError(null);
     
     // Generate cache key for this specific input combination
-    const cacheKey = createCacheKey(materials, transport, energy);
+    const cacheKey = createCacheKey(materials, transport, energy, options);
     
     // Check if we have a cached result
     if (suggestionsCache.has(cacheKey)) {
@@ -59,6 +63,7 @@ export function useSustainabilitySuggestions() {
       setSuggestions(cachedResult.suggestions);
       setPrioritySuggestions(cachedResult.prioritySuggestions || []);
       setMetadata(cachedResult.metadata || null);
+      setReport(cachedResult.report || null);
       setIsLoading(false);
       return cachedResult;
     }
@@ -66,35 +71,64 @@ export function useSustainabilitySuggestions() {
     try {
       console.log('Fetching sustainability suggestions from API...');
       const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
-        body: { materials, transport, energy }
+        body: { 
+          materials: materials.map(m => ({
+            id: `material-${m.id || Math.random().toString(36).substring(7)}`,
+            name: m.type,
+            carbonFootprint: m.factor || 1,
+            quantity: Number(m.quantity) || 0,
+            recyclable: m.recyclable,
+            recycledContent: m.recycledContent,
+            locallySourced: m.locallySourced
+          })),
+          transport: transport.map(t => ({
+            id: `transport-${t.id || Math.random().toString(36).substring(7)}`,
+            type: t.type,
+            distance: Number(t.distance) || 0,
+            weight: Number(t.weight) || 1,
+            fuelType: t.fuelType,
+            emissionsFactor: t.factor || 0.1
+          })),
+          energy: energy.map(e => ({
+            id: `energy-${e.id || Math.random().toString(36).substring(7)}`,
+            source: e.type,
+            quantity: Number(e.amount) || 0,
+            unit: e.unit || 'kWh',
+            emissionsFactor: e.factor || 0.5
+          })),
+          options: options || { format: 'basic' }
+        }
       });
       
       if (error) throw new Error(error.message);
       
+      // Extract report data
+      const report = data.report || {};
+      
       // Process the response
       const result: SuggestionsResponse = {
-        suggestions: data.suggestions || [],
-        prioritySuggestions: data.prioritySuggestions || 
-          // Extract priority suggestions if they're not separately provided
-          data.suggestions?.filter((s: string) => s.startsWith('Priority:')) || [],
-        metadata: data.metadata || {
+        suggestions: report.suggestions || [],
+        prioritySuggestions: report.prioritySuggestions || [],
+        report: report,
+        metadata: {
           source: 'api',
-          count: data.suggestions?.length || 0,
-          categories: data.categories || {
-            material: 0,
-            transport: 0,
-            energy: 0,
-            general: 0,
-            priority: 0
+          count: report.suggestions?.length || 0,
+          categories: {
+            material: report.materialRecommendations?.length || 0,
+            transport: report.transportRecommendations?.length || 0,
+            energy: report.energyRecommendations?.length || 0,
+            general: report.suggestions?.filter((s: string) => !s.startsWith('Priority:')).length || 0,
+            priority: report.prioritySuggestions?.length || 0
           },
-          generatedAt: new Date().toISOString()
+          generatedAt: report.generatedAt || new Date().toISOString()
         }
       };
       
       // Update state with the result
       setSuggestions(result.suggestions);
-      setPrioritySuggestions(result.prioritySuggestions);
+      setPrioritySuggestions(result.prioritySuggestions || []);
       setMetadata(result.metadata || null);
+      setReport(report || null);
       
       // Cache the result
       suggestionsCache.set(cacheKey, result);
@@ -110,6 +144,7 @@ export function useSustainabilitySuggestions() {
       setSuggestions(fallbackResult.suggestions);
       setPrioritySuggestions(fallbackResult.prioritySuggestions || []);
       setMetadata(fallbackResult.metadata);
+      setReport(null);
       
       return fallbackResult;
     } finally {
@@ -139,9 +174,8 @@ export function useSustainabilitySuggestions() {
     const priorities: string[] = [];
     
     // Check if concrete is used in large quantities
-    const concreteInputs = materials.filter(m => m.type.includes('concrete'));
+    const concreteInputs = materials.filter(m => m.type.toLowerCase().includes('concrete'));
     if (concreteInputs.some(m => {
-      // Fix TS2365: Ensure we're comparing numbers
       const quantity = typeof m.quantity === 'string' ? parseFloat(m.quantity) : m.quantity;
       return !isNaN(Number(quantity)) && Number(quantity) > 100;
     })) {
@@ -150,7 +184,6 @@ export function useSustainabilitySuggestions() {
     
     // Check if there's long-distance transport
     if (transport.some(t => {
-      // Fix TS2365: Ensure we're comparing numbers
       const distance = typeof t.distance === 'string' ? parseFloat(t.distance) : t.distance;
       return !isNaN(Number(distance)) && Number(distance) > 200;
     })) {
@@ -159,7 +192,6 @@ export function useSustainabilitySuggestions() {
     
     // Check if there's high energy use
     if (energy.some(e => {
-      // Fix TS2365: Ensure we're comparing numbers
       const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
       return !isNaN(Number(amount)) && Number(amount) > 1000;
     })) {
@@ -179,7 +211,7 @@ export function useSustainabilitySuggestions() {
           material: materials.length > 0 ? 2 : 0,
           transport: transport.length > 0 ? 2 : 0,
           energy: energy.length > 0 ? 2 : 0,
-          general: 2,
+          general: generalSuggestions.length,
           priority: priorities.length
         },
         generatedAt: new Date().toISOString()
@@ -191,6 +223,7 @@ export function useSustainabilitySuggestions() {
     suggestions,
     prioritySuggestions,
     metadata,
+    report,
     isLoading,
     error,
     hasCachedResult,
