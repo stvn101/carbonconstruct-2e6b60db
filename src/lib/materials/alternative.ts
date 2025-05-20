@@ -1,3 +1,4 @@
+
 import { ExtendedMaterialData, MATERIAL_TYPES } from './types';
 
 export const ALTERNATIVE_MATERIALS: Record<string, ExtendedMaterialData> = {
