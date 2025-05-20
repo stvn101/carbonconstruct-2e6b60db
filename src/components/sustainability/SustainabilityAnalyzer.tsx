@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Leaf, Shield, BarChart3, Recycle, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Leaf, Shield, BarChart3, Recycle, FileText, TrendingUp } from "lucide-react";
 import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestions";
 import { fetchMaterialAlternatives, fetchNabersComplianceCheck, fetchNccComplianceCheck } from "@/hooks/sustainability/sustainabilityService";
@@ -12,6 +12,7 @@ import SustainabilityReport from "./SustainabilityReport";
 import ComplianceStatus from "./ComplianceStatus";
 import SustainabilityImpactChart from "./SustainabilityImpactChart";
 import MaterialAlternatives from "./MaterialAlternatives";
+import MaterialPerformanceTab from "./MaterialPerformanceTab";
 import { MaterialAnalysisResult } from "supabase/functions/get-sustainability-suggestions/Material";
 import { toast } from "sonner";
 
@@ -142,7 +143,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
   
   // Navigate between tabs with animations
   const navigateTab = (direction: "next" | "prev") => {
-    const tabs = ["dashboard", "compliance", "materials", "report"];
+    const tabs = ["dashboard", "compliance", "materials", "performance", "report"];
     const currentIndex = tabs.indexOf(activeTab);
     
     if (direction === "next" && currentIndex < tabs.length - 1) {
@@ -188,6 +189,11 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
                     <Recycle className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Alternatives</span>
                     <span className="sm:hidden">Alt</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="performance" className="flex items-center">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Performance</span>
+                    <span className="sm:hidden">Perf</span>
                   </TabsTrigger>
                   <TabsTrigger value="report" className="flex items-center">
                     <FileText className="h-4 w-4 mr-2" />
@@ -264,6 +270,12 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
               <TabsContent value="materials" className="mt-4">
                 <MaterialAlternatives
                   materialAnalysis={materialAnalysis}
+                  materials={calculationInput.materials}
+                />
+              </TabsContent>
+              
+              <TabsContent value="performance" className="mt-4">
+                <MaterialPerformanceTab
                   materials={calculationInput.materials}
                 />
               </TabsContent>
