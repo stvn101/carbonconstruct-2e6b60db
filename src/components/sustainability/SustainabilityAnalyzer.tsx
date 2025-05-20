@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestions";
-import { ArrowRight, FileText, HelpCircle, LeafyGreen, Leaf, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ArrowRight, FileText, HelpCircle, LeafyGreen, Leaf, AlertTriangle, CheckCircle2, AlertCircle } from "lucide-react";
 import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
-import { SuggestionMetadata } from "@/hooks/useSustainabilitySuggestions";
+import { SustainabilityAnalysisOptions } from "@/hooks/sustainability/types";
 
 interface SustainabilityAnalyzerProps {
   materials: MaterialInput[];
@@ -62,11 +61,13 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
 
   const performAnalysis = async () => {
     try {
-      await getSuggestions(materials, transport, energy, {
+      const options: SustainabilityAnalysisOptions = {
         format: analysisType,
         includeLifecycleAnalysis: analysisType !== 'basic',
         includeComplianceDetails: analysisType === 'comprehensive'
-      });
+      };
+      
+      await getSuggestions(materials, transport, energy, options);
     } catch (err) {
       console.error("Failed to perform sustainability analysis:", err);
     }
