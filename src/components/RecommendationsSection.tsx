@@ -1,4 +1,3 @@
-
 import React, { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
@@ -8,6 +7,7 @@ import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestio
 import SuggestionsSection from "./results/SuggestionsSection";
 import { Loader, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { SustainabilityAnalysisOptions } from "@/hooks/sustainability/types";
 
 interface RecommendationsSectionProps {
   calculationInput: CalculationInput;
@@ -38,14 +38,16 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
       if (calculationResult && !fetchTriggered) {
         setFetchTriggered(true);
         try {
+          const options: SustainabilityAnalysisOptions = {
+            format: 'detailed',
+            includeLifecycleAnalysis: true
+          };
+          
           await getSuggestions(
             calculationInput.materials, 
             calculationInput.transport, 
             calculationInput.energy,
-            { 
-              format: 'detailed',
-              includeLifecycleAnalysis: true
-            }
+            options
           );
         } catch (err) {
           console.error("Failed to fetch sustainability suggestions:", err);
