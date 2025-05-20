@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } from "recharts";
 import { SustainableMaterial } from "supabase/functions/get-sustainability-suggestions/Material";
 import { Badge } from "@/components/ui/badge";
 
@@ -72,10 +72,9 @@ const AlternativesComparisonChart: React.FC<AlternativesComparisonChartProps> = 
     return null;
   };
 
-  // Define colors based on material type
-  const getBarColor = (entry: any) => {
-    return entry.type === "Conventional" ? "#f59e0b" : "#3e9847";
-  };
+  // Define colors for material types
+  const CONVENTIONAL_COLOR = "#f59e0b";
+  const SUSTAINABLE_COLOR = "#3e9847";
 
   return (
     <Card className={className}>
@@ -108,10 +107,17 @@ const AlternativesComparisonChart: React.FC<AlternativesComparisonChartProps> = 
             <Bar 
               dataKey="carbon" 
               name="Carbon Footprint" 
-              fill="#3e9847"
-              stroke={(data) => data.type === "Conventional" ? "#f59e0b" : "#3e9847"}
+              fill={SUSTAINABLE_COLOR}
               strokeWidth={2}
-            />
+            >
+              {chartData.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.type === "Conventional" ? CONVENTIONAL_COLOR : SUSTAINABLE_COLOR}
+                  stroke={entry.type === "Conventional" ? CONVENTIONAL_COLOR : SUSTAINABLE_COLOR}
+                />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
