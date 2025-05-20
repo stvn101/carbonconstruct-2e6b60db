@@ -1,293 +1,289 @@
-import React, { useState, useEffect } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Download, Leaf, Shield, BarChart3, Recycle, FileText } from "lucide-react";
+import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestions";
-import { ArrowRight, FileText, HelpCircle, LeafyGreen, Leaf, AlertTriangle, CheckCircle2, AlertCircle } from "lucide-react";
-import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
-import { SustainabilityAnalysisOptions } from "@/hooks/sustainability/types";
+import { fetchMaterialAlternatives, fetchNabersComplianceCheck, fetchNccComplianceCheck } from "@/hooks/sustainability/sustainabilityService";
+import SustainabilityReport from "./SustainabilityReport";
+import ComplianceStatus from "./ComplianceStatus";
+import SustainabilityImpactChart from "./SustainabilityImpactChart";
+import MaterialAlternatives from "./MaterialAlternatives";
+import { MaterialAnalysisResult } from "supabase/functions/get-sustainability-suggestions/Material";
+import { toast } from "sonner";
 
 interface SustainabilityAnalyzerProps {
-  materials: MaterialInput[];
-  transport: TransportInput[];
-  energy: EnergyInput[];
-  projectName?: string;
-  onReportGenerated?: (report: any) => void;
+  calculationInput: CalculationInput;
+  calculationResult: CalculationResult;
+  className?: string;
 }
 
 const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
-  materials,
-  transport,
-  energy,
-  projectName,
-  onReportGenerated
+  calculationInput,
+  calculationResult,
+  className
 }) => {
-  const {
+  const { 
     suggestions,
-    prioritySuggestions,
-    metadata,
+    prioritySuggestions, 
     report,
     isLoading,
-    error,
-    hasCachedResult,
-    getSuggestions
+    error
   } = useSustainabilitySuggestions();
-
-  const [analysisScore, setAnalysisScore] = useState<number>(0);
-  const [analysisType, setAnalysisType] = useState<'basic' | 'detailed' | 'comprehensive'>('basic');
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   
-  useEffect(() => {
-    // Initial analysis when component mounts and inputs are available
-    if (materials.length > 0 || transport.length > 0 || energy.length > 0) {
-      performAnalysis();
-    }
-  }, []);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [materialAnalysis, setMaterialAnalysis] = useState<MaterialAnalysisResult | null>(null);
+  const [nccCompliance, setNccCompliance] = useState<any | null>(null);
+  const [nabersCompliance, setNabersCompliance] = useState<any | null>(null);
+  const [isLoadingCompliance, setIsLoadingCompliance] = useState(false);
   
-  useEffect(() => {
-    // Update score when report data changes
-    if (report) {
-      // Calculate sustainability score based on report data
-      const calculatedScore = calculateSustainabilityScore(report);
-      setAnalysisScore(calculatedScore);
-      
-      // Notify parent component about the generated report
-      if (onReportGenerated) {
-        onReportGenerated(report);
-      }
+  // Use material analysis data from report if available
+  React.useEffect(() => {
+    if (report?.materialAnalysis) {
+      setMaterialAnalysis(report.materialAnalysis);
     }
   }, [report]);
-
-  const performAnalysis = async () => {
+  
+  // Function to run compliance checks
+  const runComplianceChecks = async () => {
+    setIsLoadingCompliance(true);
+    
     try {
-      const options: SustainabilityAnalysisOptions = {
-        format: analysisType,
-        includeLifecycleAnalysis: analysisType !== 'basic',
-        includeComplianceDetails: analysisType === 'comprehensive'
-      };
+      // Run NCC compliance check
+      const nccResult = await fetchNccComplianceCheck(calculationInput.materials, { includeDetails: true });
+      setNccCompliance(nccResult);
       
-      await getSuggestions(materials, transport, energy, options);
+      // Run NABERS compliance check
+      const nabersResult = await fetchNabersComplianceCheck(calculationInput.energy, { targetRating: 5 });
+      setNabersCompliance(nabersResult);
+      
+      toast.success("Compliance check complete", {
+        description: "Project analyzed against NCC 2025 and NABERS standards."
+      });
     } catch (err) {
-      console.error("Failed to perform sustainability analysis:", err);
+      console.error("Error running compliance checks:", err);
+      toast.error("Compliance check failed", {
+        description: "Could not analyze your project. Please try again later."
+      });
+    } finally {
+      setIsLoadingCompliance(false);
     }
   };
   
-  const calculateSustainabilityScore = (reportData: any): number => {
-    // Implementation based on NCC 2025 and NABERS standards
-    if (!reportData) return 0;
+  // Run material analysis if needed
+  React.useEffect(() => {
+    const fetchMaterialsData = async () => {
+      if (!materialAnalysis && calculationInput.materials && calculationInput.materials.length > 0) {
+        try {
+          // For now, let's create some mock data
+          // In a real implementation, this would call the backend
+          const highImpactMaterials = calculationInput.materials
+            .filter(m => m.quantity && Number(m.quantity) > 50)
+            .map(m => ({
+              id: `material-${m.id || Math.random().toString(36).substring(7)}`,
+              name: m.type,
+              carbonFootprint: m.factor || 1,
+              quantity: Number(m.quantity) || 0
+            }));
+            
+          // Mock material analysis result
+          const mockAnalysis: MaterialAnalysisResult = {
+            highImpactMaterials,
+            sustainabilityScore: 65,
+            sustainableMaterialPercentage: 35,
+            recommendations: [
+              "Consider using recycled steel to reduce carbon footprint",
+              "Replace conventional concrete with geopolymer alternatives",
+              "Source locally produced materials to reduce transport emissions"
+            ],
+            alternatives: {}
+          };
+          
+          // Get alternatives for each high impact material
+          for (const material of highImpactMaterials) {
+            const alternatives = await fetchMaterialAlternatives(material.name, material.quantity);
+            if (alternatives && alternatives.length > 0) {
+              mockAnalysis.alternatives[material.id] = alternatives;
+            }
+          }
+          
+          setMaterialAnalysis(mockAnalysis);
+        } catch (error) {
+          console.error("Failed to fetch material analysis:", error);
+        }
+      }
+    };
     
-    // Extract components from the report
-    const materialScore = reportData.materialScore || 0;
-    const transportScore = reportData.transportScore || 0;
-    const energyScore = reportData.energyScore || 0;
-    
-    // Apply weightings based on industry standards
-    // NCC 2025 and NABERS emphasize materials and energy over transport
-    const weightedScore = (materialScore * 0.45) + (energyScore * 0.35) + (transportScore * 0.2);
-    
-    // Return a score between 0-100
-    return Math.min(100, Math.max(0, Math.round(weightedScore)));
+    fetchMaterialsData();
+  }, [calculationInput.materials, materialAnalysis]);
+  
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2 }
+    }
   };
   
-  const getScoreColor = (score: number): string => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-amber-600";
-    return "text-red-600";
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4 }
+    }
   };
   
-  const getSustainabilityRating = (score: number): string => {
-    if (score >= 90) return "Outstanding";
-    if (score >= 80) return "Excellent";
-    if (score >= 70) return "Very Good";
-    if (score >= 60) return "Good";
-    if (score >= 50) return "Moderate";
-    if (score >= 30) return "Poor";
-    return "Very Poor";
-  };
-
-  const renderSuggestionCategory = (title: string, items: string[], icon: React.ReactNode) => {
-    if (!items || items.length === 0) return null;
+  // Navigate between tabs with animations
+  const navigateTab = (direction: "next" | "prev") => {
+    const tabs = ["dashboard", "compliance", "materials", "report"];
+    const currentIndex = tabs.indexOf(activeTab);
     
-    return (
-      <div className="mb-4">
-        <h4 className="text-sm font-medium flex items-center gap-2 mb-2">
-          {icon}
-          {title}
-        </h4>
-        <ul className="space-y-1 text-sm pl-7">
-          {items.map((item, index) => (
-            <li key={index} className="list-disc text-sm text-muted-foreground">{item}</li>
-          ))}
-        </ul>
-      </div>
-    );
+    if (direction === "next" && currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+    } else if (direction === "prev" && currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+    }
   };
-
+  
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <Leaf className="h-5 w-5 text-carbon-600" />
-            Sustainability Analysis
-            {projectName && <span className="text-muted-foreground text-sm ml-2">for {projectName}</span>}
-          </CardTitle>
-          <CardDescription>
-            Analysis based on {materials.length} materials, {transport.length} transport methods, and {energy.length} energy sources
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="py-8 flex flex-col items-center justify-center">
-              <Progress value={30} className="w-2/3 mb-4" />
-              <p className="text-sm text-muted-foreground">
-                Analyzing sustainability factors and generating recommendations...
-              </p>
-            </div>
-          ) : error ? (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>
-                {error}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={performAnalysis} 
-                  className="mt-2"
-                >
-                  Retry Analysis
-                </Button>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <>
-              <div className="mb-6 flex flex-col md:flex-row md:justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-semibold">
-                      Sustainability Score: <span className={getScoreColor(analysisScore)}>{analysisScore}</span>
-                    </h3>
-                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Rating: {getSustainabilityRating(analysisScore)} 
-                    {hasCachedResult && <span className="text-xs ml-2">(Cached)</span>}
-                  </p>
-                </div>
+    <motion.div 
+      className={`space-y-6 ${className}`}
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Leaf className="h-6 w-6 mr-2 text-carbon-600" />
+              Sustainability Analysis
+            </CardTitle>
+            <CardDescription>
+              Comprehensive analysis of your project's sustainability performance and compliance
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <div className="flex justify-between items-center mb-4">
+                <TabsList>
+                  <TabsTrigger value="dashboard" className="flex items-center">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                    <span className="sm:hidden">Data</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="compliance" className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Compliance</span>
+                    <span className="sm:hidden">Regs</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="materials" className="flex items-center">
+                    <Recycle className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Alternatives</span>
+                    <span className="sm:hidden">Alt</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="report" className="flex items-center">
+                    <FileText className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Report</span>
+                    <span className="sm:hidden">Rep</span>
+                  </TabsTrigger>
+                </TabsList>
                 
                 <div className="flex gap-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    onClick={() => navigateTab("prev")}
+                    disabled={activeTab === "dashboard"}
                   >
-                    {showAdvancedOptions ? "Hide Options" : "Analysis Options"}
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Button 
+                    variant="outline" 
                     size="sm" 
-                    onClick={performAnalysis}
-                    className="bg-carbon-600 hover:bg-carbon-700 text-white"
+                    onClick={() => navigateTab("next")}
+                    disabled={activeTab === "report"}
                   >
-                    Refresh Analysis
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               
-              {showAdvancedOptions && (
-                <div className="mb-6 p-4 border rounded-md bg-muted/30">
-                  <h4 className="text-sm font-medium mb-2">Analysis Type</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
-                    <Button 
-                      variant={analysisType === 'basic' ? "default" : "outline"} 
-                      size="sm"
-                      className={analysisType === 'basic' ? "bg-carbon-600 hover:bg-carbon-700 text-white" : ""}
-                      onClick={() => setAnalysisType('basic')}
-                    >
-                      Basic
-                    </Button>
-                    <Button 
-                      variant={analysisType === 'detailed' ? "default" : "outline"} 
-                      size="sm"
-                      className={analysisType === 'detailed' ? "bg-carbon-600 hover:bg-carbon-700 text-white" : ""}
-                      onClick={() => setAnalysisType('detailed')}
-                    >
-                      Detailed
-                    </Button>
-                    <Button 
-                      variant={analysisType === 'comprehensive' ? "default" : "outline"} 
-                      size="sm"
-                      className={analysisType === 'comprehensive' ? "bg-carbon-600 hover:bg-carbon-700 text-white" : ""}
-                      onClick={() => setAnalysisType('comprehensive')}
-                    >
-                      Comprehensive
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {analysisType === 'basic' && "Basic analysis provides key sustainability suggestions based on your inputs."}
-                    {analysisType === 'detailed' && "Detailed analysis includes lifecycle assessments and materiality scoring."}
-                    {analysisType === 'comprehensive' && "Comprehensive analysis adds NCC 2025 and NABERS compliance details."}
-                  </p>
+              <TabsContent value="dashboard" className="mt-4 space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <SustainabilityImpactChart data={materialAnalysis} chartType="bar" />
+                  <SustainabilityImpactChart data={materialAnalysis} chartType="radar" />
                 </div>
-              )}
-              
-              {prioritySuggestions && prioritySuggestions.length > 0 && (
-                <div className="mb-6 p-4 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/20 rounded-r-md">
-                  <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-500" />
-                    Priority Improvements
-                  </h4>
-                  <ul className="space-y-1 pl-6">
-                    {prioritySuggestions.map((suggestion, index) => (
-                      <li key={index} className="list-disc text-sm">
-                        {suggestion.replace('Priority: ', '')}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              <div className="space-y-4">
-                {renderSuggestionCategory(
-                  "Material Recommendations", 
-                  report?.materialRecommendations || [], 
-                  <LeafyGreen className="h-4 w-4 text-green-600" />
-                )}
                 
-                {renderSuggestionCategory(
-                  "Transport Optimizations", 
-                  report?.transportRecommendations || [], 
-                  <ArrowRight className="h-4 w-4 text-blue-600" />
-                )}
-                
-                {renderSuggestionCategory(
-                  "Energy Efficiency", 
-                  report?.energyRecommendations || [], 
-                  <Leaf className="h-4 w-4 text-amber-600" />
-                )}
-                
-                {renderSuggestionCategory(
-                  "General Sustainability Suggestions", 
-                  suggestions.filter(s => !prioritySuggestions?.includes(s)), 
-                  <CheckCircle2 className="h-4 w-4 text-carbon-600" />
-                )}
-              </div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.4 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Key Recommendations</CardTitle>
+                      <CardDescription>
+                        Priority actions to improve sustainability
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {prioritySuggestions && prioritySuggestions.length > 0 ? (
+                          prioritySuggestions.map((suggestion, index) => (
+                            <li key={index} className="flex items-start">
+                              <Leaf className="h-5 w-5 text-carbon-600 mr-2 mt-0.5 flex-shrink-0" />
+                              <span>{suggestion}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-muted-foreground">No priority recommendations available</li>
+                        )}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
               
-              {metadata && (
-                <div className="mt-6 pt-4 border-t text-xs text-muted-foreground">
-                  <p>
-                    Generated {metadata.source === 'api' ? 'via API' : 'locally'} at{' '}
-                    {new Date(metadata.generatedAt).toLocaleString()}. 
-                    {metadata.count} suggestions across {Object.keys(metadata.categories).length} categories.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+              <TabsContent value="compliance" className="mt-4">
+                <ComplianceStatus
+                  nccData={nccCompliance}
+                  nabersData={nabersCompliance}
+                  onRunCheck={runComplianceChecks}
+                  isLoading={isLoadingCompliance}
+                />
+              </TabsContent>
+              
+              <TabsContent value="materials" className="mt-4">
+                <MaterialAlternatives
+                  materialAnalysis={materialAnalysis}
+                  materials={calculationInput.materials}
+                />
+              </TabsContent>
+              
+              <TabsContent value="report" className="mt-4">
+                <SustainabilityReport
+                  calculationInput={calculationInput}
+                  calculationResult={calculationResult}
+                  sustainabilityReport={report}
+                  materialAnalysis={materialAnalysis}
+                  complianceData={{
+                    ncc: nccCompliance,
+                    nabers: nabersCompliance
+                  }}
+                  suggestions={suggestions}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -9,6 +9,9 @@ import SuggestionsSection from "./results/SuggestionsSection";
 import { Loader, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SustainabilityAnalysisOptions } from "@/hooks/sustainability/types";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SustainabilityAnalyzer from "./sustainability/SustainabilityAnalyzer";
 
 interface RecommendationsSectionProps {
   calculationInput: CalculationInput;
@@ -33,6 +36,7 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
   } = useSustainabilitySuggestions();
   
   const [fetchTriggered, setFetchTriggered] = useState(false);
+  const [activeView, setActiveView] = useState<"basic" | "advanced">("basic");
 
   useEffect(() => {
     const fetchSustainabilitySuggestions = async () => {
@@ -88,12 +92,34 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
       animate="visible"
       variants={containerVariants}
     >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Sustainability Analysis</h2>
+        <div className="flex gap-2">
+          <Button 
+            variant={activeView === "basic" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveView("basic")}
+            className={activeView === "basic" ? "bg-carbon-600 hover:bg-carbon-700 text-white" : ""}
+          >
+            Basic
+          </Button>
+          <Button 
+            variant={activeView === "advanced" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveView("advanced")}
+            className={activeView === "advanced" ? "bg-carbon-600 hover:bg-carbon-700 text-white" : ""}
+          >
+            Advanced
+          </Button>
+        </div>
+      </div>
+      
       {isLoading ? (
         <motion.div variants={itemVariants} className="flex flex-col items-center justify-center py-12">
           <Loader className="h-8 w-8 animate-spin mb-4 text-carbon-600" />
-          <h3 className="text-lg font-medium">Generating Sustainability Recommendations</h3>
+          <h3 className="text-lg font-medium">Generating Sustainability Analysis</h3>
           <p className="text-muted-foreground mt-2">
-            Analyzing your project data to provide personalized sustainability suggestions...
+            Analyzing your project data to provide personalized sustainability insights...
           </p>
         </motion.div>
       ) : error ? (
@@ -101,7 +127,7 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Failed to generate sustainability recommendations: {error}
+              Failed to generate sustainability analysis: {error}
               <br />
               <span className="text-sm">Showing limited recommendations based on your calculation data.</span>
             </AlertDescription>
@@ -115,7 +141,7 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
             />
           </motion.div>
         </motion.div>
-      ) : (
+      ) : activeView === "basic" ? (
         <>
           <motion.div variants={itemVariants} className="dark:text-carbon-200">
             <CarbonReduction
@@ -138,6 +164,13 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
             <AreasOfConcern calculationResult={calculationResult} />
           </motion.div>
         </>
+      ) : (
+        <motion.div variants={itemVariants} className="dark:text-carbon-200">
+          <SustainabilityAnalyzer 
+            calculationInput={calculationInput}
+            calculationResult={calculationResult}
+          />
+        </motion.div>
       )}
     </motion.div>
   );
