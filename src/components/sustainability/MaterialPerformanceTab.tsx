@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProject } from "@/contexts/ProjectContext";
+import { useProjects } from "@/contexts/ProjectContext"; // Fixed: useProject → useProjects
 import { ArrowUpDown, BarChart4, LineChart, PieChart } from "lucide-react";
 import { formatCarbon } from "@/lib/formatters";
 
@@ -22,7 +22,7 @@ const MaterialPerformanceTab: React.FC<MaterialPerformanceTabProps> = ({ materia
   const [activeTab, setActiveTab] = React.useState("trends");
   const [selectedMaterial, setSelectedMaterial] = React.useState<string | null>(null);
   const [chartType, setChartType] = React.useState<'line' | 'area'>('line');
-  const { projectId } = useProject();
+  const { projectId } = useProjects(); // This uses the projectId from useProjects
   
   // Find the default material (one with highest quantity)
   React.useEffect(() => {

@@ -84,8 +84,10 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
           const highImpactMaterials = calculationInput.materials
             .filter(m => m.quantity && Number(m.quantity) > 50)
             .map(m => ({
+              // Fixed: Generate a random ID instead of using material.id which doesn't exist
               id: `material-${Math.random().toString(36).substring(7)}`,
               name: m.type,
+              // Fixed: Access the carbon footprint properly
               carbonFootprint: m.type in calculationResult.breakdownByMaterial 
                 ? calculationResult.breakdownByMaterial[m.type as keyof typeof calculationResult.breakdownByMaterial] || 1 
                 : 1,
@@ -96,7 +98,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
           const mockAnalysis: MaterialAnalysisResult = {
             highImpactMaterials,
             sustainabilityScore: 65,
-            sustainableMaterialPercentage: 35,
+            sustainabilityPercentage: 35, // Fixed property name
             recommendations: [
               "Consider using recycled steel to reduce carbon footprint",
               "Replace conventional concrete with geopolymer alternatives",

@@ -1,4 +1,3 @@
-
 // Reexport calculation functions from carbonCalculations.ts
 export { 
   calculateTotalEmissions
@@ -48,4 +47,18 @@ export type MaterialsByRegion = Record<string, number>;
 export interface MaterialOption {
   id: string;
   name: string;
+}
+
+// Update this file to include the extended MaterialInput type with recycledContent and locallySourced
+// Only extending, not replacing the existing code
+
+export interface MaterialInput {
+  id?: string;
+  type: string;
+  quantity: number | string;
+  unit?: string;
+  factor?: number;
+  recycledContent?: number; // Added for sustainability calculations
+  locallySourced?: boolean; // Added for sustainability calculations
+  recyclable?: boolean; // Added for sustainability calculations
 }

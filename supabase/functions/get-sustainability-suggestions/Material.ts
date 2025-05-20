@@ -7,7 +7,8 @@ export enum MaterialCategory {
   ALUMINUM = 'aluminum',
   GLASS = 'glass',
   INSULATION = 'insulation',
-  OTHER = 'other'
+  OTHER = 'other',
+  WOOD = 'wood' // Added wood as an alias for timber for compatibility
 }
 
 export interface Material {
@@ -33,7 +34,7 @@ export interface SustainableMaterial extends Material {
 export interface MaterialAnalysisResult {
   highImpactMaterials: Material[];
   sustainabilityScore: number;
-  sustainableMaterialPercentage: number;
+  sustainabilityPercentage: number;
   recommendations: string[];
   alternatives: {
     [materialId: string]: SustainableMaterial[];
