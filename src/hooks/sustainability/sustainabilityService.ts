@@ -78,3 +78,86 @@ export const fetchSustainabilitySuggestions = async (
   
   return result;
 };
+
+export const fetchNccComplianceCheck = async (
+  materials: MaterialInput[],
+  options?: { includeDetails?: boolean }
+): Promise<any> => {
+  try {
+    console.log('Checking NCC 2025 compliance...');
+    
+    const { data, error } = await supabase.functions.invoke('compliance-check', {
+      body: {
+        materials: materials.map(m => ({
+          type: m.type,
+          quantity: Number(m.quantity) || 0,
+        })),
+        standard: 'NCC2025',
+        options: options
+      }
+    });
+    
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (err) {
+    console.error('Error checking NCC compliance:', err);
+    return {
+      compliant: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+      details: null
+    };
+  }
+};
+
+export const fetchNabersComplianceCheck = async (
+  energy: EnergyInput[],
+  options?: { targetRating?: number }
+): Promise<any> => {
+  try {
+    console.log('Checking NABERS compliance...');
+    
+    const { data, error } = await supabase.functions.invoke('compliance-check', {
+      body: {
+        energy: energy.map(e => ({
+          type: e.type,
+          amount: Number(e.amount) || 0,
+          unit: e.unit || 'kWh'
+        })),
+        standard: 'NABERS',
+        options: options
+      }
+    });
+    
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (err) {
+    console.error('Error checking NABERS compliance:', err);
+    return {
+      rating: 0,
+      compliant: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+      details: null
+    };
+  }
+};
+
+export const fetchMaterialAlternatives = async (
+  materialType: string,
+  quantity?: number
+): Promise<any[]> => {
+  try {
+    console.log(`Fetching alternatives for ${materialType}...`);
+    
+    const { data, error } = await supabase
+      .from('materials_view')
+      .select('*')
+      .eq('alternativeto', materialType);
+    
+    if (error) throw new Error(error.message);
+    
+    return data || [];
+  } catch (err) {
+    console.error(`Error fetching alternatives for ${materialType}:`, err);
+    return [];
+  }
+};
