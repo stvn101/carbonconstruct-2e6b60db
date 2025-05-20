@@ -72,6 +72,11 @@ const AlternativesComparisonChart: React.FC<AlternativesComparisonChartProps> = 
     return null;
   };
 
+  // Define colors based on material type
+  const getBarColor = (entry: any) => {
+    return entry.type === "Conventional" ? "#f59e0b" : "#3e9847";
+  };
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -103,7 +108,9 @@ const AlternativesComparisonChart: React.FC<AlternativesComparisonChartProps> = 
             <Bar 
               dataKey="carbon" 
               name="Carbon Footprint" 
-              fill={(data) => data.type === "Conventional" ? "#f59e0b" : "#3e9847"}
+              fill="#3e9847"
+              stroke={(data) => data.type === "Conventional" ? "#f59e0b" : "#3e9847"}
+              strokeWidth={2}
             />
           </BarChart>
         </ResponsiveContainer>

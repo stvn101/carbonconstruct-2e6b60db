@@ -83,9 +83,11 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
           const highImpactMaterials = calculationInput.materials
             .filter(m => m.quantity && Number(m.quantity) > 50)
             .map(m => ({
-              id: `material-${m.id || Math.random().toString(36).substring(7)}`,
+              id: `material-${Math.random().toString(36).substring(7)}`,
               name: m.type,
-              carbonFootprint: m.factor || 1,
+              carbonFootprint: m.type in calculationResult.breakdownByMaterial 
+                ? calculationResult.breakdownByMaterial[m.type as keyof typeof calculationResult.breakdownByMaterial] || 1 
+                : 1,
               quantity: Number(m.quantity) || 0
             }));
             
@@ -118,7 +120,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     };
     
     fetchMaterialsData();
-  }, [calculationInput.materials, materialAnalysis]);
+  }, [calculationInput.materials, materialAnalysis, calculationResult.breakdownByMaterial]);
   
   // Animation variants
   const containerVariants = {
