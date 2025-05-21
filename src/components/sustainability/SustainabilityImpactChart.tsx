@@ -1,135 +1,160 @@
-
+// Check and update any instances of sustainableMaterialPercentage to sustainabilityPercentage
 import React from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Cell, RadialBarChart, RadialBar, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ReferenceLine } from "recharts";
 import { MaterialAnalysisResult } from "supabase/functions/get-sustainability-suggestions/Material";
+import { Loader } from "lucide-react";
 
 interface SustainabilityImpactChartProps {
   data: MaterialAnalysisResult | null;
-  chartType?: 'bar' | 'radar';
+  chartType?: 'pie' | 'bar' | 'radar';
   className?: string;
 }
 
-const SustainabilityImpactChart: React.FC<SustainabilityImpactChartProps> = ({ 
-  data, 
-  chartType = 'bar',
+const SustainabilityImpactChart: React.FC<SustainabilityImpactChartProps> = ({
+  data,
+  chartType = 'pie',
   className
 }) => {
-  if (!data) {
+  const COLORS = ['#3e9847', '#5eb761', '#84c98c', '#aadcb0', '#d0eed3'];
+  const RADIAN = Math.PI / 180;
+  
+  const isLoading = !data;
+  
+  if (isLoading) {
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>Sustainability Impact Analysis</CardTitle>
-          <CardDescription>Visualization of material impact and improvement potential</CardDescription>
+          <CardTitle>Loading Sustainability Impact...</CardTitle>
         </CardHeader>
-        <CardContent className="h-64 flex items-center justify-center">
-          <p className="text-muted-foreground">No sustainability data available</p>
+        <CardContent className="flex justify-center items-center min-h-[300px]">
+          <Loader className="h-8 w-8 animate-spin" />
         </CardContent>
       </Card>
     );
   }
   
-  // Prepare data for visualization
-  const chartData = data.highImpactMaterials.map(material => ({
-    name: material.name,
-    carbonFootprint: material.carbonFootprint,
-    quantity: material.quantity || 0
-  }));
+  const pieData = [
+    { name: 'Sustainable', value: data.sustainabilityPercentage },
+    { name: 'Conventional', value: 100 - (data.sustainabilityPercentage || 0) }
+  ];
   
-  // Calculate total impact per material (footprint * quantity)
-  const impactData = chartData.map(item => ({
-    ...item,
-    totalImpact: item.carbonFootprint * item.quantity
-  })).sort((a, b) => b.totalImpact - a.totalImpact);
+  const radarData = [
+    { name: 'Sustainability', value: data.sustainabilityScore || 0, fullMark: 100 },
+    { name: 'Recyclability', value: (data.sustainabilityPercentage || 0) * 0.8, fullMark: 100 },
+    { name: 'Efficiency', value: data.sustainabilityScore ? data.sustainabilityScore * 0.9 : 0, fullMark: 100 },
+    { name: 'Compliance', value: data.sustainabilityScore ? data.sustainabilityScore * 1.1 : 0, fullMark: 100 }
+  ];
   
-  // Format for radar chart - normalize values
-  const radarData = [];
-  if (data.sustainableMaterialPercentage !== undefined) {
-    radarData.push({
-      subject: "Sustainable Materials",
-      value: data.sustainableMaterialPercentage,
-      fullMark: 100
-    });
-  }
-  
-  if (data.sustainabilityScore !== undefined) {
-    radarData.push({
-      subject: "Sustainability Score", 
-      value: data.sustainabilityScore, 
-      fullMark: 100
-    });
-  }
-  
-  // Add more metrics if available from the analysis
-  if (impactData.length > 0) {
-    radarData.push({
-      subject: "High Impact Materials",
-      value: Math.min(100, (impactData.length / Math.max(chartData.length, 1)) * 100),
-      fullMark: 100
-    });
-  }
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
   
   const renderBarChart = () => (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={impactData.slice(0, 5)} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis 
-          dataKey="name" 
-          angle={-45} 
-          textAnchor="end" 
-          height={60} 
-          tick={{ fontSize: 12 }}
-        />
-        <YAxis 
-          label={{ value: 'CO2e Impact', angle: -90, position: 'insideLeft' }} 
-          tick={{ fontSize: 12 }}
-        />
-        <Tooltip 
-          formatter={(value: number) => [`${value.toFixed(2)} kg CO2e`, "Carbon Impact"]}
-          labelFormatter={(label) => `Material: ${label}`}
-        />
-        <Legend />
-        <Bar dataKey="totalImpact" name="Carbon Impact" fill="#3e9847" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-
-  const renderRadarChart = () => (
-    <ResponsiveContainer width="100%" height="100%">
-      <RadarChart outerRadius={90} data={radarData}>
-        <PolarGrid />
-        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
-        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
-        <Radar 
-          name="Sustainability Metrics" 
-          dataKey="value" 
-          stroke="#3e9847" 
-          fill="#3e9847" 
-          fillOpacity={0.6} 
-        />
-        <Legend />
-        <Tooltip 
-          formatter={(value: number) => [`${value.toFixed(1)}%`, "Score"]}
-        />
-      </RadarChart>
-    </ResponsiveContainer>
-  );
-
-  return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Sustainability Impact Analysis</CardTitle>
-        <CardDescription>
-          {chartType === 'bar' 
-            ? 'Carbon impact of your top materials' 
-            : 'Overall sustainability metrics'}
-        </CardDescription>
+        <CardTitle>Sustainability Impact</CardTitle>
+        <CardDescription>Comparison of sustainability metrics</CardDescription>
       </CardHeader>
-      <CardContent className="h-80">
-        {chartType === 'bar' ? renderBarChart() : renderRadarChart()}
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data.highImpactMaterials}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="carbonFootprint" fill="#82ca9d" />
+          </BarChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
   );
+  
+  const renderPieChart = () => (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>Sustainability Score</CardTitle>
+        <CardDescription>Percentage of sustainable vs conventional materials</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={renderCustomizedLabel}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Legend />
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+  
+  const renderRadarChart = () => (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>Sustainability Radar</CardTitle>
+        <CardDescription>Overview of sustainability metrics</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="80%" data={radarData} startAngle={90} endAngle={-270}>
+            <RadialBar minAngle={15} label={{ position: 'right', fill: '#666' }} background dataKey="value" fill="#8884d8" />
+            <Tooltip />
+          </RadialBarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+  
+  if (!data) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle>No Data Available</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>No sustainability data available to display.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  switch (chartType) {
+    case 'bar':
+      return renderBarChart();
+    case 'radar':
+      return renderRadarChart();
+    case 'pie':
+    default:
+      return renderPieChart();
+  }
 };
 
 export default SustainabilityImpactChart;

@@ -15,7 +15,7 @@ import {
 } from "@/utils/calculatorHandlers";
 import { validateCalculationInput } from "@/utils/calculatorValidation";
 import { toast } from "sonner";
-import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonTypes";
+import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {
   materials: [{ type: "concrete", quantity: 1000 }],
@@ -157,6 +157,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [activeTab]);
 
+  // Update the contextValue creation to work with our types
   const contextValue = useMemo(() => ({
     calculationInput,
     setCalculationInput,
