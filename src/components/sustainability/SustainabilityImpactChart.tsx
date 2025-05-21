@@ -1,4 +1,4 @@
-// Check and update any instances of sustainableMaterialPercentage to sustainabilityPercentage
+
 import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,7 +125,12 @@ const SustainabilityImpactChart: React.FC<SustainabilityImpactChartProps> = ({
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="80%" data={radarData} startAngle={90} endAngle={-270}>
-            <RadialBar minAngle={15} label={{ position: 'right', fill: '#666' }} background dataKey="value" fill="#8884d8" />
+            <RadialBar 
+              label={{ position: 'right', fill: '#666' }}
+              background
+              dataKey="value" 
+              fill="#8884d8" 
+            />
             <Tooltip />
           </RadialBarChart>
         </ResponsiveContainer>
