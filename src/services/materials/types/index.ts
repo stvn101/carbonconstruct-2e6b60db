@@ -5,7 +5,7 @@
  */
 export * from './unifiedMaterialTypes';
 // Export specific types from materialTypes to avoid duplicate exports
-export {
+export type {
   MaterialsByRegion,
   MaterialOption
 } from '@/lib/materials/materialTypes';
