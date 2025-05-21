@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MaterialAnalysisResult, SustainableMaterial } from "supabase/functions/get-sustainability-suggestions/Material";
+import { MaterialAnalysisResult, SustainableMaterial } from "@/lib/materialCategories";
 import AlternativesComparisonChart from "./AlternativesComparisonChart";
 import { MaterialInput } from "@/lib/carbonExports";
 import { AlertTriangle, ThumbsUp, BarChart3, Database, Filter, Recycle } from "lucide-react";

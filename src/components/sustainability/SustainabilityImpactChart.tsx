@@ -1,9 +1,8 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, ResponsiveContainer, Cell, RadialBarChart, RadialBar, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ReferenceLine } from "recharts";
-import { MaterialAnalysisResult } from "supabase/functions/get-sustainability-suggestions/Material";
+import { MaterialAnalysisResult } from "@/lib/materialCategories";
 import { Loader } from "lucide-react";
 
 interface SustainabilityImpactChartProps {
