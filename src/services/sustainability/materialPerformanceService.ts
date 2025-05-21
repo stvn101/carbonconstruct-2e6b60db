@@ -50,13 +50,13 @@ export async function trackMaterialPerformance(
   try {
     // Process each material to track its performance
     const performanceData: MaterialPerformanceData[] = materials.map(material => ({
-      materialId: material.id || material.type,
+      materialId: (material as any).id || material.type,
       materialName: material.type,
-      carbonFootprint: Number(material.quantity) * (material.factor || 1),
+      carbonFootprint: Number(material.quantity) * ((material as any).factor || 1),
       timestamp: new Date().toISOString(),
       sustainabilityScore: calculateSustainabilityScore(material),
       quantity: Number(material.quantity) || 0,
-      region: material.region,
+      region: (material as any).region,
       category: getCategoryFromType(material.type)
     }));
 
@@ -158,6 +158,17 @@ async function storePerformanceData(
   
   // In the real implementation, we'd store in a database table, but for now we'll just log
   console.info('Material performance data would be stored in database');
+  
+  // Remove the problematic Supabase calls and use localStorage instead
+  try {
+    const key = `performance_data_${projectId}`;
+    const existingData = localStorage.getItem(key);
+    const parsedData = existingData ? JSON.parse(existingData) : [];
+    const newData = [...parsedData, ...performanceData];
+    localStorage.setItem(key, JSON.stringify(newData));
+  } catch (error) {
+    console.error('Error storing performance data:', error);
+  }
 }
 
 /**
@@ -291,7 +302,7 @@ function calculatePotentialReduction(
   originalMaterial: MaterialInput, 
   alternative: ExtendedMaterialData
 ): number {
-  const originalImpact = originalMaterial.factor || 1;
+  const originalImpact = (originalMaterial as any).factor || 1;
   const alternativeImpact = alternative.factor;
   
   if (originalImpact <= 0) return 0;

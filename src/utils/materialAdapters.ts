@@ -1,5 +1,5 @@
 
-import { MaterialCategory, SustainableMaterial } from "@/lib/materialCategories";
+import { MaterialCategoryEnum, SustainableMaterial } from "@/lib/materialCategories";
 
 /**
  * Adapts material data from the Supabase database to our application format
@@ -26,20 +26,20 @@ export function adaptMaterialFromSupabase(dbMaterial: any): SustainableMaterial 
 /**
  * Maps a string category to our MaterialCategory enum
  */
-export function getMaterialCategory(category?: string): MaterialCategory {
-  if (!category) return MaterialCategory.OTHER;
+export function getMaterialCategory(category?: string): string {
+  if (!category) return MaterialCategoryEnum.OTHER;
   
   const lowerCategory = category.toLowerCase();
   
-  if (lowerCategory.includes('concrete')) return MaterialCategory.CONCRETE;
-  if (lowerCategory.includes('steel')) return MaterialCategory.STEEL;
-  if (lowerCategory.includes('timber') || lowerCategory.includes('wood')) return MaterialCategory.TIMBER;
-  if (lowerCategory.includes('brick')) return MaterialCategory.BRICK;
-  if (lowerCategory.includes('aluminum') || lowerCategory.includes('aluminium')) return MaterialCategory.ALUMINUM;
-  if (lowerCategory.includes('glass')) return MaterialCategory.GLASS;
-  if (lowerCategory.includes('insulation')) return MaterialCategory.INSULATION;
+  if (lowerCategory.includes('concrete')) return MaterialCategoryEnum.CONCRETE;
+  if (lowerCategory.includes('steel')) return MaterialCategoryEnum.STEEL;
+  if (lowerCategory.includes('timber') || lowerCategory.includes('wood')) return MaterialCategoryEnum.TIMBER;
+  if (lowerCategory.includes('brick')) return MaterialCategoryEnum.BRICK;
+  if (lowerCategory.includes('aluminum') || lowerCategory.includes('aluminium')) return MaterialCategoryEnum.ALUMINUM;
+  if (lowerCategory.includes('glass')) return MaterialCategoryEnum.GLASS;
+  if (lowerCategory.includes('insulation')) return MaterialCategoryEnum.INSULATION;
   
-  return MaterialCategory.OTHER;
+  return MaterialCategoryEnum.OTHER;
 }
 
 /**
