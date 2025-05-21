@@ -1,3 +1,4 @@
+
 // Reexport calculation functions from carbonCalculations.ts
 export { 
   calculateTotalEmissions
@@ -14,7 +15,7 @@ export type {
   Material,
   Transport, 
   Energy,
-  MaterialInput,
+  MaterialInput as OriginalMaterialInput,
   TransportInput,
   EnergyInput,
 } from './carbonTypes';
@@ -49,16 +50,14 @@ export interface MaterialOption {
   name: string;
 }
 
-// Update this file to include the extended MaterialInput type with recycledContent and locallySourced
-// Only extending, not replacing the existing code
-
+// Extended MaterialInput type with sustainability properties
 export interface MaterialInput {
   id?: string;
   type: string;
   quantity: number | string;
   unit?: string;
   factor?: number;
-  recycledContent?: number; // Added for sustainability calculations
-  locallySourced?: boolean; // Added for sustainability calculations
-  recyclable?: boolean; // Added for sustainability calculations
+  recycledContent?: number;
+  locallySourced?: boolean;
+  recyclable?: boolean;
 }

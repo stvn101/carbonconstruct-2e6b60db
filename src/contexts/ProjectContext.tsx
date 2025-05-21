@@ -52,8 +52,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const projectsContext = useContext(ProjectsProvider({children}).context);
   
   // Merge the contextValue with the loadProjects function from ProjectsLoader
+  // Adding projectId to ensure it's available in the context
   const mergedContextValue = {
     ...contextValue,
+    projectId: contextValue.selectedProject?.id || null,
     loadProjects: projectsContext?.loadProjects
   };
   

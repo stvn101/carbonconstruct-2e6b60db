@@ -1,4 +1,3 @@
-
 import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { MaterialAnalysisResult } from "supabase/functions/get-sustainability-suggestions/Material";
 import { toast } from "sonner";
@@ -37,7 +36,7 @@ export const exportSustainabilityCSV = async (data: SustainabilityReportData) =>
     // Add sustainability metrics
     const sustainabilityRows = [
       `Metrics,Sustainability Score,${materialAnalysis?.sustainabilityScore || 'N/A'},/100`,
-      `Metrics,Sustainable Material Percentage,${materialAnalysis?.sustainableMaterialPercentage?.toFixed(1) || 'N/A'},%`
+      `Metrics,Sustainable Material Percentage,${materialAnalysis?.sustainabilityPercentage?.toFixed(1) || 'N/A'},%`
     ];
     
     // Add high impact materials
@@ -130,7 +129,7 @@ export const exportSustainabilityReport = async (data: SustainabilityReportData)
         ['Transport Emissions', `${calculationResult.transportEmissions.toFixed(2)} kg CO2e`],
         ['Energy Emissions', `${calculationResult.energyEmissions.toFixed(2)} kg CO2e`],
         ['Sustainability Score', materialAnalysis?.sustainabilityScore ? `${materialAnalysis.sustainabilityScore}/100` : 'N/A'],
-        ['Sustainable Materials', materialAnalysis?.sustainableMaterialPercentage ? `${materialAnalysis.sustainableMaterialPercentage.toFixed(1)}%` : 'N/A']
+        ['Sustainable Materials', materialAnalysis?.sustainabilityPercentage ? `${materialAnalysis.sustainabilityPercentage.toFixed(1)}%` : 'N/A']
       ],
       theme: 'striped',
       headStyles: { fillColor: [62, 152, 71], textColor: [255, 255, 255] }
