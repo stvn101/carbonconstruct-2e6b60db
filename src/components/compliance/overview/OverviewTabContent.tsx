@@ -4,12 +4,16 @@ import { CheckCircle, XCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ComplianceResult } from "@/hooks/useComplianceCheck";
+import { Grid } from "@/components/ui/grid";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface OverviewTabContentProps {
   result: ComplianceResult;
 }
 
 const OverviewTabContent: React.FC<OverviewTabContentProps> = ({ result }) => {
+  const { isMobile } = useIsMobile();
+  
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -26,7 +30,7 @@ const OverviewTabContent: React.FC<OverviewTabContentProps> = ({ result }) => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="p-3 border rounded-md">
           <div className="flex justify-between mb-1">
             <h4 className="text-xs font-medium">NCC 2025</h4>

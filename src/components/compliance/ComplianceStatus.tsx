@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComplianceResult } from "@/hooks/useComplianceCheck";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Import component parts
 import LoadingState from "./loading/LoadingState";
@@ -32,6 +33,7 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
 }) => {
   const { result, isLoading, error, checkCompliance } = useComplianceCheck();
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const { isMobile } = useIsMobile();
 
   useEffect(() => {
     if (materials.length > 0) {
@@ -79,10 +81,16 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full">
-            <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-            <TabsTrigger value="ncc" className="flex-1">NCC 2025</TabsTrigger>
-            <TabsTrigger value="nabers" className="flex-1">NABERS</TabsTrigger>
+          <TabsList className="w-full mb-2">
+            <TabsTrigger value="overview" className="flex-1">
+              {isMobile ? "Overview" : "Overview"}
+            </TabsTrigger>
+            <TabsTrigger value="ncc" className="flex-1">
+              {isMobile ? "NCC" : "NCC 2025"}
+            </TabsTrigger>
+            <TabsTrigger value="nabers" className="flex-1">
+              {isMobile ? "NABERS" : "NABERS"}
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="pt-4">
@@ -98,11 +106,11 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
           </TabsContent>
         </Tabs>
         
-        <div className="mt-4 pt-4 border-t flex justify-between">
-          <Button variant="outline" size="sm" onClick={runComplianceCheck}>
+        <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row justify-between items-center gap-3">
+          <Button variant="outline" size="sm" onClick={runComplianceCheck} className="w-full sm:w-auto">
             Re-check Compliance
           </Button>
-          <div className="text-xs text-muted-foreground flex items-center">
+          <div className="text-xs text-muted-foreground flex items-center justify-center">
             <Shield className="h-3.5 w-3.5 mr-1.5" />
             Based on January 1, 2025 standards
           </div>

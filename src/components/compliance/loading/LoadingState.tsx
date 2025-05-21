@@ -7,12 +7,14 @@ const LoadingState: React.FC = () => {
   return (
     <Card className="animate-pulse">
       <CardHeader className="pb-3">
-        <CardTitle>Checking Compliance</CardTitle>
-        <CardDescription>Verifying against NCC 2025 and NABERS standards</CardDescription>
+        <CardTitle className="text-lg sm:text-xl">Checking Compliance</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
+          Verifying against NCC 2025 and NABERS standards
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Progress value={45} className="mb-4" />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Processing project inputs to determine compliance status...
         </p>
       </CardContent>
