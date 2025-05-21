@@ -4,7 +4,11 @@
  * Exports all material-related types from a central location
  */
 export * from './unifiedMaterialTypes';
-export * from '@/lib/materials/materialTypes';
+// Export specific types from materialTypes to avoid duplicate exports
+export {
+  MaterialsByRegion,
+  MaterialOption
+} from '@/lib/materials/materialTypes';
 export * from '../materialAdapter';
 export * from '../materialTypes';
 

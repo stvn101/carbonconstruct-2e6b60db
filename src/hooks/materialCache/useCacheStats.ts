@@ -12,8 +12,19 @@ export function useCacheStats(materialCount: number) {
   }>({ lastUpdated: null, itemCount: null });
 
   useEffect(() => {
-    const stats = getCacheMetadata();
-    setCacheStats(stats);
+    async function fetchStats() {
+      try {
+        const stats = await getCacheMetadata();
+        setCacheStats({
+          lastUpdated: stats?.lastUpdated ? new Date(stats.lastUpdated) : null,
+          itemCount: stats?.count || null
+        });
+      } catch (error) {
+        console.error('Error fetching cache stats:', error);
+      }
+    }
+    
+    fetchStats();
   }, [materialCount]);
 
   return cacheStats;
