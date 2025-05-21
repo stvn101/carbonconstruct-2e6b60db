@@ -1,4 +1,3 @@
-
 /**
  * Sustainability API Service
  * Handles API interactions for sustainability services
@@ -45,9 +44,13 @@ export async function checkSustainabilityCompliance(projectId: string): Promise<
       '@/hooks/sustainability/sustainabilityService'
     );
     
-    // Run the compliance checks
-    const nccCompliance = await fetchNccComplianceCheck(project.materials, { includeDetails: true });
-    const nabersCompliance = await fetchNabersComplianceCheck(project.energy, { targetRating: 5 });
+    // Fix type casting for materials and energy
+    const materials = Array.isArray(project.materials) ? project.materials : [];
+    const energy = Array.isArray(project.energy) ? project.energy : [];
+    
+    // Run the compliance checks with properly typed data
+    const nccCompliance = await fetchNccComplianceCheck(materials as MaterialInput[], { includeDetails: true });
+    const nabersCompliance = await fetchNabersComplianceCheck(energy as EnergyInput[], { targetRating: 5 });
     
     return {
       ncc: nccCompliance,
