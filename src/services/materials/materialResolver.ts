@@ -139,7 +139,6 @@ export async function enrichMaterialInput(material: MaterialInput): Promise<Mate
     // Only enrich certain properties to avoid overriding user input
     return {
       ...material,
-      factor: materialDetails.factor,
       unit: material.unit || materialDetails.unit,
       region: material.region || materialDetails.region
     };

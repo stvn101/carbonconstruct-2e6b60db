@@ -48,7 +48,7 @@ export function mapDatabaseMaterials(data: MaterialSourceData[]): ExtendedMateri
           // Create a material with defaults for missing fields
           // Convert recyclability string to the proper type using the determineRecyclability function
           const recyclabilityValue = (item.recyclability || 
-                                     determineRecyclability(item.category || '')) as 'High' | 'Medium' | 'Low';
+                                     determineRecyclability({ category: item.category || '' })) as 'High' | 'Medium' | 'Low';
           
           // Create mapped material that matches the ExtendedMaterialData type
           const mappedMaterial: ExtendedMaterialData = {
@@ -59,7 +59,7 @@ export function mapDatabaseMaterials(data: MaterialSourceData[]): ExtendedMateri
             tags: Array.isArray(item.tags) ? item.tags : 
                   item.category ? [item.category] : ['construction'],
             sustainabilityScore: item.sustainabilityscore || 
-                               calculateSustainabilityScore(item.carbon_footprint_kgco2e_kg || item.factor || 0),
+                               calculateSustainabilityScore({ factor: item.carbon_footprint_kgco2e_kg || item.factor || 0 }),
             recyclability: recyclabilityValue,
             alternativeTo: item.alternativeto || undefined,
             notes: item.notes || '',
