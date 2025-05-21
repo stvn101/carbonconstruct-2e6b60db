@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TransportInput } from "@/lib/carbonExports";
-import { Transport, TRANSPORT_FACTORS } from "@/lib/carbonData";
+import { TRANSPORT_FACTORS } from "@/lib/carbonData";
+import { TransportFactorKey } from "@/lib/carbonData";
 
 interface TransportFormFieldsProps {
   transport: TransportInput;
@@ -43,7 +44,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
               <SelectContent>
                 {transportTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {TRANSPORT_FACTORS[type as Transport]?.name || type}
+                    {TRANSPORT_FACTORS[type as TransportFactorKey]?.name || type}
                   </SelectItem>
                 ))}
               </SelectContent>

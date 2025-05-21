@@ -1,8 +1,10 @@
+
 /**
  * Sustainability API Service
  * Handles API interactions for sustainability services
  */
 import { supabase } from "@/integrations/supabase/client";
+import { MaterialInput, EnergyInput } from "@/lib/carbonExports";
 
 // Re-export types from the new performance service
 export type { 

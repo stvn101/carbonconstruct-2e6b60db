@@ -1,8 +1,8 @@
 
 import { expect, test, describe } from 'vitest';
 import { 
-  calculateTotalEmissions,
-  CalculationInput
+  CalculationInput,
+  calculateTotalEmissions
 } from '../carbonExports';
 
 describe('Carbon Calculations', () => {
