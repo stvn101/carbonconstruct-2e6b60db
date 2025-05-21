@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MaterialInput } from "@/lib/carbonExports";
-import { MaterialCategory, SustainableMaterial } from "supabase/functions/get-sustainability-suggestions/Material";
+import { MaterialCategory, SustainableMaterial } from "@/lib/materialCategories";
 
 /**
  * Service for interacting with sustainability APIs and tracking material performance
@@ -157,41 +157,6 @@ export async function getMaterialTrends(materialType: string): Promise<Sustainab
       })),
       improvement
     };
-    
-    /* 
-    // We'll use this code once we have the material_performance table
-    const { data, error } = await supabase
-      .from('material_performance')
-      .select('*')
-      .eq('materialName', materialType)
-      .order('timestamp', { ascending: true });
-      
-    if (error) {
-      console.error("Failed to get material trends:", error);
-      return null;
-    }
-    
-    if (!data || data.length === 0) {
-      return null;
-    }
-    
-    // Calculate improvement over time
-    const firstDataPoint = data[0].carbonFootprint;
-    const lastDataPoint = data[data.length - 1].carbonFootprint;
-    const improvement = firstDataPoint > 0 ? 
-      ((firstDataPoint - lastDataPoint) / firstDataPoint * 100) : 0;
-    
-    return {
-      materialId: data[0].materialId,
-      materialName: materialType,
-      dataPoints: data.map(d => ({
-        timestamp: d.timestamp,
-        carbonFootprint: d.carbonFootprint,
-        sustainabilityScore: d.sustainabilityScore
-      })),
-      improvement
-    };
-    */
   } catch (err) {
     console.error("Error getting material trends:", err);
     return null;

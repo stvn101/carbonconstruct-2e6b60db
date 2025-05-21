@@ -10,6 +10,9 @@ export interface MaterialInput {
   quantity: number | string;
   unit?: string;
   region?: string;
+  recycledContent?: number;
+  locallySourced?: boolean;
+  recyclable?: boolean;
 }
 
 export interface TransportInput {
