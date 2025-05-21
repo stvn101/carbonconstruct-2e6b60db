@@ -77,13 +77,17 @@ export function validateCalculationInput(input: CalculationInput): ValidationErr
       });
     }
     
-    if (!energy.amount && (!energy.quantity)) {
+    // Check either amount or quantity is specified and valid
+    const hasAmount = energy.amount !== undefined && energy.amount !== '';
+    const hasQuantity = energy.quantity !== undefined && energy.quantity !== '';
+    
+    if (!hasAmount && !hasQuantity) {
       errors.push({
         field: `energy[${index}].amount`,
         message: `Energy ${index + 1} must have an amount specified.`
       });
-    } else if ((energy.amount && Number(energy.amount) <= 0) && 
-              (energy.quantity && Number(energy.quantity) <= 0)) {
+    } else if ((hasAmount && Number(energy.amount) <= 0) && 
+               (hasQuantity && Number(energy.quantity) <= 0)) {
       errors.push({
         field: `energy[${index}].amount`,
         message: `Energy ${index + 1} must have a positive amount.`
