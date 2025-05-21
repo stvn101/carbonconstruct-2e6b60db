@@ -1,81 +1,82 @@
 
 /**
- * Refactored material cache hook that composes smaller, more focused hooks
- * with improved type safety
+ * Hook for cached material data
  */
 import { useState, useEffect } from 'react';
+import { fetchMaterials } from '@/services/materials/fetch/materialFetchService';
+import { getCachedMaterials, cacheMaterials } from '@/services/materials/cache';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { useCacheStats } from './useCacheStats';
-import { useRefreshCache } from './useRefreshCache';
-import { useLoadMaterials } from './useLoadMaterials';
-import { UseMaterialCacheResult } from './types';
-import { toast } from 'sonner';
 
-// Enhanced material cache hook with improved error handling and retry logic
-export const useMaterialCache = (): UseMaterialCacheResult => {
+export function useMaterialCache() {
   const [materials, setMaterials] = useState<ExtendedMaterialData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const MAX_RETRIES = 3;
   
-  // Use composed hooks
-  const refreshCache = useRefreshCache(setMaterials, setLoading, setError);
-  const loadMaterials = useLoadMaterials(setMaterials, setLoading, setError, materials);
+  // Get cache statistics
   const cacheStats = useCacheStats(materials.length);
   
-  // Automatic retry for failed loads
   useEffect(() => {
-    if (error && materials.length === 0 && retryCount < MAX_RETRIES) {
-      const retryDelay = Math.min(2000 * Math.pow(2, retryCount), 10000); // Exponential backoff with max 10s
-      
-      console.log(`Auto-retry ${retryCount + 1}/${MAX_RETRIES} in ${retryDelay}ms due to error: ${error.message}`);
-      
-      const retryTimer = setTimeout(() => {
-        console.log(`Executing retry ${retryCount + 1}/${MAX_RETRIES}`);
-        loadMaterials(retryCount > 0)
-          .then(() => {
-            if (materials.length > 0) {
-              setError(null);
-              toast.success(`Materials loaded successfully on retry ${retryCount + 1}`);
-            }
-          })
-          .catch((err: Error) => {
-            console.error(`Retry ${retryCount + 1} failed:`, err);
-          });
+    const loadMaterials = async () => {
+      try {
+        setLoading(true);
         
-        setRetryCount(prevCount => prevCount + 1);
-      }, retryDelay);
-      
-      return () => clearTimeout(retryTimer);
-    }
-  }, [error, materials.length, retryCount, loadMaterials]);
-  
-  // Load materials on mount only once
-  useEffect(() => {
-    if (!initialLoadComplete) {
-      console.log('Initial material loading');
-      loadMaterials(false).then(() => {
-        setInitialLoadComplete(true);
+        // First try to get from cache
+        const cachedMaterials = await getCachedMaterials();
         
-        // Check if we got a good number of materials
-        if (materials.length < 50) {
-          console.log('Initial load returned insufficient materials, trying again with force refresh');
-          // Try again with force refresh if we didn't get many materials
-          loadMaterials(true).catch((err: Error) => {
-            console.error('Forced refresh after initial load failed:', err);
-          });
+        if (cachedMaterials && cachedMaterials.length > 0) {
+          setMaterials(cachedMaterials);
+          setError(null);
+          setLoading(false);
+          
+          // Still fetch fresh data in the background
+          fetchMaterials(false)
+            .then(freshMaterials => {
+              if (freshMaterials.length > 0) {
+                setMaterials(freshMaterials);
+                cacheMaterials(freshMaterials).catch(console.error);
+              }
+            })
+            .catch(console.error); // Don't set the error state here to avoid flickering
+        } else {
+          // No cache, fetch directly
+          const fetchedMaterials = await fetchMaterials(false);
+          setMaterials(fetchedMaterials);
+          setError(null);
+          
+          // Cache the materials for future use
+          cacheMaterials(fetchedMaterials).catch(console.error);
         }
-      });
-    }
-  }, [loadMaterials, initialLoadComplete, materials.length]);
+      } catch (err) {
+        console.error('Error in useMaterialCache:', err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadMaterials();
+  }, []);
   
-  return { 
-    materials, 
-    loading, 
-    error,
-    refreshCache,
-    cacheStats
+  const refreshCache = async () => {
+    try {
+      setLoading(true);
+      const freshMaterials = await fetchMaterials(true); // Force refresh
+      setMaterials(freshMaterials);
+      setError(null);
+      
+      // Cache the fresh materials
+      await cacheMaterials(freshMaterials);
+      
+      return Promise.resolve();
+    } catch (err) {
+      console.error('Error refreshing materials cache:', err);
+      setError(err instanceof Error ? err : new Error(String(err)));
+      return Promise.reject(err);
+    } finally {
+      setLoading(false);
+    }
   };
-};
+  
+  return { materials, loading, error, refreshCache, cacheStats };
+}
