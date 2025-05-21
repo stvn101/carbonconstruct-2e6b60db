@@ -1,46 +1,59 @@
 
 /**
  * Materials System Initialization
- * Manages the initialization and startup of the material data system
+ * Bootstraps the materials system and ensures data is available
  */
-import { prefetchMaterials } from './cache/materialCacheService';
-import { withNetworkErrorHandling } from '@/utils/errorHandling';
+import { prefetchMaterials, cacheMaterials } from './cache';
 
-// Initialization state
-let initialized = false;
+let isInitialized = false;
+let initPromise: Promise<void> | null = null;
 
 /**
  * Initialize the materials system
+ * This should be called early in the application lifecycle
+ * @param options Initialization options
  */
-export async function initializeMaterialsSystem(): Promise<boolean> {
-  if (initialized) {
-    console.log('Materials system already initialized');
-    return true;
+export async function initializeMaterialsSystem(options: {
+  forceRefresh?: boolean;
+  preloadCache?: boolean;
+} = {}): Promise<void> {
+  
+  // Only initialize once
+  if (isInitialized) {
+    return;
   }
   
-  try {
-    console.log('Initializing materials system...');
-    
-    // Start prefetching materials with network error handling
-    await withNetworkErrorHandling(
-      prefetchMaterials(),
-      30000, // 30 second timeout
-      2 // Max 2 retries
-    );
-    
-    initialized = true;
-    console.log('Materials system successfully initialized');
-    return true;
-  } catch (error) {
-    console.error('Failed to initialize materials system:', error);
-    return false;
+  // Use existing initialization promise if in progress
+  if (initPromise) {
+    return initPromise;
   }
+  
+  console.log('Initializing materials system');
+  
+  // Create a promise for the initialization process
+  initPromise = (async () => {
+    try {
+      if (options.preloadCache || options.forceRefresh) {
+        // Prefetch materials to populate cache
+        await prefetchMaterials(options.forceRefresh);
+      }
+      
+      isInitialized = true;
+      console.log('Materials system initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize materials system:', error);
+      // Don't mark as initialized so it can be retried
+    } finally {
+      // Clear the promise reference
+      initPromise = null;
+    }
+  })();
+  
+  return initPromise;
 }
 
-// Auto-initialize when imported (non-blocking)
+// Auto-initialize on import (in background, non-blocking)
 setTimeout(() => {
-  initializeMaterialsSystem().catch(err => {
-    console.warn('Background materials initialization failed:', err);
-    // Non-critical failure, app can still function with fallbacks
-  });
-}, 1500);
+  initializeMaterialsSystem({ preloadCache: true })
+    .catch(err => console.warn('Background materials initialization failed:', err));
+}, 1000);

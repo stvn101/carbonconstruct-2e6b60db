@@ -1,41 +1,41 @@
 
 /**
- * Material Data Processor
- * Provides utilities for processing material data
+ * Material Data Processing Utilities
+ * Functions for processing material data in batches and calculating metrics
  */
+
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { createFallbackMaterial } from './materialAdapter';
+
+const MAX_BATCH_SIZE = 500;
 
 /**
- * Process material data in batches to avoid overwhelming the browser
+ * Process data in batches to prevent UI freezing
+ * @param data Array of items to process
+ * @param processFn Function to process each batch
+ * @param batchSize Maximum batch size
  */
 export async function processDataInBatches<T, R>(
-  items: T[],
-  processFn: (item: T) => Promise<R>,
-  batchSize: number = 10
+  data: T[],
+  processFn: (batch: T[]) => Promise<R[]>,
+  batchSize = MAX_BATCH_SIZE
 ): Promise<R[]> {
+  if (!data || !Array.isArray(data)) {
+    return [];
+  }
+  
   const results: R[] = [];
   
-  // Process in batches
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    
-    // Process each batch in parallel
-    const batchResults = await Promise.all(
-      batch.map(item => 
-        processFn(item).catch(err => {
-          console.error('Error processing item:', err);
-          return null as unknown as R;
-        })
-      )
-    );
-    
-    // Add results from this batch
-    results.push(...batchResults.filter(Boolean));
-    
-    // Allow UI to update between batches
-    if (i + batchSize < items.length) {
+  for (let i = 0; i < data.length; i += batchSize) {
+    const batch = data.slice(i, i + batchSize);
+    try {
+      // Process each batch and add to results
+      const batchResults = await processFn(batch);
+      results.push(...batchResults);
+      
+      // Allow UI to update by yielding control flow
       await new Promise(resolve => setTimeout(resolve, 0));
+    } catch (error) {
+      console.error(`Error processing batch ${i}-${i + batchSize}:`, error);
     }
   }
   
@@ -43,76 +43,96 @@ export async function processDataInBatches<T, R>(
 }
 
 /**
- * Calculate sustainability score based on carbon footprint and other factors
+ * Calculate a sustainability score based on carbon footprint
+ * @param materialData Material data with factor (carbon footprint)
+ * @returns Sustainability score (0-100)
  */
-export function calculateSustainabilityScore(material: Partial<ExtendedMaterialData>): number {
-  if (!material) return 50; // Default mid-range score
-  
-  // If the material already has a sustainability score, use it
-  if (material.sustainabilityScore !== undefined) {
-    return material.sustainabilityScore;
+export function calculateSustainabilityScore(materialData: { factor?: number }): number {
+  if (!materialData || typeof materialData.factor !== 'number') {
+    return 50; // Default middle score for unknown materials
   }
   
-  // Get the carbon footprint (fallback to factor if not available)
-  const carbonFootprint = material.carbon_footprint_kgco2e_kg || material.factor || 1.0;
+  const factor = materialData.factor;
   
-  // Basic inverse relationship - lower carbon footprint = higher score
-  // Scale from 0 to 10 kg CO2e/kg
-  const baseScore = Math.max(0, Math.min(100, 100 - (carbonFootprint * 10)));
+  // Lower carbon footprint = higher score
+  // This is a simple inverse relationship with boundaries
+  if (factor <= 0) return 100;
+  if (factor >= 10) return 10;
   
-  // Adjust for recyclability if available
-  let recyclabilityBonus = 0;
-  if (material.recyclability) {
-    recyclabilityBonus = 
-      material.recyclability === 'High' ? 10 :
-      material.recyclability === 'Medium' ? 5 : 0;
-  }
-  
-  // Final score with bonus (capped at 100)
-  return Math.min(100, baseScore + recyclabilityBonus);
+  // Scale between 10 and 100 based on factor (0-10)
+  return Math.round(100 - factor * 9);
 }
 
 /**
- * Determine recyclability based on sustainability score or other factors
+ * Determine recyclability category based on material properties
+ * @param materialData Material data with category
+ * @returns Recyclability level: 'High', 'Medium', or 'Low'
  */
-export function determineRecyclability(material: Partial<ExtendedMaterialData>): 'High' | 'Medium' | 'Low' {
-  if (!material) return 'Low';
+export function determineRecyclability(
+  materialData: { category?: string }
+): 'High' | 'Medium' | 'Low' {
+  if (!materialData || !materialData.category) {
+    return 'Medium';
+  }
   
-  // If recyclability is already set, use it
-  if (material.recyclability) return material.recyclability;
+  const category = materialData.category.toLowerCase();
   
-  // Calculate based on sustainability score
-  const score = material.sustainabilityScore || calculateSustainabilityScore(material);
+  // Materials with high recyclability
+  if (
+    category.includes('wood') ||
+    category.includes('timber') ||
+    category.includes('metal') ||
+    category.includes('steel') ||
+    category.includes('aluminum') ||
+    category.includes('glass')
+  ) {
+    return 'High';
+  }
   
-  if (score >= 75) return 'High';
-  if (score >= 40) return 'Medium';
-  return 'Low';
+  // Materials with low recyclability
+  if (
+    category.includes('composite') ||
+    category.includes('insulation') ||
+    category.includes('plastic') ||
+    category.includes('foam')
+  ) {
+    return 'Low';
+  }
+  
+  // All other materials default to medium
+  return 'Medium';
 }
 
 /**
- * Process material data to ensure all required fields are present
+ * Calculate material efficiency score based on multiple factors
+ * @param material Material data
+ * @returns Efficiency score (0-100)
  */
-export function processMaterialData(material: Partial<ExtendedMaterialData>): ExtendedMaterialData {
-  if (!material || typeof material !== 'object') {
-    return createFallbackMaterial('unknown');
-  }
+export function calculateMaterialEfficiency(material: ExtendedMaterialData): number {
+  if (!material) return 50;
   
-  // Ensure all required fields are present
-  const processed: ExtendedMaterialData = {
-    id: material.id || `material-${Date.now().toString(36)}`,
-    name: material.name || 'Unknown Material',
-    factor: material.factor || material.carbon_footprint_kgco2e_kg || 1.0,
-    carbon_footprint_kgco2e_kg: material.carbon_footprint_kgco2e_kg || material.factor,
-    carbon_footprint_kgco2e_tonne: material.carbon_footprint_kgco2e_tonne,
-    unit: material.unit || 'kg',
-    region: material.region || 'Global',
-    tags: Array.isArray(material.tags) ? material.tags : [],
-    sustainabilityScore: material.sustainabilityScore || calculateSustainabilityScore(material),
-    recyclability: material.recyclability || determineRecyclability(material),
-    category: material.category || 'Other',
-    alternativeTo: material.alternativeTo,
-    notes: material.notes
-  };
+  let score = 50;
   
-  return processed;
+  // Factor in carbon footprint (30% weight)
+  const sustainabilityScore = material.sustainabilityScore || 
+                           calculateSustainabilityScore({ factor: material.factor || 0 });
+  score += sustainabilityScore * 0.3;
+  
+  // Factor in recyclability (20% weight)
+  const recyclabilityScore = 
+    material.recyclability === 'High' ? 100 :
+    material.recyclability === 'Medium' ? 50 : 
+    material.recyclability === 'Low' ? 20 : 50;
+  score += recyclabilityScore * 0.2;
+  
+  // Local sourcing bonus (10% weight)
+  const isLocal = material.region === 'Australia' || material.region === 'Local';
+  if (isLocal) score += 10;
+  
+  // Normalize score to 0-100 range
+  return Math.max(0, Math.min(100, Math.round(score)));
 }
+
+// Export constants for external use
+export const MAX_EFFICIENCY_SCORE = 100;
+export { MAX_BATCH_SIZE };
