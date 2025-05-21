@@ -1,10 +1,17 @@
 
 /**
- * Sustainability API Service
- * 
- * @deprecated This file is maintained for backward compatibility.
- * Please import directly from the specific service files or from 'src/services/sustainability/index.ts'
+ * Re-export from performance module to maintain backward compatibility
  */
 
-// Re-export all services from the index file
-export * from './index';
+// Re-export types and functions from performance module
+export type { 
+  MaterialPerformanceData,
+  SustainabilityTrendData,
+  MaterialRecommendation
+} from './performance';
+
+export { 
+  trackMaterialPerformance,
+  getMaterialTrends,
+  getMaterialRecommendations
+} from './performance';
