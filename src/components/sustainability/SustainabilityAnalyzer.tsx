@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import ComplianceStatus from "./ComplianceStatus";
 import SustainabilityImpactChart from "./SustainabilityImpactChart";
 import MaterialAlternatives from "./MaterialAlternatives";
 import MaterialPerformanceTab from "./MaterialPerformanceTab";
-import { MaterialAnalysisResult } from "supabase/functions/get-sustainability-suggestions/Material";
+import { MaterialAnalysisResult, generateMaterialAnalysis } from "@/lib/materialCategories";
 import { toast } from "sonner";
 
 interface SustainabilityAnalyzerProps {
@@ -79,43 +78,28 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     const fetchMaterialsData = async () => {
       if (!materialAnalysis && calculationInput.materials && calculationInput.materials.length > 0) {
         try {
-          // For now, let's create some mock data
-          // In a real implementation, this would call the backend
-          const highImpactMaterials = calculationInput.materials
-            .filter(m => m.quantity && Number(m.quantity) > 50)
-            .map(m => ({
-              // Fixed: Generate a random ID instead of using material.id which doesn't exist
+          // Generate material analysis using our utility function
+          const analysis = generateMaterialAnalysis(
+            calculationInput.materials.map(m => ({
               id: `material-${Math.random().toString(36).substring(7)}`,
               name: m.type,
-              // Fixed: Access the carbon footprint properly
-              carbonFootprint: m.type in calculationResult.breakdownByMaterial 
-                ? calculationResult.breakdownByMaterial[m.type as keyof typeof calculationResult.breakdownByMaterial] || 1 
-                : 1,
+              carbon_footprint_kgco2e_kg: 
+                m.type in calculationResult.breakdownByMaterial 
+                  ? calculationResult.breakdownByMaterial[m.type as keyof typeof calculationResult.breakdownByMaterial] || 1 
+                  : 1,
               quantity: Number(m.quantity) || 0
-            }));
-            
-          // Mock material analysis result
-          const mockAnalysis: MaterialAnalysisResult = {
-            highImpactMaterials,
-            sustainabilityScore: 65,
-            sustainabilityPercentage: 35, // Fixed property name
-            recommendations: [
-              "Consider using recycled steel to reduce carbon footprint",
-              "Replace conventional concrete with geopolymer alternatives",
-              "Source locally produced materials to reduce transport emissions"
-            ],
-            alternatives: {}
-          };
+            }))
+          );
           
           // Get alternatives for each high impact material
-          for (const material of highImpactMaterials) {
+          for (const material of analysis.highImpactMaterials) {
             const alternatives = await fetchMaterialAlternatives(material.name, material.quantity);
             if (alternatives && alternatives.length > 0) {
-              mockAnalysis.alternatives[material.id] = alternatives;
+              analysis.alternatives[material.id] = alternatives;
             }
           }
           
-          setMaterialAnalysis(mockAnalysis);
+          setMaterialAnalysis(analysis);
         } catch (error) {
           console.error("Failed to fetch material analysis:", error);
         }
@@ -292,7 +276,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
                     ncc: nccCompliance,
                     nabers: nabersCompliance
                   }}
-                  suggestions={suggestions}
+                  suggestions={suggestions || []}
                 />
               </TabsContent>
             </Tabs>
