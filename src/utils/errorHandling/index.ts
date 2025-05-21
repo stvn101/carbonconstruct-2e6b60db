@@ -3,7 +3,6 @@
 import { withTimeout as localWithTimeout } from './timeoutHelper';
 
 // Export all error handling utilities from this central file
-export * from './networkListeners';
 export * from './toastHelpers';
 export * from './networkErrorHandler';
 
@@ -17,6 +16,12 @@ export { timeoutPromise, withTimeout, retryWithBackoff } from './timeoutHelper';
 // Export everything from networkChecker (including its isNetworkError)
 export * from './networkChecker';
 
+// Export functions from networkListeners without addNetworkListeners (which would cause ambiguity)
+export { triggerConnectionRecovery } from './networkListeners';
+
+// Export addNetworkListeners explicitly from networkChecker to avoid ambiguity
+export { addNetworkListeners } from './networkChecker';
+
 // Utility to combine errors with timeout handling
 export const withNetworkErrorHandling = async <T>(
   promise: Promise<T>, 
@@ -29,7 +34,6 @@ export const withNetworkErrorHandling = async <T>(
     return await localWithTimeout(promise, timeoutMs);
   } catch (error) {
     // Check if it's a network error
-    const { isNetworkError } = await import('./networkChecker');
     if (isNetworkError(error)) {
       // Retry with backoff for network errors
       const { retryWithBackoff } = await import('./timeoutHelper');

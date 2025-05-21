@@ -1,6 +1,6 @@
 
 import { showErrorToast, showSuccessToast } from './toastHelpers';
-import { checkNetworkStatus } from './networkChecker';
+import { checkNetworkStatus, isNetworkError } from './networkChecker';
 import { pingSupabaseConnection } from '@/services/supabase/connection';
 
 /**
