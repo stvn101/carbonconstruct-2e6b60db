@@ -13,6 +13,7 @@ export interface ExtendedMaterialData {
   alternativeTo?: string;
   notes?: string;
   category?: string;
+  description?: string; // Adding the missing description property
 }
 
 export type MaterialsByRegion = Record<string, number>;

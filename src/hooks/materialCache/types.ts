@@ -9,6 +9,8 @@ export interface UseMaterialCacheResult {
   cacheStats: {
     lastUpdated: Date | null;
     itemCount: number | null;
+    status: 'fresh' | 'stale' | 'unknown';
+    ageInMinutes: number | null;
   };
 }
 
@@ -24,4 +26,6 @@ export interface MaterialOption {
 export interface CacheStats {
   lastUpdated: Date | null;
   itemCount: number | null;
+  status: 'fresh' | 'stale' | 'unknown';
+  ageInMinutes: number | null;
 }

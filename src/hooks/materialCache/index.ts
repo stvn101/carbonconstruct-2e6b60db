@@ -4,3 +4,4 @@
  */
 export { useMaterialCache } from './useMaterialCache';
 export { useCacheStats, type CacheStats } from './useCacheStats';
+export type { UseMaterialCacheResult } from './types';
