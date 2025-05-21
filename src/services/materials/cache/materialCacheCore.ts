@@ -1,82 +1,89 @@
 
 /**
  * Material Cache Core Service
- * Provides core functionality for material caching
+ * Low-level implementation of material caching using IndexedDB
  */
+import { openDB, IDBPDatabase } from 'idb';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { CACHE_KEYS, DEFAULT_CACHE_TTL, CACHE_STALE_THRESHOLD } from './cacheConstants';
-import { openDB } from 'idb';
+import { CACHE_KEYS } from './cacheConstants';
 
-// Database configuration
-const DB_NAME = 'materialCacheDB';
+// Database constants
+const DB_NAME = 'materials-cache-db';
 const DB_VERSION = 1;
 const MATERIALS_STORE = 'materials';
 const METADATA_STORE = 'metadata';
 
+// Cache management
+let dbPromise: Promise<IDBPDatabase> | null = null;
+let lastCachedMaterials: ExtendedMaterialData[] | null = null;
+
 /**
- * Opens the IndexedDB database for material cache
+ * Lazily initialize and connect to the IndexedDB database
  */
-async function openDatabase() {
-  return openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      // Create stores if they don't exist
-      if (!db.objectStoreNames.contains(MATERIALS_STORE)) {
-        db.createObjectStore(MATERIALS_STORE, { keyPath: 'id' });
+async function connectToDb() {
+  if (!dbPromise) {
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        // Create materials object store
+        if (!db.objectStoreNames.contains(MATERIALS_STORE)) {
+          const materialsStore = db.createObjectStore(MATERIALS_STORE, { keyPath: 'id' });
+          materialsStore.createIndex('name', 'name');
+          materialsStore.createIndex('category', 'category');
+          materialsStore.createIndex('region', 'region');
+        }
+        
+        // Create metadata object store
+        if (!db.objectStoreNames.contains(METADATA_STORE)) {
+          db.createObjectStore(METADATA_STORE);
+        }
+      },
+      blocking() {
+        // Handle blocking event (another tab is trying to upgrade)
+        console.warn('Another tab is updating the materials database, this tab will reload');
+        // Reload the page after a short delay
+        setTimeout(() => window.location.reload(), 1000);
       }
-      
-      if (!db.objectStoreNames.contains(METADATA_STORE)) {
-        db.createObjectStore(METADATA_STORE, { keyPath: 'key' });
-      }
-    }
-  });
+    });
+  }
+  
+  return dbPromise;
 }
 
 /**
  * Stores materials in the cache
- * @param materials Array of materials to cache
  */
-export async function storeMaterialsInCache(materials: ExtendedMaterialData[]): Promise<void> {
+async function storeMaterialsInCache(materials: ExtendedMaterialData[]) {
   if (!materials || materials.length === 0) {
-    console.warn('Attempting to cache empty materials array');
+    console.warn('No materials provided for caching');
     return;
   }
   
   try {
-    const db = await openDatabase();
+    const db = await connectToDb();
     const tx = db.transaction([MATERIALS_STORE, METADATA_STORE], 'readwrite');
+    const materialsStore = tx.objectStore(MATERIALS_STORE);
+    const metadataStore = tx.objectStore(METADATA_STORE);
     
     // Clear existing materials
-    await tx.objectStore(MATERIALS_STORE).clear();
+    await materialsStore.clear();
     
-    // Store each material
+    // Store all materials
     for (const material of materials) {
-      // Ensure material has an ID
-      const materialWithId = {
-        ...material,
-        id: material.id || `unknown-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-      };
-      
-      await tx.objectStore(MATERIALS_STORE).put(materialWithId);
+      await materialsStore.put(material);
     }
     
     // Update metadata
-    await tx.objectStore(METADATA_STORE).put({
-      key: CACHE_KEYS.TIMESTAMP,
-      value: new Date().toISOString()
-    });
+    await metadataStore.put(new Date(), CACHE_KEYS.TIMESTAMP);
+    await metadataStore.put(materials.length, CACHE_KEYS.COUNT);
+    await metadataStore.put(DB_VERSION, CACHE_KEYS.VERSION);
     
-    await tx.objectStore(METADATA_STORE).put({
-      key: CACHE_KEYS.COUNT,
-      value: materials.length
-    });
+    // Cache in memory
+    lastCachedMaterials = [...materials];
     
-    await tx.objectStore(METADATA_STORE).put({
-      key: CACHE_KEYS.VERSION,
-      value: '1.0.0'
-    });
-    
+    // Commit transaction
     await tx.done;
-    console.log(`Successfully cached ${materials.length} materials`);
+    
+    return true;
   } catch (error) {
     console.error('Error storing materials in cache:', error);
     throw error;
@@ -84,59 +91,50 @@ export async function storeMaterialsInCache(materials: ExtendedMaterialData[]): 
 }
 
 /**
- * Retrieves materials from the cache
+ * Gets materials from the cache
  */
-export async function getMaterialsFromCache(): Promise<ExtendedMaterialData[] | null> {
+async function getMaterialsFromCache(): Promise<ExtendedMaterialData[]> {
+  // If we have in-memory cache, use it
+  if (lastCachedMaterials) {
+    return lastCachedMaterials;
+  }
+  
   try {
-    const db = await openDatabase();
+    const db = await connectToDb();
+    const tx = db.transaction(MATERIALS_STORE, 'readonly');
+    const store = tx.objectStore(MATERIALS_STORE);
     
-    // Get cache timestamp
-    const metadataStore = db.transaction(METADATA_STORE).objectStore(METADATA_STORE);
-    const timestamp = await metadataStore.get(CACHE_KEYS.TIMESTAMP);
+    const materials = await store.getAll();
     
-    // Check if cache is valid
-    if (!timestamp || !timestamp.value) {
-      console.log('No timestamp found in cache');
-      return null;
-    }
+    // Cache in memory for faster access next time
+    lastCachedMaterials = [...materials];
     
-    const lastUpdated = new Date(timestamp.value);
-    const now = new Date();
-    
-    // Check if cache is expired
-    if (now.getTime() - lastUpdated.getTime() > DEFAULT_CACHE_TTL) {
-      console.log('Cache is expired');
-      return null;
-    }
-    
-    // Get materials from cache
-    const materials = await db.getAll(MATERIALS_STORE);
-    if (!materials || materials.length === 0) {
-      console.log('No materials found in cache');
-      return null;
-    }
-    
-    console.log(`Retrieved ${materials.length} materials from cache`);
     return materials;
   } catch (error) {
     console.error('Error getting materials from cache:', error);
-    return null;
+    return [];
   }
 }
 
 /**
  * Clears the materials cache
  */
-export async function clearMaterialsCache(): Promise<void> {
+async function clearMaterialsCache() {
   try {
-    const db = await openDatabase();
+    // Clear in-memory cache
+    lastCachedMaterials = null;
+    
+    const db = await connectToDb();
     const tx = db.transaction([MATERIALS_STORE, METADATA_STORE], 'readwrite');
     
+    // Clear materials and metadata
     await tx.objectStore(MATERIALS_STORE).clear();
     await tx.objectStore(METADATA_STORE).clear();
     
+    // Commit transaction
     await tx.done;
-    console.log('Materials cache cleared successfully');
+    
+    return true;
   } catch (error) {
     console.error('Error clearing materials cache:', error);
     throw error;
@@ -144,56 +142,86 @@ export async function clearMaterialsCache(): Promise<void> {
 }
 
 /**
- * Gets metadata about the cache
+ * Gets cache metadata
  */
-export async function getCacheMetadata() {
+async function getCacheMetadata() {
   try {
-    const db = await openDatabase();
-    const metadataStore = db.transaction(METADATA_STORE).objectStore(METADATA_STORE);
+    const db = await connectToDb();
+    const tx = db.transaction(METADATA_STORE, 'readonly');
+    const store = tx.objectStore(METADATA_STORE);
     
     // Get metadata values
-    const timestampRecord = await metadataStore.get(CACHE_KEYS.TIMESTAMP);
-    const countRecord = await metadataStore.get(CACHE_KEYS.COUNT);
-    const versionRecord = await metadataStore.get(CACHE_KEYS.VERSION);
-    
-    // Parse timestamp
-    let lastUpdated = null;
-    let status: 'fresh' | 'stale' | 'unknown' = 'unknown';
-    let ageInMinutes = null;
-    
-    if (timestampRecord && timestampRecord.value) {
-      lastUpdated = new Date(timestampRecord.value);
-      const now = new Date();
-      const ageInMs = now.getTime() - lastUpdated.getTime();
-      ageInMinutes = Math.floor(ageInMs / (1000 * 60));
-      
-      // Determine freshness
-      status = ageInMs < CACHE_STALE_THRESHOLD ? 'fresh' : 'stale';
-    }
+    const lastUpdated = await store.get(CACHE_KEYS.TIMESTAMP) as Date | undefined;
+    const itemCount = await store.get(CACHE_KEYS.COUNT) as number | undefined;
+    const version = await store.get(CACHE_KEYS.VERSION) as number | undefined;
     
     return {
-      lastUpdated,
-      itemCount: countRecord ? countRecord.value : null,
-      version: versionRecord ? versionRecord.value : null,
-      status,
-      ageInMinutes
+      lastUpdated: lastUpdated || null,
+      itemCount: itemCount || null,
+      version: version || null
     };
   } catch (error) {
     console.error('Error getting cache metadata:', error);
     return {
       lastUpdated: null,
       itemCount: null,
-      version: null,
-      status: 'unknown',
-      ageInMinutes: null
+      version: null
     };
   }
 }
 
-// Default export
-export default {
+/**
+ * Gets a material by ID from the cache
+ */
+async function getMaterialById(id: string): Promise<ExtendedMaterialData | null> {
+  try {
+    // Try in-memory cache first
+    if (lastCachedMaterials) {
+      const material = lastCachedMaterials.find(m => m.id === id);
+      if (material) {
+        return material;
+      }
+    }
+    
+    const db = await connectToDb();
+    return db.get(MATERIALS_STORE, id);
+  } catch (error) {
+    console.error(`Error getting material ${id} from cache:`, error);
+    return null;
+  }
+}
+
+/**
+ * Gets materials by category from the cache
+ */
+async function getMaterialsByCategory(category: string): Promise<ExtendedMaterialData[]> {
+  try {
+    // Try in-memory cache first
+    if (lastCachedMaterials) {
+      return lastCachedMaterials.filter(m => 
+        m.category && m.category.toLowerCase() === category.toLowerCase()
+      );
+    }
+    
+    const db = await connectToDb();
+    const tx = db.transaction(MATERIALS_STORE, 'readonly');
+    const index = tx.objectStore(MATERIALS_STORE).index('category');
+    
+    return index.getAll(category);
+  } catch (error) {
+    console.error(`Error getting materials for category ${category} from cache:`, error);
+    return [];
+  }
+}
+
+// Export the service
+const materialCacheService = {
   storeMaterialsInCache,
   getMaterialsFromCache,
   clearMaterialsCache,
-  getCacheMetadata
+  getCacheMetadata,
+  getMaterialById,
+  getMaterialsByCategory
 };
+
+export default materialCacheService;

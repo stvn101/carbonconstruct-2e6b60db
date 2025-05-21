@@ -1,331 +1,198 @@
 
+/**
+ * Sustainability API Service
+ * Handles API interactions for sustainability services
+ */
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { MaterialInput } from "@/lib/carbonExports";
-import { MaterialCategory, SustainableMaterial } from "@/lib/materialCategories";
+
+// Re-export types from the new performance service
+export type { 
+  MaterialPerformanceData,
+  SustainabilityTrendData,
+  MaterialRecommendation
+} from './materialPerformanceService';
+
+// Re-export implementation from the new performance service
+export { 
+  trackMaterialPerformance,
+  getMaterialTrends,
+  getMaterialRecommendations
+} from './materialPerformanceService';
 
 /**
- * Service for interacting with sustainability APIs and tracking material performance
+ * Gets sustainability compliance status for a project
  */
-
-export interface MaterialPerformanceData {
-  materialId: string;
-  materialName: string;
-  carbonFootprint: number;
-  sustainabilityScore: number;
-  timestamp: string;
-  projectId?: string;
-  alternatives?: SustainableMaterial[];
-}
-
-export interface SustainabilityTrendData {
-  materialId: string;
-  materialName: string;
-  dataPoints: {
-    timestamp: string;
-    carbonFootprint: number;
-    sustainabilityScore: number;
-  }[];
-  improvement: number; // Percentage improvement over time
-}
-
-export interface MaterialRecommendation {
-  originalMaterial: string;
-  recommendedMaterial: string;
-  potentialReduction: number; // Percentage reduction in carbon footprint
-  costImpact: 'lower' | 'similar' | 'higher';
-  availability: 'low' | 'medium' | 'high';
-  details: string;
-}
-
-/**
- * Fetch sustainable alternatives for a given material
- */
-export async function fetchSustainableAlternatives(materialType: string, quantity: number = 1): Promise<SustainableMaterial[]> {
+export async function checkSustainabilityCompliance(projectId: string): Promise<{
+  ncc: { compliant: boolean; details?: any };
+  nabers: { rating: number; compliant: boolean; details?: any };
+}> {
   try {
-    console.log(`Fetching sustainable alternatives for ${materialType}...`);
-    
-    const { data, error } = await supabase
-      .from('materials_view')
-      .select('*')
-      .eq('alternativeto', materialType);
-    
-    if (error) {
-      console.error("Error fetching alternatives:", error);
-      return [];
-    }
-    
-    // Map to the SustainableMaterial format with proper MaterialCategory typing
-    return (data || []).map(item => {
-      // Map string category to MaterialCategory enum
-      let category: MaterialCategory;
-      switch(item.category?.toLowerCase()) {
-        case 'concrete': category = MaterialCategory.CONCRETE; break;
-        case 'steel': category = MaterialCategory.STEEL; break;
-        case 'timber':
-        case 'wood': category = MaterialCategory.TIMBER; break;
-        case 'brick': category = MaterialCategory.BRICK; break;
-        case 'aluminum': category = MaterialCategory.ALUMINUM; break;
-        case 'glass': category = MaterialCategory.GLASS; break;
-        case 'insulation': category = MaterialCategory.INSULATION; break;
-        default: category = MaterialCategory.OTHER;
-      }
+    // Get the project details
+    const { data: project, error } = await supabase
+      .from('projects')
+      .select('materials, energy, transport')
+      .eq('id', projectId)
+      .single();
       
-      return {
-        id: item.id || `alt-${Math.random().toString(36).substring(7)}`,
-        name: item.name || 'Alternative Material',
-        carbonFootprint: item.carbon_footprint_kgco2e_kg || 0,
-        category,
-        alternativeTo: materialType,
-        sustainabilityScore: item.sustainabilityscore || 70,
-        carbonReduction: calculateReduction(item.carbon_footprint_kgco2e_kg, getBaseMaterialFootprint(materialType)),
-        costDifference: getCostDifference(materialType, item.name),
-        availability: item.tags?.includes('high-availability') ? 'high' : 
-                   item.tags?.includes('low-availability') ? 'low' : 'medium',
-        recyclable: item.recyclability === 'High',
-        locallySourced: item.tags?.includes('local')
-      };
-    });
-  } catch (err) {
-    console.error(`Error fetching alternatives for ${materialType}:`, err);
-    return [];
-  }
-}
-
-/**
- * Track material performance data
- * Instead of storing in Supabase, we'll use an in-memory approach until the table is created
- */
-export async function trackMaterialPerformance(
-  materials: MaterialInput[],
-  projectId?: string
-): Promise<MaterialPerformanceData[]> {
-  try {
-    // Convert MaterialInput array to MaterialPerformanceData
-    const performanceData = materials.map(material => ({
-      materialId: `material-${Math.random().toString(36).substring(7)}`,
-      materialName: material.type,
-      carbonFootprint: calculateCarbonFootprint(material),
-      sustainabilityScore: calculateSustainabilityScore(material),
-      timestamp: new Date().toISOString(),
-      projectId
-    }));
+    if (error) throw error;
     
-    /* 
-    // We'll comment this out until we create the material_performance table in Supabase
-    if (projectId) {
-      const { error } = await supabase
-        .from('material_performance')
-        .insert(performanceData);
-        
-      if (error) {
-        console.error("Failed to store material performance data:", error);
-      }
+    if (!project) {
+      throw new Error('Project not found');
     }
-    */
     
-    return performanceData;
-  } catch (err) {
-    console.error("Error tracking material performance:", err);
-    toast.error("Failed to track material performance");
-    return [];
-  }
-}
-
-/**
- * Get performance trends for a specific material over time
- * Since we don't have the material_performance table yet, this uses simulated data
- */
-export async function getMaterialTrends(materialType: string): Promise<SustainabilityTrendData | null> {
-  try {
-    // Simulate historical data until we have the table
-    const simulatedData = generateSimulatedPerformanceData(materialType);
+    // Call the sustainability service functions
+    const { fetchNccComplianceCheck, fetchNabersComplianceCheck } = await import(
+      '@/hooks/sustainability/sustainabilityService'
+    );
     
-    // Calculate improvement over time
-    const firstDataPoint = simulatedData[0].carbonFootprint;
-    const lastDataPoint = simulatedData[simulatedData.length - 1].carbonFootprint;
-    const improvement = firstDataPoint > 0 ? 
-      ((firstDataPoint - lastDataPoint) / firstDataPoint * 100) : 0;
+    // Run the compliance checks
+    const nccCompliance = await fetchNccComplianceCheck(project.materials, { includeDetails: true });
+    const nabersCompliance = await fetchNabersComplianceCheck(project.energy, { targetRating: 5 });
     
     return {
-      materialId: `simulated-${Math.random().toString(36).substring(7)}`,
-      materialName: materialType,
-      dataPoints: simulatedData.map(d => ({
-        timestamp: d.timestamp,
-        carbonFootprint: d.carbonFootprint,
-        sustainabilityScore: d.sustainabilityScore
-      })),
-      improvement
+      ncc: nccCompliance,
+      nabers: nabersCompliance
     };
-  } catch (err) {
-    console.error("Error getting material trends:", err);
-    return null;
+  } catch (error) {
+    console.error('Error checking sustainability compliance:', error);
+    return {
+      ncc: { compliant: false },
+      nabers: { rating: 0, compliant: false }
+    };
   }
 }
 
 /**
- * Generate simulated performance data for testing
+ * Gets sustainability trend data for a project over time
  */
-function generateSimulatedPerformanceData(materialType: string): {
-  timestamp: string;
-  carbonFootprint: number;
-  sustainabilityScore: number;
-}[] {
-  const today = new Date();
-  const data = [];
-  
-  // Initial values based on material type
-  let baseCarbonFootprint = getBaseMaterialFootprint(materialType);
-  let baseSustainabilityScore = getBaseMaterialSustainabilityScore(materialType);
-  
-  // Generate data points for the last 6 months
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today);
-    date.setMonth(today.getMonth() - i);
-    
-    // Gradually improve metrics over time (decrease carbon, increase sustainability)
-    const improvementFactor = (6 - i) / 20; // 0 to 0.3 improvement factor
-    const carbonFootprint = Math.max(0, baseCarbonFootprint * (1 - improvementFactor));
-    const sustainabilityScore = Math.min(100, baseSustainabilityScore * (1 + improvementFactor));
-    
-    data.push({
-      timestamp: date.toISOString(),
-      carbonFootprint,
-      sustainabilityScore
-    });
-  }
-  
-  return data;
-}
-
-/**
- * Get material recommendations based on performance data
- */
-export async function getMaterialRecommendations(materials: MaterialInput[]): Promise<MaterialRecommendation[]> {
+export async function getProjectSustainabilityTrend(projectId: string): Promise<{
+  trend: Array<{ date: string; score: number; carbonFootprint: number }>;
+  improvement: number;
+}> {
   try {
-    const recommendations: MaterialRecommendation[] = [];
+    // This would typically get real data from the database
+    // For now, generate sample data
+    const today = new Date();
+    const trend = [];
     
-    // Process each material and find alternatives
-    for (const material of materials) {
-      const alternatives = await fetchSustainableAlternatives(material.type, Number(material.quantity));
+    // Generate data for past 30 days
+    for (let i = 30; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
       
-      // Find the best alternative based on carbon reduction
-      const bestAlternative = alternatives.reduce((best, current) => {
-        return (current.carbonReduction > (best?.carbonReduction || 0)) ? current : best;
-      }, null as SustainableMaterial | null);
+      // Generate some realistic looking values with a general improvement trend
+      const baseScore = 60 + (i * 0.5);
+      const randomVariation = (Math.random() * 10) - 5; // -5 to +5
       
-      if (bestAlternative) {
-        recommendations.push({
-          originalMaterial: material.type,
-          recommendedMaterial: bestAlternative.name,
-          potentialReduction: bestAlternative.carbonReduction,
-          costImpact: bestAlternative.costDifference && bestAlternative.costDifference > 5 ? 
-                     'higher' : bestAlternative.costDifference && bestAlternative.costDifference < -5 ? 
-                     'lower' : 'similar',
-          availability: bestAlternative.availability || 'medium',
-          details: `Replacing ${material.type} with ${bestAlternative.name} can reduce carbon footprint by approximately ${bestAlternative.carbonReduction}% while maintaining similar performance characteristics.`
-        });
-      }
+      const baseCarbonFootprint = 5000 - (i * 70);
+      const carbonRandomVariation = (Math.random() * 500) - 250; // -250 to +250
+      
+      trend.push({
+        date: date.toISOString().split('T')[0],
+        score: Math.min(100, Math.max(0, baseScore + randomVariation)),
+        carbonFootprint: Math.max(0, baseCarbonFootprint + carbonRandomVariation)
+      });
     }
     
-    return recommendations;
-  } catch (err) {
-    console.error("Error getting material recommendations:", err);
+    // Calculate improvement percentage
+    const firstPoint = trend[0];
+    const lastPoint = trend[trend.length - 1];
+    const improvement = firstPoint.carbonFootprint > 0 ? 
+      ((firstPoint.carbonFootprint - lastPoint.carbonFootprint) / firstPoint.carbonFootprint) * 100 : 0;
+    
+    return {
+      trend,
+      improvement
+    };
+  } catch (error) {
+    console.error('Error getting project sustainability trend:', error);
+    return {
+      trend: [],
+      improvement: 0
+    };
+  }
+}
+
+/**
+ * Gets sustainability issues for a project
+ */
+export async function getProjectSustainabilityIssues(projectId: string): Promise<Array<{
+  id: string;
+  severity: 'high' | 'medium' | 'low';
+  description: string;
+  component: string;
+  recommendation: string;
+}>> {
+  try {
+    // This would typically get real data from the database
+    // For now, generate sample issues
+    return [
+      {
+        id: '1',
+        severity: 'high',
+        description: 'High-carbon concrete mix used in foundation',
+        component: 'Materials',
+        recommendation: 'Switch to low-carbon concrete alternative with fly ash or GGBS'
+      },
+      {
+        id: '2',
+        severity: 'medium',
+        description: 'Long-distance transportation of steel components',
+        component: 'Transportation',
+        recommendation: 'Source steel from local suppliers to reduce transport emissions'
+      },
+      {
+        id: '3',
+        severity: 'low',
+        description: 'Inadequate on-site renewable energy',
+        component: 'Energy',
+        recommendation: 'Install temporary solar panels for construction power needs'
+      }
+    ];
+  } catch (error) {
+    console.error('Error getting project sustainability issues:', error);
     return [];
   }
 }
 
-// Helper functions
-
-function calculateCarbonFootprint(material: MaterialInput): number {
-  // Basic calculation based on quantity and material type
-  const quantity = Number(material.quantity) || 1;
-  const baseFootprint = getBaseMaterialFootprint(material.type);
-  return baseFootprint * quantity;
-}
-
-function calculateSustainabilityScore(material: MaterialInput): number {
-  // Base sustainability score for the material type
-  const baseScore = getBaseMaterialSustainabilityScore(material.type);
-  
-  // Additional factors - safely access optional properties
-  const recycledContentFactor = material.recycledContent ? material.recycledContent / 100 * 20 : 0;
-  const locallySourcedFactor = material.locallySourced ? 10 : 0;
-  
-  // Calculate final score (capped at 100)
-  return Math.min(100, baseScore + recycledContentFactor + locallySourcedFactor);
-}
-
-function getBaseMaterialFootprint(materialType: string): number {
-  // Default footprints for common materials
-  const footprints: Record<string, number> = {
-    concrete: 0.107,
-    steel: 1.46,
-    timber: 0.42,
-    brick: 0.24,
-    glass: 0.85,
-    aluminum: 8.24,
-    insulation: 1.86,
-    wood: 0.42 // Alias for timber
-  };
-  
-  return footprints[materialType.toLowerCase()] || 1.0;
-}
-
-function getBaseMaterialSustainabilityScore(materialType: string): number {
-  // Default sustainability scores (higher is better)
-  const scores: Record<string, number> = {
-    timber: 80,
-    wood: 80, // Alias for timber
-    recycledSteel: 75,
-    lowCarbonConcrete: 70,
-    brick: 65,
-    insulation: 60,
-    glass: 55,
-    concrete: 50,
-    steel: 45,
-    aluminum: 40
-  };
-  
-  return scores[materialType] || 50;
-}
-
-function calculateReduction(alternativeFootprint: number, originalFootprint: number): number {
-  if (!originalFootprint || originalFootprint <= 0) return 0;
-  if (!alternativeFootprint) return 0;
-  
-  const reduction = ((originalFootprint - alternativeFootprint) / originalFootprint) * 100;
-  return Math.round(Math.max(0, reduction));
-}
-
-function getCostDifference(originalMaterial: string, alternativeMaterial: string): number {
-  // Simulated cost differences between materials
-  const costDifferences: Record<string, Record<string, number>> = {
-    concrete: {
-      'Low-Carbon Concrete': 5,
-      'Geopolymer Concrete': 8,
-      'Concrete with Recycled Aggregate': -2
-    },
-    steel: {
-      'Recycled Steel': -3,
-      'High-Strength Steel': 7
-    },
-    timber: {
-      'FSC Certified Timber': 4,
-      'Cross-Laminated Timber': 6,
-      'Reclaimed Timber': -2
-    },
-    wood: {
-      'FSC Certified Timber': 4,
-      'Cross-Laminated Timber': 6,
-      'Reclaimed Timber': -2
-    }
-  };
-  
-  if (costDifferences[originalMaterial] && costDifferences[originalMaterial][alternativeMaterial]) {
-    return costDifferences[originalMaterial][alternativeMaterial];
+/**
+ * Creates a sustainability report for a project
+ */
+export async function createSustainabilityReport(projectId: string): Promise<{
+  reportUrl: string;
+  reportId: string;
+  generatedAt: string;
+}> {
+  try {
+    // This would typically generate a real report and store it
+    // For now, return a mock response
+    return {
+      reportUrl: '#',
+      reportId: `report-${Date.now()}`,
+      generatedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error creating sustainability report:', error);
+    throw error;
   }
-  
-  // Default to a slight premium for sustainable alternatives
-  return 3;
+}
+
+/**
+ * Updates a project's sustainability goals
+ */
+export async function updateProjectSustainabilityGoals(
+  projectId: string, 
+  goals: {
+    targetRating: number;
+    carbonReductionTarget: number;
+    sustainabilityFeatures: string[];
+  }
+): Promise<void> {
+  try {
+    // This would typically update real data in the database
+    console.log('Updating sustainability goals for project', projectId, goals);
+  } catch (error) {
+    console.error('Error updating project sustainability goals:', error);
+    throw error;
+  }
 }

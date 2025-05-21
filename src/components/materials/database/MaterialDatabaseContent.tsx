@@ -1,20 +1,15 @@
 
-/**
- * Content component for the material database
- * Displays material data with filtering, sorting, and cache status
- */
-import React from 'react';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { CacheStats } from '@/hooks/materialCache/types';
-import MaterialCacheStatus from './MaterialCacheStatus';
-import MaterialsTable from './MaterialsTable';
-import MaterialFilters from './MaterialFilters';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Search, RefreshCw, AlertTriangle, Database } from "lucide-react";
+import MaterialFilters from "./MaterialFilters";
+import MaterialGrid from "./MaterialGrid";
+import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
+import { formatDate } from "@/lib/formatters";
+import AdvancedMaterialSearch, { SearchParams } from "./AdvancedMaterialSearch";
 
 interface MaterialDatabaseContentProps {
   searchTerm: string;
@@ -23,16 +18,16 @@ interface MaterialDatabaseContentProps {
   setSelectedAlternative: (alternative: string) => void;
   selectedTag: string;
   setSelectedTag: (tag: string) => void;
-  materials: ExtendedMaterialData[];
+  materials: ExtendedMaterialData[] | null;
   filteredMaterials: ExtendedMaterialData[];
   loading: boolean;
   error: Error | null;
   refreshCache: () => Promise<void>;
-  cacheStats: CacheStats;
+  cacheStats: { lastUpdated: Date | null; itemCount: number | null };
   categoriesList: string[];
   materialsByRegion: Record<string, number>;
   allTags: string[];
-  baseOptions: Array<{id: string, name: string}>;
+  baseOptions: Array<{ id: string; name: string }>;
   materialCount: number;
   resetFilters: () => void;
 }
@@ -57,116 +52,170 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
   materialCount,
   resetFilters
 }) => {
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
-  
-  // Handle manual refresh with loading state
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await refreshCache();
-    } catch (err) {
-      console.error("Refresh failed:", err);
-    } finally {
-      setIsRefreshing(false);
-    }
+  const [useAdvancedSearch, setUseAdvancedSearch] = useState(false);
+  const [advancedFilteredMaterials, setAdvancedFilteredMaterials] = useState<ExtendedMaterialData[]>([]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
-  
+
+  const handleAdvancedSearch = (searchParams: SearchParams) => {
+    if (!materials) return;
+    
+    // Apply advanced search filters
+    const filteredMaterials = materials.filter(material => {
+      // Apply text search
+      const matchesTerm = !searchParams.term || 
+        material.name?.toLowerCase().includes(searchParams.term.toLowerCase()) ||
+        material.description?.toLowerCase().includes(searchParams.term.toLowerCase()) ||
+        material.category?.toLowerCase().includes(searchParams.term.toLowerCase());
+      
+      // Apply category filter
+      const matchesCategory = searchParams.categories.length === 0 || 
+        (material.category && searchParams.categories.includes(material.category));
+      
+      // Apply region filter
+      const matchesRegion = searchParams.regions.length === 0 || 
+        (material.region && searchParams.regions.includes(material.region));
+      
+      // Apply tag filter
+      const matchesTags = searchParams.tags.length === 0 || 
+        (material.tags && material.tags.some(tag => searchParams.tags.includes(tag)));
+      
+      // Apply carbon range filter
+      const carbonFootprint = material.carbon_footprint_kgco2e_kg || 0;
+      const matchesCarbon = carbonFootprint >= searchParams.carbonRange[0] && 
+                           carbonFootprint <= searchParams.carbonRange[1];
+      
+      // Apply sustainability score filter
+      const sustainabilityScore = material.sustainabilityScore || 0;
+      const matchesSustainability = sustainabilityScore >= searchParams.sustainabilityScore[0] && 
+                                   sustainabilityScore <= searchParams.sustainabilityScore[1];
+      
+      // Apply recyclability filter
+      const matchesRecyclability = searchParams.recyclability.length === 0 || 
+        (material.recyclability && searchParams.recyclability.includes(material.recyclability));
+      
+      // Apply alternatives filter
+      const matchesAlternatives = !searchParams.showOnlyAlternatives || 
+        (material.alternativeTo && material.alternativeTo.length > 0);
+      
+      return matchesTerm && matchesCategory && matchesRegion && matchesTags && 
+             matchesCarbon && matchesSustainability && matchesRecyclability &&
+             matchesAlternatives;
+    });
+    
+    setAdvancedFilteredMaterials(filteredMaterials);
+  };
+
+  const handleResetFilters = () => {
+    resetFilters();
+    setAdvancedFilteredMaterials([]);
+  };
+
+  const displayedMaterials = useAdvancedSearch && advancedFilteredMaterials.length > 0
+    ? advancedFilteredMaterials
+    : filteredMaterials;
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-6">Materials Database</h1>
-      
-      {/* Cache status indicator */}
-      <div className="mb-4">
-        <MaterialCacheStatus 
-          cacheStats={cacheStats}
-          onRefresh={handleRefresh}
-          isRefreshing={isRefreshing || loading}
-        />
-      </div>
-      
-      {/* Error message */}
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>
-            Error: {error.message}
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {/* Search and filters */}
-      <div className="mb-6">
-        <div className="flex flex-col md:flex-row gap-3 mb-4">
-          <div className="relative flex-grow">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search materials..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 md:flex gap-2">
-            <Select value={selectedAlternative} onValueChange={setSelectedAlternative}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Filter by alternative" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">All Materials</SelectItem>
-                <SelectItem value="alternatives">Show Alternatives</SelectItem>
-                {baseOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.name} Alt.
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={selectedTag} onValueChange={setSelectedTag}>
-              <SelectTrigger className="w-full md:w-[150px]">
-                <SelectValue placeholder="Filter by tag" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Tags</SelectItem>
-                {allTags.map((tag) => (
-                  <SelectItem key={tag} value={tag}>{tag}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Button
-              variant="outline"
-              onClick={resetFilters}
-              className="h-10"
-            >
-              Reset
-            </Button>
-          </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center">
+            <Database className="h-6 w-6 mr-2 text-carbon-600" />
+            Materials Database
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Explore our database of sustainable construction materials
+          </p>
         </div>
         
-        {/* Additional filters */}
-        <MaterialFilters 
-          categoriesList={categoriesList} 
-          materialsByRegion={materialsByRegion} 
-        />
+        <div className="mt-4 md:mt-0 flex items-center">
+          <Badge variant="outline" className="mr-4">
+            {cacheStats.itemCount || 0} materials
+          </Badge>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refreshCache} 
+            disabled={loading}
+            className="flex items-center"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
       </div>
-      
-      {/* Materials count */}
-      <div className="mb-4 text-sm text-muted-foreground">
-        Showing {filteredMaterials.length} of {materialCount} materials
+
+      {/* Search and Advanced Search Toggle */}
+      <div className="mb-6 flex items-center justify-between">
+        {!useAdvancedSearch && (
+          <div className="relative flex-1 mr-4">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search materials..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="pl-9"
+            />
+          </div>
+        )}
+        <Button 
+          variant={useAdvancedSearch ? "default" : "outline"} 
+          onClick={() => setUseAdvancedSearch(!useAdvancedSearch)}
+        >
+          {useAdvancedSearch ? "Simple Search" : "Advanced Search"}
+        </Button>
       </div>
-      
-      {/* Materials table with loading state */}
-      {loading ? (
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
+
+      {useAdvancedSearch ? (
+        <div className="mb-6">
+          <AdvancedMaterialSearch
+            onSearch={handleAdvancedSearch}
+            categories={categoriesList}
+            regions={Object.keys(materialsByRegion)}
+            tags={allTags}
+            materialCount={materials?.length || 0}
+            onResetFilters={handleResetFilters}
+          />
         </div>
       ) : (
-        <MaterialsTable materials={filteredMaterials} />
+        <div className="mb-6">
+          <MaterialFilters 
+            categoriesList={categoriesList} 
+            materialsByRegion={materialsByRegion} 
+          />
+        </div>
+      )}
+
+      {error ? (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex items-center text-red-500 mb-2">
+              <AlertTriangle className="h-5 w-5 mr-2" />
+              <h3 className="text-lg font-medium">Error loading materials</h3>
+            </div>
+            <p className="text-muted-foreground">{error.message}</p>
+            <Button variant="outline" className="mt-4" onClick={refreshCache}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Showing {displayedMaterials.length} of {materials?.length || 0} materials. 
+            {cacheStats.lastUpdated && (
+              <span> Last updated: {formatDate(cacheStats.lastUpdated)}</span>
+            )}
+          </p>
+
+          <MaterialGrid 
+            materials={displayedMaterials}
+            loading={loading}
+          />
+        </>
       )}
     </div>
   );
