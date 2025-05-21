@@ -7,8 +7,9 @@ import { fetchMaterials } from '@/services/materials/fetch/materialFetchService'
 import { getCachedMaterials, cacheMaterials } from '@/services/materials/cache';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { useCacheStats } from './useCacheStats';
+import { UseMaterialCacheResult } from './types';
 
-export function useMaterialCache() {
+export function useMaterialCache(): UseMaterialCacheResult {
   const [materials, setMaterials] = useState<ExtendedMaterialData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
