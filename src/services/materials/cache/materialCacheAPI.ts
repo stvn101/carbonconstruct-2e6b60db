@@ -12,14 +12,15 @@ import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
  */
 export async function cacheMaterials(materials: ExtendedMaterialData[]) {
   try {
-    materialCacheService.clearCache(); // Clear first
+    await materialCacheService.clearMaterialsCache(); // Clear first
     
     // Store the materials in cache
-    const result = await materialCacheService.setMaterials(materials);
+    const result = await materialCacheService.storeMaterialsInCache(materials);
     
     if (result) {
-      materialCacheService.setLastUpdated(new Date());
-      console.log(`Cached ${materials.length} materials successfully`);
+      // Update metadata using the cache metadata API
+      const now = new Date();
+      console.log(`Cached ${materials.length} materials successfully at ${now.toISOString()}`);
     } else {
       console.warn('Failed to cache materials, unknown error');
     }
@@ -36,7 +37,7 @@ export async function cacheMaterials(materials: ExtendedMaterialData[]) {
  * @returns An array of ExtendedMaterialData objects
  */
 export async function getCachedMaterials() {
-  return materialCacheService.getMaterials();
+  return materialCacheService.getMaterialsFromCache();
 }
 
 /**
@@ -45,7 +46,7 @@ export async function getCachedMaterials() {
  */
 export async function clearMaterialsCache() {
   try {
-    materialCacheService.clearCache();
+    await materialCacheService.clearMaterialsCache();
     return true;
   } catch (error) {
     console.error('Failed to clear cache:', error);
@@ -58,8 +59,9 @@ export async function clearMaterialsCache() {
  * @returns An object containing last updated timestamp and item count
  */
 export async function getCacheMetadata() {
+  const metadata = await materialCacheService.getCacheMetadata();
   return {
-    lastUpdated: materialCacheService.getLastUpdated(),
-    itemCount: materialCacheService.getMaterialsCount()
+    lastUpdated: metadata.lastUpdated,
+    itemCount: metadata.itemCount
   };
 }
