@@ -1,6 +1,6 @@
 
 /**
- * Material cache hook exports
+ * Index file for material cache hooks
  */
-export * from './useMaterialCache';
-export * from './types';
+export { useMaterialCache } from './useMaterialCache';
+export { useCacheStats, type CacheStats } from './useCacheStats';

@@ -1,161 +1,114 @@
 
 /**
- * Material fetch service with proper Supabase integration
+ * Service for fetching material data from various sources
  */
-import { supabase } from '@/integrations/supabase/client';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { SupabaseMaterial } from '../materialTypes';
-import { adaptMaterialFromDatabase } from '@/lib/materialCategories';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { mapDatabaseMaterials } from '../cache/materialDataMapping';
+import { processDataInBatches } from '../materialDataProcessor';
 
-// Cache storage for materials
-let materialsCache: ExtendedMaterialData[] | null = null;
-let lastFetchTime = 0;
-const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+// Default materials to use when no DB connection is available
+const DEFAULT_MATERIALS: ExtendedMaterialData[] = [
+  {
+    id: 'concrete',
+    name: 'Standard Concrete',
+    factor: 0.159,
+    unit: 'kg',
+    region: 'Australia',
+    category: 'Concrete',
+    sustainabilityScore: 40,
+    recyclability: 'Medium',
+    tags: ['concrete', 'foundation', 'structure'],
+    description: 'Standard construction concrete with typical Portland cement content.'
+  },
+  {
+    id: 'steel',
+    name: 'Structural Steel',
+    factor: 1.46,
+    unit: 'kg', 
+    region: 'Australia',
+    category: 'Steel',
+    sustainabilityScore: 60,
+    recyclability: 'High',
+    tags: ['steel', 'structure', 'framing'],
+    description: 'Standard structural steel used in building frames and reinforcement.'
+  },
+  {
+    id: 'timber',
+    name: 'Timber (Softwood)',
+    factor: 0.2,
+    unit: 'kg',
+    region: 'Australia',
+    category: 'Wood',
+    sustainabilityScore: 85,
+    recyclability: 'High',
+    tags: ['timber', 'wood', 'framing'],
+    description: 'Sustainably sourced softwood timber for construction.'
+  }
+];
 
 /**
- * Fetch materials from Supabase with caching
- * @param forceRefresh Force a refresh ignoring the cache
- * @returns Promise containing the materials data
+ * Fetches material data from the database
+ * @param forceRefresh Force a refresh from the database (bypassing cache)
+ * @returns Array of material data
  */
 export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMaterialData[]> {
-  // Use cache if available and not forcing refresh
-  const now = Date.now();
-  if (!forceRefresh && materialsCache && now - lastFetchTime < CACHE_DURATION) {
-    console.log('Using cached materials data');
-    return materialsCache;
-  }
-
   try {
-    console.log('Fetching materials from Supabase');
+    console.log('Fetching materials from database');
+
+    // Try to fetch from database if possible
+    const { data: dbMaterials, error } = await supabase
+      .from('materials')
+      .select('*');
     
-    // Fetch from materials_view which should have all the fields we need
-    const { data, error } = await supabase
-      .from('materials_view')
-      .select('*')
-      .order('name');
-      
     if (error) {
-      console.error('Error fetching materials:', error);
-      throw error;
+      console.error('Error fetching materials from database:', error);
+      console.log('Using default materials');
+      return DEFAULT_MATERIALS;
     }
     
-    if (!data || data.length === 0) {
-      console.warn('No materials found in database');
-      return getFallbackMaterials();
+    // Process the results in batches to prevent UI freezing
+    const processedMaterials = await processDataInBatches(
+      dbMaterials,
+      async (batch) => {
+        return mapDatabaseMaterials(batch);
+      }
+    );
+    
+    console.log(`Fetched ${processedMaterials.length} materials from database`);
+    
+    // If no materials returned, use defaults
+    if (!processedMaterials || processedMaterials.length === 0) {
+      console.log('No materials found in database, using defaults');
+      return DEFAULT_MATERIALS;
     }
     
-    // Map the data from database format to our application format
-    const materials = data.map(item => {
-      // Ensure factor exists in each material
-      const adaptedMaterial = adaptMaterialFromDatabase(item);
-      return {
-        ...adaptedMaterial,
-        // Ensure the factor field is present and has a valid number
-        factor: adaptedMaterial.carbonFootprint || 1.0
-      } as ExtendedMaterialData;
-    });
-    
-    // Update cache
-    materialsCache = materials;
-    lastFetchTime = now;
-    
-    console.log(`Fetched ${materials.length} materials from database`);
-    return materials;
+    return processedMaterials;
   } catch (error) {
-    console.error('Error loading materials:', error);
-    
-    // Show toast for error
-    toast.error("Failed to load materials. Using fallback data.");
-    
-    // Use fallback if available, otherwise return empty array
-    return getFallbackMaterials();
+    console.error('Error in fetchMaterials:', error);
+    return DEFAULT_MATERIALS;
   }
 }
 
 /**
- * Fetch material categories from the database
- * @returns Promise with array of category strings
+ * Fetches material categories from the database
+ * @returns Array of category names
  */
 export async function fetchMaterialCategories(): Promise<string[]> {
   try {
-    // Use the get_material_categories function we defined in the database
-    const { data, error } = await supabase.rpc('get_material_categories');
+    const { data, error } = await supabase
+      .from('material_categories')
+      .select('name');
     
     if (error) {
       console.error('Error fetching material categories:', error);
-      return getDefaultCategories();
+      // Default categories if fetch fails
+      return ['Concrete', 'Steel', 'Wood', 'Insulation', 'Glass', 'Brick'];
     }
     
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      console.warn('No categories found in database');
-      return getDefaultCategories();
-    }
-    
-    return data.map(item => item.category);
+    return data.map(category => category.name);
   } catch (error) {
-    console.error('Error loading categories:', error);
-    return getDefaultCategories();
+    console.error('Error in fetchMaterialCategories:', error);
+    return ['Concrete', 'Steel', 'Wood', 'Insulation', 'Glass', 'Brick'];
   }
-}
-
-/**
- * Get fallback materials for when the database is unavailable
- */
-function getFallbackMaterials(): ExtendedMaterialData[] {
-  // Return some basic materials as fallback
-  return [
-    {
-      id: 'fallback-concrete',
-      name: 'Concrete',
-      factor: 0.159,
-      carbon_footprint_kgco2e_kg: 0.159,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction'],
-      sustainabilityScore: 65,
-      recyclability: 'Medium',
-      category: 'Concrete'
-    },
-    {
-      id: 'fallback-steel',
-      name: 'Steel',
-      factor: 2.4,
-      carbon_footprint_kgco2e_kg: 2.4,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction'],
-      sustainabilityScore: 55,
-      recyclability: 'High',
-      category: 'Steel'
-    },
-    {
-      id: 'fallback-timber',
-      name: 'Timber',
-      factor: 0.086,
-      carbon_footprint_kgco2e_kg: 0.086,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['construction'],
-      sustainabilityScore: 85,
-      recyclability: 'High',
-      category: 'Wood'
-    }
-  ];
-}
-
-/**
- * Get default categories for when the database is unavailable
- */
-function getDefaultCategories(): string[] {
-  return [
-    'Concrete',
-    'Steel',
-    'Wood',
-    'Glass',
-    'Insulation',
-    'Brick',
-    'Aluminum',
-    'Other'
-  ];
 }
