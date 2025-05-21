@@ -1,63 +1,87 @@
 
 /**
- * Material cache service for browser caching of material data
+ * Material Cache Service
+ * Provides caching, loading, and prefetching mechanisms for materials data
  */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { CACHE_KEY_MATERIALS, CACHE_KEY_TIMESTAMP, CACHE_DURATION } from './cacheConstants';
+import { toast } from 'sonner';
+
+// Cache constants
+const CACHE_KEY = 'carbon-construct-materials-cache';
+const CACHE_METADATA_KEY = 'carbon-construct-materials-cache-meta';
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Cache metadata interface
+export interface MaterialCacheMetadata {
+  timestamp: number;
+  count: number;
+  version: string;
+  lastUpdated: string;
+}
 
 /**
- * Cache materials in localStorage
+ * Cache materials data in localStorage
  */
-export async function cacheMaterials(materials: ExtendedMaterialData[]): Promise<void> {
-  if (!materials || !Array.isArray(materials)) {
-    console.warn('Tried to cache invalid materials data', materials);
-    return;
+export async function cacheMaterials(materials: ExtendedMaterialData[]): Promise<boolean> {
+  if (!materials || materials.length === 0) {
+    console.warn('Attempted to cache empty materials array');
+    return false;
   }
   
   try {
-    localStorage.setItem(CACHE_KEY_MATERIALS, JSON.stringify(materials));
-    localStorage.setItem(CACHE_KEY_TIMESTAMP, String(Date.now()));
+    // Store the actual materials data
+    localStorage.setItem(CACHE_KEY, JSON.stringify(materials));
     
-    console.log(`Cached ${materials.length} materials in localStorage`);
+    // Store metadata about the cache
+    const metadata: MaterialCacheMetadata = {
+      timestamp: Date.now(),
+      count: materials.length,
+      version: '1.1',
+      lastUpdated: new Date().toISOString()
+    };
+    localStorage.setItem(CACHE_METADATA_KEY, JSON.stringify(metadata));
+    
+    console.log(`Cached ${materials.length} materials successfully`);
+    return true;
   } catch (error) {
-    console.error('Failed to cache materials:', error);
-    // If localStorage fails (e.g., quota exceeded), try to clear old cache and try again
-    try {
-      localStorage.removeItem(CACHE_KEY_MATERIALS);
-      localStorage.removeItem(CACHE_KEY_TIMESTAMP);
-      localStorage.setItem(CACHE_KEY_MATERIALS, JSON.stringify(materials));
-      localStorage.setItem(CACHE_KEY_TIMESTAMP, String(Date.now()));
-    } catch (retryError) {
-      console.error('Failed to cache materials even after clearing cache:', retryError);
+    console.error('Error caching materials:', error);
+    
+    // Check if it's a storage quota error
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      toast.error('Storage limit reached. Some materials data may not be available offline.');
+      return false;
     }
+    
+    return false;
   }
 }
 
 /**
- * Get cached materials from localStorage
+ * Get cached materials data from localStorage
  */
 export async function getCachedMaterials(): Promise<ExtendedMaterialData[] | null> {
   try {
-    const timestamp = localStorage.getItem(CACHE_KEY_TIMESTAMP);
-    const now = Date.now();
+    // Check if cache exists and is still valid
+    const metadataStr = localStorage.getItem(CACHE_METADATA_KEY);
+    if (!metadataStr) return null;
     
-    // Check if cache is expired
-    if (!timestamp || now - parseInt(timestamp, 10) > CACHE_DURATION) {
-      console.log('Materials cache is expired or missing');
+    const metadata = JSON.parse(metadataStr) as MaterialCacheMetadata;
+    
+    // Check if cache has expired
+    if (Date.now() - metadata.timestamp > CACHE_TTL) {
+      console.log('Materials cache has expired');
       return null;
     }
     
-    const materials = localStorage.getItem(CACHE_KEY_MATERIALS);
-    if (!materials) {
-      console.log('No materials found in cache');
-      return null;
-    }
+    // If cache is still valid, get the materials data
+    const cachedDataStr = localStorage.getItem(CACHE_KEY);
+    if (!cachedDataStr) return null;
     
-    const parsedMaterials = JSON.parse(materials) as ExtendedMaterialData[];
-    console.log(`Retrieved ${parsedMaterials.length} materials from cache`);
-    return parsedMaterials;
+    const materials = JSON.parse(cachedDataStr) as ExtendedMaterialData[];
+    console.log(`Retrieved ${materials.length} materials from cache`);
+    return materials;
   } catch (error) {
-    console.error('Failed to retrieve cached materials:', error);
+    console.error('Error retrieving cached materials:', error);
     return null;
   }
 }
@@ -65,37 +89,66 @@ export async function getCachedMaterials(): Promise<ExtendedMaterialData[] | nul
 /**
  * Clear the materials cache
  */
-export function clearMaterialsCache(): void {
+export async function clearMaterialsCache(): Promise<void> {
   try {
-    localStorage.removeItem(CACHE_KEY_MATERIALS);
-    localStorage.removeItem(CACHE_KEY_TIMESTAMP);
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_METADATA_KEY);
     console.log('Materials cache cleared');
   } catch (error) {
-    console.error('Failed to clear materials cache:', error);
+    console.error('Error clearing materials cache:', error);
   }
 }
 
 /**
- * Get cache metadata
+ * Get metadata about the cached materials
  */
-export function getCacheMetadata(): { lastUpdated: Date | null; itemCount: number | null } {
+export async function getCacheMetadata(): Promise<MaterialCacheMetadata | null> {
   try {
-    const timestamp = localStorage.getItem(CACHE_KEY_TIMESTAMP);
-    const materials = localStorage.getItem(CACHE_KEY_MATERIALS);
+    const metadataStr = localStorage.getItem(CACHE_METADATA_KEY);
+    if (!metadataStr) return null;
     
-    if (!timestamp || !materials) {
-      return { lastUpdated: null, itemCount: null };
-    }
-    
-    const lastUpdated = new Date(parseInt(timestamp, 10));
-    const parsedMaterials = JSON.parse(materials) as ExtendedMaterialData[];
-    
-    return {
-      lastUpdated,
-      itemCount: parsedMaterials?.length || 0
-    };
+    return JSON.parse(metadataStr) as MaterialCacheMetadata;
   } catch (error) {
-    console.error('Failed to get cache metadata:', error);
-    return { lastUpdated: null, itemCount: null };
+    console.error('Error retrieving cache metadata:', error);
+    return null;
   }
 }
+
+/**
+ * Check if the materials cache needs to be refreshed
+ */
+export function isCacheStale(metadata: MaterialCacheMetadata | null): boolean {
+  if (!metadata) return true;
+  return Date.now() - metadata.timestamp > CACHE_TTL;
+}
+
+/**
+ * Prefetch materials in the background to ensure they're available when needed
+ */
+export async function prefetchMaterials(): Promise<void> {
+  try {
+    // First check if cache is already fresh
+    const metadata = await getCacheMetadata();
+    if (!isCacheStale(metadata)) {
+      console.log('Materials cache is fresh, skipping prefetch');
+      return;
+    }
+    
+    console.log('Starting background prefetch of materials');
+    
+    // Import dynamically to avoid circular dependencies
+    const { fetchMaterials } = await import('../fetch/materialFetchService');
+    
+    // Fetch materials and update cache
+    const materials = await fetchMaterials(false);
+    if (materials && materials.length > 0) {
+      await cacheMaterials(materials);
+      console.log(`Background prefetch complete: ${materials.length} materials loaded`);
+    }
+  } catch (error) {
+    console.warn('Background prefetch failed:', error);
+  }
+}
+
+// Start prefetching materials as soon as this module is imported
+setTimeout(prefetchMaterials, 2000);

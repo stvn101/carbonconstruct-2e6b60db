@@ -1,19 +1,18 @@
 
 /**
  * Main entry point for material services
+ * Provides a clean interface to all material-related functionality
  */
-export * from './fetch';
-export * from './cache';
-export * from './materialDataProcessor';
-export * from './fallback/materialFallbackProvider';
 
-// Start prefetching materials immediately when this module is imported
-(function initializeMaterialCache() {
-  setTimeout(() => {
-    console.log('Starting background prefetch of materials');
-    import('./fetch/materialFetchService')
-      .then(({ fetchMaterials }) => fetchMaterials(false))
-      .then(materials => console.log(`Background prefetch complete: ${materials.length} materials loaded`))
-      .catch(err => console.warn('Background prefetch failed:', err));
-  }, 1000);
-})();
+// Type exports
+export * from './types';
+
+// Core functionality exports
+export { getMaterialFactor, getMaterialDetails, batchResolveMaterials, enrichMaterialInput } from './materialResolver';
+export { prefetchMaterials, getCachedMaterials, cacheMaterials, clearMaterialsCache } from './cache/materialCacheService';
+export { initializeMaterialsSystem } from './materialsInit';
+export { resolveMaterial, isDatabaseMaterialId, createDatabaseMaterialId } from './materialAdapter';
+export { processDataInBatches, calculateSustainabilityScore, determineRecyclability } from './materialDataProcessor';
+
+// Import dynamic initialization
+import './materialsInit';
