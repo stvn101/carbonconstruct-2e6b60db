@@ -46,7 +46,15 @@ export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMate
     }
     
     // Map the data from database format to our application format
-    const materials = data.map(item => adaptMaterialFromDatabase(item));
+    const materials = data.map(item => {
+      // Ensure factor exists in each material
+      const adaptedMaterial = adaptMaterialFromDatabase(item);
+      return {
+        ...adaptedMaterial,
+        // Ensure the factor field is present and has a valid number
+        factor: adaptedMaterial.carbonFootprint || 1.0
+      } as ExtendedMaterialData;
+    });
     
     // Update cache
     materialsCache = materials;
