@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -49,7 +50,7 @@ const ResultsSection = ({
   const hasValidTransport = transport?.some(t => Number(t.distance) > 0 && (t.weight ? Number(t.weight) > 0 : true)) || false;
   const hasValidEnergy = energy?.some(e => 
     (e.amount ? Number(e.amount) > 0 : false) || 
-    (e.quantity && Number(e.quantity) > 0)
+    (e.quantity ? Number(e.quantity) > 0 : false)
   ) || false;
   
   // Check if calculation result has any data

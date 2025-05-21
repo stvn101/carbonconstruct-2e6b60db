@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
 import { CalculationResult } from '@/lib/carbonCalculations';
@@ -44,7 +43,7 @@ export async function fetchUserProjects(
           const baseResult = project.result as unknown as CalculationResult;
           result = {
             ...baseResult,
-            timestamp: baseResult.timestamp || new Date().toISOString()
+            timestamp: (project.result as any)?.timestamp || new Date().toISOString()
           };
         }
         

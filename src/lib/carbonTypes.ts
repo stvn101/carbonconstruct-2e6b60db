@@ -29,6 +29,7 @@ export interface TransportInput {
 export interface EnergyInput {
   type: string;
   amount: number | string;
+  quantity?: number | string; // Added quantity property for backward compatibility
   unit?: string;
   id?: string;
   factor?: number;
@@ -53,4 +54,5 @@ export interface CalculationResult {
   breakdownByMaterial: Record<string, number>;
   breakdownByTransport: Record<string, number>;
   breakdownByEnergy: Record<string, number>;
+  timestamp?: string; // Added timestamp property
 }

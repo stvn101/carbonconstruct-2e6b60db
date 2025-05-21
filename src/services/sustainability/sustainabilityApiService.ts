@@ -46,13 +46,13 @@ export async function checkSustainabilityCompliance(projectId: string): Promise<
       '@/hooks/sustainability/sustainabilityService'
     );
     
-    // Fix type casting for materials and energy
-    const materials = Array.isArray(project.materials) ? project.materials : [];
-    const energy = Array.isArray(project.energy) ? project.energy : [];
+    // Properly cast JSON data to expected types
+    const materials = project.materials ? (project.materials as unknown as MaterialInput[]) : [];
+    const energy = project.energy ? (project.energy as unknown as EnergyInput[]) : [];
     
     // Run the compliance checks with properly typed data
-    const nccCompliance = await fetchNccComplianceCheck(materials as MaterialInput[], { includeDetails: true });
-    const nabersCompliance = await fetchNabersComplianceCheck(energy as EnergyInput[], { targetRating: 5 });
+    const nccCompliance = await fetchNccComplianceCheck(materials, { includeDetails: true });
+    const nabersCompliance = await fetchNabersComplianceCheck(energy, { targetRating: 5 });
     
     return {
       ncc: nccCompliance,
