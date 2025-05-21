@@ -15,20 +15,16 @@ export async function cacheMaterials(materials: ExtendedMaterialData[]) {
     await materialCacheService.clearMaterialsCache(); // Clear first
     
     // Store the materials in cache
-    const result = await materialCacheService.storeMaterialsInCache(materials);
+    await materialCacheService.storeMaterialsInCache(materials);
     
-    if (result) {
-      // Update metadata using the cache metadata API
-      const now = new Date();
-      console.log(`Cached ${materials.length} materials successfully at ${now.toISOString()}`);
-    } else {
-      console.warn('Failed to cache materials, unknown error');
-    }
+    // Log success and update timestamp
+    const now = new Date();
+    console.log(`Cached ${materials.length} materials successfully at ${now.toISOString()}`);
     
-    return !!result;
+    return true; // Return success
   } catch (error) {
     console.error('Error caching materials:', error);
-    throw error;
+    return false; // Return failure
   }
 }
 
