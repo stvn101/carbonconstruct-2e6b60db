@@ -50,9 +50,12 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
 
   const runComplianceCheck = async () => {
     try {
-      // Use network error handling wrapper
+      // Create the promise first, then pass it to withNetworkErrorHandling
+      const compliancePromise = checkCompliance(materials, transport, energy, { includeDetailedReport: true });
+      
+      // Now pass the promise directly to withNetworkErrorHandling
       await withNetworkErrorHandling(
-        () => checkCompliance(materials, transport, energy, { includeDetailedReport: true }),
+        compliancePromise,
         10000, // 10 second timeout
         2 // Max 2 retries
       );
