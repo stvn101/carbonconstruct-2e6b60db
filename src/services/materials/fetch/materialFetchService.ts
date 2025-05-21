@@ -297,7 +297,7 @@ function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
         },
         {
           id: 'alt-insulation-1',
-          name: 'Sheep's Wool Insulation',
+          name: 'Sheep\'s Wool Insulation',
           factor: 0.8,
           carbon_footprint_kgco2e_kg: 0.8,
           unit: 'kg',
@@ -307,7 +307,7 @@ function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
           recyclability: 'High',
           alternativeTo: 'insulation',
           category: 'Insulation',
-          description: 'Natural insulation material made from sheep's wool with excellent thermal and acoustic properties.'
+          description: 'Natural insulation material made from sheep\'s wool with excellent thermal and acoustic properties.'
         }
       );
       
@@ -396,7 +396,7 @@ function generateDescriptionFromName(name: string): string {
   }
   
   if (nameLower.includes('timber') || nameLower.includes('wood')) {
-    return 'Timber is wood prepared for use in building and carpentry. It's a renewable resource with good structural properties.';
+    return 'Timber is wood prepared for use in building and carpentry. It\'s a renewable resource with good structural properties.';
   }
   
   if (nameLower.includes('glass')) {
