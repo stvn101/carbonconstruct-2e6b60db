@@ -43,15 +43,16 @@ const MaterialAlternatives: React.FC<MaterialAlternativesProps> = ({
   const alternativesData = Object.entries(materialAnalysis.alternatives)
     .map(([materialId, alternatives]) => {
       const originalMaterial = originalMaterials.find(m => m.id === materialId);
-      if (!originalMaterial || !alternatives.length) return null;
+      if (!originalMaterial || !alternatives || alternatives.length === 0) return null;
       
       return {
         originalMaterial,
         alternatives: alternatives as SustainableMaterial[],
-        hasSavings: alternatives.some((alt: SustainableMaterial) => alt.carbonReduction > 0)
+        hasSavings: alternatives && Array.isArray(alternatives) && 
+                    alternatives.some((alt: SustainableMaterial) => alt.carbonReduction > 0)
       };
     })
-    .filter(Boolean) as unknown as {
+    .filter(Boolean) as {
       originalMaterial: {id: string; name: string; carbonFootprint: number; quantity?: number};
       alternatives: SustainableMaterial[];
       hasSavings: boolean;
