@@ -51,7 +51,7 @@ const MaterialAlternatives: React.FC<MaterialAlternativesProps> = ({
         hasSavings: alternatives.some((alt: SustainableMaterial) => alt.carbonReduction > 0)
       };
     })
-    .filter(Boolean) as {
+    .filter(Boolean) as unknown as {
       originalMaterial: {id: string; name: string; carbonFootprint: number; quantity?: number};
       alternatives: SustainableMaterial[];
       hasSavings: boolean;
