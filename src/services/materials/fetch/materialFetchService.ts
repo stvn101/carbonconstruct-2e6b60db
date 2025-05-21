@@ -1,289 +1,153 @@
 
 /**
- * Core material fetch service with improved caching and fallbacks
+ * Material fetch service with proper Supabase integration
  */
+import { supabase } from '@/integrations/supabase/client';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { cacheMaterials, getCachedMaterials } from '@/services/materials/cache';
-import { processDataInBatches } from '../materialDataProcessor';
-import { isOffline } from '@/utils/errorHandling/networkChecker';
-import { fetchMaterialsFromApi, fetchMaterialCategoriesFromApi } from '../api/materialApiClient';
-import { getFallbackMaterials, getDefaultCategories } from '../fallback/materialFallbackProvider';
-import { handleMaterialApiError } from '../notifications/materialNotifications';
+import { SupabaseMaterial } from '../materialTypes';
+import { adaptMaterialFromDatabase } from '@/lib/materialCategories';
 import { toast } from 'sonner';
-import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
-import { ApiRequestOptions } from '../api/materialApiTypes';
 
-// Keep track of current fetch to prevent duplicate requests
-let currentFetchPromise: Promise<ExtendedMaterialData[]> | null = null;
+// Cache storage for materials
+let materialsCache: ExtendedMaterialData[] | null = null;
 let lastFetchTime = 0;
-const FETCH_COOLDOWN = 1000; // 1 second cooldown between fetch attempts
-const MAX_RETRIES = 3; // Maximum number of retries for loading materials
-const QUERY_LIMIT = 500; // Limit number of materials to fetch at once
+const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 /**
- * Unified material fetch with simplified caching, retry logic, and fallbacks
+ * Fetch materials from Supabase with caching
+ * @param forceRefresh Force a refresh ignoring the cache
+ * @returns Promise containing the materials data
  */
 export async function fetchMaterials(forceRefresh = false): Promise<ExtendedMaterialData[]> {
-  console.log('fetchMaterials called with forceRefresh:', forceRefresh);
-  
-  // Prevent rapid repeated fetch calls but allow forced refreshes
+  // Use cache if available and not forcing refresh
   const now = Date.now();
-  if (now - lastFetchTime < FETCH_COOLDOWN && !forceRefresh) {
-    console.log('Fetch called too frequently, using existing promise or cache');
-    
-    // Return existing promise if there's already a fetch in progress
-    if (currentFetchPromise) {
-      console.log('Using existing fetch promise');
-      return currentFetchPromise;
-    }
+  if (!forceRefresh && materialsCache && now - lastFetchTime < CACHE_DURATION) {
+    console.log('Using cached materials data');
+    return materialsCache;
   }
-  
-  // Update last fetch time
-  lastFetchTime = now;
-  
-  const fetchOperation = async () => {
-    try {
-      // First try to get materials from cache unless forceRefresh is true
-      if (!forceRefresh) {
-        const cachedMaterials = await getCachedMaterials();
-        if (cachedMaterials && cachedMaterials.length > 0) {
-          console.log('Using cached materials:', cachedMaterials.length);
-          return cachedMaterials;
-        } else {
-          console.log('No cached materials found or cache is empty');
-        }
-      } else {
-        console.log('Force refresh requested, bypassing cache');
-      }
-      
-      // If offline, use fallback without trying network request
-      if (isOffline()) {
-        console.log('Offline mode detected, using fallback materials');
-        handleMaterialApiError(new Error('Network offline'), 'load materials');
-        return getComprehensiveFallbackMaterials();
-      }
-      
-      // Try to fetch from API
-      try {
-        console.log('Fetching materials from API');
-        
-        // Fetch with pagination to avoid large queries
-        const apiResponse = await fetchMaterialsWithPagination();
-        
-        // Sanity check for data
-        if (!apiResponse.data || !Array.isArray(apiResponse.data) || apiResponse.data.length === 0) {
-          console.warn('API returned empty or invalid material data');
-          throw new Error('Invalid material data returned from API');
-        }
-        
-        // Process the data - no need for additional processing since our adapter already did that
-        console.log('Processing data from API:', apiResponse.data.length, 'rows');
-        
-        // Cache the materials for future use
-        cacheMaterials(apiResponse.data)
-          .then(() => console.log('Materials cached successfully'))
-          .catch(err => console.warn('Failed to cache materials:', err));
-        
-        return apiResponse.data;
-      } catch (err) {
-        console.error('API fetch error:', err);
-        handleMaterialApiError(err, 'load materials from database');
-        
-        // Try to get data from cache as fallback even though we bypassed it earlier
-        // This handles the case where forceRefresh was true but API call failed
-        if (forceRefresh) {
-          console.log('API fetch failed on forced refresh, trying cache as fallback');
-          const cachedMaterials = await getCachedMaterials();
-          if (cachedMaterials && cachedMaterials.length > 0) {
-            toast.info('Using cached material data after refresh failure');
-            return cachedMaterials;
-          }
-        }
-        
-        return getComprehensiveFallbackMaterials();
-      }
-    } catch (err) {
-      console.error('Error loading materials:', err);
-      handleMaterialApiError(err, 'load materials');
-      return getComprehensiveFallbackMaterials();
-    } finally {
-      // Clear current promise reference when done
-      currentFetchPromise = null;
-    }
-  };
-  
-  // Set the current promise and return it
-  currentFetchPromise = fetchOperation();
-  return currentFetchPromise;
-}
 
-/**
- * Fetch materials with pagination to handle large datasets
- */
-async function fetchMaterialsWithPagination() {
-  let allData: ExtendedMaterialData[] = [];
-  let currentOffset = 0;
-  let hasMore = true;
-  
-  while (hasMore) {
-    // Use optimized query with only needed columns and limit/offset
-    const options: ApiRequestOptions = {
-      limit: QUERY_LIMIT,
-      offset: currentOffset,
-      columns: 'id,material,description,co2e_min,co2e_max,co2e_avg,sustainability_score,applicable_standards,ncc_requirements,sustainability_notes'
-    };
+  try {
+    console.log('Fetching materials from Supabase');
     
-    try {
-      const response = await fetchMaterialsFromApi(options);
+    // Fetch from materials_view which should have all the fields we need
+    const { data, error } = await supabase
+      .from('materials_view')
+      .select('*')
+      .order('name');
       
-      if (response.data && response.data.length > 0) {
-        allData = [...allData, ...response.data];
-        currentOffset += QUERY_LIMIT;
-        
-        // Stop if we received fewer items than the limit
-        if (response.data.length < QUERY_LIMIT) {
-          hasMore = false;
-        }
-        
-        // Safety check to avoid too many requests
-        if (currentOffset >= 2000) {
-          hasMore = false;
-        }
-      } else {
-        hasMore = false;
-      }
-    } catch (error) {
-      console.error('Error in pagination fetch:', error);
-      // Break the loop on error
-      hasMore = false;
+    if (error) {
+      console.error('Error fetching materials:', error);
       throw error;
     }
-  }
-  
-  return { data: allData, error: null };
-}
-
-/**
- * Get comprehensive fallback materials using all available sources
- */
-function getComprehensiveFallbackMaterials(): ExtendedMaterialData[] {
-  try {
-    // Get base fallback materials
-    const baseMaterials = getFallbackMaterials();
     
-    // Also generate materials from MATERIAL_FACTORS
-    const factorMaterials = Object.entries(MATERIAL_FACTORS).map(([key, value]) => {
-      return {
-        id: `factor-${key}`,
-        name: value.name || key,
-        factor: value.factor,
-        carbon_footprint_kgco2e_kg: value.factor,
-        carbon_footprint_kgco2e_tonne: value.factor * 1000,
-        unit: value.unit || 'kg',
-        region: 'Australia',
-        tags: ['construction'],
-        sustainabilityScore: Math.floor(Math.random() * 20) + 60, // More variation: 60-80
-        recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low',
-        alternativeTo: key.includes('recycled') || key.includes('low-carbon') ? key.replace(/recycled |low-carbon /, '') : undefined,
-        notes: '',
-        category: determineCategoryFromName(key)
-      };
-    });
+    if (!data || data.length === 0) {
+      console.warn('No materials found in database');
+      return getFallbackMaterials();
+    }
     
-    // Combine both sources, removing duplicates by name
-    const materialMap = new Map<string, ExtendedMaterialData>();
+    // Map the data from database format to our application format
+    const materials = data.map(item => adaptMaterialFromDatabase(item));
     
-    // Add base materials first
-    baseMaterials.forEach(material => {
-      if (material && material.name) {
-        materialMap.set(material.name.toLowerCase(), material);
-      }
-    });
+    // Update cache
+    materialsCache = materials;
+    lastFetchTime = now;
     
-    // Add factor materials if not already present
-    factorMaterials.forEach(material => {
-      if (material && material.name && !materialMap.has(material.name.toLowerCase())) {
-        materialMap.set(material.name.toLowerCase(), material);
-      }
-    });
-    
-    // Convert back to array
-    const combinedMaterials = Array.from(materialMap.values());
-    console.log(`Combined ${combinedMaterials.length} fallback materials from multiple sources`);
-    
-    return combinedMaterials;
+    console.log(`Fetched ${materials.length} materials from database`);
+    return materials;
   } catch (error) {
-    console.error('Error creating comprehensive fallback materials:', error);
+    console.error('Error loading materials:', error);
+    
+    // Show toast for error
+    toast.error("Failed to load materials. Using fallback data.");
+    
+    // Use fallback if available, otherwise return empty array
     return getFallbackMaterials();
   }
 }
 
 /**
- * Determine category from material name for better organization
- */
-function determineCategoryFromName(name: string): string {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes('concrete')) return 'Concrete';
-  if (lowerName.includes('steel') || lowerName.includes('metal') || lowerName.includes('iron')) return 'Metals';
-  if (lowerName.includes('wood') || lowerName.includes('timber')) return 'Wood';
-  if (lowerName.includes('glass')) return 'Glass';
-  if (lowerName.includes('brick') || lowerName.includes('tile')) return 'Ceramics';
-  if (lowerName.includes('insulation')) return 'Insulation';
-  if (lowerName.includes('plastic')) return 'Plastics';
-  if (lowerName.includes('rock') || lowerName.includes('stone') || lowerName.includes('aggregate')) return 'Aggregates';
-  return 'Other';
-}
-
-/**
- * Fetch material categories with improved fallbacks
+ * Fetch material categories from the database
+ * @returns Promise with array of category strings
  */
 export async function fetchMaterialCategories(): Promise<string[]> {
-  // First check if we're offline
-  if (isOffline()) {
-    console.log('Offline, returning default categories');
-    return getDefaultCategories();
-  }
-  
   try {
-    const categoriesResponse = await fetchMaterialCategoriesFromApi();
+    // Use the get_material_categories function we defined in the database
+    const { data, error } = await supabase.rpc('get_material_categories');
     
-    // Log categories retrieved
-    console.log('Categories fetched:', categoriesResponse.data?.length || 0);
-    
-    if (!categoriesResponse.data || categoriesResponse.data.length === 0) {
-      console.warn('API returned empty categories, using defaults');
+    if (error) {
+      console.error('Error fetching material categories:', error);
       return getDefaultCategories();
     }
     
-    return categoriesResponse.data;
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.warn('No categories found in database');
+      return getDefaultCategories();
+    }
+    
+    return data.map(item => item.category);
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    // Return some sensible default categories on error
+    console.error('Error loading categories:', error);
     return getDefaultCategories();
   }
 }
 
-// Initialize materials prefetch
-(function initializeMaterialPrefetch() {
-  let retryCount = 0;
-  
-  function attemptPrefetch() {
-    console.log(`Starting background materials prefetch (attempt ${retryCount + 1})`);
-    fetchMaterials(false)
-      .then(materials => {
-        console.log(`Background prefetch complete: ${materials.length} materials loaded`);
-      })
-      .catch(err => {
-        console.warn('Background prefetch failed:', err);
-        if (retryCount < MAX_RETRIES) {
-          retryCount++;
-          const delay = Math.min(2000 * Math.pow(2, retryCount), 30000); // Exponential backoff with max 30s
-          console.log(`Will retry in ${delay}ms`);
-          setTimeout(attemptPrefetch, delay);
-        }
-      });
-  }
-  
-  // Start with a short delay
-  setTimeout(attemptPrefetch, 500);
-})();
+/**
+ * Get fallback materials for when the database is unavailable
+ */
+function getFallbackMaterials(): ExtendedMaterialData[] {
+  // Return some basic materials as fallback
+  return [
+    {
+      id: 'fallback-concrete',
+      name: 'Concrete',
+      factor: 0.159,
+      carbon_footprint_kgco2e_kg: 0.159,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['construction'],
+      sustainabilityScore: 65,
+      recyclability: 'Medium',
+      category: 'Concrete'
+    },
+    {
+      id: 'fallback-steel',
+      name: 'Steel',
+      factor: 2.4,
+      carbon_footprint_kgco2e_kg: 2.4,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['construction'],
+      sustainabilityScore: 55,
+      recyclability: 'High',
+      category: 'Steel'
+    },
+    {
+      id: 'fallback-timber',
+      name: 'Timber',
+      factor: 0.086,
+      carbon_footprint_kgco2e_kg: 0.086,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['construction'],
+      sustainabilityScore: 85,
+      recyclability: 'High',
+      category: 'Wood'
+    }
+  ];
+}
+
+/**
+ * Get default categories for when the database is unavailable
+ */
+function getDefaultCategories(): string[] {
+  return [
+    'Concrete',
+    'Steel',
+    'Wood',
+    'Glass',
+    'Insulation',
+    'Brick',
+    'Aluminum',
+    'Other'
+  ];
+}

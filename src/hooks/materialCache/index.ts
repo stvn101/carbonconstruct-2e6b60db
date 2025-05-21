@@ -1,6 +1,6 @@
 
 /**
- * Main material cache hook composed from smaller hooks
+ * Material cache hook exports
  */
-export * from './types';
 export * from './useMaterialCache';
+export * from './types';

@@ -1,170 +1,119 @@
 
-import { useMemo } from "react";
-import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
-import { MaterialOption, MaterialsByRegion } from "@/lib/materialTypes";
+/**
+ * Hook for working with material data
+ */
+import { useMemo } from 'react';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
+import { MaterialsByRegion, MaterialOption } from '@/lib/materialTypes';
 
 interface UseMaterialDataProps {
+  materials: ExtendedMaterialData[];
   searchTerm: string;
   selectedRegion: string;
   selectedAlternative: string;
   selectedTag: string;
-  materials: ExtendedMaterialData[];
-}
-
-interface UseMaterialDataResult {
-  filteredMaterials: ExtendedMaterialData[];
-  materialsByRegion: MaterialsByRegion;
-  allTags: string[];
-  baseOptions: MaterialOption[];
-  materialCount: number;
-  allRegions: string[];
 }
 
 export function useMaterialData({
+  materials,
   searchTerm,
   selectedRegion,
   selectedAlternative,
-  selectedTag,
-  materials
-}: UseMaterialDataProps): UseMaterialDataResult {
-  // Get all regions from materials
-  const allRegions = useMemo(() => {
-    if (!materials) return ["Australia"];
+  selectedTag
+}: UseMaterialDataProps) {
+  // Filter materials based on search term, region, alternative, and tag
+  const filteredMaterials = useMemo(() => {
+    if (!materials || materials.length === 0) return [];
     
-    const regions = new Set<string>();
-    materials.forEach(material => {
-      if (material.region) {
-        regions.add(material.region);
-      } else {
-        regions.add("Australia"); // Default
-      }
-    });
-    return Array.from(regions).sort();
-  }, [materials]);
-
-  // Get all tags from materials
-  const allTags = useMemo(() => {
-    if (!materials) return [];
-
-    const tags = new Set<string>();
-    tags.add("all"); // Always include "all" option
-    
-    materials.forEach(material => {
-      if (Array.isArray(material.tags)) {
-        material.tags.forEach(tag => {
-          if (tag) tags.add(tag);
-        });
-      }
+    return materials.filter((material) => {
+      // Filter by search term
+      const matchesSearch = !searchTerm || 
+        material.name?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Also add category as a tag if present
-      if (material.category) {
-        tags.add(material.category);
-      }
+      // Filter by region
+      const matchesRegion = selectedRegion === 'all' || 
+        !material.region || 
+        material.region.toLowerCase() === selectedRegion.toLowerCase();
+      
+      // Filter by alternative
+      const matchesAlternative = selectedAlternative === 'none' || 
+        (selectedAlternative === 'alternatives' && material.alternativeTo) || 
+        (selectedAlternative !== 'alternatives' && material.alternativeTo === selectedAlternative);
+      
+      // Filter by tag
+      const matchesTag = selectedTag === 'all' || 
+        (material.tags && material.tags.some(tag => 
+          tag.toLowerCase() === selectedTag.toLowerCase()
+        ));
+      
+      return matchesSearch && matchesRegion && matchesAlternative && matchesTag;
     });
-    
-    return Array.from(tags).sort();
-  }, [materials]);
+  }, [materials, searchTerm, selectedRegion, selectedAlternative, selectedTag]);
 
-  // Count materials by region
+  // Generate material statistics by region
   const materialsByRegion = useMemo(() => {
-    const regionCounts: MaterialsByRegion = {};
+    if (!materials || materials.length === 0) return {};
     
-    if (!materials) return { Australia: 0 };
-
-    materials.forEach(material => {
-      const region = material.region || "Australia";
-      regionCounts[region] = (regionCounts[region] || 0) + 1;
-    });
-    
-    return regionCounts;
+    return materials.reduce((acc: MaterialsByRegion, material) => {
+      const region = material.region || 'Unknown';
+      acc[region] = (acc[region] || 0) + 1;
+      return acc;
+    }, {});
   }, [materials]);
 
-  // Create base options for alternatives dropdown
-  const baseOptions = useMemo(() => {
-    const options = [{ id: "none", name: "All Materials" }];
+  // Extract all unique tags from materials
+  const allTags = useMemo(() => {
+    if (!materials || materials.length === 0) return [];
     
-    // Get materials that are listed as alternatives to something
-    if (materials) {
-      const alternativeTargets = new Set<string>();
-      
-      materials.forEach(material => {
-        if (material.alternativeTo) {
-          alternativeTargets.add(material.alternativeTo);
-        }
-      });
-      
-      if (alternativeTargets.size > 0) {
-        options.push({ id: "only_alternatives", name: "Only Alternatives" });
-        
-        // Add specific material alternatives
-        Array.from(alternativeTargets).sort().forEach(target => {
-          options.push({
-            id: `alt_to_${target}`,
-            name: `Alternative to ${target}`
-          });
+    const tagSet = new Set<string>();
+    
+    materials.forEach((material) => {
+      if (material.tags && Array.isArray(material.tags)) {
+        material.tags.forEach((tag) => {
+          if (tag) tagSet.add(tag);
         });
       }
-    }
+      
+      // Also add material categories as tags if they're not already there
+      if (material.category) {
+        tagSet.add(material.category);
+      }
+    });
+    
+    return Array.from(tagSet).sort();
+  }, [materials]);
+
+  // Generate base options for selectors
+  const baseOptions = useMemo(() => {
+    if (!materials || materials.length === 0) return [];
+    
+    const uniqueMaterials = new Map<string, ExtendedMaterialData>();
+    
+    materials.forEach((material) => {
+      if (material.name && !uniqueMaterials.has(material.name.toLowerCase())) {
+        uniqueMaterials.set(material.name.toLowerCase(), material);
+      }
+    });
+    
+    const options: MaterialOption[] = Array.from(uniqueMaterials.values())
+      .filter(m => !m.alternativeTo)
+      .map(m => ({
+        id: m.id || '',
+        name: m.name || ''
+      }));
     
     return options;
   }, [materials]);
 
-  // Filter materials based on search, region, alternative, and tag
-  const filteredMaterials = useMemo(() => {
-    if (!materials || !Array.isArray(materials)) return [];
-    
-    return materials.filter(material => {
-      // Filter by search term if provided
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        const nameMatch = material.name?.toLowerCase().includes(searchLower);
-        const categoryMatch = material.category?.toLowerCase().includes(searchLower);
-        const tagsMatch = Array.isArray(material.tags) && 
-          material.tags.some(tag => tag?.toLowerCase().includes(searchLower));
-        
-        if (!(nameMatch || categoryMatch || tagsMatch)) {
-          return false;
-        }
-      }
-      
-      // Filter by region if selected and not "all"
-      if (selectedRegion !== "all" && material.region !== selectedRegion) {
-        return false;
-      }
-      
-      // Filter by alternatives
-      if (selectedAlternative !== "none") {
-        if (selectedAlternative === "only_alternatives") {
-          // Show only materials that are alternatives
-          if (!material.alternativeTo) {
-            return false;
-          }
-        } else if (selectedAlternative.startsWith("alt_to_")) {
-          // Show alternatives to a specific material
-          const targetMaterial = selectedAlternative.replace("alt_to_", "");
-          if (material.alternativeTo !== targetMaterial) {
-            return false;
-          }
-        }
-      }
-      
-      // Filter by tag if selected and not "all"
-      if (selectedTag !== "all") {
-        const hasCategoryMatch = material.category === selectedTag;
-        const hasTagMatch = Array.isArray(material.tags) && 
-          material.tags.some(tag => tag === selectedTag);
-        
-        if (!(hasCategoryMatch || hasTagMatch)) {
-          return false;
-        }
-      }
-      
-      return true;
-    });
-  }, [materials, searchTerm, selectedRegion, selectedAlternative, selectedTag]);
+  // Count total unique materials
+  const materialCount = useMemo(() => {
+    return filteredMaterials.length;
+  }, [filteredMaterials]);
 
-  // Number of filtered materials
-  const materialCount = filteredMaterials.length;
+  // Extract all regions
+  const allRegions = useMemo(() => {
+    return Object.keys(materialsByRegion).sort();
+  }, [materialsByRegion]);
 
   return {
     filteredMaterials,
