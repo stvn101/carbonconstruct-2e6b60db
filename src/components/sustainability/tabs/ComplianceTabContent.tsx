@@ -1,6 +1,6 @@
 
 import React from "react";
-import ComplianceStatus from "../ComplianceStatus";
+import ComplianceStatus from "../compliance/ComplianceStatus";
 import { ComplianceData } from "../types";
 import { MaterialInput } from "@/lib/carbonExports";
 
