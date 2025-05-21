@@ -128,8 +128,8 @@ const SustainabilityReport: React.FC<SustainabilityReportProps> = ({
                 <div>
                   <p className="text-sm text-muted-foreground">Sustainable Materials</p>
                   <p className="text-xl font-bold">
-                    {materialAnalysis?.sustainableMaterialPercentage 
-                      ? `${materialAnalysis.sustainableMaterialPercentage.toFixed(1)}%` 
+                    {materialAnalysis?.sustainabilityPercentage 
+                      ? `${materialAnalysis.sustainabilityPercentage.toFixed(1)}%` 
                       : '—'
                     }
                   </p>

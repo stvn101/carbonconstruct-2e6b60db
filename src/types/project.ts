@@ -31,6 +31,7 @@ export interface ProjectFormData {
 
 export interface ProjectContextType {
   projects: SavedProject[];
+  selectedProject?: SavedProject | null;
   isLoading: boolean;
   fetchError: Error | null;
   saveProject: (project: Omit<SavedProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<SavedProject>;

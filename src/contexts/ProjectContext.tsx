@@ -55,7 +55,8 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Adding projectId to ensure it's available in the context
   const mergedContextValue = {
     ...contextValue,
-    projectId: contextValue.selectedProject?.id || null,
+    selectedProject: contextValue.getProject ? contextValue.projects.find(p => p.id === projectChannel) : null,
+    projectId: projectChannel || null,
     loadProjects: projectsContext?.loadProjects
   };
   

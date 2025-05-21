@@ -15,7 +15,7 @@ export type {
   Material,
   Transport, 
   Energy,
-  MaterialInput as OriginalMaterialInput,
+  MaterialInput,
   TransportInput,
   EnergyInput,
 } from './carbonTypes';
@@ -48,16 +48,4 @@ export type MaterialsByRegion = Record<string, number>;
 export interface MaterialOption {
   id: string;
   name: string;
-}
-
-// Extended MaterialInput type with sustainability properties
-export interface MaterialInput {
-  id?: string;
-  type: string;
-  quantity: number | string;
-  unit?: string;
-  factor?: number;
-  recycledContent?: number;
-  locallySourced?: boolean;
-  recyclable?: boolean;
 }
