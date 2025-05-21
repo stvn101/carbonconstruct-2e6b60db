@@ -41,84 +41,55 @@ export function adaptDatabaseMaterial(material: any): ExtendedMaterialData {
   if (!material) return createFallbackMaterial('unknown');
   
   // Create a properly formatted database material ID
-  const dbMaterialId = createDatabaseMaterialId(material.id);
+  const dbId = material.id ? createDatabaseMaterialId(material.id) : undefined;
   
   return {
-    id: dbMaterialId,
-    name: material.name || material.material || 'Unknown Material',
-    factor: material.factor || material.carbon_footprint_kgco2e_kg || 1.0,
-    carbon_footprint_kgco2e_kg: material.carbon_footprint_kgco2e_kg || material.factor,
-    carbon_footprint_kgco2e_tonne: material.carbon_footprint_kgco2e_tonne,
+    id: dbId,
+    name: material.name || material.material || 'Unnamed Material',
+    factor: material.carbon_footprint_kgco2e_kg || material.factor || 1.0,
     unit: material.unit || 'kg',
-    region: material.region || 'Global',
-    sustainabilityScore: material.sustainabilityScore || material.sustainability_score,
+    region: material.region || 'Australia',
+    tags: Array.isArray(material.tags) ? material.tags : 
+          material.category ? [material.category] : ['construction'],
+    sustainabilityScore: material.sustainabilityScore || 60,
     recyclability: material.recyclability || 'Medium',
     alternativeTo: material.alternativeTo,
-    notes: material.notes,
-    category: material.category || material.applicable_standards,
-    tags: Array.isArray(material.tags) ? material.tags : []
+    notes: material.notes || '',
+    category: material.category || 'Other'
   };
 }
 
 /**
- * Create a fallback material for when a material can't be found
+ * Creates a fallback material when a material cannot be resolved
  */
-export function createFallbackMaterial(materialType: string): ExtendedMaterialData {
-  // Try to get information from static factors if available
-  const staticInfo = MATERIAL_FACTORS[materialType];
-  
+export function createFallbackMaterial(id: string): ExtendedMaterialData {
   return {
-    id: `fallback-${materialType}`,
-    name: staticInfo ? staticInfo.name : materialType,
-    factor: staticInfo ? staticInfo.factor : 1.0,
-    unit: staticInfo ? staticInfo.unit || 'kg' : 'kg',
+    id,
+    name: `Unknown Material (${id})`,
+    factor: 1.0,
+    unit: 'kg',
     region: 'Global',
-    category: 'Other',
-    tags: ['fallback'],
+    tags: ['unknown'],
     sustainabilityScore: 50,
-    recyclability: 'Medium'
+    recyclability: 'Medium',
+    category: 'Unknown'
   };
 }
 
 /**
- * Normalize material type to ensure consistent lookup
- */
-export function normalizeMaterialType(materialType: string): string {
-  if (!materialType) return 'unknown';
-  
-  // Convert to lowercase and remove special characters
-  return materialType.toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .trim();
-}
-
-/**
- * Universal material resolver that can handle both database and static materials
+ * Resolve a material by its identifier from various sources
  */
 export async function resolveMaterial(materialIdentifier: string): Promise<ExtendedMaterialData> {
-  // Import dynamically to avoid circular dependencies
-  const { fetchMaterials } = await import('./fetch/materialFetchService');
-  const { getCachedMaterials } = await import('./cache/materialCacheService');
+  if (!materialIdentifier) {
+    return createFallbackMaterial('unknown');
+  }
   
   try {
-    // Check if it's a database material ID
-    if (isDatabaseMaterialId(materialIdentifier)) {
-      const dbId = extractDatabaseId(materialIdentifier);
-      
-      // Try cache first
-      const cachedMaterials = await getCachedMaterials();
-      if (cachedMaterials && cachedMaterials.length > 0) {
-        const found = cachedMaterials.find(m => m.id === dbId);
-        if (found) return adaptDatabaseMaterial(found);
-      }
-      
-      // If not in cache or no cache available, fetch from database
-      const materials = await fetchMaterials();
-      const material = materials.find(m => m.id === dbId);
-      if (material) return adaptDatabaseMaterial(material);
-    }
+    // Import services dynamically to avoid circular dependencies
+    const { getCachedMaterials } = await import('./cache');
+    const { fetchMaterials } = await import('./fetch/materialFetchService');
     
-    // If not a database ID or not found, try as a static material type
+    // Check if it's a static material
     if (MATERIAL_FACTORS[materialIdentifier]) {
       const staticInfo = MATERIAL_FACTORS[materialIdentifier];
       return {
@@ -133,30 +104,32 @@ export async function resolveMaterial(materialIdentifier: string): Promise<Exten
       };
     }
     
-    // Try normalized lookup for static materials
-    const normalizedType = normalizeMaterialType(materialIdentifier);
-    const normalizedMatch = Object.keys(MATERIAL_FACTORS).find(key => 
-      normalizeMaterialType(key) === normalizedType
-    );
-    
-    if (normalizedMatch) {
-      const staticInfo = MATERIAL_FACTORS[normalizedMatch];
-      return {
-        id: normalizedMatch,
-        name: staticInfo.name || normalizedMatch,
-        factor: staticInfo.factor,
-        unit: staticInfo.unit || 'kg',
-        region: 'Global',
-        category: 'Static',
-        sustainabilityScore: 60,
-        recyclability: 'Medium'
-      };
+    // Check if it's a database material ID
+    if (isDatabaseMaterialId(materialIdentifier)) {
+      const dbId = extractDatabaseId(materialIdentifier);
+      
+      // Try to get from cache first
+      const cachedMaterials = await getCachedMaterials();
+      if (cachedMaterials) {
+        const cachedMaterial = cachedMaterials.find(m => m.id === dbId);
+        if (cachedMaterial) {
+          return cachedMaterial;
+        }
+      }
+      
+      // If not in cache, fetch from database
+      const fetchedMaterials = await fetchMaterials();
+      const fetchedMaterial = fetchedMaterials.find(m => m.id === dbId);
+      
+      if (fetchedMaterial) {
+        return fetchedMaterial;
+      }
     }
     
-    // Return a fallback material if all else fails
+    // If we couldn't resolve the material, create a fallback
     return createFallbackMaterial(materialIdentifier);
   } catch (error) {
-    console.error('Failed to resolve material:', materialIdentifier, error);
+    console.error('Error resolving material:', error);
     return createFallbackMaterial(materialIdentifier);
   }
 }
