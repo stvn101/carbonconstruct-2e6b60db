@@ -1,134 +1,187 @@
 
-// Define material categories that can be used throughout the application
-export enum MaterialCategory {
-  CONCRETE = 'concrete',
-  STEEL = 'steel',
-  TIMBER = 'timber',
-  BRICK = 'brick',
-  ALUMINUM = 'aluminum',
-  GLASS = 'glass',
-  INSULATION = 'insulation',
-  OTHER = 'other',
-  WOOD = 'wood' // Added as an alias for timber for compatibility
-}
+/**
+ * Material Categories and Analysis Utilities
+ */
 
-// Also define the SustainableMaterial interface
-export interface SustainableMaterial {
+import { ExtendedMaterialData } from "./materials/materialTypes";
+
+export interface Material {
   id: string;
   name: string;
-  carbonFootprint: number;
+  carbon_footprint_kgco2e_kg?: number;
   quantity?: number;
-  category?: MaterialCategory;
-  unit?: string;
-  sustainabilityScore: number;
-  alternativeTo?: string;
-  carbonReduction: number;
-  costDifference?: number;
-  availability?: 'low' | 'medium' | 'high';
-  recyclable?: boolean;
-  recycledContent?: number;
-  locallySourced?: boolean;
 }
 
-// Define MaterialAnalysisResult locally instead of importing from edge functions
 export interface MaterialAnalysisResult {
-  highImpactMaterials: Array<{
+  highImpactMaterials: {
     id: string;
     name: string;
-    carbonFootprint: number;
-    quantity?: number;
-    category?: string;
-  }>;
+    impact: number;
+    percentage: number;
+    quantity: number;
+    factor: number;
+    recyclable?: boolean;
+  }[];
   sustainabilityScore: number;
   sustainabilityPercentage: number;
   recommendations: string[];
   alternatives: {
-    [materialId: string]: SustainableMaterial[];
+    [materialId: string]: ExtendedMaterialData[];
   };
 }
 
-// Create adapter function to convert database material to our application format
-export function adaptMaterialFromDatabase(dbMaterial: any): SustainableMaterial {
-  return {
-    id: dbMaterial.id || `material-${Math.random().toString(36).substring(2, 9)}`,
-    name: dbMaterial.material || dbMaterial.name || '',
-    carbonFootprint: dbMaterial.co2e_avg || dbMaterial.carbon_footprint_kgco2e_kg || 0,
-    category: dbMaterial.applicable_standards as MaterialCategory || MaterialCategory.OTHER,
-    sustainabilityScore: dbMaterial.sustainability_score || 50,
-    alternativeTo: dbMaterial.alternativeTo || '',
-    carbonReduction: dbMaterial.carbonReduction || 0,
-    costDifference: dbMaterial.costDifference || 0,
-    availability: dbMaterial.availability || 'medium',
-    recyclable: dbMaterial.recyclable || false,
-    recycledContent: dbMaterial.recycledContent || 0,
-    locallySourced: dbMaterial.locallySourced || false,
-    unit: dbMaterial.unit || 'kg'
-  };
-}
-
-// Create adapter function to generate MaterialAnalysisResult from material inputs
-export function generateMaterialAnalysis(materials: any[]): MaterialAnalysisResult {
-  // Convert materials to standardized format
-  const standardizedMaterials = materials.map(adaptMaterialFromDatabase);
-  
-  // Find high impact materials (top 50% by carbon footprint)
-  const sortedByImpact = [...standardizedMaterials].sort(
-    (a, b) => b.carbonFootprint - a.carbonFootprint
-  );
-  
-  const highImpactCount = Math.ceil(sortedByImpact.length / 2);
-  const highImpactMaterials = sortedByImpact.slice(0, highImpactCount).map(m => ({
-    id: m.id,
-    name: m.name,
-    carbonFootprint: m.carbonFootprint,
-    quantity: m.quantity,
-    category: m.category
-  }));
-  
-  // Calculate sustainability metrics
-  const avgSustainabilityScore = standardizedMaterials.reduce(
-    (sum, m) => sum + m.sustainabilityScore, 0
-  ) / standardizedMaterials.length;
-  
-  const sustainableCount = standardizedMaterials.filter(
-    m => m.sustainabilityScore >= 70
-  ).length;
-  
-  const sustainabilityPercentage = standardizedMaterials.length > 0
-    ? Math.round((sustainableCount / standardizedMaterials.length) * 100)
-    : 0;
-  
-  // Generate recommendations based on material properties
-  const recommendations = [];
-  
-  if (highImpactMaterials.length > 0) {
-    recommendations.push(
-      `Consider alternatives to ${highImpactMaterials[0].name} to reduce carbon footprint`
-    );
+/**
+ * Generate a material analysis from material data
+ */
+export function generateMaterialAnalysis(materials: Material[]): MaterialAnalysisResult {
+  if (!materials || materials.length === 0) {
+    return {
+      highImpactMaterials: [],
+      sustainabilityScore: 0,
+      sustainabilityPercentage: 0,
+      recommendations: [],
+      alternatives: {}
+    };
   }
   
-  if (sustainabilityPercentage < 50) {
-    recommendations.push(
-      "Increase the use of sustainable materials to improve project sustainability score"
-    );
-  }
+  // Calculate total impact
+  const totalImpact = materials.reduce((sum, material) => {
+    const impact = calculateMaterialImpact(material);
+    return sum + impact;
+  }, 0);
   
-  recommendations.push(
-    "Source locally produced materials to reduce transport emissions",
-    "Consider using materials with higher recycled content"
-  );
+  // Identify high impact materials (those contributing >10% to total)
+  const highImpactMaterials = materials
+    .map(material => {
+      const impact = calculateMaterialImpact(material);
+      const percentage = totalImpact > 0 ? (impact / totalImpact) * 100 : 0;
+      
+      return {
+        id: material.id,
+        name: material.name,
+        impact,
+        percentage,
+        quantity: material.quantity || 0,
+        factor: material.carbon_footprint_kgco2e_kg || 0,
+        recyclable: false // Default value
+      };
+    })
+    .filter(material => material.percentage >= 10)
+    .sort((a, b) => b.impact - a.impact);
   
-  // Group alternatives by material
-  const alternatives: {[materialId: string]: SustainableMaterial[]} = {};
+  // Generate material recommendations based on high impact materials
+  const recommendations = generateRecommendations(highImpactMaterials);
   
-  // This would normally be populated from database queries
-  // For now we'll leave it as an empty object
+  // Calculate overall sustainability score (placeholder implementation)
+  const sustainabilityScore = calculateSustainabilityScore(materials, highImpactMaterials);
+  
+  // Calculate sustainability percentage (placeholder)
+  const sustainabilityPercentage = Math.min(100, sustainabilityScore);
   
   return {
     highImpactMaterials,
-    sustainabilityScore: Math.round(avgSustainabilityScore),
+    sustainabilityScore,
     sustainabilityPercentage,
     recommendations,
-    alternatives
+    alternatives: {} // Empty for now, would be populated by material service
   };
+}
+
+/**
+ * Calculate the carbon impact of a material
+ */
+function calculateMaterialImpact(material: Material): number {
+  const quantity = Number(material.quantity) || 0;
+  const factor = material.carbon_footprint_kgco2e_kg || 1;
+  
+  return quantity * factor;
+}
+
+/**
+ * Generate recommendations based on high impact materials
+ */
+function generateRecommendations(highImpactMaterials: any[]): string[] {
+  const recommendations: string[] = [];
+  
+  if (highImpactMaterials.length === 0) {
+    return [
+      "No high-impact materials identified. Continue monitoring material usage."
+    ];
+  }
+  
+  // Generate specific recommendations based on material types
+  highImpactMaterials.forEach(material => {
+    const materialName = material.name.toLowerCase();
+    
+    if (materialName.includes('concrete')) {
+      recommendations.push(
+        `Consider using low-carbon concrete alternatives for ${material.name}.`,
+        `Reduce the quantity of ${material.name} through optimized design.`
+      );
+    } else if (materialName.includes('steel')) {
+      recommendations.push(
+        `Source ${material.name} with higher recycled content.`,
+        `Optimize structural design to reduce the quantity of ${material.name}.`
+      );
+    } else if (materialName.includes('aluminum') || materialName.includes('aluminium')) {
+      recommendations.push(
+        `Consider using locally sourced ${material.name} to reduce transportation emissions.`,
+        `Explore alternatives to ${material.name} with lower embodied carbon.`
+      );
+    } else {
+      recommendations.push(
+        `Investigate lower carbon alternatives for ${material.name}.`,
+        `Review the specification and quantity of ${material.name}.`
+      );
+    }
+  });
+  
+  // Add general recommendations
+  recommendations.push(
+    "Consider life cycle assessment (LCA) when selecting materials.",
+    "Prioritize materials with Environmental Product Declarations (EPDs)."
+  );
+  
+  return recommendations;
+}
+
+/**
+ * Calculate sustainability score based on materials
+ */
+function calculateSustainabilityScore(materials: Material[], highImpactMaterials: any[]): number {
+  // Base score starting point
+  let baseScore = 70;
+  
+  // Adjust based on how many high impact materials
+  if (highImpactMaterials.length > 3) {
+    baseScore -= 10;
+  } else if (highImpactMaterials.length <= 1) {
+    baseScore += 10;
+  }
+  
+  // Look for keywords in material names that indicate sustainability
+  let sustainableMaterialCount = 0;
+  materials.forEach(material => {
+    const materialName = material.name.toLowerCase();
+    
+    if (
+      materialName.includes('recycled') ||
+      materialName.includes('sustainable') ||
+      materialName.includes('low carbon') ||
+      materialName.includes('low-carbon') ||
+      materialName.includes('reclaimed') ||
+      materialName.includes('bio-based')
+    ) {
+      sustainableMaterialCount++;
+    }
+  });
+  
+  // Adjust score based on sustainable materials
+  if (materials.length > 0) {
+    const sustainableRatio = sustainableMaterialCount / materials.length;
+    baseScore += Math.round(sustainableRatio * 20);
+  }
+  
+  // Ensure score is between 0-100
+  return Math.min(100, Math.max(0, baseScore));
 }

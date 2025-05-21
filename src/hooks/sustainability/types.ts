@@ -1,7 +1,51 @@
 
-// Type definitions for sustainability suggestions
+/**
+ * Type definitions for sustainability analysis and suggestions
+ */
+
+import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
+
+// Extended types with additional sustainability properties
+export interface ExtendedMaterialInput extends MaterialInput {
+  recyclable?: boolean;
+  recycledContent?: number; // percentage
+  locallySourced?: boolean;
+  embodiedCarbon?: number;
+  lifespan?: number;
+}
+
+export interface ExtendedTransportInput extends TransportInput {
+  fuelType?: string;
+  electricVehicle?: boolean;
+  averageLoad?: number;
+}
+
+export interface ExtendedEnergyInput extends EnergyInput {
+  renewablePercentage?: number;
+  gridEmissionsIntensity?: number;
+}
+
+// Sustainability analysis options
+export interface SustainabilityAnalysisOptions {
+  format?: 'basic' | 'detailed' | 'comprehensive';
+  includeLifecycleAnalysis?: boolean;
+  includeComplianceDetails?: boolean;
+  targetRating?: number;
+  region?: string;
+  buildingType?: string;
+}
+
+// Response structure for suggestions
+export interface SuggestionsResponse {
+  suggestions: string[];
+  prioritySuggestions?: string[];
+  report?: any; // Detailed report data
+  metadata: SuggestionMetadata;
+}
+
+// Metadata about the suggestions
 export interface SuggestionMetadata {
-  source: 'api' | 'local';
+  source: 'api' | 'fallback' | 'cache';
   count: number;
   categories: {
     material: number;
@@ -10,47 +54,5 @@ export interface SuggestionMetadata {
     general: number;
     priority: number;
   };
-  generatedAt: string;
-}
-
-export interface SuggestionsResponse {
-  suggestions: string[];
-  prioritySuggestions?: string[];
-  metadata?: SuggestionMetadata;
-  report?: any; // Full report object
-}
-
-// Extended interfaces for the API request
-export interface ExtendedMaterialInput {
-  id?: string;
-  type: string;
-  quantity: number | string;
-  unit?: string;
-  factor?: number;
-  recyclable?: boolean;
-  recycledContent?: number;
-  locallySourced?: boolean;
-}
-
-export interface ExtendedTransportInput {
-  id?: string;
-  type: string;
-  distance: number | string;
-  weight?: number | string;
-  factor?: number;
-  fuelType?: string;
-}
-
-export interface ExtendedEnergyInput {
-  id?: string;
-  type: string;
-  amount: number | string;
-  unit?: string;
-  factor?: number;
-}
-
-export interface SustainabilityAnalysisOptions {
-  format?: 'basic' | 'detailed' | 'comprehensive';
-  includeLifecycleAnalysis?: boolean;
-  includeComplianceDetails?: boolean;
+  generatedAt: string; // ISO date string
 }
