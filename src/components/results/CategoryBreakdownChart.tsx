@@ -2,7 +2,8 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalculationResult, Material, Transport, Energy, MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from "@/lib/carbonExports";
+import { CalculationResult } from "@/lib/carbonExports";
+import { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from "@/lib/carbonData";
 import { Progress } from "@/components/ui/progress";
 import { useCallback, useEffect, useMemo } from "react";
 import { Bug } from "lucide-react";
@@ -36,7 +37,7 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
             
             chartData = Object.entries(result.breakdownByMaterial)
               .map(([key, value]) => {
-                const materialName = MATERIAL_FACTORS[key as Material]?.name || key;
+                const materialName = MATERIAL_FACTORS[key as any]?.name || key;
                 console.log(`Material ${key} -> ${materialName}: ${value}`);
                 return {
                   name: materialName,
@@ -55,7 +56,7 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
         case 'transport':
           chartData = Object.entries(result.breakdownByTransport)
             .map(([key, value]) => ({
-              name: TRANSPORT_FACTORS[key as Transport]?.name || key,
+              name: TRANSPORT_FACTORS[key as any]?.name || key,
               value: Number(value.toFixed(2))
             }))
             .filter(item => item.value > 0)
@@ -69,7 +70,7 @@ const CategoryBreakdownChart = ({ result, category }: CategoryBreakdownChartProp
         case 'energy':
           chartData = Object.entries(result.breakdownByEnergy)
             .map(([key, value]) => ({
-              name: ENERGY_FACTORS[key as Energy]?.name || key,
+              name: ENERGY_FACTORS[key as any]?.name || key,
               value: Number(value.toFixed(2))
             }))
             .filter(item => item.value > 0)

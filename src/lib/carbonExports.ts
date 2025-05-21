@@ -1,28 +1,16 @@
 
-export interface MaterialInput {
-  type: string;
-  quantity: string;
-  id?: string; // Added missing property
-  factor?: number; // Added missing property
-  region?: string;
-}
+import { CalculationResult as CalculationResultType } from "./carbonCalculations";
+import { MaterialInput as MaterialInputType, TransportInput as TransportInputType, EnergyInput as EnergyInputType } from "./carbonTypes";
 
-export interface TransportInput {
-  type: string;
-  distance: string;
-  weight: string;
-  id?: string;
-  factor?: number;
-}
+// Re-export types from carbonTypes.ts
+export type MaterialInput = MaterialInputType;
+export type TransportInput = TransportInputType;
+export type EnergyInput = EnergyInputType;
 
-export interface EnergyInput {
-  type: string;
-  amount: string;
-  unit: string;
-  id?: string;
-  factor?: number;
-}
+// Export Material, Transport and Energy types
+export type { Material, Transport, Energy } from "./carbonTypes";
 
+// Export the calculation types
 export interface CalculationInput {
   materials: MaterialInput[];
   transport: TransportInput[];
@@ -35,13 +23,10 @@ export interface CalculationInput {
   };
 }
 
-export interface CalculationResult {
-  totalEmissions: number;
-  materialEmissions: number;
-  transportEmissions: number;
-  energyEmissions: number;
-  breakdownByMaterial: Record<string, number>;
-  breakdownByTransport: Record<string, number>;
-  breakdownByEnergy: Record<string, number>;
+// Extend the CalculationResult to include timestamp
+export interface CalculationResult extends CalculationResultType {
   timestamp: string;
 }
+
+// Export the factor maps
+export { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from "./carbonData";

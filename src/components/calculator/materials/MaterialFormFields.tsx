@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle } from "lucide-react";
-import { MATERIAL_FACTORS } from "@/lib/carbonExports";
+import { MATERIAL_FACTORS } from "@/lib/carbonData";
 import { fetchMaterials } from "@/services/materialService";
 import { useState } from "react";
 
