@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useRegion } from "@/contexts/RegionContext";
 import { useMaterialCache } from "@/hooks/materialCache";
 import { useMaterialData } from "@/hooks/useMaterialData";
+import { useBackgroundMaterialRefresh } from "@/hooks/useBackgroundMaterialRefresh";
 import ErrorBoundaryWrapper from "@/components/error/ErrorBoundaryWrapper";
 import MaterialDatabaseContent from "./database/MaterialDatabaseContent";
 import { toast } from "sonner";
@@ -17,6 +18,17 @@ const MaterialDatabaseContainer: React.FC = () => {
   
   // Use the material cache hook for efficient data loading
   const { materials, loading, error, refreshCache, cacheStats } = useMaterialCache();
+  
+  // Set up background refresh of materials
+  const { isRefreshing } = useBackgroundMaterialRefresh({
+    enabled: true, // Enable background refresh
+    onSuccess: () => {
+      console.log("Background refresh completed successfully");
+    },
+    onError: (err) => {
+      console.error("Background refresh failed:", err);
+    }
+  });
   
   // Log materials when they change
   useEffect(() => {
@@ -125,7 +137,7 @@ const MaterialDatabaseContainer: React.FC = () => {
           setSelectedTag={setSelectedTag}
           materials={materials}
           filteredMaterials={filteredMaterials}
-          loading={loading}
+          loading={loading || isRefreshing}
           error={error}
           refreshCache={handleManualRefresh}
           cacheStats={cacheStats}
