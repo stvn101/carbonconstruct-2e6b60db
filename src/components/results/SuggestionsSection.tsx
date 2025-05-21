@@ -47,7 +47,7 @@ const SuggestionsSection = ({
               API
             </Badge>
           )}
-          {metadata?.source === 'local' && (
+          {metadata?.source === 'fallback' && (
             <Badge variant="outline" className="ml-2 bg-yellow-50 text-yellow-700 border-yellow-300">
               Local
             </Badge>

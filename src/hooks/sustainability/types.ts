@@ -7,6 +7,8 @@ import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports'
 
 // Extended types with additional sustainability properties
 export interface ExtendedMaterialInput extends MaterialInput {
+  id?: string; // Added missing property
+  factor?: number; // Added missing property
   recyclable?: boolean;
   recycledContent?: number; // percentage
   locallySourced?: boolean;
@@ -15,12 +17,16 @@ export interface ExtendedMaterialInput extends MaterialInput {
 }
 
 export interface ExtendedTransportInput extends TransportInput {
+  id?: string; // Added missing property
+  factor?: number; // Added missing property
   fuelType?: string;
   electricVehicle?: boolean;
   averageLoad?: number;
 }
 
 export interface ExtendedEnergyInput extends EnergyInput {
+  id?: string; // Added missing property
+  factor?: number; // Added missing property
   renewablePercentage?: number;
   gridEmissionsIntensity?: number;
 }

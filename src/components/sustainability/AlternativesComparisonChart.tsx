@@ -1,125 +1,87 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } from "recharts";
-import { SustainableMaterial } from "supabase/functions/get-sustainability-suggestions/Material";
-import { Badge } from "@/components/ui/badge";
+import { SustainableMaterial } from "@/lib/materialCategories";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface AlternativesComparisonChartProps {
-  originalMaterial: { name: string; carbonFootprint: number; quantity?: number };
+  originalMaterial: {
+    id: string;
+    name: string;
+    carbonFootprint: number;
+    quantity?: number;
+  };
   alternatives: SustainableMaterial[];
-  className?: string;
 }
 
-const AlternativesComparisonChart: React.FC<AlternativesComparisonChartProps> = ({ 
-  originalMaterial, 
-  alternatives,
-  className
+const AlternativesComparisonChart: React.FC<AlternativesComparisonChartProps> = ({
+  originalMaterial,
+  alternatives
 }) => {
-  if (!originalMaterial || alternatives.length === 0) {
-    return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle>Material Alternatives</CardTitle>
-          <CardDescription>Compare conventional materials with sustainable alternatives</CardDescription>
-        </CardHeader>
-        <CardContent className="h-64 flex items-center justify-center">
-          <p className="text-muted-foreground">No alternatives data available</p>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  // Prepare data for comparison chart
+  // Prepare chart data
   const chartData = [
     {
       name: originalMaterial.name,
-      carbon: originalMaterial.carbonFootprint,
-      type: "Conventional",
-      reduction: 0,
-      score: 0
+      value: originalMaterial.carbonFootprint,
+      isOriginal: true,
     },
     ...alternatives.map(alt => ({
       name: alt.name,
-      carbon: alt.carbonFootprint,
-      type: "Sustainable Alternative",
-      reduction: alt.carbonReduction,
-      score: alt.sustainabilityScore
+      value: alt.carbonFootprint,
+      isOriginal: false,
+      reduction: alt.carbonReduction
     }))
-  ].sort((a, b) => a.carbon - b.carbon); // Sort by carbon footprint (lowest first)
-  
-  const customTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow-lg">
-          <p className="font-medium">{label}</p>
-          <p className="text-sm text-carbon-600 dark:text-carbon-400">
-            Carbon: {payload[0].value.toFixed(2)} kg CO2e
-          </p>
-          {payload[0].payload.reduction > 0 && (
-            <p className="text-sm text-green-600 dark:text-green-400">
-              Reduction: {payload[0].payload.reduction}%
-            </p>
-          )}
-          {payload[0].payload.score > 0 && (
-            <p className="text-sm text-blue-600 dark:text-blue-400">
-              Sustainability Score: {payload[0].payload.score}/100
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Define colors for material types
-  const CONVENTIONAL_COLOR = "#f59e0b";
-  const SUSTAINABLE_COLOR = "#3e9847";
+  ].sort((a, b) => b.value - a.value);
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          Material Alternatives
-          <Badge variant="outline" className="ml-2 bg-carbon-50 text-carbon-700 dark:bg-carbon-900 dark:text-carbon-300">
-            Up to {Math.max(...alternatives.map(alt => alt.carbonReduction), 0)}% Reduction
-          </Badge>
-        </CardTitle>
-        <CardDescription>
-          Comparing {originalMaterial.name} with sustainable alternatives
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart 
-            data={chartData} 
-            layout="vertical" 
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" horizontal={true} />
-            <XAxis 
-              type="number" 
-              label={{ value: 'Carbon Footprint (kg CO2e)', position: 'insideBottom', offset: -5 }}
-            />
-            <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 12 }} />
-            <Tooltip content={customTooltip} />
-            <Legend />
-            <Bar 
-              dataKey="carbon" 
-              name="Carbon Footprint" 
-              fill={SUSTAINABLE_COLOR}
-              strokeWidth={2}
-            >
-              {chartData.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.type === "Conventional" ? CONVENTIONAL_COLOR : SUSTAINABLE_COLOR}
-                  stroke={entry.type === "Conventional" ? CONVENTIONAL_COLOR : SUSTAINABLE_COLOR}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+    <Card className="mb-4">
+      <CardContent className="pt-6">
+        <h3 className="font-medium mb-3">Carbon Footprint Comparison</h3>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fontSize: 12 }}
+                interval={0}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis 
+                label={{ 
+                  value: 'kg CO₂e', 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle' }
+                }}
+              />
+              <Tooltip
+                formatter={(value: number) => [`${value.toFixed(2)} kg CO₂e`, 'Carbon Footprint']}
+                labelFormatter={(name) => `Material: ${name}`}
+                contentStyle={{ fontSize: '12px' }}
+                cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+              />
+              <Bar dataKey="value" name="Carbon Footprint">
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.isOriginal ? '#f59e0b' : '#22c55e'} 
+                    strokeWidth={entry.isOriginal ? 2 : 0}
+                    stroke={entry.isOriginal ? '#d97706' : 'none'}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4 text-sm text-muted-foreground">
+          <span className="inline-block w-3 h-3 bg-[#f59e0b] mr-2"></span>
+          Original material
+          <span className="inline-block w-3 h-3 bg-[#22c55e] ml-6 mr-2"></span>
+          Alternative materials
+        </div>
       </CardContent>
     </Card>
   );

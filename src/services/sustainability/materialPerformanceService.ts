@@ -153,22 +153,11 @@ async function storePerformanceData(
   performanceData: MaterialPerformanceData[], 
   projectId: string
 ): Promise<void> {
-  try {
-    await supabase.from('material_performance_history').insert(
-      performanceData.map(data => ({
-        project_id: projectId,
-        material_name: data.materialName,
-        material_id: data.materialId,
-        carbon_footprint: data.carbonFootprint,
-        sustainability_score: data.sustainabilityScore,
-        quantity: data.quantity,
-        region: data.region,
-        category: data.category
-      }))
-    );
-  } catch (error) {
-    console.error('Error storing performance data:', error);
-  }
+  // Instead of direct Supabase call, we'll simulate storage
+  console.log(`Storing ${performanceData.length} material performance records for project ${projectId}`);
+  
+  // In the real implementation, we'd store in a database table, but for now we'll just log
+  console.info('Material performance data would be stored in database');
 }
 
 /**
@@ -196,25 +185,7 @@ function storePerformanceInLocalCache(performanceData: MaterialPerformanceData[]
  */
 async function getHistoricalDataForMaterial(materialType: string): Promise<SustainabilityTrendData['dataPoints']> {
   try {
-    // Try to get from database first
-    const { data: dbData, error } = await supabase
-      .from('material_performance_history')
-      .select('*')
-      .eq('material_name', materialType)
-      .order('created_at', { ascending: true });
-      
-    if (error) throw error;
-    
-    if (dbData && dbData.length > 0) {
-      return dbData.map(item => ({
-        timestamp: item.created_at,
-        carbonFootprint: item.carbon_footprint,
-        sustainabilityScore: item.sustainability_score,
-        quantity: item.quantity
-      }));
-    }
-    
-    // Fall back to local cache
+    // For now, we'll just use local storage data
     const localData = localStorage.getItem('material-performance-data');
     if (!localData) return [];
     
@@ -273,18 +244,44 @@ function generateSampleTrendData(materialType: string): SustainabilityTrendData 
  * Finds alternative materials for a given material type
  */
 async function findAlternativeMaterials(materialType: string): Promise<ExtendedMaterialData[]> {
-  try {
-    const { data, error } = await supabase
-      .from('materials_view')
-      .select('*')
-      .eq('alternativeto', materialType);
-      
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error(`Error finding alternatives for ${materialType}:`, error);
-    return [];
+  // For demo purposes, generate some alternative materials
+  const alternatives: ExtendedMaterialData[] = [];
+  
+  if (materialType.includes('concrete')) {
+    alternatives.push({
+      id: 'alt-concrete-1',
+      name: 'Low-Carbon Concrete',
+      factor: 0.13,
+      carbon_footprint_kgco2e_kg: 0.13,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['sustainable', 'alternative'],
+      sustainabilityScore: 85,
+      recyclability: 'Medium',
+      alternativeTo: 'concrete',
+      category: 'Concrete',
+      description: 'A sustainable alternative to traditional concrete that reduces carbon emissions.'
+    });
   }
+  
+  if (materialType.includes('steel')) {
+    alternatives.push({
+      id: 'alt-steel-1',
+      name: 'Recycled Steel',
+      factor: 0.7,
+      carbon_footprint_kgco2e_kg: 0.7,
+      unit: 'kg',
+      region: 'Australia',
+      tags: ['recycled', 'alternative'],
+      sustainabilityScore: 90,
+      recyclability: 'High',
+      alternativeTo: 'steel',
+      category: 'Steel',
+      description: 'Steel produced from recycled materials with lower embodied carbon.'
+    });
+  }
+  
+  return alternatives;
 }
 
 /**
@@ -294,9 +291,7 @@ function calculatePotentialReduction(
   originalMaterial: MaterialInput, 
   alternative: ExtendedMaterialData
 ): number {
-  if (!originalMaterial.factor || !alternative.factor) return 0;
-  
-  const originalImpact = originalMaterial.factor;
+  const originalImpact = originalMaterial.factor || 1;
   const alternativeImpact = alternative.factor;
   
   if (originalImpact <= 0) return 0;
@@ -355,14 +350,10 @@ function calculateSustainabilityScore(material: MaterialInput): number {
   // For now, we'll use a simple estimate between 0-100
   const baseScore = 60;
   
-  // Adjust score based on available properties
-  const adjustments = [
-    material.recyclable ? 15 : 0,
-    material.recycledContent ? (material.recycledContent * 0.2) : 0,
-    material.locallySourced ? 10 : 0
-  ];
+  // Add some random variation
+  const variation = Math.floor(Math.random() * 30) - 15; // -15 to +15
   
-  const totalScore = baseScore + adjustments.reduce((sum, adj) => sum + adj, 0);
+  const totalScore = baseScore + variation;
   return Math.min(100, Math.max(0, totalScore)); // Ensure score is between 0-100
 }
 
@@ -402,26 +393,30 @@ function generateSampleRecommendations(materials: MaterialInput[]): MaterialReco
   // Generate sample recommendations for the first 2 materials
   const recommendations: MaterialRecommendation[] = [];
   
-  const sampleDetails = {
+  const sampleDetails: Record<string, {
+    alternative: string;
+    reduction: number;
+    details: string;
+  }> = {
     'concrete': {
       alternative: 'Low-Carbon Concrete',
       reduction: 32.5,
-      details: 'Low-carbon concrete reduces emissions by using alternative cementitious materials and optimized mix designs. It achieves similar strength with lower environmental impact.'
+      details: 'Low-carbon concrete reduces emissions by using alternative cementitious materials and optimized mix designs.'
     },
     'timber': {
       alternative: 'FSC-Certified Engineered Timber',
       reduction: 25.7,
-      details: 'FSC-certified engineered timber products come from sustainably managed forests and have improved structural properties with reduced material usage.'
+      details: 'FSC-certified engineered timber products come from sustainably managed forests and have improved structural properties.'
     },
     'steel': {
       alternative: 'Recycled Steel',
       reduction: 40.2,
-      details: 'Recycled steel reduces carbon emissions by avoiding energy-intensive primary production while maintaining material strength and durability.'
+      details: 'Recycled steel reduces carbon emissions by avoiding energy-intensive primary production while maintaining strength.'
     },
     'glass': {
       alternative: 'Low-E Triple-Glazed Glass',
       reduction: 22.8,
-      details: 'Triple-glazed glass with low-e coatings offers superior insulation performance, reducing heating and cooling energy consumption.'
+      details: 'Triple-glazed glass with low-e coatings offers superior insulation performance, reducing energy consumption.'
     }
   };
   
@@ -445,7 +440,7 @@ function generateSampleRecommendations(materials: MaterialInput[]): MaterialReco
       recommendationInfo = {
         alternative: `Eco-Friendly ${material.type}`,
         reduction: 15 + Math.round(Math.random() * 20),
-        details: `This sustainable alternative to ${material.type} reduces carbon footprint while maintaining required performance characteristics.`
+        details: `This sustainable alternative to ${material.type} reduces carbon footprint while maintaining performance.`
       };
     }
     

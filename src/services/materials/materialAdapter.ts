@@ -1,75 +1,70 @@
-
 /**
  * Material Adapter
- * Provides utilities for adapting between different material data formats
+ * 
+ * Adapts different material data formats to work consistently in the app
  */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
 
-const DATABASE_ID_PREFIX = 'db-material-';
+// Prefix for database material IDs to distinguish them from static material types
+const DB_MATERIAL_PREFIX = 'db-material-';
 
 /**
- * Checks if a material ID is from the database
+ * Check if a material ID is a database material
  */
 export function isDatabaseMaterialId(id: string): boolean {
-  return id.startsWith(DATABASE_ID_PREFIX);
+  return id.startsWith(DB_MATERIAL_PREFIX);
 }
 
 /**
- * Extracts the database ID from a prefixed ID
+ * Extract the raw database ID from a prefixed material ID
  */
 export function extractDatabaseId(id: string): string {
-  if (!isDatabaseMaterialId(id)) {
-    return id;
-  }
-  
-  return id.substring(DATABASE_ID_PREFIX.length);
+  return id.replace(DB_MATERIAL_PREFIX, '');
 }
 
 /**
- * Creates a database material ID
+ * Create a prefixed database material ID
  */
-export function createDatabaseMaterialId(dbId: string): string {
-  return `${DATABASE_ID_PREFIX}${dbId}`;
+export function createDatabaseMaterialId(id: string): string {
+  return `${DB_MATERIAL_PREFIX}${id}`;
 }
 
 /**
- * Resolves a material from various data sources
+ * Resolve a material by its identifier (either static type or database id)
  */
 export async function resolveMaterial(materialIdentifier: string): Promise<ExtendedMaterialData> {
-  // Handle database material IDs
+  // Check if material is a database material
   if (isDatabaseMaterialId(materialIdentifier)) {
+    // Extract the database ID and look up in the database
     const dbId = extractDatabaseId(materialIdentifier);
-    return resolveMaterialFromDatabase(dbId);
+    return getDatabaseMaterialById(dbId);
   }
   
-  // Handle static material types
+  // Otherwise, lookup in static materials
   if (MATERIAL_FACTORS[materialIdentifier]) {
-    return createMaterialFromStatic(materialIdentifier);
+    const staticMaterial = MATERIAL_FACTORS[materialIdentifier];
+    return {
+      id: materialIdentifier,
+      name: staticMaterial.name || materialIdentifier,
+      factor: staticMaterial.factor,
+      unit: staticMaterial.unit || 'kg',
+      category: guessCategoryFromName(staticMaterial.name || materialIdentifier),
+      region: 'Global',
+      tags: [guessCategoryFromName(staticMaterial.name || materialIdentifier).toLowerCase()]
+    };
   }
   
-  // If we can't resolve it, create a fallback
+  // If not found, create a fallback
   return createFallbackMaterial(materialIdentifier);
 }
 
 /**
- * Resolves a material from the database
+ * Get a material from the database by ID
  */
-async function resolveMaterialFromDatabase(dbId: string): Promise<ExtendedMaterialData> {
+async function getDatabaseMaterialById(dbId: string): Promise<ExtendedMaterialData> {
   try {
     // Import dynamically to avoid circular dependencies
-    const { getCachedMaterials } = await import('./cache/materialCacheAPI');
-    
-    // Try to get from cache first
-    const cachedMaterials = await getCachedMaterials();
-    if (cachedMaterials && cachedMaterials.length > 0) {
-      const cachedMaterial = cachedMaterials.find(m => m.id === dbId);
-      if (cachedMaterial) {
-        return cachedMaterial;
-      }
-    }
-    
-    // If not in cache, try to get directly from database
     const { supabase } = await import('@/integrations/supabase/client');
     
     const { data, error } = await supabase
@@ -78,137 +73,84 @@ async function resolveMaterialFromDatabase(dbId: string): Promise<ExtendedMateri
       .eq('id', dbId)
       .single();
       
-    if (error) {
-      console.error('Error resolving material from database:', error);
-      return createFallbackMaterial(dbId);
-    }
+    if (error) throw error;
+    if (!data) throw new Error(`Material ${dbId} not found`);
     
-    if (!data) {
-      return createFallbackMaterial(dbId);
-    }
-    
-    // Convert to ExtendedMaterialData format
-    return {
-      id: data.id,
-      name: data.name || 'Unknown Material',
-      factor: data.factor || data.carbon_footprint_kgco2e_kg || 1,
-      carbon_footprint_kgco2e_kg: data.carbon_footprint_kgco2e_kg,
-      carbon_footprint_kgco2e_tonne: data.carbon_footprint_kgco2e_tonne,
-      unit: data.unit || 'kg',
-      region: data.region || 'Australia',
-      tags: data.tags || [],
-      sustainabilityScore: data.sustainabilityscore || 60,
-      recyclability: data.recyclability || 'Medium',
-      alternativeTo: data.alternativeto,
-      notes: data.notes,
-      category: data.category,
-      description: data.description
-    };
+    // Convert from database format to ExtendedMaterialData
+    return convertFromDatabaseFormat(data);
   } catch (error) {
-    console.error('Error resolving material from database:', error);
-    return createFallbackMaterial(dbId);
+    console.error(`Error fetching material ${dbId}:`, error);
+    return createFallbackMaterial(`Unknown (${dbId})`);
   }
 }
 
 /**
- * Creates a material from static data
+ * Convert a database material to ExtendedMaterialData format
  */
-function createMaterialFromStatic(materialType: string): ExtendedMaterialData {
-  const staticMaterial = MATERIAL_FACTORS[materialType];
+export function convertFromDatabaseFormat(dbMaterial: any): ExtendedMaterialData {
+  // Validate recyclability as one of the allowed values
+  let recyclability: 'High' | 'Medium' | 'Low' = 'Medium';
+  if (dbMaterial.recyclability) {
+    if (['High', 'Medium', 'Low'].includes(dbMaterial.recyclability)) {
+      recyclability = dbMaterial.recyclability as 'High' | 'Medium' | 'Low';
+    }
+  }
   
   return {
-    id: materialType,
-    name: staticMaterial.name || materialType,
-    factor: staticMaterial.factor,
-    carbon_footprint_kgco2e_kg: staticMaterial.factor,
-    unit: staticMaterial.unit || 'kg',
-    region: 'Global', // Static materials are global by default
-    tags: ['construction'],
-    sustainabilityScore: 60, // Default score
-    recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
-    category: guessCategoryFromName(staticMaterial.name || materialType),
-    description: `Standard construction material: ${staticMaterial.name || materialType}`
+    id: dbMaterial.id,
+    name: dbMaterial.name,
+    factor: dbMaterial.factor || dbMaterial.carbon_footprint_kgco2e_kg || 1,
+    carbon_footprint_kgco2e_kg: dbMaterial.carbon_footprint_kgco2e_kg,
+    carbon_footprint_kgco2e_tonne: dbMaterial.carbon_footprint_kgco2e_tonne,
+    unit: dbMaterial.unit || 'kg',
+    region: dbMaterial.region || 'Global',
+    tags: dbMaterial.tags || [],
+    sustainabilityScore: dbMaterial.sustainabilityscore || 50,
+    recyclability: recyclability,
+    alternativeTo: dbMaterial.alternativeto,
+    notes: dbMaterial.notes,
+    category: dbMaterial.category,
+    description: dbMaterial.notes // Use notes as description since description doesn't exist
   };
 }
 
 /**
- * Creates a fallback material for when resolution fails
+ * Create a fallback material when the requested one can't be found
  */
-export function createFallbackMaterial(identifier: string): ExtendedMaterialData {
+export function createFallbackMaterial(name: string): ExtendedMaterialData {
   return {
-    id: identifier,
-    name: formatMaterialName(identifier),
+    id: `fallback-${name.replace(/\s+/g, '-').toLowerCase()}`,
+    name: name,
     factor: 1.0, // Default factor
-    carbon_footprint_kgco2e_kg: 1.0,
     unit: 'kg',
-    region: 'Unknown',
-    tags: ['unknown'],
+    region: 'Global',
+    tags: [],
     sustainabilityScore: 50,
-    recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
+    recyclability: 'Medium',
     category: 'Other',
-    description: `Material data could not be resolved for ${formatMaterialName(identifier)}`
+    description: `Generic material based on ${name}`
   };
 }
 
 /**
- * Formats a material name from an identifier
- */
-function formatMaterialName(identifier: string): string {
-  // Remove any prefixes
-  let name = identifier;
-  if (isDatabaseMaterialId(identifier)) {
-    name = extractDatabaseId(identifier);
-  }
-  
-  // Convert kebab-case or snake_case to Title Case
-  name = name
-    .replace(/[-_]/g, ' ')
-    .replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
-  
-  return name;
-}
-
-/**
- * Guesses a category based on material name
+ * Guess a category based on material name
  */
 function guessCategoryFromName(name: string): string {
   const nameLower = name.toLowerCase();
   
-  if (
-    nameLower.includes('concrete') || 
-    nameLower.includes('cement') ||
-    nameLower.includes('mortar')
-  ) {
+  if (nameLower.includes('concrete') || nameLower.includes('cement')) {
     return 'Concrete';
   }
   
-  if (
-    nameLower.includes('steel') || 
-    nameLower.includes('metal') ||
-    nameLower.includes('iron')
-  ) {
+  if (nameLower.includes('steel') || nameLower.includes('metal')) {
     return 'Steel';
   }
   
-  if (
-    nameLower.includes('timber') || 
-    nameLower.includes('wood')
-  ) {
+  if (nameLower.includes('timber') || nameLower.includes('wood')) {
     return 'Timber';
   }
   
-  if (
-    nameLower.includes('glass') || 
-    nameLower.includes('window')
-  ) {
-    return 'Glass';
-  }
-  
-  if (
-    nameLower.includes('insulation') || 
-    nameLower.includes('wool') ||
-    nameLower.includes('foam')
-  ) {
+  if (nameLower.includes('insulation')) {
     return 'Insulation';
   }
   
