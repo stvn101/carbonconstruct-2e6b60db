@@ -8,6 +8,7 @@ import { isNetworkError } from './networkChecker';
 // Export all error handling utilities from this central file
 export * from './toastHelpers';
 export * from './networkErrorHandler';
+export * from './connectionRecovery';
 
 // Explicitly handle the duplicate isNetworkError functions
 // Export from timeoutHelper with a renamed export

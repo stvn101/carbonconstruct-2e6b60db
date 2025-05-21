@@ -9,6 +9,7 @@ import { Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComplianceResult } from "@/hooks/useComplianceCheck";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { withNetworkErrorHandling } from "@/utils/errorHandling";
 
 // Import component parts
 import LoadingState from "./loading/LoadingState";
@@ -48,9 +49,20 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
   }, [result, onComplianceResult]);
 
   const runComplianceCheck = async () => {
-    await checkCompliance(materials, transport, energy, { includeDetailedReport: true });
+    try {
+      // Use network error handling wrapper
+      await withNetworkErrorHandling(
+        () => checkCompliance(materials, transport, energy, { includeDetailedReport: true }),
+        10000, // 10 second timeout
+        2 // Max 2 retries
+      );
+    } catch (err) {
+      // Error handling is done inside the hook
+      console.error("Error in compliance check:", err);
+    }
   };
 
+  // Show appropriate state based on data status
   if (isLoading) {
     return <LoadingState />;
   }
