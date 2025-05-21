@@ -32,7 +32,6 @@ export interface EnergyInput {
   unit?: string;
   id?: string;
   factor?: number;
-  quantity?: number | string; // For backward compatibility
 }
 
 export interface CalculationInput {

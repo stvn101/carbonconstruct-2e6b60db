@@ -8,7 +8,7 @@ export type TransportInput = TransportInputType;
 export type EnergyInput = EnergyInputType;
 
 // Export Material, Transport and Energy types
-export type { Material, Transport, Energy } from "./carbonTypes";
+export { type Material, type Transport, type Energy } from "./carbonTypes";
 
 // Export the calculation types
 export interface CalculationInput {
@@ -30,3 +30,6 @@ export interface CalculationResult extends CalculationResultType {
 
 // Export the factor maps
 export { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from "./carbonData";
+
+// Re-export the calculation function
+export { calculateTotalEmissions } from "./carbonCalculations";

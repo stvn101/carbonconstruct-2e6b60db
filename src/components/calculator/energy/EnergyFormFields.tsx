@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { EnergyInput } from "@/lib/carbonExports";
-import { Energy, ENERGY_FACTORS } from "@/lib/carbonData";
+import { ENERGY_FACTORS } from "@/lib/carbonData";
+import { EnergyFactorKey } from "@/lib/carbonData";
 
 interface EnergyFormFieldsProps {
   energy: EnergyInput;
@@ -42,7 +43,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
               <SelectContent>
                 {energyTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {ENERGY_FACTORS[type as Energy]?.name || type}
+                    {ENERGY_FACTORS[type as EnergyFactorKey]?.name || type}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -58,7 +59,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
               type="number"
               min="0"
               max="10000"
-              value={energy.amount || energy.quantity || ""}
+              value={energy.amount || ""}
               onChange={(e) => onUpdate("amount", e.target.value)}
               className={error ? "border-red-300 bg-red-50" : ""}
               aria-invalid={error ? "true" : "false"}

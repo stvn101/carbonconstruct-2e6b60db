@@ -1,7 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
 import { CalculationResult } from '@/lib/carbonCalculations';
-import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
+import { MaterialInput, TransportInput, EnergyInput, CalculationResult as ExtendedCalculationResult } from '@/lib/carbonExports';
 import { Json } from '@/integrations/supabase/types';
 import { performDbOperation } from './supabase';
 
@@ -31,24 +32,40 @@ export async function fetchUserProjects(
       if (!data) return [];
       
       // Transform the data to match our SavedProject interface with all required properties
-      return data.map(project => ({
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        user_id: project.user_id,
-        created_at: project.created_at,
-        updated_at: project.updated_at,
+      return data.map(project => {
         // Parse JSON data from database with proper type casting
-        materials: (project.materials as unknown as MaterialInput[]) || [],
-        transport: (project.transport as unknown as TransportInput[]) || [],
-        energy: (project.energy as unknown as EnergyInput[]) || [],
-        result: project.result as unknown as CalculationResult,
-        tags: project.tags || [],
-        // Add required properties with default values if not present
-        status: 'draft', // Default to 'draft' as the database doesn't have this field yet
-        total_emissions: project.total || 0, // Use the 'total' column for emissions
-        premium_only: false // Default to false as the database doesn't have this field yet
-      }));
+        const materials = (project.materials as unknown as MaterialInput[]) || [];
+        const transport = (project.transport as unknown as TransportInput[]) || [];
+        const energy = (project.energy as unknown as EnergyInput[]) || [];
+        
+        // Parse result and add timestamp if missing
+        let result: ExtendedCalculationResult | undefined;
+        if (project.result) {
+          const baseResult = project.result as unknown as CalculationResult;
+          result = {
+            ...baseResult,
+            timestamp: baseResult.timestamp || new Date().toISOString()
+          };
+        }
+        
+        return {
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          user_id: project.user_id,
+          created_at: project.created_at,
+          updated_at: project.updated_at,
+          materials: materials,
+          transport: transport,
+          energy: energy,
+          result: result,
+          tags: project.tags || [],
+          // Add required properties with default values if not present
+          status: 'draft', // Default to 'draft' as the database doesn't have this field yet
+          total_emissions: project.total || 0, // Use the 'total' column for emissions
+          premium_only: false // Default to false as the database doesn't have this field yet
+        };
+      });
     },
     'load user projects',
     { fallbackData: [] }
@@ -75,6 +92,15 @@ export async function createProject(
 ): Promise<SavedProject> {
   return performDbOperation(
     async () => {
+      // Add timestamp to result if it's missing
+      let resultWithTimestamp: ExtendedCalculationResult | undefined;
+      if (project.result) {
+        resultWithTimestamp = {
+          ...project.result,
+          timestamp: new Date().toISOString()
+        };
+      }
+      
       const newProject = {
         name: project.name,
         description: project.description,
@@ -83,7 +109,7 @@ export async function createProject(
         materials: project.materials as unknown as Json,
         transport: project.transport as unknown as Json,
         energy: project.energy as unknown as Json,
-        result: project.result as unknown as Json,
+        result: resultWithTimestamp as unknown as Json,
         tags: project.tags || [],
         total: project.total_emissions || 0, // Ensure we update the 'total' column
       };
@@ -112,7 +138,10 @@ export async function createProject(
         materials: (data.materials as unknown as MaterialInput[]) || [],
         transport: (data.transport as unknown as TransportInput[]) || [],
         energy: (data.energy as unknown as EnergyInput[]) || [],
-        result: data.result as unknown as CalculationResult,
+        result: data.result ? {
+          ...(data.result as unknown as CalculationResult),
+          timestamp: (data.result as any)?.timestamp || new Date().toISOString()
+        } : undefined,
         tags: data.tags || [],
         // Add required properties with default values
         status: 'draft', // Default to 'draft' as the database doesn't have this field yet
@@ -130,6 +159,15 @@ export async function createProject(
 export async function updateProject(project: SavedProject): Promise<SavedProject> {
   return performDbOperation(
     async () => {
+      // Ensure result has timestamp if it exists
+      let resultWithTimestamp = project.result;
+      if (resultWithTimestamp && !resultWithTimestamp.timestamp) {
+        resultWithTimestamp = {
+          ...resultWithTimestamp,
+          timestamp: new Date().toISOString()
+        };
+      }
+      
       const { error } = await supabase
         .from('projects')
         .update({
@@ -139,7 +177,7 @@ export async function updateProject(project: SavedProject): Promise<SavedProject
           materials: project.materials as unknown as Json,
           transport: project.transport as unknown as Json,
           energy: project.energy as unknown as Json,
-          result: project.result as unknown as Json,
+          result: resultWithTimestamp as unknown as Json,
           tags: project.tags,
           total: project.total_emissions, // Ensure we update the 'total' column
           updated_at: new Date().toISOString()
@@ -151,7 +189,8 @@ export async function updateProject(project: SavedProject): Promise<SavedProject
       // Update local state with the new updated_at
       return { 
         ...project, 
-        updated_at: new Date().toISOString() 
+        updated_at: new Date().toISOString(),
+        result: resultWithTimestamp
       };
     },
     'update project'

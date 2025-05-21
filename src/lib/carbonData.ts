@@ -108,3 +108,8 @@ export const ENERGY_FACTORS = {
     description: "Coal energy"
   }
 };
+
+// Export keys as types
+export type MaterialFactorKey = keyof typeof MATERIAL_FACTORS;
+export type TransportFactorKey = keyof typeof TRANSPORT_FACTORS;
+export type EnergyFactorKey = keyof typeof ENERGY_FACTORS;
