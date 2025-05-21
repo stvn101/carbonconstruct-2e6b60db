@@ -1,16 +1,18 @@
 
-import React from "react";
+import React from 'react';
 import { Progress } from "@/components/ui/progress";
-import { Material } from "@/lib/carbonTypes";
-import { ArrowRightIcon, TrendingDown, Leaf, FileCheck } from "lucide-react";
+import { ArrowDownIcon } from "lucide-react";
 
 interface PotentialSavingsProps {
   originalEmissions: number;
   potentialEmissions: number;
   savings: number;
   savingsPercentage: number;
-  material: Material;
-  alternative: string;
+  material: string;
+  alternative: {
+    name: string;
+    description: string;
+  };
 }
 
 export const PotentialSavings: React.FC<PotentialSavingsProps> = ({
@@ -21,63 +23,53 @@ export const PotentialSavings: React.FC<PotentialSavingsProps> = ({
   material,
   alternative
 }) => {
-  const formatNumber = (num: number) => {
-    return num.toLocaleString(undefined, {
-      maximumFractionDigits: 2
-    });
-  };
-  
   return (
-    <div className="p-3 bg-green-50 border border-green-100 rounded-lg dark:bg-green-900/20 dark:border-green-800/50">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center">
-          <Leaf className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
-          <h3 className="font-medium text-carbon-800 dark:text-carbon-100">
-            {material} Replacement
-          </h3>
-        </div>
-        <span className="text-sm font-semibold text-green-700 dark:text-green-400 flex items-center">
-          <TrendingDown className="h-4 w-4 mr-1" />
-          {savingsPercentage}% reduction
+    <div className="p-4 border border-carbon-100 rounded-lg bg-carbon-50 dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="font-medium text-carbon-800 dark:text-carbon-100">{material}</h4>
+        <span className="text-sm text-carbon-600 dark:text-carbon-300">
+          -{savingsPercentage.toFixed(1)}% emissions
         </span>
       </div>
       
-      <div className="flex items-center mb-2 text-sm">
-        <span className="text-carbon-700 dark:text-carbon-300">{material}</span>
-        <ArrowRightIcon className="h-4 w-4 mx-2 text-carbon-400" />
-        <span className="font-medium text-green-700 dark:text-green-400 flex items-center">
-          <FileCheck className="h-4 w-4 mr-1" />
-          {alternative}
-        </span>
-      </div>
-      
-      <div className="mt-3 space-y-2 text-sm text-carbon-700 dark:text-carbon-300">
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <div className="flex justify-between mb-1">
-              <span>Original</span>
-              <span>{formatNumber(originalEmissions)} kg CO₂e</span>
-            </div>
-            <Progress value={100} className="h-2 bg-carbon-200" />
-          </div>
-          <div>
-            <div className="flex justify-between mb-1">
-              <span>After</span>
-              <span>{formatNumber(potentialEmissions)} kg CO₂e</span>
-            </div>
-            <Progress 
-              value={(potentialEmissions / originalEmissions) * 100} 
-              className="h-2 bg-carbon-200" 
-              indicatorClassName="bg-green-500"
-            />
-          </div>
+      <div className="mb-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div>
+          <div className="text-xs text-muted-foreground">Original</div>
+          <div className="font-medium">{originalEmissions.toFixed(2)} kg CO2e</div>
         </div>
         
-        <div className="pt-1 border-t border-green-200 dark:border-green-800/50 flex justify-between text-xs">
-          <span>Potential savings</span>
-          <span className="font-medium text-green-700 dark:text-green-400">
-            {formatNumber(savings)} kg CO₂e
-          </span>
+        <ArrowDownIcon className="h-4 w-4 text-carbon-600" />
+        
+        <div>
+          <div className="text-xs text-muted-foreground">Potential</div>
+          <div className="font-medium">{potentialEmissions.toFixed(2)} kg CO2e</div>
+        </div>
+      </div>
+      
+      <div className="mb-3">
+        <div className="flex justify-between text-xs mb-1">
+          <span>Current</span>
+          <span>Potential savings: {savings.toFixed(2)} kg CO2e</span>
+        </div>
+        
+        <div className="h-2 relative bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className="absolute top-0 left-0 h-full bg-carbon-600"
+            style={{ width: '100%' }}
+          ></div>
+          <div 
+            className="absolute top-0 left-0 h-full bg-green-600"
+            style={{ width: `${100 - savingsPercentage}%` }}
+          ></div>
+        </div>
+      </div>
+      
+      <div className="mt-3 bg-white rounded-md p-2 dark:bg-gray-700">
+        <div className="font-medium text-sm text-carbon-800 dark:text-carbon-200">
+          <span className="text-carbon-600 dark:text-carbon-400">Alternative: </span>{alternative.name}
+        </div>
+        <div className="text-xs text-muted-foreground dark:text-carbon-300 mt-1">
+          {alternative.description}
         </div>
       </div>
     </div>

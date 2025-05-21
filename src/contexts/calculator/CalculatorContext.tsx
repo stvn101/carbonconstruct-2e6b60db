@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useEffect, useCallback, useMemo } from "react";
-import { CalculationInput, CalculationResult, calculateTotalEmissions } from "@/lib/carbonCalculations";
+import { CalculationResult, CalculationInput, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
+import { calculateTotalEmissions } from "@/lib/carbonCalculations";
 import { CalculatorContextType } from "./types";
 import {
   handleAddMaterial,
@@ -15,12 +16,11 @@ import {
 } from "@/utils/calculatorHandlers";
 import { validateCalculationInput } from "@/utils/calculatorValidation";
 import { toast } from "sonner";
-import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {
-  materials: [{ type: "concrete", quantity: 1000 }],
-  transport: [{ type: "truck", distance: 100, weight: 1000 }],
-  energy: [{ type: "electricity", amount: 500 }]
+  materials: [{ type: "concrete", quantity: "1000" }],
+  transport: [{ type: "truck", distance: "100", weight: "1000" }],
+  energy: [{ type: "electricity", amount: "500" }]
 };
 
 export const CalculatorContext = createContext<CalculatorContextType | undefined>(undefined);
@@ -88,8 +88,21 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Perform the calculation with a small delay to allow UI to update
       setTimeout(() => {
         try {
-          const result = calculateTotalEmissions(calculationInput);
+          // Convert the calculationInput to the format expected by calculateTotalEmissions
+          const convertedInput = {
+            materials: calculationInput.materials,
+            transport: calculationInput.transport,
+            energy: calculationInput.energy
+          };
+
+          const result = calculateTotalEmissions(convertedInput);
           console.log('Calculation completed with result:', result);
+          
+          // Add timestamp to the result
+          const resultWithTimestamp: CalculationResult = {
+            ...result,
+            timestamp: new Date().toISOString()
+          };
           
           // Validate the result
           if (result.totalEmissions === 0 && 
@@ -102,7 +115,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             toast.success("Calculation completed successfully!");
           }
           
-          setCalculationResult(result);
+          setCalculationResult(resultWithTimestamp);
           setActiveTab("results");
         } catch (error) {
           console.error("Error during calculation:", error);
@@ -132,8 +145,22 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Slight delay to allow UI to update before heavy calculation
       setTimeout(() => {
         try {
-          const result = calculateTotalEmissions(calculationInput);
-          setCalculationResult(result);
+          // Convert the calculationInput to the format expected by calculateTotalEmissions
+          const convertedInput = {
+            materials: calculationInput.materials,
+            transport: calculationInput.transport,
+            energy: calculationInput.energy
+          };
+
+          const result = calculateTotalEmissions(convertedInput);
+          
+          // Add timestamp to the result
+          const resultWithTimestamp: CalculationResult = {
+            ...result,
+            timestamp: new Date().toISOString()
+          };
+          
+          setCalculationResult(resultWithTimestamp);
           setActiveTab("results");
         } catch (error) {
           console.error("Error during calculation:", error);
@@ -168,21 +195,42 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     validationErrors,
     isCalculating,
     setIsCalculating,
-    handleAddMaterial: () => setCalculationInput(current => handleAddMaterial(current)),
-    handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: any) => 
-      setCalculationInput(current => handleUpdateMaterial(current, index, field, value)),
-    handleRemoveMaterial: (index: number) => 
-      setCalculationInput(current => handleRemoveMaterial(current, index)),
-    handleAddTransport: () => setCalculationInput(current => handleAddTransport(current)),
-    handleUpdateTransport: (index: number, field: keyof TransportInput, value: any) => 
-      setCalculationInput(current => handleUpdateTransport(current, index, field, value)),
-    handleRemoveTransport: (index: number) => 
-      setCalculationInput(current => handleRemoveTransport(current, index)),
-    handleAddEnergy: () => setCalculationInput(current => handleAddEnergy(current)),
-    handleUpdateEnergy: (index: number, field: keyof EnergyInput, value: any) => 
-      setCalculationInput(current => handleUpdateEnergy(current, index, field, value)),
-    handleRemoveEnergy: (index: number) => 
-      setCalculationInput(current => handleRemoveEnergy(current, index)),
+    handleAddMaterial: () => {
+      const newInput = handleAddMaterial(calculationInput);
+      setCalculationInput(newInput);
+    },
+    handleUpdateMaterial: (index: number, field: keyof MaterialInput, value: any) => {
+      const newInput = handleUpdateMaterial(calculationInput, index, field, value);
+      setCalculationInput(newInput);
+    },
+    handleRemoveMaterial: (index: number) => {
+      const newInput = handleRemoveMaterial(calculationInput, index);
+      setCalculationInput(newInput);
+    },
+    handleAddTransport: () => {
+      const newInput = handleAddTransport(calculationInput);
+      setCalculationInput(newInput);
+    },
+    handleUpdateTransport: (index: number, field: keyof TransportInput, value: any) => {
+      const newInput = handleUpdateTransport(calculationInput, index, field, value);
+      setCalculationInput(newInput);
+    },
+    handleRemoveTransport: (index: number) => {
+      const newInput = handleRemoveTransport(calculationInput, index);
+      setCalculationInput(newInput);
+    },
+    handleAddEnergy: () => {
+      const newInput = handleAddEnergy(calculationInput);
+      setCalculationInput(newInput);
+    },
+    handleUpdateEnergy: (index: number, field: keyof EnergyInput, value: any) => {
+      const newInput = handleUpdateEnergy(calculationInput, index, field, value);
+      setCalculationInput(newInput);
+    },
+    handleRemoveEnergy: (index: number) => {
+      const newInput = handleRemoveEnergy(calculationInput, index);
+      setCalculationInput(newInput);
+    },
     handleCalculate,
     handleNextTab,
     handlePrevTab

@@ -4,7 +4,8 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TransportInput, Transport, TRANSPORT_FACTORS } from "@/lib/carbonExports";
+import { TransportInput } from "@/lib/carbonExports";
+import { Transport, TRANSPORT_FACTORS } from "@/lib/carbonData";
 
 interface TransportFormFieldsProps {
   transport: TransportInput;
@@ -21,7 +22,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
   onRemove,
   onUpdate
 }) => {
-  const transportTypes = Object.keys(TRANSPORT_FACTORS) as Transport[];
+  const transportTypes = Object.keys(TRANSPORT_FACTORS);
   
   return (
     <div className={`grid grid-cols-1 gap-3 items-end border p-3 md:p-4 rounded-lg ${errors ? "border-red-300 bg-red-50" : "border-carbon-100"}`}>
@@ -34,7 +35,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
             </label>
             <Select
               value={transport.type}
-              onValueChange={(value) => onUpdate("type", value as Transport)}
+              onValueChange={(value) => onUpdate("type", value)}
             >
               <SelectTrigger id={`transport-type-${index}`}>
                 <SelectValue placeholder="Select transport type" />
@@ -42,7 +43,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
               <SelectContent>
                 {transportTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {TRANSPORT_FACTORS[type]?.name || type}
+                    {TRANSPORT_FACTORS[type as Transport]?.name || type}
                   </SelectItem>
                 ))}
               </SelectContent>

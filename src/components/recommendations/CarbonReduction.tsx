@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { PotentialSavings } from "./PotentialSavings";
 import { calculatePotentialSavings } from "@/lib/sustainabilitySuggestions";
-import { Material } from "@/lib/carbonTypes";
 
 interface CarbonReductionProps {
   calculationInput: CalculationInput;
@@ -67,7 +66,7 @@ export const CarbonReduction: React.FC<CarbonReductionProps> = ({
                 potentialEmissions={item.potentialEmissions}
                 savings={item.savings}
                 savingsPercentage={item.savingsPercentage}
-                material={item.material as Material}
+                material={item.material}
                 alternative={item.alternative}
               />
             ))}

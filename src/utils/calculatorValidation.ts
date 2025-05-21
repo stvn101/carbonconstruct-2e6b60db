@@ -1,99 +1,95 @@
 
-import { CalculationInput } from "@/lib/carbonTypes";
-
-export const MAX_QUANTITY = 10000;
-export const MAX_DISTANCE = 10000;
-export const MAX_WEIGHT = 10000;
-export const MAX_ENERGY = 10000;
+import { CalculationInput } from "@/lib/carbonExports";
 
 export interface ValidationError {
   field: string;
   message: string;
 }
 
-export const validateCalculationInput = (input: CalculationInput): ValidationError[] => {
+/**
+ * Validates the calculation input for required fields and valid values
+ */
+export function validateCalculationInput(input: CalculationInput): ValidationError[] {
   const errors: ValidationError[] = [];
-
+  
   // Validate materials
   input.materials.forEach((material, index) => {
-    const quantity = Number(material.quantity);
-    if (isNaN(quantity)) {
+    if (!material.type) {
       errors.push({
-        field: `materials[${index}].quantity`,
-        message: "Quantity must be a number"
+        field: `materials[${index}].type`,
+        message: `Material ${index + 1} must have a type selected.`
       });
-    } else if (quantity < 0) {
+    }
+    
+    if (!material.quantity) {
       errors.push({
         field: `materials[${index}].quantity`,
-        message: "Quantity cannot be negative"
+        message: `Material ${index + 1} must have a quantity specified.`
       });
-    } else if (quantity > MAX_QUANTITY) {
+    } else if (Number(material.quantity) <= 0) {
       errors.push({
         field: `materials[${index}].quantity`,
-        message: `Maximum quantity is ${MAX_QUANTITY} kg`
+        message: `Material ${index + 1} must have a positive quantity.`
       });
     }
   });
-
+  
   // Validate transport
   input.transport.forEach((transport, index) => {
-    const distance = Number(transport.distance);
-    if (isNaN(distance)) {
+    if (!transport.type) {
       errors.push({
-        field: `transport[${index}].distance`,
-        message: "Distance must be a number"
-      });
-    } else if (distance < 0) {
-      errors.push({
-        field: `transport[${index}].distance`,
-        message: "Distance cannot be negative"
-      });
-    } else if (distance > MAX_DISTANCE) {
-      errors.push({
-        field: `transport[${index}].distance`,
-        message: `Maximum distance is ${MAX_DISTANCE} km`
+        field: `transport[${index}].type`,
+        message: `Transport ${index + 1} must have a type selected.`
       });
     }
-
-    const weight = Number(transport.weight);
-    if (transport.weight !== undefined && isNaN(weight)) {
+    
+    if (!transport.distance) {
       errors.push({
-        field: `transport[${index}].weight`,
-        message: "Weight must be a number"
+        field: `transport[${index}].distance`,
+        message: `Transport ${index + 1} must have a distance specified.`
       });
-    } else if (transport.weight !== undefined && weight < 0) {
+    } else if (Number(transport.distance) <= 0) {
       errors.push({
-        field: `transport[${index}].weight`,
-        message: "Weight cannot be negative"
+        field: `transport[${index}].distance`,
+        message: `Transport ${index + 1} must have a positive distance.`
       });
-    } else if (transport.weight !== undefined && weight > MAX_WEIGHT) {
+    }
+    
+    if (!transport.weight) {
       errors.push({
         field: `transport[${index}].weight`,
-        message: `Maximum weight is ${MAX_WEIGHT} kg`
+        message: `Transport ${index + 1} must have a weight specified.`
+      });
+    } else if (Number(transport.weight) <= 0) {
+      errors.push({
+        field: `transport[${index}].weight`,
+        message: `Transport ${index + 1} must have a positive weight.`
       });
     }
   });
-
+  
   // Validate energy
   input.energy.forEach((energy, index) => {
-    const amount = Number(energy.amount);
-    if (isNaN(amount)) {
+    if (!energy.type) {
       errors.push({
-        field: `energy[${index}].amount`,
-        message: "Amount must be a number"
+        field: `energy[${index}].type`,
+        message: `Energy ${index + 1} must have a type selected.`
       });
-    } else if (amount < 0) {
+    }
+    
+    if (!energy.amount && (!energy.quantity)) {
       errors.push({
         field: `energy[${index}].amount`,
-        message: "Amount cannot be negative"
+        message: `Energy ${index + 1} must have an amount specified.`
       });
-    } else if (amount > MAX_ENERGY) {
+    } else if ((energy.amount && Number(energy.amount) <= 0) && 
+              (energy.quantity && Number(energy.quantity) <= 0)) {
       errors.push({
         field: `energy[${index}].amount`,
-        message: `Maximum amount is ${MAX_ENERGY} units`
+        message: `Energy ${index + 1} must have a positive amount.`
       });
     }
   });
-
+  
   return errors;
-};
+}

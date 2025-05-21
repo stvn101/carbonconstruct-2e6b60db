@@ -1,84 +1,110 @@
 
-// Re-export everything from the carbonFactors directory
-export * from './carbonFactors';
-
-// Define Material factors structure if not already exported
+// Material factors (kg CO2e per unit)
 export const MATERIAL_FACTORS = {
-  concrete: {
-    name: "Concrete",
+  concrete: { 
+    name: "Concrete", 
     factor: 0.15,
-    unit: "kg"
+    unit: "kg",
+    description: "Standard concrete"
   },
-  steel: {
-    name: "Steel",
+  steel: { 
+    name: "Steel", 
     factor: 2.00,
-    unit: "kg"
+    unit: "kg",
+    description: "Standard structural steel"
   },
-  wood: {
-    name: "Wood",
+  timber: { 
+    name: "Timber", 
     factor: 0.05,
-    unit: "kg"
+    unit: "kg",
+    description: "Structural timber"
   },
-  glass: {
-    name: "Glass",
+  wood: { 
+    name: "Wood", 
+    factor: 0.05,
+    unit: "kg",
+    description: "General wood products"
+  },
+  glass: { 
+    name: "Glass", 
     factor: 1.00,
-    unit: "kg"
+    unit: "kg",
+    description: "Standard glass"
   },
-  insulation: {
-    name: "Insulation",
+  brick: { 
+    name: "Brick", 
+    factor: 0.22,
+    unit: "kg",
+    description: "Standard clay brick"
+  },
+  insulation: { 
+    name: "Insulation", 
     factor: 0.20,
-    unit: "kg"
+    unit: "kg",
+    description: "General insulation materials"
   },
-  // Add more material types as needed...
+  aluminum: { 
+    name: "Aluminum", 
+    factor: 8.24,
+    unit: "kg",
+    description: "Standard aluminum"
+  }
 };
 
-// Define Transport factors structure if not already exported
+// Transport factors (kg CO2e per km per tonne)
 export const TRANSPORT_FACTORS = {
-  truck: {
-    name: "Truck",
+  truck: { 
+    name: "Truck", 
     factor: 0.10,
-    unit: "tonne-km"
+    description: "Standard heavy-duty truck"
   },
-  train: {
-    name: "Train",
+  train: { 
+    name: "Train", 
     factor: 0.03,
-    unit: "tonne-km"
+    description: "Freight train"
   },
-  ship: {
-    name: "Ship",
-    factor: 0.015,
-    unit: "tonne-km"
+  ship: { 
+    name: "Ship", 
+    factor: 0.01,
+    description: "Ocean freight"
   },
-  // Add more transport types as needed...
+  plane: { 
+    name: "Plane", 
+    factor: 1.50,
+    description: "Air freight"
+  },
+  van: { 
+    name: "Van", 
+    factor: 0.25,
+    description: "Delivery van"
+  }
 };
 
-// Define Energy factors structure if not already exported
+// Energy factors (kg CO2e per kWh)
 export const ENERGY_FACTORS = {
-  electricity: {
-    name: "Electricity",
+  electricity: { 
+    name: "Electricity", 
     factor: 0.50,
-    unit: "kWh"
+    description: "Grid electricity average"
   },
-  naturalGas: {
-    name: "Natural Gas",
+  naturalGas: { 
+    name: "Natural Gas", 
     factor: 0.20,
-    unit: "kWh"
+    description: "Natural gas consumption"
   },
-  renewableEnergy: {
-    name: "Renewable Energy",
+  renewableEnergy: { 
+    name: "Renewable Energy", 
     factor: 0.05,
-    unit: "kWh"
+    description: "Renewable energy mix"
   },
-  // Add more energy types as needed...
-};
-
-// Australian specific material factors
-export const AUS_SPECIFIC_MATERIAL_FACTORS = {
-  // Australian specific materials can be defined here
-};
-
-// Combined material factors
-export const ALL_MATERIAL_FACTORS = {
-  ...MATERIAL_FACTORS,
-  ...AUS_SPECIFIC_MATERIAL_FACTORS
+  diesel: { 
+    name: "Diesel", 
+    factor: 0.27,
+    description: "Diesel fuel"
+  },
+  coal: { 
+    name: "Coal", 
+    factor: 0.34,
+    description: "Coal energy"
+  }
 };

@@ -6,9 +6,6 @@ import {
   TransportInput,
   EnergyInput,
   CalculationResult,
-  MATERIAL_FACTORS,
-  TRANSPORT_FACTORS,
-  ENERGY_FACTORS
 } from "@/lib/carbonExports";
 import SummaryCard from "./results/SummaryCard";
 import EmissionsBreakdownChart from "./results/EmissionsBreakdownChart";

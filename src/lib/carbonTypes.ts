@@ -6,8 +6,10 @@ export type Transport = keyof typeof TRANSPORT_FACTORS;
 export type Energy = keyof typeof ENERGY_FACTORS;
 
 export interface MaterialInput {
-  type: Material;
+  type: string;
   quantity: number | string;
+  id?: string;
+  factor?: number;
   unit?: string;
   region?: string;
   recycledContent?: number;
@@ -16,17 +18,21 @@ export interface MaterialInput {
 }
 
 export interface TransportInput {
-  type: Transport;
+  type: string;
   distance: number | string;
   weight?: number | string;
+  id?: string;
+  factor?: number;
   unit?: string;
 }
 
 export interface EnergyInput {
-  type: Energy;
+  type: string;
   amount: number | string;
-  quantity?: number | string; // For backward compatibility
   unit?: string;
+  id?: string;
+  factor?: number;
+  quantity?: number | string; // For backward compatibility
 }
 
 export interface CalculationInput {
@@ -45,13 +51,7 @@ export interface CalculationResult {
     transport: number;
     energy: number;
   };
-  breakdownByMaterial: {
-    [key in Material]?: number;
-  };
-  breakdownByTransport: {
-    [key in Transport]?: number;
-  };
-  breakdownByEnergy: {
-    [key in Energy]?: number;
-  };
+  breakdownByMaterial: Record<string, number>;
+  breakdownByTransport: Record<string, number>;
+  breakdownByEnergy: Record<string, number>;
 }

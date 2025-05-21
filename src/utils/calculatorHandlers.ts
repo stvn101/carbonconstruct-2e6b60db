@@ -1,127 +1,149 @@
 
 import { CalculationInput, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 
-export const handleUpdateMaterial = (
-  calculationInput: CalculationInput,
-  index: number,
-  field: keyof MaterialInput,
-  value: string | number
-): CalculationInput => {
+/**
+ * Adds a new material to the calculation input
+ */
+export function handleAddMaterial(calculationInput: CalculationInput): CalculationInput {
+  return {
+    ...calculationInput,
+    materials: [
+      ...calculationInput.materials,
+      { type: "concrete", quantity: "" }
+    ]
+  };
+}
+
+/**
+ * Updates a material in the calculation input
+ */
+export function handleUpdateMaterial(
+  calculationInput: CalculationInput, 
+  index: number, 
+  field: keyof MaterialInput, 
+  value: any
+): CalculationInput {
   const updatedMaterials = [...calculationInput.materials];
+  updatedMaterials[index] = {
+    ...updatedMaterials[index],
+    [field]: value
+  };
   
-  // Ensure materials array exists
-  if (!updatedMaterials || !Array.isArray(updatedMaterials)) {
-    return {
-      ...calculationInput,
-      materials: [{ type: "concrete", quantity: field === 'quantity' ? Number(value) : 0 }]
-    };
-  }
-  
-  // Convert numeric strings to numbers for quantity field
-  if (field === 'quantity' && typeof value === 'string') {
-    value = Number(value) || 0;
-  }
-  
-  // Ensure the target item exists
-  if (!updatedMaterials[index]) {
-    updatedMaterials[index] = { type: "concrete", quantity: 0 };
-  }
-  
-  updatedMaterials[index] = { ...updatedMaterials[index], [field]: value };
-  return { ...calculationInput, materials: updatedMaterials };
-};
-
-export const handleAddMaterial = (calculationInput: CalculationInput): CalculationInput => {
-  const materials = calculationInput.materials || [];
   return {
     ...calculationInput,
-    materials: [...materials, { type: "concrete", quantity: 0 }]
+    materials: updatedMaterials
   };
-};
+}
 
-export const handleRemoveMaterial = (calculationInput: CalculationInput, index: number): CalculationInput => {
-  const materials = calculationInput.materials || [];
-  const updatedMaterials = materials.filter((_, i) => i !== index);
+/**
+ * Removes a material from the calculation input
+ */
+export function handleRemoveMaterial(
+  calculationInput: CalculationInput, 
+  index: number
+): CalculationInput {
+  const updatedMaterials = calculationInput.materials.filter((_, i) => i !== index);
+  
   return {
     ...calculationInput,
-    materials: updatedMaterials.length ? updatedMaterials : [{ type: "concrete", quantity: 0 }]
+    materials: updatedMaterials
   };
-};
+}
 
-export const handleUpdateTransport = (
+/**
+ * Adds a new transport item to the calculation input
+ */
+export function handleAddTransport(calculationInput: CalculationInput): CalculationInput {
+  return {
+    ...calculationInput,
+    transport: [
+      ...calculationInput.transport,
+      { type: "truck", distance: "", weight: "" }
+    ]
+  };
+}
+
+/**
+ * Updates a transport item in the calculation input
+ */
+export function handleUpdateTransport(
   calculationInput: CalculationInput,
   index: number,
   field: keyof TransportInput,
-  value: string | number
-): CalculationInput => {
-  const updatedTransport = [...(calculationInput.transport || [])];
+  value: any
+): CalculationInput {
+  const updatedTransport = [...calculationInput.transport];
+  updatedTransport[index] = {
+    ...updatedTransport[index],
+    [field]: value
+  };
   
-  // Convert numeric strings to numbers for numeric fields
-  if ((field === 'distance' || field === 'weight') && typeof value === 'string') {
-    value = Number(value) || 0;
-  }
-  
-  // Ensure the target item exists
-  if (!updatedTransport[index]) {
-    updatedTransport[index] = { type: "truck", distance: 0, weight: 0 };
-  }
-  
-  updatedTransport[index] = { ...updatedTransport[index], [field]: value };
-  return { ...calculationInput, transport: updatedTransport };
-};
-
-export const handleAddTransport = (calculationInput: CalculationInput): CalculationInput => {
-  const transport = calculationInput.transport || [];
   return {
     ...calculationInput,
-    transport: [...transport, { type: "truck", distance: 0, weight: 0 }]
+    transport: updatedTransport
   };
-};
+}
 
-export const handleRemoveTransport = (calculationInput: CalculationInput, index: number): CalculationInput => {
-  const transport = calculationInput.transport || [];
-  const updatedTransport = transport.filter((_, i) => i !== index);
+/**
+ * Removes a transport item from the calculation input
+ */
+export function handleRemoveTransport(
+  calculationInput: CalculationInput,
+  index: number
+): CalculationInput {
+  const updatedTransport = calculationInput.transport.filter((_, i) => i !== index);
+  
   return {
     ...calculationInput,
-    transport: updatedTransport.length ? updatedTransport : [{ type: "truck", distance: 0, weight: 0 }]
+    transport: updatedTransport
   };
-};
+}
 
-export const handleUpdateEnergy = (
+/**
+ * Adds a new energy item to the calculation input
+ */
+export function handleAddEnergy(calculationInput: CalculationInput): CalculationInput {
+  return {
+    ...calculationInput,
+    energy: [
+      ...calculationInput.energy,
+      { type: "electricity", amount: "" }
+    ]
+  };
+}
+
+/**
+ * Updates an energy item in the calculation input
+ */
+export function handleUpdateEnergy(
   calculationInput: CalculationInput,
   index: number,
   field: keyof EnergyInput,
-  value: string | number
-): CalculationInput => {
-  const updatedEnergy = [...(calculationInput.energy || [])];
+  value: any
+): CalculationInput {
+  const updatedEnergy = [...calculationInput.energy];
+  updatedEnergy[index] = {
+    ...updatedEnergy[index],
+    [field]: value
+  };
   
-  // Convert numeric strings to numbers for amount field
-  if (field === 'amount' && typeof value === 'string') {
-    value = Number(value) || 0;
-  }
-  
-  // Ensure the target item exists
-  if (!updatedEnergy[index]) {
-    updatedEnergy[index] = { type: "electricity", amount: 0 };
-  }
-  
-  updatedEnergy[index] = { ...updatedEnergy[index], [field]: value };
-  return { ...calculationInput, energy: updatedEnergy };
-};
-
-export const handleAddEnergy = (calculationInput: CalculationInput): CalculationInput => {
-  const energy = calculationInput.energy || [];
   return {
     ...calculationInput,
-    energy: [...energy, { type: "electricity", amount: 0 }]
+    energy: updatedEnergy
   };
-};
+}
 
-export const handleRemoveEnergy = (calculationInput: CalculationInput, index: number): CalculationInput => {
-  const energy = calculationInput.energy || [];
-  const updatedEnergy = energy.filter((_, i) => i !== index);
+/**
+ * Removes an energy item from the calculation input
+ */
+export function handleRemoveEnergy(
+  calculationInput: CalculationInput,
+  index: number
+): CalculationInput {
+  const updatedEnergy = calculationInput.energy.filter((_, i) => i !== index);
+  
   return {
     ...calculationInput,
-    energy: updatedEnergy.length ? updatedEnergy : [{ type: "electricity", amount: 0 }]
+    energy: updatedEnergy
   };
-};
+}

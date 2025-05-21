@@ -4,7 +4,8 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { EnergyInput, Energy, ENERGY_FACTORS } from "@/lib/carbonExports";
+import { EnergyInput } from "@/lib/carbonExports";
+import { Energy, ENERGY_FACTORS } from "@/lib/carbonData";
 
 interface EnergyFormFieldsProps {
   energy: EnergyInput;
@@ -21,7 +22,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
   onRemove,
   onUpdate
 }) => {
-  const energyTypes = Object.keys(ENERGY_FACTORS) as Energy[];
+  const energyTypes = Object.keys(ENERGY_FACTORS);
   
   return (
     <div className={`grid grid-cols-1 gap-3 items-end border p-3 md:p-4 rounded-lg ${error ? "border-red-300 bg-red-50" : "border-carbon-100"}`}>
@@ -33,7 +34,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
             </label>
             <Select
               value={energy.type}
-              onValueChange={(value) => onUpdate("type", value as Energy)}
+              onValueChange={(value) => onUpdate("type", value)}
             >
               <SelectTrigger id={`energy-type-${index}`}>
                 <SelectValue placeholder="Select energy type" />
@@ -41,7 +42,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
               <SelectContent>
                 {energyTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {ENERGY_FACTORS[type]?.name || type}
+                    {ENERGY_FACTORS[type as Energy]?.name || type}
                   </SelectItem>
                 ))}
               </SelectContent>
