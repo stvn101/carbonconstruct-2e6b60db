@@ -2,6 +2,9 @@
 // Import withTimeout for local use in this file
 import { withTimeout as localWithTimeout } from './timeoutHelper';
 
+// Import isNetworkError directly for local use to avoid scope issues
+import { isNetworkError } from './networkChecker';
+
 // Export all error handling utilities from this central file
 export * from './toastHelpers';
 export * from './networkErrorHandler';
