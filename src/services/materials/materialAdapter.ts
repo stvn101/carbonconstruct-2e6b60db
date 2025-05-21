@@ -1,132 +1,94 @@
 
 /**
- * Material Adapter System
- * Provides unified handling for both static and database materials
+ * Material Adapter - Adapts different material data sources into a consistent format
+ * This enables seamless handling of materials from different sources (database, static, etc.)
  */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
-import { adaptMaterialFromDatabase } from '@/lib/materialCategories';
 
-// Material source types
-export type MaterialSourceType = 'static' | 'database' | 'fallback';
-
-// Material identifier format utilities
-export function isDatabaseMaterialId(id: string): boolean {
-  return id.startsWith('db-');
-}
-
-export function extractDatabaseId(materialId: string): string {
-  if (isDatabaseMaterialId(materialId)) {
-    return materialId.substring(3); // Remove 'db-' prefix
-  }
-  return materialId;
-}
-
-export function createDatabaseMaterialId(originalId: string | number): string {
-  // Remove any existing prefix to avoid double prefixing
-  const cleanId = String(originalId).replace(/^db-/, '');
-  return `db-${cleanId}`;
-}
-
-// Material adaptation utilities
-export function getStaticMaterialFactor(materialType: string): number {
-  const material = MATERIAL_FACTORS[materialType];
-  return material ? material.factor : 1.0;
-}
+// Constants for material source identification
+const DB_MATERIAL_PREFIX = 'db-';
 
 /**
- * Adapt a database material to the standard ExtendedMaterialData format
+ * Check if a material ID is from the database
  */
-export function adaptDatabaseMaterial(material: any): ExtendedMaterialData {
-  if (!material) return createFallbackMaterial('unknown');
-  
-  // Create a properly formatted database material ID
-  const dbId = material.id ? createDatabaseMaterialId(material.id) : undefined;
-  
-  return {
-    id: dbId,
-    name: material.name || material.material || 'Unnamed Material',
-    factor: material.carbon_footprint_kgco2e_kg || material.factor || 1.0,
-    unit: material.unit || 'kg',
-    region: material.region || 'Australia',
-    tags: Array.isArray(material.tags) ? material.tags : 
-          material.category ? [material.category] : ['construction'],
-    sustainabilityScore: material.sustainabilityScore || 60,
-    recyclability: material.recyclability || 'Medium',
-    alternativeTo: material.alternativeTo,
-    notes: material.notes || '',
-    category: material.category || 'Other'
-  };
+export function isDatabaseMaterialId(id: string): boolean {
+  return id.startsWith(DB_MATERIAL_PREFIX);
 }
 
 /**
- * Creates a fallback material when a material cannot be resolved
+ * Extract the database ID from a prefixed material ID
+ */
+export function extractDatabaseId(id: string): string {
+  if (!isDatabaseMaterialId(id)) {
+    return id;
+  }
+  return id.substring(DB_MATERIAL_PREFIX.length);
+}
+
+/**
+ * Create a database material ID with the proper prefix
+ */
+export function createDatabaseMaterialId(id: string): string {
+  if (isDatabaseMaterialId(id)) {
+    return id;
+  }
+  return `${DB_MATERIAL_PREFIX}${id}`;
+}
+
+/**
+ * Create a fallback material when the requested one is not found
  */
 export function createFallbackMaterial(id: string): ExtendedMaterialData {
   return {
-    id,
+    id: id,
     name: `Unknown Material (${id})`,
-    factor: 1.0,
+    factor: 1.0, // Default factor
     unit: 'kg',
     region: 'Global',
-    tags: ['unknown'],
+    category: 'Unknown',
     sustainabilityScore: 50,
     recyclability: 'Medium',
-    category: 'Unknown'
+    description: 'This is a fallback material used when the requested material was not found.'
   };
 }
 
 /**
- * Resolve a material by its identifier from various sources
+ * Resolve a material from any source (database, static, etc.)
+ * This is a placeholder implementation that will be enhanced with actual resolution logic
  */
 export async function resolveMaterial(materialIdentifier: string): Promise<ExtendedMaterialData> {
-  if (!materialIdentifier) {
-    return createFallbackMaterial('unknown');
-  }
-  
   try {
-    // Import services dynamically to avoid circular dependencies
-    const { getCachedMaterials } = await import('./cache');
+    // Import cache service dynamically to avoid circular dependencies
+    const { getCachedMaterials } = await import('./cache/materialCacheService');
     const { fetchMaterials } = await import('./fetch/materialFetchService');
     
-    // Check if it's a static material
-    if (MATERIAL_FACTORS[materialIdentifier]) {
-      const staticInfo = MATERIAL_FACTORS[materialIdentifier];
-      return {
-        id: materialIdentifier,
-        name: staticInfo.name || materialIdentifier,
-        factor: staticInfo.factor,
-        unit: staticInfo.unit || 'kg',
-        region: 'Global',
-        category: 'Static',
-        sustainabilityScore: 60,
-        recyclability: 'Medium'
-      };
-    }
-    
-    // Check if it's a database material ID
-    if (isDatabaseMaterialId(materialIdentifier)) {
-      const dbId = extractDatabaseId(materialIdentifier);
+    // Try to get from cache first
+    const cachedMaterials = await getCachedMaterials();
+    if (cachedMaterials && cachedMaterials.length > 0) {
+      // If it's a database material, extract the ID
+      const searchId = isDatabaseMaterialId(materialIdentifier) 
+        ? extractDatabaseId(materialIdentifier)
+        : materialIdentifier;
       
-      // Try to get from cache first
-      const cachedMaterials = await getCachedMaterials();
-      if (cachedMaterials) {
-        const cachedMaterial = cachedMaterials.find(m => m.id === dbId);
-        if (cachedMaterial) {
-          return cachedMaterial;
-        }
-      }
-      
-      // If not in cache, fetch from database
-      const fetchedMaterials = await fetchMaterials();
-      const fetchedMaterial = fetchedMaterials.find(m => m.id === dbId);
-      
-      if (fetchedMaterial) {
-        return fetchedMaterial;
+      // Look for the material in the cache
+      const material = cachedMaterials.find(m => m.id === searchId);
+      if (material) {
+        return material;
       }
     }
     
-    // If we couldn't resolve the material, create a fallback
+    // If not found in cache, try fetching
+    const fetchedMaterials = await fetchMaterials(false);
+    const searchId = isDatabaseMaterialId(materialIdentifier)
+      ? extractDatabaseId(materialIdentifier)
+      : materialIdentifier;
+    
+    const material = fetchedMaterials.find(m => m.id === searchId);
+    if (material) {
+      return material;
+    }
+    
+    // If still not found, create a fallback material
     return createFallbackMaterial(materialIdentifier);
   } catch (error) {
     console.error('Error resolving material:', error);
