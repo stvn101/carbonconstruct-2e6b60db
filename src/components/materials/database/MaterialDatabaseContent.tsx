@@ -10,6 +10,7 @@ import SearchBar from "./components/SearchBar";
 import DatabaseErrorState from "./components/DatabaseErrorState";
 import DatabaseStats from "./components/DatabaseStats";
 import { useAdvancedMaterialSearch } from "@/hooks/useAdvancedMaterialSearch";
+import { useBasicMaterialFiltering } from "@/hooks/useBasicMaterialFiltering";
 
 interface MaterialDatabaseContentProps {
   searchTerm: string;
@@ -33,14 +34,7 @@ interface MaterialDatabaseContentProps {
 }
 
 const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
-  searchTerm,
-  setSearchTerm,
-  selectedAlternative,
-  setSelectedAlternative,
-  selectedTag,
-  setSelectedTag,
   materials,
-  filteredMaterials,
   loading,
   error,
   refreshCache,
@@ -49,22 +43,40 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
   materialsByRegion,
   allTags,
   baseOptions,
-  materialCount,
-  resetFilters
+  materialCount
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Use our improved custom hook for advanced search
+  // Use our new basic filtering hook
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    selectedTag,
+    setSelectedTag,
+    selectedRegion,
+    setSelectedRegion,
+    filteredMaterials: basicFilteredMaterials,
+    resetFilters: resetBasicFilters,
+    isFiltering: isBasicFiltering
+  } = useBasicMaterialFiltering({
+    materials,
+    categoriesList,
+    allTags
+  });
+
+  // Use our improved advanced search hook
   const { 
     useAdvancedSearch, 
     advancedFilteredMaterials, 
     toggleAdvancedSearch, 
     handleAdvancedSearch, 
     resetAdvancedSearch,
-    isFiltering 
+    isFiltering: isAdvancedFiltering 
   } = useAdvancedMaterialSearch({
     materials,
-    onResetFilters: resetFilters
+    onResetFilters: resetBasicFilters
   });
 
   // Effect to check if we have enough materials
@@ -85,12 +97,9 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
     }
   }, [materials, loading, error]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
+  // Combined reset for all filters
   const handleResetFilters = () => {
-    resetFilters();
+    resetBasicFilters();
     resetAdvancedSearch();
   };
 
@@ -108,10 +117,10 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
   // Determine which materials to display
   const displayedMaterials = useAdvancedSearch && advancedFilteredMaterials.length > 0
     ? advancedFilteredMaterials
-    : filteredMaterials;
+    : basicFilteredMaterials;
 
   // Determine if the grid should show loading state
-  const isLoading = loading || isRefreshing || isFiltering;
+  const isLoading = loading || isRefreshing || isBasicFiltering || isAdvancedFiltering;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -124,7 +133,7 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
 
       <SearchBar
         searchTerm={searchTerm}
-        onSearchChange={handleSearchChange}
+        onSearchChange={(e) => setSearchTerm(e.target.value)}
         useAdvancedSearch={useAdvancedSearch}
         onToggleAdvancedSearch={toggleAdvancedSearch}
       />
@@ -143,8 +152,15 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
       ) : (
         <div className="mb-6">
           <MaterialFilters 
-            categoriesList={categoriesList} 
-            materialsByRegion={materialsByRegion} 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedAlternative={selectedCategory}
+            setSelectedAlternative={setSelectedCategory}
+            selectedTag={selectedTag}
+            setSelectedTag={setSelectedTag}
+            allTags={allTags}
+            baseOptions={baseOptions}
+            categories={categoriesList}
           />
         </div>
       )}

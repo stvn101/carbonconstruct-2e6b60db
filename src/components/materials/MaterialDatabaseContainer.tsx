@@ -10,10 +10,6 @@ import MaterialDatabaseContent from "./database/MaterialDatabaseContent";
 import { toast } from "sonner";
 
 const MaterialDatabaseContainer: React.FC = () => {
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedAlternative, setSelectedAlternative] = React.useState<string>("none");
-  const [selectedTag, setSelectedTag] = React.useState<string>("all");
-  
   // Get region context safely - default to Australia if not available
   let region = "Australia"; // Default value
   try {
@@ -64,26 +60,18 @@ const MaterialDatabaseContainer: React.FC = () => {
   
   // Use the material data hook for organizing and categorizing data
   const {
-    filteredMaterials,
     materialsByRegion,
     allTags,
     baseOptions,
     materialCount,
     allRegions
   } = useMaterialData({
-    searchTerm,
+    searchTerm: "",
     selectedRegion: "Australia", // Always use Australia regardless of context
-    selectedAlternative,
-    selectedTag,
+    selectedAlternative: "none",
+    selectedTag: "all",
     materials
   });
-  
-  // Filters and state management
-  const resetFilters = () => {
-    setSearchTerm("");
-    setSelectedAlternative("none");
-    setSelectedTag("all");
-  };
   
   // Manual refresh handler with UX feedback that properly returns the Promise
   const handleManualRefresh = (): Promise<void> => {
@@ -132,20 +120,20 @@ const MaterialDatabaseContainer: React.FC = () => {
   return (
     <ErrorBoundaryWrapper feature="Material Database">
       <motion.div
-        className="min-h-screen content-top-spacing" // Added content-top-spacing class
+        className="min-h-screen content-top-spacing"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
       >
         <MaterialDatabaseContent
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedAlternative={selectedAlternative}
-          setSelectedAlternative={setSelectedAlternative}
-          selectedTag={selectedTag}
-          setSelectedTag={setSelectedTag}
+          searchTerm=""
+          setSearchTerm={() => {}}
+          selectedAlternative="none"
+          setSelectedAlternative={() => {}}
+          selectedTag="all"
+          setSelectedTag={() => {}}
           materials={materials}
-          filteredMaterials={filteredMaterials}
+          filteredMaterials={[]}
           loading={loading || isRefreshing}
           error={error}
           refreshCache={handleManualRefresh}
@@ -155,7 +143,7 @@ const MaterialDatabaseContainer: React.FC = () => {
           allTags={allTags}
           baseOptions={baseOptions}
           materialCount={materialCount}
-          resetFilters={resetFilters}
+          resetFilters={() => {}}
         />
       </motion.div>
     </ErrorBoundaryWrapper>
