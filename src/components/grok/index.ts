@@ -5,5 +5,6 @@ export { default as GrokConfig } from './GrokConfig';
 export { default as GrokUsageDisplay } from './GrokUsageDisplay';
 export { default as MaterialAnalysis } from './material-analysis';
 
-// Export error components
+// Export chat components
+export { default as GrokChatContainer } from './chat/GrokChatContainer';
 export { default as GrokChatError } from './chat/GrokChatError';
