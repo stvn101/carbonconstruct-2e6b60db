@@ -19,13 +19,18 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
     <div className="flex items-center justify-between h-[56px]">
       <div className="flex items-center">
         <NavbarLogo />
-      </div>
-      <div className="hidden md:flex items-center space-x-1 lg:space-x-4">
-        <NavbarDesktopItems navLinks={navLinks} />
+        {/* Added spacing between logo and nav items */}
+        <div className="hidden md:flex items-center ml-6 lg:ml-10 space-x-1 lg:space-x-4">
+          <NavbarDesktopItems navLinks={navLinks} />
+        </div>
       </div>
       <div className="md:hidden flex items-center">
         <NavbarLinks />
         <NavbarMobileToggle isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+      </div>
+      {/* Show NavbarLinks on desktop in the right section */}
+      <div className="hidden md:flex items-center">
+        <NavbarLinks />
       </div>
     </div>
   );
