@@ -7,44 +7,197 @@ import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
 import { cacheMaterials } from '../cache';
 import { adaptSupabaseMaterialToExtended } from '@/hooks/materialCache/utils/typeAdapters';
+import { toast } from 'sonner';
 
 const DEMO_DELAY = 800; // Simulate network delay in demo mode
+const MAX_RETRIES = 3; // Maximum number of retries for fetching materials
 
 /**
- * Fetches materials from the database or generates demo data
+ * Fetches materials from all available sources with fallbacks
  */
 export async function fetchMaterials(forceRefresh = true): Promise<ExtendedMaterialData[]> {
   try {
     console.log(`Fetching materials (forceRefresh: ${forceRefresh})`);
     
-    // Try to get materials from Supabase
-    const { data, error } = await supabase
-      .from('materials_view')
-      .select('*');
-      
-    if (error) {
-      console.error('Error fetching materials from database:', error);
-      return generateFallbackMaterials();
-    }
+    // Try multiple strategies in sequence
+    const materials = await fetchWithStrategies();
     
-    if (data && data.length > 0) {
-      console.log(`Fetched ${data.length} materials from database`);
-      
-      // Process and augment the data
-      const processedMaterials = processAndValidateMaterials(data);
+    if (materials && materials.length > 0) {
+      console.log(`Successfully fetched ${materials.length} materials`);
       
       // Cache the materials
-      await cacheMaterials(processedMaterials);
+      await cacheMaterials(materials);
       
-      return processedMaterials;
+      return materials;
     }
     
-    // If no data, use fallback data
-    console.log('No materials found in database, using fallback data');
+    // If all strategies fail, use fallback data
+    console.warn('All fetch strategies failed, using fallback materials');
     return generateFallbackMaterials();
   } catch (error) {
     console.error('Error in fetchMaterials:', error);
     return generateFallbackMaterials();
+  }
+}
+
+/**
+ * Try multiple strategies to fetch materials
+ */
+async function fetchWithStrategies(): Promise<ExtendedMaterialData[]> {
+  let materials: ExtendedMaterialData[] = [];
+  let attempts = 0;
+  let errors = [];
+  
+  // Strategy 1: Try materials_view first
+  try {
+    console.log('Strategy 1: Fetching from materials_view');
+    materials = await fetchMaterialsFromView();
+    if (materials && materials.length > 0) {
+      console.log(`Strategy 1 successful: Got ${materials.length} materials`);
+      return materials;
+    }
+  } catch (error) {
+    console.warn('Strategy 1 failed:', error);
+    errors.push({ strategy: 'materials_view', error });
+  }
+  
+  // Strategy 2: Try direct materials table access
+  try {
+    console.log('Strategy 2: Fetching directly from materials table');
+    materials = await fetchMaterialsFromTable();
+    if (materials && materials.length > 0) {
+      console.log(`Strategy 2 successful: Got ${materials.length} materials`);
+      return materials;
+    }
+  } catch (error) {
+    console.warn('Strategy 2 failed:', error);
+    errors.push({ strategy: 'materials_table', error });
+  }
+  
+  // Strategy 3: Try materials_backup table
+  try {
+    console.log('Strategy 3: Fetching from materials_backup table');
+    materials = await fetchMaterialsFromBackupTable();
+    if (materials && materials.length > 0) {
+      console.log(`Strategy 3 successful: Got ${materials.length} materials`);
+      return materials;
+    }
+  } catch (error) {
+    console.warn('Strategy 3 failed:', error);
+    errors.push({ strategy: 'materials_backup', error });
+  }
+  
+  // Log detailed errors to help diagnose the issue
+  console.error('All fetch strategies failed:', errors);
+  
+  // Return empty array if all strategies fail
+  return [];
+}
+
+/**
+ * Fetches materials from the materials_view
+ */
+export async function fetchMaterialsFromView(): Promise<ExtendedMaterialData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('materials_view')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching from materials_view:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('No materials found in materials_view');
+      return [];
+    }
+
+    // Convert the data to the expected format
+    return processAndValidateMaterials(data);
+  } catch (error) {
+    console.error('Error in fetchMaterialsFromView:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches materials directly from the materials table
+ */
+export async function fetchMaterialsFromTable(): Promise<ExtendedMaterialData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('materials')
+      .select(`
+        id,
+        material,
+        description,
+        co2e_min,
+        co2e_max,
+        co2e_avg,
+        sustainability_score,
+        sustainability_notes,
+        applicable_standards,
+        ncc_requirements,
+        category_id
+      `);
+
+    if (error) {
+      console.error('Error fetching from materials table:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('No materials found in materials table');
+      return [];
+    }
+
+    // Map data from materials table to ExtendedMaterialData format
+    return data.map(item => ({
+      id: item.id.toString(),
+      name: item.material || 'Unknown Material',
+      factor: item.co2e_avg || 1,
+      unit: 'kg',
+      region: 'Australia',
+      tags: item.applicable_standards ? [item.applicable_standards] : [],
+      sustainabilityScore: item.sustainability_score || 50,
+      recyclability: 'Medium' as 'High' | 'Medium' | 'Low',
+      notes: item.sustainability_notes || '',
+      category: guessCategoryFromName(item.material || ''),
+      carbon_footprint_kgco2e_kg: item.co2e_avg || 0,
+      carbon_footprint_kgco2e_tonne: item.co2e_avg ? item.co2e_avg * 1000 : 0,
+      description: item.description || item.sustainability_notes || ''
+    }));
+  } catch (error) {
+    console.error('Error in fetchMaterialsFromTable:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches materials from the materials_backup table
+ */
+export async function fetchMaterialsFromBackupTable(): Promise<ExtendedMaterialData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('materials_backup')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching from materials_backup:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('No materials found in materials_backup');
+      return [];
+    }
+
+    // Process the backup table data
+    return processAndValidateMaterials(data);
+  } catch (error) {
+    console.error('Error in fetchMaterialsFromBackupTable:', error);
+    throw error;
   }
 }
 
@@ -231,10 +384,16 @@ function processAndValidateMaterials(materials: any[]): ExtendedMaterialData[] {
       tags: material.tags || [],
       sustainabilityScore: material.sustainabilityScore || 
         material.sustainability_score || 
+        material.sustainabilityscore ||
         Math.floor(Math.random() * 40) + 60,
       recyclability: normalizeRecyclability(material.recyclability),
       description: material.description || material.notes || material.sustainability_notes || '',
-      category: material.category || guessCategoryFromName(material.name || material.material || 'Unknown Material')
+      category: material.category || guessCategoryFromName(material.name || material.material || 'Unknown Material'),
+      notes: material.notes || material.sustainability_notes || '',
+      carbon_footprint_kgco2e_kg: material.carbon_footprint_kgco2e_kg || material.factor || material.co2e_avg || 0,
+      carbon_footprint_kgco2e_tonne: material.carbon_footprint_kgco2e_tonne || 
+        (material.carbon_footprint_kgco2e_kg ? material.carbon_footprint_kgco2e_kg * 1000 : null) ||
+        (material.factor ? material.factor * 1000 : 0)
     };
     
     return processedMaterial;
@@ -380,7 +539,8 @@ function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
           sustainabilityScore: Math.floor(Math.random() * 40) + 60,
           recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low',
           category: guessCategoryFromName(value.name || key),
-          description: generateDescriptionFromName(value.name || key)
+          description: generateDescriptionFromName(value.name || key),
+          notes: ''
         });
       });
       
@@ -398,7 +558,8 @@ function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
           recyclability: 'Medium',
           alternativeTo: 'concrete',
           category: 'Structural',
-          description: 'A sustainable alternative to traditional concrete that reduces carbon emissions by using alternative cementitious materials.'
+          description: 'A sustainable alternative to traditional concrete that reduces carbon emissions by using alternative cementitious materials.',
+          notes: ''
         },
         {
           id: 'alt-steel-1',
@@ -412,7 +573,8 @@ function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
           recyclability: 'High',
           alternativeTo: 'steel',
           category: 'Structural',
-          description: '100% recycled steel with significantly lower embodied carbon compared to virgin steel production.'
+          description: '100% recycled steel with significantly lower embodied carbon compared to virgin steel production.',
+          notes: ''
         },
         {
           id: 'alt-insulation-1',
@@ -426,12 +588,113 @@ function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
           recyclability: 'High',
           alternativeTo: 'insulation',
           category: 'Insulation',
-          description: 'Natural insulation material made from sheep\'s wool with excellent thermal and acoustic properties.'
+          description: 'Natural insulation material made from sheep\'s wool with excellent thermal and acoustic properties.',
+          notes: ''
+        },
+        {
+          id: 'alt-timber-1',
+          name: 'Cross-Laminated Timber (CLT)',
+          factor: 0.42,
+          carbon_footprint_kgco2e_kg: 0.42,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'sustainable', 'alternative'],
+          sustainabilityScore: 88,
+          recyclability: 'High',
+          alternativeTo: 'timber',
+          category: 'Timber',
+          description: 'Engineered wood product with high strength-to-weight ratio and carbon sequestration benefits.',
+          notes: ''
+        },
+        {
+          id: 'alt-brick-1',
+          name: 'Hempcrete Blocks',
+          factor: 0.38,
+          carbon_footprint_kgco2e_kg: 0.38,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'sustainable', 'alternative'],
+          sustainabilityScore: 92,
+          recyclability: 'High',
+          alternativeTo: 'brick',
+          category: 'Masonry',
+          description: 'Made from hemp fibers and lime binder, offering excellent insulation and negative carbon footprint.',
+          notes: ''
+        },
+        {
+          id: 'alt-glass-1',
+          name: 'Triple-Glazed Low-E Glass',
+          factor: 0.95,
+          carbon_footprint_kgco2e_kg: 0.95,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'energy-efficient', 'alternative'],
+          sustainabilityScore: 78,
+          recyclability: 'Medium',
+          alternativeTo: 'glass',
+          category: 'Glass',
+          description: 'Advanced glazing with low emissivity coating for superior thermal performance.',
+          notes: ''
+        },
+        {
+          id: 'alt-aluminum-1',
+          name: 'Recycled Aluminum',
+          factor: 0.55,
+          carbon_footprint_kgco2e_kg: 0.55,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'recycled', 'alternative'],
+          sustainabilityScore: 87,
+          recyclability: 'High',
+          alternativeTo: 'aluminum',
+          category: 'Aluminum',
+          description: 'Aluminum produced from recycled material requiring significantly less energy than virgin production.',
+          notes: ''
+        },
+        {
+          id: 'alt-insulation-2',
+          name: 'Cellulose Insulation',
+          factor: 0.26,
+          carbon_footprint_kgco2e_kg: 0.26,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'recycled', 'alternative'],
+          sustainabilityScore: 91,
+          recyclability: 'High',
+          alternativeTo: 'insulation',
+          category: 'Insulation',
+          description: 'Made from recycled paper products, treated for fire and pest resistance.',
+          notes: ''
+        },
+        {
+          id: 'alt-concrete-2',
+          name: 'Geopolymer Concrete',
+          factor: 0.18,
+          carbon_footprint_kgco2e_kg: 0.18,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'innovative', 'alternative'],
+          sustainabilityScore: 89,
+          recyclability: 'Medium',
+          alternativeTo: 'concrete',
+          category: 'Concrete',
+          description: 'Concrete alternative using industrial byproducts instead of Portland cement, reducing carbon emissions.',
+          notes: ''
         }
       );
       
       // Cache the generated materials
       cacheMaterials(materials).catch(console.error);
+      
+      // Display a toast notification to inform users we're using fallback data
+      try {
+        toast.info("Using local material database. Some features may be limited.", {
+          id: "fallback-materials-notice",
+          duration: 5000
+        });
+      } catch (error) {
+        console.warn("Could not display toast notification:", error);
+      }
       
       resolve(materials);
     }, DEMO_DELAY);

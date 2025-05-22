@@ -1,7 +1,7 @@
 
 /* ======== LAYOUT & SPACING ======== */
 .content-top-spacing {
-  padding-top: calc(var(--navbar-height) + 1rem);
+  padding-top: calc(var(--navbar-height, 60px) + 1.5rem); /* Increased padding to ensure content is visible */
 }
 
 /* Card styling */
@@ -46,7 +46,7 @@
 
 /* Navbar spacer */
 .navbar-spacer {
-  height: var(--navbar-height, 56px);
+  height: var(--navbar-height, 60px); /* Updated navbar height */
 }
 
 /* Mobile container padding */
