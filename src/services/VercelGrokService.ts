@@ -5,10 +5,11 @@ import { streamText } from 'ai';
 // Define response types
 export interface VercelGrokResponse {
   text: string;
+  response?: string; // Adding for backward compatibility
   error?: string;
 }
 
-export type GrokMode = 'creative' | 'balanced' | 'precise';
+export type GrokMode = 'creative' | 'balanced' | 'precise' | 'material_analysis' | 'compliance_check';
 
 export interface GrokQueryOptions {
   prompt: string;
@@ -21,7 +22,9 @@ export interface GrokQueryOptions {
 const modeToTemperature = {
   creative: 1.0,
   balanced: 0.7,
-  precise: 0.2
+  precise: 0.2,
+  material_analysis: 0.7, // Default to balanced for material analysis
+  compliance_check: 0.2  // More precise for compliance checks
 };
 
 class VercelGrokService {
@@ -94,12 +97,14 @@ class VercelGrokService {
       }
 
       return {
-        text: completeText
+        text: completeText,
+        response: completeText // Add for backward compatibility
       };
     } catch (error) {
       console.error('Error querying Grok API:', error);
       return {
         text: "Sorry, there was an error processing your request.",
+        response: "Sorry, there was an error processing your request.", // Add for backward compatibility
         error: error instanceof Error ? error.message : String(error)
       };
     }

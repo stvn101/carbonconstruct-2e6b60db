@@ -131,7 +131,7 @@ export function useComplianceChecks() {
       // Add Grok's analysis to the compliance data
       setNCCCompliance(prev => ({
         ...prev!,
-        grokAnalysis: response.response
+        grokAnalysis: response.text
       }));
 
       toast.success("Compliance check complete", {
