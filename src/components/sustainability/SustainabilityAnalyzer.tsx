@@ -65,7 +65,8 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
         sustainabilityScore: 0,
         sustainabilityPercentage: 0,
         recommendations: [],
-        alternatives: {}
+        alternatives: {},
+        sustainabilityIssues: []
       };
       
       setMaterialAnalysis({
@@ -119,7 +120,12 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     sustainabilityPercentage: materialAnalysis?.sustainabilityPercentage || 0,
     recommendations: materialAnalysis?.recommendations || [],
     alternatives: materialAnalysis?.alternatives || {},
-    sustainabilityIssues: materialAnalysis?.sustainabilityIssues || []
+    sustainabilityIssues: materialAnalysis?.sustainabilityIssues || [],
+    categories: materialAnalysis?.categories,
+    materialCount: materialAnalysis?.materialCount,
+    sustainabilityStrengths: materialAnalysis?.sustainabilityStrengths,
+    averageCarbonFootprint: materialAnalysis?.averageCarbonFootprint,
+    materialWithHighestFootprint: materialAnalysis?.materialWithHighestFootprint
   };
   
   const suggestionStrings = convertSuggestionsToStrings(suggestions);

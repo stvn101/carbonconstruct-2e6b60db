@@ -5,6 +5,20 @@ import { createProject as apiCreateProject, updateProject as apiUpdateProject, d
 import { showErrorToast } from '@/utils/errorHandling';
 import { Dispatch, SetStateAction } from 'react';
 import { isOffline } from '@/utils/errorHandling';
+import { CalculationResult, MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
+
+export interface CreateProjectInput {
+  name: string;
+  description?: string;
+  materials: MaterialInput[];
+  transport: TransportInput[];
+  energy: EnergyInput[];
+  result?: CalculationResult;
+  tags?: string[];
+  status?: "draft" | "active" | "completed" | "archived";
+  total_emissions?: number;
+  premium_only?: boolean;
+}
 
 export const useProjectOperations = (
   userId: string | undefined,
@@ -20,7 +34,21 @@ export const useProjectOperations = (
     }
     
     try {
-      const newProject = await apiCreateProject(userId, project);
+      // Convert to the correct type for API call
+      const projectInput: CreateProjectInput = {
+        name: project.name,
+        description: project.description,
+        materials: project.materials,
+        transport: project.transport,
+        energy: project.energy,
+        result: project.result,
+        tags: project.tags,
+        status: project.status as "draft" | "active" | "completed" | "archived",
+        total_emissions: project.total_emissions,
+        premium_only: project.premium_only
+      };
+      
+      const newProject = await apiCreateProject(userId, projectInput);
       setProjects(prevProjects => [...prevProjects, newProject]);
       toast.success("Project created successfully!");
       return newProject;

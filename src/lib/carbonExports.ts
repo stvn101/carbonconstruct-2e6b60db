@@ -40,11 +40,11 @@ export interface CalculationInput {
 // Making this interface compatible with the one in carbonCalculations.ts
 export interface CalculationResult {
   totalCO2: number;
-  totalEmissions: number; // Added to match carbonCalculations.ts
+  totalEmissions: number; // Required from carbonCalculations
   breakdownByCategory: Record<string, number>;
   breakdownByMaterial: Record<string, number>;
-  breakdownByTransport?: Record<string, number>;
-  breakdownByEnergy?: Record<string, number>;
+  breakdownByTransport: Record<string, number>; // Making this required
+  breakdownByEnergy: Record<string, number>; // Making this required
   sustainabilityScore: number;
   materialEmissions: number;
   transportEmissions: number;

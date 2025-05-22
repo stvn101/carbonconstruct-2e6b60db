@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {
   materials: [{ name: "Concrete", type: "concrete", quantity: 1000, unit: "kg", carbonFootprint: 0.12 }],
-  transport: [{ mode: "truck", distance: 100, weight: 1000, carbonFootprint: 0.1 }],
+  transport: [{ mode: "truck", distance: 100, weight: 1000, carbonFootprint: 0.1, type: "truck" }],
   energy: [{ type: "electricity", amount: 500, unit: "kWh", carbonFootprint: 0.5 }]
 };
 
@@ -87,12 +87,14 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Perform the calculation with a small delay to allow UI to update
       setTimeout(() => {
         try {
-          // Convert input types to ensure compatibility
+          // Ensure transport items have both mode and type for compatibility
           const calculationInputModified = {
             ...calculationInput,
             transport: calculationInput.transport.map(t => ({
               ...t,
-              type: t.mode // Ensure we have a type property for compatibility
+              // Ensure all transport items have both mode and type properties
+              mode: t.mode,
+              type: t.type || t.mode
             }))
           };
           
@@ -102,13 +104,20 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           
           // Add required fields to match the CalculationResult type
           const resultWithFormattedData: CalculationResult = {
-            ...result,
             totalCO2: result.totalEmissions,
+            totalEmissions: result.totalEmissions,
             breakdownByCategory: {
               materials: result.breakdown.materials,
               transport: result.breakdown.transport,
               energy: result.breakdown.energy
             },
+            breakdownByMaterial: result.breakdownByMaterial || {},
+            breakdownByTransport: result.breakdownByTransport || {},
+            breakdownByEnergy: result.breakdownByEnergy || {},
+            materialEmissions: result.materialEmissions,
+            transportEmissions: result.transportEmissions,
+            energyEmissions: result.energyEmissions,
+            breakdown: result.breakdown,
             sustainabilityScore: 50, // Default score
             timestamp: new Date().toISOString()
           };
@@ -154,12 +163,14 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Slight delay to allow UI to update before heavy calculation
       setTimeout(() => {
         try {
-          // Convert input types to ensure compatibility
+          // Ensure transport items have both mode and type for compatibility
           const calculationInputModified = {
             ...calculationInput,
             transport: calculationInput.transport.map(t => ({
               ...t,
-              type: t.mode // Ensure we have a type property for compatibility
+              // Ensure all transport items have both mode and type properties
+              mode: t.mode,
+              type: t.type || t.mode
             }))
           };
           
@@ -167,13 +178,20 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           
           // Add required fields to match the CalculationResult type
           const resultWithFormattedData: CalculationResult = {
-            ...result,
             totalCO2: result.totalEmissions,
+            totalEmissions: result.totalEmissions,
             breakdownByCategory: {
               materials: result.breakdown.materials,
               transport: result.breakdown.transport,
               energy: result.breakdown.energy
             },
+            breakdownByMaterial: result.breakdownByMaterial || {},
+            breakdownByTransport: result.breakdownByTransport || {},
+            breakdownByEnergy: result.breakdownByEnergy || {},
+            materialEmissions: result.materialEmissions,
+            transportEmissions: result.transportEmissions,
+            energyEmissions: result.energyEmissions,
+            breakdown: result.breakdown,
             sustainabilityScore: 50, // Default score
             timestamp: new Date().toISOString()
           };

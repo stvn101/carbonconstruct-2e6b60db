@@ -1,149 +1,155 @@
 
-import { CalculationInput, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
+import {
+  CalculationInput,
+  MaterialInput,
+  TransportInput,
+  EnergyInput
+} from "@/lib/carbonExports";
 
-/**
- * Adds a new material to the calculation input
- */
-export function handleAddMaterial(calculationInput: CalculationInput): CalculationInput {
+// Material Handlers
+export const handleAddMaterial = (calculationInput: CalculationInput): CalculationInput => {
+  const newMaterial: MaterialInput = {
+    name: "New Material",
+    type: "concrete",
+    quantity: 0,
+    unit: "kg",
+    carbonFootprint: 0.12
+  };
   return {
     ...calculationInput,
-    materials: [
-      ...calculationInput.materials,
-      { type: "concrete", quantity: "" }
-    ]
+    materials: [...calculationInput.materials, newMaterial]
   };
-}
+};
 
-/**
- * Updates a material in the calculation input
- */
-export function handleUpdateMaterial(
-  calculationInput: CalculationInput, 
-  index: number, 
-  field: keyof MaterialInput, 
+export const handleUpdateMaterial = (
+  calculationInput: CalculationInput,
+  index: number,
+  field: keyof MaterialInput,
   value: any
-): CalculationInput {
+): CalculationInput => {
   const updatedMaterials = [...calculationInput.materials];
   updatedMaterials[index] = {
     ...updatedMaterials[index],
-    [field]: value
+    [field]: field === 'quantity' || field === 'carbonFootprint' || field === 'recycledContent' 
+      ? Number(value) 
+      : value
   };
-  
   return {
     ...calculationInput,
     materials: updatedMaterials
   };
-}
+};
 
-/**
- * Removes a material from the calculation input
- */
-export function handleRemoveMaterial(
-  calculationInput: CalculationInput, 
+export const handleRemoveMaterial = (
+  calculationInput: CalculationInput,
   index: number
-): CalculationInput {
-  const updatedMaterials = calculationInput.materials.filter((_, i) => i !== index);
-  
+): CalculationInput => {
+  const updatedMaterials = [...calculationInput.materials];
+  updatedMaterials.splice(index, 1);
   return {
     ...calculationInput,
     materials: updatedMaterials
   };
-}
+};
 
-/**
- * Adds a new transport item to the calculation input
- */
-export function handleAddTransport(calculationInput: CalculationInput): CalculationInput {
+// Transport Handlers
+export const handleAddTransport = (calculationInput: CalculationInput): CalculationInput => {
+  const newTransport: TransportInput = {
+    mode: "truck",
+    distance: 0,
+    weight: 0,
+    carbonFootprint: 0.1
+  };
   return {
     ...calculationInput,
-    transport: [
-      ...calculationInput.transport,
-      { type: "truck", distance: "", weight: "" }
-    ]
+    transport: [...calculationInput.transport, newTransport]
   };
-}
+};
 
-/**
- * Updates a transport item in the calculation input
- */
-export function handleUpdateTransport(
+export const handleUpdateTransport = (
   calculationInput: CalculationInput,
   index: number,
   field: keyof TransportInput,
   value: any
-): CalculationInput {
+): CalculationInput => {
   const updatedTransport = [...calculationInput.transport];
   updatedTransport[index] = {
     ...updatedTransport[index],
-    [field]: value
+    [field]: field === 'distance' || field === 'weight' || field === 'carbonFootprint'
+      ? Number(value)
+      : value
   };
+  
+  // For backward compatibility, sync type with mode if updating mode
+  if (field === 'mode') {
+    updatedTransport[index].type = value;
+  }
   
   return {
     ...calculationInput,
     transport: updatedTransport
   };
-}
+};
 
-/**
- * Removes a transport item from the calculation input
- */
-export function handleRemoveTransport(
+export const handleRemoveTransport = (
   calculationInput: CalculationInput,
   index: number
-): CalculationInput {
-  const updatedTransport = calculationInput.transport.filter((_, i) => i !== index);
-  
+): CalculationInput => {
+  const updatedTransport = [...calculationInput.transport];
+  updatedTransport.splice(index, 1);
   return {
     ...calculationInput,
     transport: updatedTransport
   };
-}
+};
 
-/**
- * Adds a new energy item to the calculation input
- */
-export function handleAddEnergy(calculationInput: CalculationInput): CalculationInput {
+// Energy Handlers
+export const handleAddEnergy = (calculationInput: CalculationInput): CalculationInput => {
+  const newEnergy: EnergyInput = {
+    type: "electricity",
+    amount: 0,
+    unit: "kWh",
+    carbonFootprint: 0.5
+  };
   return {
     ...calculationInput,
-    energy: [
-      ...calculationInput.energy,
-      { type: "electricity", amount: "" }
-    ]
+    energy: [...calculationInput.energy, newEnergy]
   };
-}
+};
 
-/**
- * Updates an energy item in the calculation input
- */
-export function handleUpdateEnergy(
+export const handleUpdateEnergy = (
   calculationInput: CalculationInput,
   index: number,
   field: keyof EnergyInput,
   value: any
-): CalculationInput {
+): CalculationInput => {
   const updatedEnergy = [...calculationInput.energy];
   updatedEnergy[index] = {
     ...updatedEnergy[index],
-    [field]: value
+    [field]: field === 'amount' || field === 'carbonFootprint'
+      ? Number(value)
+      : value
   };
+  
+  // For backward compatibility, sync quantity with amount if updating amount
+  if (field === 'amount') {
+    updatedEnergy[index].quantity = Number(value);
+  }
   
   return {
     ...calculationInput,
     energy: updatedEnergy
   };
-}
+};
 
-/**
- * Removes an energy item from the calculation input
- */
-export function handleRemoveEnergy(
+export const handleRemoveEnergy = (
   calculationInput: CalculationInput,
   index: number
-): CalculationInput {
-  const updatedEnergy = calculationInput.energy.filter((_, i) => i !== index);
-  
+): CalculationInput => {
+  const updatedEnergy = [...calculationInput.energy];
+  updatedEnergy.splice(index, 1);
   return {
     ...calculationInput,
     energy: updatedEnergy
   };
-}
+};
