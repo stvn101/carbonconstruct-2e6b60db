@@ -86,12 +86,17 @@ export function validateCalculationInput(input: CalculationInput): ValidationErr
         field: `energy[${index}].amount`,
         message: `Energy ${index + 1} must have an amount specified.`
       });
-    } else if ((hasAmount && Number(energy.amount) <= 0) && 
-               (hasQuantity && Number(energy.quantity) <= 0)) {
-      errors.push({
-        field: `energy[${index}].amount`,
-        message: `Energy ${index + 1} must have a positive amount.`
-      });
+    } else {
+      // Fix: Convert to numbers before doing comparisons
+      const amountValue = hasAmount ? Number(energy.amount) : -1;
+      const quantityValue = hasQuantity ? Number(energy.quantity) : -1;
+      
+      if (amountValue <= 0 && quantityValue <= 0) {
+        errors.push({
+          field: `energy[${index}].amount`,
+          message: `Energy ${index + 1} must have a positive amount.`
+        });
+      }
     }
   });
   

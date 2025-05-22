@@ -9,14 +9,14 @@ describe('Carbon Calculations', () => {
   test('calculateTotalEmissions returns expected results', () => {
     const input: CalculationInput = {
       materials: [
-        { type: 'concrete', quantity: 1000, unit: 'kg' },
-        { type: 'steel', quantity: 500, unit: 'kg' }
+        { type: 'concrete', quantity: 1000, unit: 'kg', name: 'Standard Concrete', carbonFootprint: 0.12 },
+        { type: 'steel', quantity: 500, unit: 'kg', name: 'Structural Steel', carbonFootprint: 1.85 }
       ],
       transport: [
-        { type: 'truck', distance: 100 }
+        { type: 'truck', mode: 'truck', distance: 100, weight: 1500, carbonFootprint: 0.1 }
       ],
       energy: [
-        { type: 'electricity', amount: 1000, unit: 'kWh' }
+        { type: 'electricity', amount: 1000, unit: 'kWh', carbonFootprint: 0.94 }
       ]
     };
     
