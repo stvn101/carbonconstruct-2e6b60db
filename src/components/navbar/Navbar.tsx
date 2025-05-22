@@ -46,8 +46,8 @@ const Navbar = () => {
   return (
     <ErrorBoundary feature="Navigation">
       <NavbarContainer
-        isDarkMode={isDarkMode}
         isPremiumUser={profile?.subscription_tier === 'premium'}
+        isDarkMode={isDarkMode}
       >
         <div className="container mx-auto px-4 md:px-6">
           <NavbarMainSection isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

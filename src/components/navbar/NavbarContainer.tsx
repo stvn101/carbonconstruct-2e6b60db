@@ -6,12 +6,17 @@ import { useTheme } from "@/components/ThemeProvider";
 interface NavbarContainerProps {
   children: React.ReactNode;
   isPremiumUser: boolean;
+  isDarkMode?: boolean; // Added isDarkMode as an optional prop
 }
 
-const NavbarContainer = ({ children, isPremiumUser }: NavbarContainerProps) => {
+const NavbarContainer = ({ children, isPremiumUser, isDarkMode }: NavbarContainerProps) => {
   const { isVisible, scrolled } = useNavbarVisibility();
   const { theme } = useTheme();
-  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  
+  // Use provided isDarkMode prop if available, otherwise compute it from theme context
+  const effectiveDarkMode = isDarkMode !== undefined ? 
+    isDarkMode : 
+    theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   
   return (
     <motion.nav 

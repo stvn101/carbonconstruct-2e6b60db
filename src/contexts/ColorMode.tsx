@@ -21,17 +21,27 @@ export const useColorMode = (): ColorModeContextType => {
 export const ColorModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme, setTheme } = useTheme();
   
-  // Convert theme to color mode
-  const isDark = theme === 'dark' || 
-    (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  // Convert theme to color mode - handle SSR safely
+  const [isDarkMode, setIsDarkMode] = useState(false);
   
-  const [colorMode, setColorMode] = useState<ColorMode>(isDark ? 'dark' : 'light');
+  useEffect(() => {
+    // Only access window.matchMedia in browser environment
+    const darkModePreference = window.matchMedia && 
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    const isDark = theme === 'dark' || 
+      (theme === 'system' && darkModePreference);
+    
+    setIsDarkMode(isDark);
+  }, [theme]);
+  
+  const [colorMode, setColorMode] = useState<ColorMode>(isDarkMode ? 'dark' : 'light');
 
   // Keep colorMode in sync with theme
   useEffect(() => {
-    const newColorMode: ColorMode = isDark ? 'dark' : 'light';
+    const newColorMode: ColorMode = isDarkMode ? 'dark' : 'light';
     setColorMode(newColorMode);
-  }, [theme, isDark]);
+  }, [isDarkMode]);
 
   const toggleColorMode = () => {
     const newMode = colorMode === 'light' ? 'dark' : 'light';
