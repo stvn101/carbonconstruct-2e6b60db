@@ -25,13 +25,19 @@ export interface SuggestionMetadata {
 }
 
 export function useSustainabilitySuggestions() {
-  const { materials, transport, energy, calculationResult } = useCalculator();
+  const calculatorContext = useCalculator();
   const [suggestions, setSuggestions] = useState<SustainabilitySuggestion[]>([]);
   const [prioritySuggestions, setPrioritySuggestions] = useState<SustainabilitySuggestion[]>([]);
   const [report, setReport] = useState<any>(null);
   const [metadata, setMetadata] = useState<SuggestionMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Extract required properties from calculationInput
+  const materials = calculatorContext.calculationInput?.materials || [];
+  const transport = calculatorContext.calculationInput?.transport || [];
+  const energy = calculatorContext.calculationInput?.energy || [];
+  const calculationResult = calculatorContext.calculationResult;
   
   // Fetch sustainability suggestions when materials or energy data changes
   useEffect(() => {
