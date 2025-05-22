@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useGrok } from '@/contexts/GrokContext';
 import { useChat } from 'ai/react';
 import { GrokChatMessage } from '@/types/grok';
+import { useSimpleOfflineMode } from '@/hooks/useSimpleOfflineMode';
 
 // Helper to get a chat message ID
 const getMessageId = () => `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -16,6 +17,14 @@ export const useGrokChatLogic = ({ initialContext }: UseGrokChatLogicProps = {})
   const [messages, setMessages] = useState<GrokChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isOffline } = useSimpleOfflineMode();
+  
+  // Clear error when going back online
+  useEffect(() => {
+    if (!isOffline && error?.includes('network') || error?.includes('offline')) {
+      setError(null);
+    }
+  }, [isOffline, error]);
 
   // Use the Vercel AI SDK's useChat hook for streaming capabilities
   const { input, handleInputChange, handleSubmit: handleVercelSubmit, isLoading } = useChat({
@@ -28,6 +37,16 @@ export const useGrokChatLogic = ({ initialContext }: UseGrokChatLogicProps = {})
         content: message.content,
         timestamp: new Date()
       }]);
+    },
+    onError: (error) => {
+      console.error("Error in chat:", error);
+      
+      // Show network-specific error message if offline
+      if (isOffline || error.message.includes('network') || error.message.includes('failed to fetch')) {
+        setError("Network connection issue. Please check your internet and try again.");
+      } else {
+        setError(error.message || "An error occurred while processing your request.");
+      }
     }
   });
 
@@ -41,13 +60,19 @@ export const useGrokChatLogic = ({ initialContext }: UseGrokChatLogicProps = {})
         timestamp: new Date()
       }]);
     }
-  }, [initialContext]);
+  }, [initialContext, messages.length]);
 
   // Custom submit handler that integrates Vercel AI with our existing GrokContext
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!input.trim() || !isConfigured || isLoading) return;
+    if (!input.trim() || !isConfigured || isLoading || isOffline) {
+      // Show specific message if trying to submit while offline
+      if (isOffline) {
+        setError("You're currently offline. Please reconnect to use Grok AI services.");
+      }
+      return;
+    }
     
     // Add user message
     const userMessage: GrokChatMessage = {
@@ -70,7 +95,13 @@ export const useGrokChatLogic = ({ initialContext }: UseGrokChatLogicProps = {})
       }
     } catch (error) {
       console.error('Error in Grok chat:', error);
-      setError('Failed to get a response. Please try again.');
+      
+      // Show network-specific error if offline
+      if (isOffline || (error instanceof Error && (error.message.includes('network') || error.message.includes('failed to fetch')))) {
+        setError("Network connection issue. Please check your internet and try again.");
+      } else {
+        setError('Failed to get a response. Please try again.');
+      }
     }
   };
 
@@ -80,6 +111,7 @@ export const useGrokChatLogic = ({ initialContext }: UseGrokChatLogicProps = {})
     isLoading,
     input,
     isConfigured,
+    isOffline,
     handleInputChange,
     handleSubmit,
     inputRef
