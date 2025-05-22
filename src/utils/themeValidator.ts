@@ -22,47 +22,30 @@ export type ThemeColorCategory = {
 // Our standardized color palette
 export const themeColorPalette: ThemeColorCategory[] = [
   {
-    name: "Primary",
+    name: "Primary Colors",
     colors: [
       {
         name: "background",
         day: "#F8F9FA",
         night: "#212529",
-        description: "Main background color"
+        description: "Main background"
       },
       {
         name: "foreground",
         day: "#212529",
         night: "#F8F9FA",
-        description: "Main text color"
+        description: "Main text"
       },
       {
-        name: "accent",
+        name: "primary",
         day: "#2B8A3E",
         night: "#2B8A3E",
-        description: "Primary accent/action color"
+        description: "Brand accent"
       }
     ]
   },
   {
-    name: "Secondary",
-    colors: [
-      {
-        name: "secondary-bg",
-        day: "#E9ECEF",
-        night: "#343A40",
-        description: "Secondary background color"
-      },
-      {
-        name: "muted",
-        day: "#6C757D",
-        night: "#ADB5BD",
-        description: "Muted/subtle text"
-      }
-    ]
-  },
-  {
-    name: "Components",
+    name: "UI Components",
     colors: [
       {
         name: "card",
@@ -71,53 +54,111 @@ export const themeColorPalette: ThemeColorCategory[] = [
         description: "Card background"
       },
       {
+        name: "muted",
+        day: "#E9ECEF",
+        night: "#343A40",
+        description: "Muted areas"
+      },
+      {
+        name: "muted-foreground",
+        day: "#6C757D",
+        night: "#ADB5BD",
+        description: "Muted text"
+      },
+      {
         name: "border",
         day: "#DEE2E6",
         night: "#495057",
-        description: "Border color"
+        description: "Borders"
+      }
+    ]
+  },
+  {
+    name: "Semantic Colors",
+    colors: [
+      {
+        name: "destructive",
+        day: "#DC3545",
+        night: "#DC3545",
+        description: "Error/danger"
+      },
+      {
+        name: "success",
+        day: "#198754",
+        night: "#20C997",
+        description: "Success/confirmed"
+      },
+      {
+        name: "warning",
+        day: "#FFC107",
+        night: "#FFC107",
+        description: "Warning/attention"
       }
     ]
   }
 ];
 
 /**
- * Validates if a color is used consistently
+ * Validates all theme colors on the page
  */
-export function validateColorConsistency(
-  elementSelector: string,
-  propertyName: string,
-  expectedColor: string
-): boolean {
-  // Only run in development mode
-  if (process.env.NODE_ENV !== 'development') return true;
+export function validateAllThemeColors(): {isValid: boolean, issues: string[]} {
+  // Only run in browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return {isValid: true, issues: []};
+  }
   
+  const issues: string[] = [];
+  const isDark = document.documentElement.classList.contains('dark');
+  
+  // Check if root element has correct theme class
+  if (!document.documentElement.classList.contains('dark') && 
+      !document.documentElement.classList.contains('light')) {
+    issues.push("Root element missing theme class (dark or light)");
+  }
+  
+  // Check body background
+  const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+  const expectedBgColor = isDark ? "rgb(33, 37, 41)" : "rgb(248, 249, 250)"; 
+  if (!bodyBg.includes(expectedBgColor.substring(0, 10))) {
+    issues.push(`Body background color inconsistency. Expected: ${expectedBgColor}, Got: ${bodyBg}`);
+  }
+  
+  // Check text color
+  const bodyText = window.getComputedStyle(document.body).color;
+  const expectedTextColor = isDark ? "rgb(248, 249, 250)" : "rgb(33, 37, 41)";
+  if (!bodyText.includes(expectedTextColor.substring(0, 10))) {
+    issues.push(`Body text color inconsistency. Expected: ${expectedTextColor}, Got: ${bodyText}`);
+  }
+  
+  // Check a few key components
   try {
-    const elements = document.querySelectorAll(elementSelector);
-    let isConsistent = true;
-    
-    elements.forEach(element => {
-      const computedStyle = window.getComputedStyle(element);
-      const actualColor = computedStyle.getPropertyValue(propertyName);
-      
-      // Convert colors to a standard format for comparison
-      const normalizedActual = normalizeColor(actualColor);
-      const normalizedExpected = normalizeColor(expectedColor);
-      
-      if (normalizedActual !== normalizedExpected) {
-        console.warn(
-          `Theme inconsistency detected on ${elementSelector}`,
-          `Expected ${propertyName} to be ${expectedColor}`,
-          `Got ${actualColor} instead`
-        );
-        isConsistent = false;
+    // Check buttons
+    const buttons = document.querySelectorAll('button[class*="btn-primary"], button[class*="bg-primary"]');
+    buttons.forEach(button => {
+      const buttonStyles = window.getComputedStyle(button);
+      if (!buttonStyles.backgroundColor.includes("43, 138, 62") && // RGB values for #2B8A3E
+          !buttonStyles.backgroundColor.includes("43,138,62")) {
+        issues.push(`Primary button with inconsistent color: ${buttonStyles.backgroundColor}`);
       }
     });
     
-    return isConsistent;
+    // Check cards
+    const cards = document.querySelectorAll('.card, [class*="bg-card"]');
+    cards.forEach(card => {
+      const cardStyles = window.getComputedStyle(card);
+      const expectedCardBg = isDark ? "rgb(52, 58, 64)" : "rgb(255, 255, 255)";
+      if (!cardStyles.backgroundColor.includes(expectedCardBg.substring(0, 10))) {
+        issues.push(`Card with inconsistent background: ${cardStyles.backgroundColor}`);
+      }
+    });
   } catch (error) {
-    console.error("Error while validating color consistency:", error);
-    return false;
+    issues.push(`Error during theme validation: ${(error as Error).message}`);
   }
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  };
 }
 
 /**
@@ -125,46 +166,5 @@ export function validateColorConsistency(
  */
 function normalizeColor(color: string): string {
   // This is a simplified implementation
-  // In a real app, you'd want to convert all formats (hex, rgb, hsl) to a single format
   return color.toLowerCase().trim();
-}
-
-/**
- * Validate all theme colors on the page
- */
-export function validateAllThemeColors(): {isValid: boolean, issues: string[]} {
-  // Only run in development mode
-  if (process.env.NODE_ENV !== 'development') {
-    return {isValid: true, issues: []};
-  }
-  
-  const issues: string[] = [];
-  const isDark = document.documentElement.classList.contains('dark');
-  
-  // Check body background
-  const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-  const expectedBg = isDark ? "#212529" : "#F8F9FA";
-  if (normalizeColor(bodyBg) !== normalizeColor(expectedBg)) {
-    issues.push(`Body background color mismatch. Expected: ${expectedBg}, Got: ${bodyBg}`);
-  }
-  
-  // Check text color
-  const bodyText = window.getComputedStyle(document.body).color;
-  const expectedText = isDark ? "#F8F9FA" : "#212529"; 
-  if (normalizeColor(bodyText) !== normalizeColor(expectedText)) {
-    issues.push(`Body text color mismatch. Expected: ${expectedText}, Got: ${bodyText}`);
-  }
-  
-  // Check primary buttons
-  document.querySelectorAll('button.btn-primary').forEach(button => {
-    const buttonBg = window.getComputedStyle(button).backgroundColor;
-    if (normalizeColor(buttonBg) !== normalizeColor("#2B8A3E")) {
-      issues.push(`Button background color mismatch on ${button}`);
-    }
-  });
-  
-  return {
-    isValid: issues.length === 0,
-    issues
-  };
 }

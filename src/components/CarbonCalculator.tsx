@@ -13,14 +13,14 @@ export interface CarbonCalculatorProps {
 
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => {
   return (
-    <Alert className="mb-6 bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800">
-      <AlertTitle className="text-red-800 dark:text-red-300">Calculator Error</AlertTitle>
-      <AlertDescription className="text-red-700 dark:text-red-400">
+    <Alert className="mb-6 bg-destructive/10 border-destructive/20 dark:bg-destructive/20 dark:border-destructive/30">
+      <AlertTitle className="text-destructive">Calculator Error</AlertTitle>
+      <AlertDescription className="text-destructive/90">
         An error occurred while loading the calculator: {error.message}
         <div className="mt-2">
           <Button 
             onClick={resetErrorBoundary} 
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             size="sm"
           >
             Try Again
@@ -73,10 +73,8 @@ const CarbonCalculatorContent = ({ demoMode = false }: CarbonCalculatorProps) =>
     return <CalculatorError />;
   }
 
-  console.log("CarbonCalculator rendering with calculatorContext:", calculatorContext.activeTab);
-
   return (
-    <div className="container mx-auto px-4 md:px-6">
+    <div className="container mx-auto px-4 md:px-6 pb-16">
       <CalculatorAlerts 
         demoMode={demoMode} 
         authError={authError ? authError.message : null}
