@@ -27,7 +27,7 @@ const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContaine
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
     >
-      <div className="w-full px-4 md:px-6 lg:px-8">
+      <div className="w-full">
         {children}
       </div>
     </motion.nav>
