@@ -7,36 +7,19 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
-} from '@/components/ui/collapsible';
-import { Slider } from '@/components/ui/slider';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import {
-  ChevronDown,
-  ChevronUp,
-  Search,
-  Filter,
-  X,
-  RotateCcw
-} from 'lucide-react';
-import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
+import { Search } from 'lucide-react';
 
-interface AdvancedMaterialSearchProps {
-  onSearch: (searchParams: SearchParams) => void;
-  categories: string[];
-  regions: string[];
-  tags: string[];
-  materialCount: number;
-  onResetFilters: () => void;
-  className?: string;
-}
+// Import our new components
+import SearchBox from './advanced-search/SearchBox';
+import ActiveFilters from './advanced-search/ActiveFilters';
+import CategoryFilter from './advanced-search/CategoryFilter';
+import RegionFilter from './advanced-search/RegionFilter';
+import TagFilter from './advanced-search/TagFilter';
+import RangeFilter from './advanced-search/RangeFilter';
+import RecyclabilityFilter from './advanced-search/RecyclabilityFilter';
+import AlternativesFilter from './advanced-search/AlternativesFilter';
+import SearchCollapsible from './advanced-search/SearchCollapsible';
 
 export interface SearchParams {
   term: string;
@@ -59,6 +42,16 @@ const defaultSearchParams: SearchParams = {
   recyclability: [],
   showOnlyAlternatives: false
 };
+
+interface AdvancedMaterialSearchProps {
+  onSearch: (searchParams: SearchParams) => void;
+  categories: string[];
+  regions: string[];
+  tags: string[];
+  materialCount: number;
+  onResetFilters: () => void;
+  className?: string;
+}
 
 const AdvancedMaterialSearch: React.FC<AdvancedMaterialSearchProps> = ({
   onSearch,
@@ -234,191 +227,79 @@ const AdvancedMaterialSearch: React.FC<AdvancedMaterialSearchProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Search Box */}
-        <div className="flex space-x-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search materials..."
-              value={searchParams.term}
-              onChange={handleSearchTermChange}
-              className="pl-9"
-            />
-          </div>
-          <Button onClick={handleSearch}>Search</Button>
-        </div>
+        <SearchBox 
+          term={searchParams.term}
+          onTermChange={handleSearchTermChange}
+          onSearch={handleSearch}
+        />
         
         {/* Active Filters */}
-        {activeFilters.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-2">
-            {activeFilters.map(filter => {
-              const [type, ...valueParts] = filter.split(':');
-              const value = valueParts.join(':'); // Rejoin in case value contained colons
-              
-              return (
-                <Badge key={filter} variant="secondary" className="flex items-center gap-1">
-                  {value}
-                  <button 
-                    onClick={() => removeFilter(filter)} 
-                    className="ml-1 rounded-full hover:bg-muted"
-                  >
-                    <X className="h-3 w-3" />
-                    <span className="sr-only">Remove {value} filter</span>
-                  </button>
-                </Badge>
-              );
-            })}
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleResetFilters} 
-              className="h-6 px-2 text-xs"
-            >
-              <RotateCcw className="h-3 w-3 mr-1" />
-              Reset
-            </Button>
-          </div>
-        )}
+        <ActiveFilters 
+          activeFilters={activeFilters}
+          onRemoveFilter={removeFilter}
+          onResetFilters={handleResetFilters}
+        />
 
         {/* Advanced Filters */}
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between p-1 text-sm font-medium">
-            <span className="flex items-center">
-              <Filter className="h-4 w-4 mr-2" />
-              Advanced Filters
-            </span>
-            {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </CollapsibleTrigger>
+        <SearchCollapsible 
+          isOpen={isOpen} 
+          onOpenChange={setIsOpen}
+          onSearch={handleSearch}
+        >
+          {/* Categories */}
+          <CategoryFilter 
+            categories={categories}
+            selectedCategories={searchParams.categories}
+            onToggleCategory={handleCategoryToggle}
+          />
           
-          <CollapsibleContent className="pt-2 space-y-4">
-            {/* Categories */}
-            <div>
-              <h3 className="text-sm font-medium mb-2">Categories</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {categories.map((category) => (
-                  <div key={category} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`category-${category}`}
-                      checked={searchParams.categories.includes(category)}
-                      onCheckedChange={() => handleCategoryToggle(category)}
-                    />
-                    <Label 
-                      htmlFor={`category-${category}`}
-                      className="text-sm cursor-pointer"
-                    >
-                      {category}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Regions */}
-            <div>
-              <h3 className="text-sm font-medium mb-2">Regions</h3>
-              <div className="flex flex-wrap gap-2">
-                {regions.map((region) => (
-                  <Badge
-                    key={region}
-                    variant={searchParams.regions.includes(region) ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => handleRegionToggle(region)}
-                  >
-                    {region}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            
-            {/* Tags */}
-            <div>
-              <h3 className="text-sm font-medium mb-2">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {tags.slice(0, 15).map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant={searchParams.tags.includes(tag) ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => handleTagToggle(tag)}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            
-            {/* Carbon Range */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium">Carbon Footprint Range (kgCO2e)</h3>
-                <span className="text-xs text-muted-foreground">
-                  {searchParams.carbonRange[0]} - {searchParams.carbonRange[1]}
-                </span>
-              </div>
-              <Slider
-                defaultValue={searchParams.carbonRange}
-                min={0}
-                max={2000}
-                step={50}
-                value={searchParams.carbonRange}
-                onValueChange={handleCarbonRangeChange}
-              />
-            </div>
-            
-            {/* Sustainability Score */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium">Sustainability Score</h3>
-                <span className="text-xs text-muted-foreground">
-                  {searchParams.sustainabilityScore[0]} - {searchParams.sustainabilityScore[1]}
-                </span>
-              </div>
-              <Slider
-                defaultValue={searchParams.sustainabilityScore}
-                min={0}
-                max={100}
-                step={5}
-                value={searchParams.sustainabilityScore}
-                onValueChange={handleSustainabilityScoreChange}
-              />
-            </div>
-            
-            {/* Recyclability */}
-            <div>
-              <h3 className="text-sm font-medium mb-2">Recyclability</h3>
-              <div className="flex gap-2">
-                {(['High', 'Medium', 'Low'] as const).map((level) => (
-                  <Badge
-                    key={level}
-                    variant={searchParams.recyclability.includes(level) ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => handleRecyclabilityToggle(level)}
-                  >
-                    {level}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            
-            {/* Alternatives Only */}
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="alternatives-only"
-                checked={searchParams.showOnlyAlternatives}
-                onCheckedChange={(checked) => handleAlternativesToggle(!!checked)}
-              />
-              <Label 
-                htmlFor="alternatives-only"
-                className="text-sm cursor-pointer"
-              >
-                Show only alternative materials
-              </Label>
-            </div>
-            
-            {/* Search Button */}
-            <Button onClick={handleSearch} className="w-full">Apply Filters</Button>
-          </CollapsibleContent>
-        </Collapsible>
+          {/* Regions */}
+          <RegionFilter 
+            regions={regions}
+            selectedRegions={searchParams.regions}
+            onToggleRegion={handleRegionToggle}
+          />
+          
+          {/* Tags */}
+          <TagFilter 
+            tags={tags}
+            selectedTags={searchParams.tags}
+            onToggleTag={handleTagToggle}
+          />
+          
+          {/* Carbon Range */}
+          <RangeFilter 
+            title="Carbon Footprint Range"
+            description="kgCO2e"
+            min={0}
+            max={2000}
+            step={50}
+            value={searchParams.carbonRange}
+            onChange={handleCarbonRangeChange}
+          />
+          
+          {/* Sustainability Score */}
+          <RangeFilter 
+            title="Sustainability Score"
+            min={0}
+            max={100}
+            step={5}
+            value={searchParams.sustainabilityScore}
+            onChange={handleSustainabilityScoreChange}
+          />
+          
+          {/* Recyclability */}
+          <RecyclabilityFilter 
+            selectedLevels={searchParams.recyclability}
+            onToggleLevel={handleRecyclabilityToggle}
+          />
+          
+          {/* Alternatives Only */}
+          <AlternativesFilter 
+            checked={searchParams.showOnlyAlternatives}
+            onToggle={handleAlternativesToggle}
+          />
+        </SearchCollapsible>
       </CardContent>
     </Card>
   );
