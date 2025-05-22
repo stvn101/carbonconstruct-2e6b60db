@@ -18,7 +18,8 @@ export interface SavedProject {
   tags: string[];
   
   // Additional properties with specific types
-  status: 'draft' | 'completed' | 'archived';
+  // Update status to include 'active'
+  status: 'draft' | 'active' | 'completed' | 'archived';
   region?: string;
   total_emissions: number;
   premium_only: boolean;

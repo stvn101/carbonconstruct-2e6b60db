@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { SavedProject } from '@/types/project';
-import { CalculationResult } from '@/lib/carbonCalculations';
+import { CalculationResult as BaseCalculationResult } from '@/lib/carbonCalculations';
 import { MaterialInput, TransportInput, EnergyInput, CalculationResult as ExtendedCalculationResult } from '@/lib/carbonExports';
 import { Json } from '@/integrations/supabase/types';
 import { performDbOperation } from './supabase';
@@ -40,10 +40,20 @@ export async function fetchUserProjects(
         // Parse result and add timestamp if missing
         let result: ExtendedCalculationResult | undefined;
         if (project.result) {
-          const baseResult = project.result as unknown as CalculationResult;
+          const baseResult = project.result as unknown as any;
           result = {
-            ...baseResult,
-            timestamp: (project.result as any)?.timestamp || new Date().toISOString()
+            totalCO2: baseResult.totalCO2 || baseResult.totalEmissions || 0,
+            totalEmissions: baseResult.totalEmissions || 0,
+            breakdownByCategory: baseResult.breakdownByCategory || { materials: 0, transport: 0, energy: 0 },
+            breakdownByMaterial: baseResult.breakdownByMaterial || {},
+            breakdownByTransport: baseResult.breakdownByTransport || {},
+            breakdownByEnergy: baseResult.breakdownByEnergy || {},
+            sustainabilityScore: baseResult.sustainabilityScore || 0,
+            materialEmissions: baseResult.materialEmissions || 0,
+            transportEmissions: baseResult.transportEmissions || 0,
+            energyEmissions: baseResult.energyEmissions || 0,
+            breakdown: baseResult.breakdown || { materials: 0, transport: 0, energy: 0 },
+            timestamp: baseResult.timestamp || new Date().toISOString()
           };
         }
         
@@ -60,9 +70,9 @@ export async function fetchUserProjects(
           result: result,
           tags: project.tags || [],
           // Add required properties with default values if not present
-          status: 'draft', // Default to 'draft' as the database doesn't have this field yet
+          status: project.status || 'draft', // Default to 'draft'
           total_emissions: project.total || 0, // Use the 'total' column for emissions
-          premium_only: false // Default to false as the database doesn't have this field yet
+          premium_only: false // Default to false
         };
       });
     },
@@ -82,9 +92,9 @@ export async function createProject(
     materials: MaterialInput[];
     transport: TransportInput[];
     energy: EnergyInput[];
-    result?: CalculationResult;
+    result?: ExtendedCalculationResult;
     tags?: string[];
-    status?: 'draft' | 'completed' | 'archived';
+    status?: 'draft' | 'active' | 'completed' | 'archived';
     total_emissions?: number;
     premium_only?: boolean;
   }
@@ -96,7 +106,15 @@ export async function createProject(
       if (project.result) {
         resultWithTimestamp = {
           ...project.result,
-          timestamp: new Date().toISOString()
+          // Set default values for required fields if they're missing
+          totalCO2: project.result.totalCO2 || project.result.totalEmissions || 0,
+          totalEmissions: project.result.totalEmissions || 0,
+          breakdownByCategory: project.result.breakdownByCategory || {},
+          breakdownByMaterial: project.result.breakdownByMaterial || {},
+          breakdownByTransport: project.result.breakdownByTransport || {},
+          breakdownByEnergy: project.result.breakdownByEnergy || {},
+          sustainabilityScore: project.result.sustainabilityScore || 0,
+          timestamp: project.result.timestamp || new Date().toISOString()
         };
       }
       
@@ -138,14 +156,24 @@ export async function createProject(
         transport: (data.transport as unknown as TransportInput[]) || [],
         energy: (data.energy as unknown as EnergyInput[]) || [],
         result: data.result ? {
-          ...(data.result as unknown as CalculationResult),
+          totalCO2: (data.result as any)?.totalCO2 || (data.result as any)?.totalEmissions || 0,
+          totalEmissions: (data.result as any)?.totalEmissions || 0,
+          breakdownByCategory: (data.result as any)?.breakdownByCategory || {},
+          breakdownByMaterial: (data.result as any)?.breakdownByMaterial || {},
+          breakdownByTransport: (data.result as any)?.breakdownByTransport || {},
+          breakdownByEnergy: (data.result as any)?.breakdownByEnergy || {},
+          sustainabilityScore: (data.result as any)?.sustainabilityScore || 0,
+          materialEmissions: (data.result as any)?.materialEmissions || 0,
+          transportEmissions: (data.result as any)?.transportEmissions || 0,
+          energyEmissions: (data.result as any)?.energyEmissions || 0,
+          breakdown: (data.result as any)?.breakdown || { materials: 0, transport: 0, energy: 0 },
           timestamp: (data.result as any)?.timestamp || new Date().toISOString()
         } : undefined,
         tags: data.tags || [],
         // Add required properties with default values
-        status: 'draft', // Default to 'draft' as the database doesn't have this field yet
-        total_emissions: data.total || 0, // Use the 'total' column
-        premium_only: false // Default to false as the database doesn't have this field yet
+        status: data.status || 'draft',
+        total_emissions: data.total || 0,
+        premium_only: false
       };
     },
     'create project'

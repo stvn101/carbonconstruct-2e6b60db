@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { SavedProject } from '@/types/project';
 import { createProject as apiCreateProject, updateProject as apiUpdateProject, deleteProject as apiDeleteProject } from '@/services/projectService';
@@ -43,6 +42,7 @@ export const useProjectOperations = (
         energy: project.energy,
         result: project.result,
         tags: project.tags,
+        // Map the status to match the allowed values on both sides
         status: project.status as "draft" | "active" | "completed" | "archived",
         total_emissions: project.total_emissions,
         premium_only: project.premium_only
