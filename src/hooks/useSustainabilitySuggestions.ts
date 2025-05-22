@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useCalculator } from '@/contexts/CalculatorContext';
+import { useCalculator } from '@/contexts/calculator';
 import { toast } from 'sonner';
 import { retryWithRecovery } from '@/utils/errorHandling/connectionRecovery';
 import { CalculationInput } from '@/lib/carbonExports';
@@ -50,6 +50,7 @@ export function useSustainabilitySuggestions() {
     
     try {
       // Use the recovery utility for network resilience
+      // Fix: Pass correct parameters to retryWithRecovery
       const result = await retryWithRecovery(
         async () => {
           const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
@@ -67,14 +68,10 @@ export function useSustainabilitySuggestions() {
           if (error) throw error;
           return data;
         },
-        {
-          onRetry: (attempt) => {
-            console.log(`Retry attempt ${attempt} for sustainability suggestions`);
-          },
-          onFailure: (err) => {
-            console.error("Failed to get sustainability suggestions after retries:", err);
-            setError(err.message || "Failed to fetch sustainability suggestions");
-          }
+        2, // Max retries
+        5000, // Initial delay
+        (attempt, delay) => {
+          console.log(`Retry attempt ${attempt} for sustainability suggestions`);
         }
       );
       
@@ -109,7 +106,7 @@ export function useSustainabilitySuggestions() {
     setError(null);
     
     try {
-      // Implementation similar to getSustainabilitySuggestions but takes explicit parameters
+      // Fix: Pass correct parameters to retryWithRecovery
       const result = await retryWithRecovery(
         async () => {
           const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
@@ -124,14 +121,10 @@ export function useSustainabilitySuggestions() {
           if (error) throw error;
           return data;
         },
-        {
-          onRetry: (attempt) => {
-            console.log(`Retry attempt ${attempt} for sustainability suggestions`);
-          },
-          onFailure: (err) => {
-            console.error("Failed to get sustainability suggestions after retries:", err);
-            setError(err.message || "Failed to fetch sustainability suggestions");
-          }
+        2, // Max retries
+        5000, // Initial delay
+        (attempt, delay) => {
+          console.log(`Retry attempt ${attempt} for sustainability suggestions`);
         }
       );
       
