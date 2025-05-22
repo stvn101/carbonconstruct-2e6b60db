@@ -8,6 +8,7 @@ import { ComplianceData } from '../types';
 import { withNetworkErrorHandling } from '@/utils/errorHandling';
 import GrokAnalysisStatus from './GrokAnalysisStatus';
 import ComplianceAnalysisSection from './ComplianceAnalysisSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GrokComplianceInsightsProps {
   nccData?: ComplianceData;
@@ -29,6 +30,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
   const [nccAnalysisStream, setNccAnalysisStream] = useState<string>('');
   const [nabersAnalysisStream, setNabersAnalysisStream] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const { isMobile } = useIsMobile();
   
   // Check if we have both compliance data sets
   const hasComplianceData = nccData && nabersData && 
@@ -164,14 +166,14 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
   }
   
   return (
-    <Card className={`mt-4 ${className}`}>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className={`mt-3 sm:mt-4 ${className}`}>
+      <CardHeader className={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-start sm:items-center ${isMobile ? 'space-y-2 pb-2' : 'justify-between pb-4'}`}>
         <div>
-          <CardTitle className="flex items-center">
-            <Brain className="h-5 w-5 mr-2 text-carbon-600" />
+          <CardTitle className="flex items-center text-base sm:text-lg">
+            <Brain className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2 text-carbon-600" />
             AI Compliance Insights
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             AI-powered analysis and recommendations for improving compliance
           </CardDescription>
         </div>
@@ -181,22 +183,23 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
             size="sm"
             onClick={analyzeComplianceData}
             disabled={isAnalyzing || isProcessing}
+            className={isMobile ? "w-full mt-2" : ""}
           >
             {isAnalyzing ? (
               <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                <RefreshCw className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                 Analyzing...
               </>
             ) : (
               <>
-                <Brain className="mr-2 h-4 w-4" />
+                <Brain className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 Analyze
               </>
             )}
           </Button>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0 px-3 sm:px-6">
         <GrokAnalysisStatus 
           isConfigured={isConfigured}
           error={error}
@@ -204,7 +207,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
         />
         
         {isConfigured && !error && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* NCC 2025 Analysis */}
             <ComplianceAnalysisSection
               title="NCC 2025"
@@ -212,6 +215,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
               analysis={nccAnalysis}
               analysisStream={nccAnalysisStream}
               isAnalyzing={isAnalyzing}
+              isMobile={isMobile}
             />
             
             {/* NABERS Analysis */}
@@ -222,6 +226,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
               analysis={nabersAnalysis}
               analysisStream={nabersAnalysisStream}
               isAnalyzing={isAnalyzing}
+              isMobile={isMobile}
             />
           </div>
         )}

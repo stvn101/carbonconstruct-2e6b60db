@@ -7,6 +7,7 @@ import GrokChatError from './GrokChatError';
 import GrokChatUnconfigured from './GrokChatUnconfigured';
 import GrokUsageDisplay from '../GrokUsageDisplay';
 import { GrokChatMessage } from '@/types/grok';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GrokChatContainerProps {
   messages: GrokChatMessage[];
@@ -34,11 +35,12 @@ const GrokChatContainer: React.FC<GrokChatContainerProps> = ({
   className
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useIsMobile();
 
   return (
-    <Card className={`flex flex-col h-[calc(100vh-320px)] md:h-[600px] ${className}`}>
+    <Card className={`flex flex-col ${isMobile ? 'h-[calc(100vh-240px)]' : 'h-[calc(100vh-320px)] md:h-[600px]'} ${className}`}>
       {/* Chat messages area with improved mobile styling */}
-      <CardContent className="flex-1 overflow-y-auto py-6 px-4 sm:px-6">
+      <CardContent className="flex-1 overflow-y-auto py-4 px-3 sm:py-6 sm:px-6">
         <GrokChatMessages 
           messages={messages}
           title={title}
@@ -47,7 +49,7 @@ const GrokChatContainer: React.FC<GrokChatContainerProps> = ({
       </CardContent>
       
       {/* Input area */}
-      <CardFooter className="p-4 border-t">
+      <CardFooter className="p-3 sm:p-4 border-t">
         <GrokChatError error={error} />
         
         {!isConfigured ? (
@@ -59,15 +61,15 @@ const GrokChatContainer: React.FC<GrokChatContainerProps> = ({
                 input={input}
                 handleInputChange={handleInputChange}
                 handleSubmit={handleSubmit}
-                placeholder={placeholder}
+                placeholder={isMobile ? "Ask Grok..." : placeholder}
                 isLoading={isLoading}
                 isConfigured={isConfigured}
               />
             </div>
             
-            {/* Compact usage display on larger screens */}
-            <div className="hidden sm:block w-48">
-              <GrokUsageDisplay compact />
+            {/* Usage display - compact on mobile, expanded on larger screens */}
+            <div className={isMobile ? "mt-2 w-full" : "hidden sm:block w-48"}>
+              <GrokUsageDisplay compact={!isMobile} />
             </div>
           </div>
         )}

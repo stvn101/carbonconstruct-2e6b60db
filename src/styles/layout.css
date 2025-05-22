@@ -6,7 +6,7 @@
 
 /* Card styling */
 .card {
-  @apply p-4 md:p-6;
+  @apply p-3 md:p-4 lg:p-6;
 }
 
 /* Fix for overflow issues on mobile */
@@ -51,7 +51,7 @@
 
 /* Mobile container padding */
 .container {
-  @apply px-4 md:px-6 lg:px-8;
+  @apply px-3 sm:px-4 md:px-6 lg:px-8;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -59,7 +59,7 @@
 
 /* Mobile section spacing */
 .section {
-  @apply py-8 md:py-12 lg:py-16;
+  @apply py-6 sm:py-8 md:py-12 lg:py-16;
 }
 
 /* Mobile grid layouts */
@@ -91,4 +91,34 @@ body {
 .calculator-container {
   max-height: none !important;
   overflow-y: visible !important;
+}
+
+/* Touch-friendly elements for mobile */
+@media (max-width: 640px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-padding {
+    padding: 12px;
+  }
+  
+  /* Fix for Grok chat elements */
+  .grok-chat-form {
+    margin-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  /* Improve spacing in tight mobile layouts */
+  .mobile-spacing {
+    margin-bottom: 1rem;
+  }
+  
+  /* Fix fixed position elements on iOS */
+  .ios-fixed {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
 }

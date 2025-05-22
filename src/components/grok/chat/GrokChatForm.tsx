@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SendIcon, User } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GrokChatFormProps {
   input: string;
@@ -22,6 +23,7 @@ const GrokChatForm: React.FC<GrokChatFormProps> = ({
   isConfigured
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isMobile } = useIsMobile();
   
   if (!isConfigured) {
     return null;
@@ -38,14 +40,18 @@ const GrokChatForm: React.FC<GrokChatFormProps> = ({
           onChange={handleInputChange}
           className="pl-9"
           disabled={isLoading}
+          autoComplete="off"
+          style={isMobile ? { fontSize: '16px', paddingTop: '10px', paddingBottom: '10px' } : {}}
         />
       </div>
       <Button 
         type="submit" 
-        size="icon" 
+        size={isMobile ? "default" : "icon"} 
         disabled={!input.trim() || isLoading}
+        className={isMobile ? "h-10 px-4" : ""}
       >
         <SendIcon className="h-4 w-4" />
+        {isMobile && <span className="ml-2">Send</span>}
       </Button>
     </form>
   );

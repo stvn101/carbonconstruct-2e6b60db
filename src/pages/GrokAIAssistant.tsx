@@ -4,8 +4,9 @@ import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GrokProvider } from "@/contexts/GrokContext";
-import { MessageSquare, Leaf, Settings, BarChart3 } from "lucide-react";
+import { MessageSquare, Leaf, Settings } from "lucide-react";
 import { useA11y } from "@/hooks/useA11y";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import GrokChat from "@/components/grok/GrokChat";
 import GrokConfig from "@/components/grok/GrokConfig";
@@ -15,6 +16,7 @@ import { useCalculator } from "@/contexts/CalculatorContext"; // Assuming this e
 function GrokAIAssistant() {
   const [activeTab, setActiveTab] = useState("chat");
   const { materials = [], energy = [], transport = [] } = useCalculator() || {};
+  const { isMobile } = useIsMobile();
   
   // Set page title and a11y features
   useA11y({
@@ -27,27 +29,27 @@ function GrokAIAssistant() {
     <GrokProvider>
       <div className="flex min-h-screen flex-col bg-background">
         <Navbar />
-        <main className="flex-grow container mx-auto px-4 pt-24 pb-12" id="main-content" tabIndex={-1}>
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-carbon-800 dark:text-carbon-100 mb-2">Grok AI Assistant</h1>
-            <p className="text-carbon-600 dark:text-carbon-300">
+        <main className="flex-grow container mx-auto px-3 sm:px-4 pt-20 sm:pt-24 pb-8 sm:pb-12" id="main-content" tabIndex={-1}>
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-carbon-800 dark:text-carbon-100 mb-1 sm:mb-2">Grok AI Assistant</h1>
+            <p className="text-sm sm:text-base text-carbon-600 dark:text-carbon-300">
               Leverage advanced AI to optimize your sustainable construction projects
             </p>
           </div>
           
           <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-8">
-              <TabsTrigger value="chat" className="flex items-center gap-2">
+            <TabsList className="grid grid-cols-3 mb-6 sm:mb-8">
+              <TabsTrigger value="chat" className="flex items-center gap-2 py-2 px-1 sm:px-3">
                 <MessageSquare className="h-4 w-4" />
                 <span className="hidden sm:inline">Construction Assistant</span>
                 <span className="sm:hidden">Chat</span>
               </TabsTrigger>
-              <TabsTrigger value="materials" className="flex items-center gap-2">
+              <TabsTrigger value="materials" className="flex items-center gap-2 py-2 px-1 sm:px-3">
                 <Leaf className="h-4 w-4" />
                 <span className="hidden sm:inline">Material Analysis</span>
                 <span className="sm:hidden">Materials</span>
               </TabsTrigger>
-              <TabsTrigger value="settings" className="flex items-center gap-2">
+              <TabsTrigger value="settings" className="flex items-center gap-2 py-2 px-1 sm:px-3">
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Configuration</span>
                 <span className="sm:hidden">Settings</span>
@@ -56,13 +58,16 @@ function GrokAIAssistant() {
             
             <TabsContent value="chat" className="w-full">
               <GrokChat 
-                placeholder="Ask Grok about sustainable construction materials, compliance, or best practices..." 
+                placeholder={isMobile 
+                  ? "Ask about construction..." 
+                  : "Ask Grok about sustainable construction materials, compliance, or best practices..."
+                }
                 title="Construction Assistant"
               />
             </TabsContent>
             
             <TabsContent value="materials">
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <MaterialAnalysis materials={materials} />
               </div>
             </TabsContent>

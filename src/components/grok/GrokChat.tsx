@@ -3,6 +3,7 @@ import React from 'react';
 import GrokChatContainer from './chat/GrokChatContainer';
 import { useGrokChatLogic } from './chat/useGrokChatLogic';
 import { GrokChatProps } from '@/types/grok';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const GrokChat: React.FC<GrokChatProps> = ({ 
   placeholder = 'Ask Grok AI a question...',
@@ -10,6 +11,8 @@ const GrokChat: React.FC<GrokChatProps> = ({
   initialContext,
   className
 }) => {
+  const { isMobile } = useIsMobile();
+  
   const {
     messages,
     error,
@@ -30,7 +33,7 @@ const GrokChat: React.FC<GrokChatProps> = ({
       input={input}
       handleInputChange={handleInputChange}
       handleSubmit={handleSubmit}
-      placeholder={placeholder}
+      placeholder={isMobile ? 'Ask Grok...' : placeholder}
       className={className}
     />
   );
