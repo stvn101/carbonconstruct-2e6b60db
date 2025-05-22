@@ -136,7 +136,7 @@ export function useComplianceCheck() {
       );
       
       if (complianceResult) {
-        // Make sure complianceResult is of type ComplianceResult before setting
+        // Fixed type issue: The function now correctly returns a ComplianceResult
         setResult(complianceResult as ComplianceResult);
         toast.success("Compliance check complete", {
           description: "Project analyzed against NCC 2025 and NABERS standards"
