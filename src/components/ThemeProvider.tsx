@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -11,11 +12,13 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  resolvedTheme: "dark" | "light"; // The actual theme after resolving "system"
 };
 
 const initialState: ThemeProviderState = {
   theme: "system",
   setTheme: () => null,
+  resolvedTheme: "light",
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
@@ -29,6 +32,8 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
+  
+  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -40,6 +45,7 @@ export function ThemeProvider({
         ? "dark"
         : "light";
       root.classList.add(systemTheme);
+      setResolvedTheme(systemTheme);
       
       // Apply consistent dark mode styles to body when using system preference
       if (systemTheme === "dark") {
@@ -55,6 +61,7 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
+    setResolvedTheme(theme === "dark" ? "dark" : "light");
 
     // Apply consistent color styles to body
     if (theme === "dark") {
@@ -76,6 +83,9 @@ export function ThemeProvider({
       
       const handleChange = () => {
         const root = window.document.documentElement;
+        const newResolvedTheme = mediaQuery.matches ? "dark" : "light";
+        setResolvedTheme(newResolvedTheme);
+        
         if (mediaQuery.matches) {
           root.classList.remove("light");
           root.classList.add("dark");
@@ -102,6 +112,7 @@ export function ThemeProvider({
 
   const value = {
     theme,
+    resolvedTheme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
       setTheme(theme);

@@ -25,6 +25,7 @@ import { OfflineStatusIndicator } from './OfflineStatusIndicator';
 
 export const AppContent: React.FC = () => {
   const { isIOS } = useDevice();
+  const { isOffline } = useOfflineState();
   
   // Apply app-wide accessibility improvements
   useEffect(() => {
@@ -39,7 +40,7 @@ export const AppContent: React.FC = () => {
   
   return (
     <CalculatorProvider>
-      <div className="flex flex-col min-h-screen">
+      <div className={`flex flex-col min-h-screen ${isOffline ? 'offline-mode' : ''}`}>
         <SkipToContent />
         <RouteChangeTracker />
         <ErrorBoundaryWrapper 

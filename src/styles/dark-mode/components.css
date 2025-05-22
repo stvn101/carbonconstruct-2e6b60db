@@ -60,3 +60,18 @@
 .dark [data-state="active"] {
   @apply border-green-600;
 }
+
+/* Mobile navigation styles */
+.dark .bottom-navigation {
+  @apply bg-gray-900 border-t border-gray-800;
+}
+
+/* Mobile navigation active item */
+.dark .bottom-navigation .active {
+  @apply text-green-400;
+}
+
+/* Toast styles for dark mode */
+.dark .toast-container {
+  @apply bg-gray-800 border-gray-700;
+}
