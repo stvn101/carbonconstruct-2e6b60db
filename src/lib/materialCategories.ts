@@ -1,4 +1,3 @@
-
 import { Material } from "./carbonTypes";
 import { MaterialInput } from "./carbonExports";
 
@@ -32,7 +31,6 @@ export interface SustainableMaterial {
 }
 
 // Updated MaterialAnalysisResult interface to include all properties used in SustainabilityAnalyzer
-// and match the type definitions across files
 export interface MaterialAnalysisResult {
   materialScores?: Record<string, number>;
   impactSummary?: string;
@@ -42,7 +40,7 @@ export interface MaterialAnalysisResult {
   recommendations?: string[];
   alternatives?: Record<string, SustainableMaterial[]>;
   sustainabilityIssues?: { id: string; title: string; description: string; recommendation: string; }[];
-  // Changed from Material[] to MaterialInput[] to match other implementations
+  // Update categories to use MaterialInput[] instead of string[]
   categories?: Record<string, MaterialInput[]>;
   materialCount?: number;
   sustainabilityStrengths?: { id: string; title: string; description: string; impact: string; }[];
