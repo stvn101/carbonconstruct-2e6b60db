@@ -19,10 +19,11 @@ const MaterialAnalysis: React.FC<MaterialAnalysisProps> = ({
   materials, 
   onAnalysisComplete 
 }) => {
-  const { askGrok, isConfigured, isProcessing } = useGrok();
+  const { askGrok, streamGrok, isConfigured, isProcessing } = useGrok();
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [currentInsights, setCurrentInsights] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   const runAnalysis = async () => {
@@ -43,6 +44,7 @@ const MaterialAnalysis: React.FC<MaterialAnalysisProps> = ({
     setIsAnalyzing(true);
     setError(null);
     setAnalysisProgress(10);
+    setCurrentInsights('');
 
     try {
       // Create a simplified material list for analysis
@@ -58,22 +60,30 @@ const MaterialAnalysis: React.FC<MaterialAnalysisProps> = ({
 
       setAnalysisProgress(30);
 
-      // Get sustainability analysis from Grok
-      const response = await askGrok(
+      // Using the stream functionality for real-time updates
+      const stream = streamGrok(
         "Analyze these construction materials for sustainability. Provide insights on their carbon footprint, recyclability, and suggest sustainable alternatives where applicable.",
         { materials: materialData },
         'material_analysis'
       );
 
-      setAnalysisProgress(80);
-
-      if (response.error) {
-        throw new Error(response.error);
+      // Process the stream
+      let fullResponse = '';
+      
+      for await (const chunk of stream) {
+        fullResponse += chunk;
+        setCurrentInsights(fullResponse);
+        
+        // Increase progress as we receive chunks
+        setAnalysisProgress(prev => Math.min(80, prev + 1));
       }
+
+      // Finalize when stream complete
+      setAnalysisProgress(95);
 
       // Parse the response
       const results = {
-        insights: response.text,
+        insights: fullResponse,
         materials: materialData,
         timestamp: new Date().toISOString()
       };
@@ -150,6 +160,16 @@ const MaterialAnalysis: React.FC<MaterialAnalysisProps> = ({
               <span className="text-sm">{analysisProgress}%</span>
             </div>
             <Progress value={analysisProgress} className="h-2" />
+            
+            {currentInsights && (
+              <div className="bg-carbon-50 dark:bg-carbon-900 p-4 rounded-md border mt-4 overflow-y-auto max-h-[300px]">
+                <h3 className="text-sm font-medium mb-2">Insights (Live)</h3>
+                <div className="text-sm whitespace-pre-line">
+                  {currentInsights}
+                </div>
+              </div>
+            )}
+            
             <p className="text-sm text-muted-foreground">
               Grok AI is analyzing your materials for sustainability assessment. This may take a moment...
             </p>

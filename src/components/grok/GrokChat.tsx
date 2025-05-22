@@ -8,6 +8,7 @@ import { SendIcon, Brain, AlertCircle, User } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { withGrokErrorHandling } from '@/utils/errorHandling/grokNetworkHandler';
 import GrokUsageDisplay from './GrokUsageDisplay';
+import { useChat } from 'ai/react';
 
 interface GrokChatMessage {
   id: string;
@@ -32,12 +33,25 @@ const GrokChat: React.FC<GrokChatProps> = ({
   initialContext,
   className
 }) => {
-  const { askGrok, isConfigured, isProcessing } = useGrok();
+  const { isConfigured } = useGrok();
   const [messages, setMessages] = useState<GrokChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Use the Vercel AI SDK's useChat hook for streaming capabilities
+  const { input, handleInputChange, handleSubmit: handleVercelSubmit, isLoading } = useChat({
+    api: '/api/chat', // This would be your API endpoint (we'll use the GrokContext instead)
+    onFinish: (message) => {
+      // Add the assistant's response to our messages array
+      setMessages(prev => [...prev, {
+        id: getMessageId(),
+        role: 'assistant',
+        content: message.content,
+        timestamp: new Date()
+      }]);
+    }
+  });
   
   // Add initial system message for context if provided
   useEffect(() => {
@@ -58,58 +72,26 @@ const GrokChat: React.FC<GrokChatProps> = ({
     }
   }, [messages]);
 
+  // Custom submit handler that integrates Vercel AI with our existing GrokContext
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!inputValue.trim() || !isConfigured || isProcessing) return;
+    if (!input.trim() || !isConfigured || isLoading) return;
     
     // Add user message
     const userMessage: GrokChatMessage = {
       id: getMessageId(),
       role: 'user',
-      content: inputValue.trim(),
+      content: input.trim(),
       timestamp: new Date()
     };
     
     setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
     setError(null);
     
-    // Add temporary assistant message (loading state)
-    const tempAssistantId = getMessageId();
-    setMessages(prev => [...prev, {
-      id: tempAssistantId,
-      role: 'assistant',
-      content: '...',
-      timestamp: new Date()
-    }]);
-    
     try {
-      // Send to Grok with enhanced error handling
-      const response = await withGrokErrorHandling(
-        askGrok(userMessage.content),
-        {
-          timeout: 60000, // 60 second timeout
-          maxRetries: 2,
-          context: 'chat',
-          fallback: () => ({
-            text: "I'm currently having trouble connecting to my knowledge base. Please try again shortly, or ask a different question.",
-            error: undefined
-          })
-        }
-      );
-      
-      // Replace temporary message with actual response
-      setMessages(prev => prev.map(msg => 
-        msg.id === tempAssistantId 
-          ? {
-              id: tempAssistantId,
-              role: 'assistant',
-              content: response.text,
-              timestamp: new Date()
-            }
-          : msg
-      ));
+      // Process with Vercel AI SDK (we're still using our handleSubmit from useChat)
+      handleVercelSubmit(e);
       
       // Focus input for next message
       if (inputRef.current) {
@@ -117,9 +99,6 @@ const GrokChat: React.FC<GrokChatProps> = ({
       }
     } catch (error) {
       console.error('Error in Grok chat:', error);
-      
-      // Replace temporary message with error
-      setMessages(prev => prev.filter(msg => msg.id !== tempAssistantId));
       setError('Failed to get a response. Please try again.');
     }
   };
@@ -147,15 +126,7 @@ const GrokChat: React.FC<GrokChatProps> = ({
                       : 'bg-carbon-100 dark:bg-carbon-800 text-carbon-800 dark:text-carbon-200'
                   }`}
                 >
-                  {message.role === 'assistant' && message.content === '...' ? (
-                    <div className="flex items-center space-x-1">
-                      <div className="h-1.5 w-1.5 bg-carbon-400 dark:bg-carbon-500 rounded-full animate-bounce"></div>
-                      <div className="h-1.5 w-1.5 bg-carbon-400 dark:bg-carbon-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="h-1.5 w-1.5 bg-carbon-400 dark:bg-carbon-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
-                  ) : (
-                    <div className="whitespace-pre-line">{message.content}</div>
-                  )}
+                  <div className="whitespace-pre-line">{message.content}</div>
                 </div>
               </div>
             ))}
@@ -192,16 +163,16 @@ const GrokChat: React.FC<GrokChatProps> = ({
                   <Input
                     ref={inputRef}
                     placeholder={placeholder}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
+                    value={input}
+                    onChange={handleInputChange}
                     className="pl-9"
-                    disabled={isProcessing}
+                    disabled={isLoading}
                   />
                 </div>
                 <Button 
                   type="submit" 
                   size="icon" 
-                  disabled={!inputValue.trim() || isProcessing}
+                  disabled={!input.trim() || isLoading}
                 >
                   <SendIcon className="h-4 w-4" />
                 </Button>

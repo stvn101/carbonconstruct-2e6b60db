@@ -15,7 +15,7 @@ export function useComplianceChecks() {
   const [nabersCompliance, setNABERSCompliance] = useState<ComplianceData | null>(null);
   const [isLoadingCompliance, setIsLoadingCompliance] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { askGrok, isConfigured } = useGrok();
+  const { askGrok, streamGrok, isConfigured } = useGrok();
 
   const runComplianceChecks = useCallback(async (materials: MaterialInput[], energy: EnergyInput[]) => {
     if (!isConfigured) {
@@ -52,17 +52,23 @@ export function useComplianceChecks() {
         }))
       };
 
-      // Use Grok AI to check compliance
-      const response = await askGrok(
+      // Use Grok AI stream to check compliance
+      const stream = streamGrok(
         "Check if this construction project complies with NCC 2025 and NABERS standards. Provide separate compliance assessments for NCC and NABERS, including scores and specific details about compliance issues.",
         projectData,
         'compliance_check'
       );
 
-      if (response.error) {
-        throw new Error(response.error);
+      // Process the stream
+      let fullResponse = '';
+      for await (const chunk of stream) {
+        fullResponse += chunk;
       }
 
+      if (!fullResponse) {
+        throw new Error("Received empty response from Grok AI");
+      }
+      
       // Process the response
       // Here we're assuming the response is in a structured format we can parse
       // In reality, you might need more sophisticated parsing or ask Grok to return structured data
@@ -131,7 +137,7 @@ export function useComplianceChecks() {
       // Add Grok's analysis to the compliance data
       setNCCCompliance(prev => ({
         ...prev!,
-        grokAnalysis: response.text
+        grokAnalysis: fullResponse
       }));
 
       toast.success("Compliance check complete", {
@@ -147,7 +153,7 @@ export function useComplianceChecks() {
     } finally {
       setIsLoadingCompliance(false);
     }
-  }, [askGrok, isConfigured]);
+  }, [askGrok, streamGrok, isConfigured]);
 
   return {
     nccCompliance,
