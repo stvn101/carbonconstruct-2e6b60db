@@ -1,5 +1,6 @@
 
 import { MaterialInput, EnergyInput } from "@/lib/carbonExports";
+import { SustainableMaterial } from "@/lib/materialCategories";
 
 // Basic compliance data structure
 export interface ComplianceData {
@@ -63,7 +64,7 @@ export interface NABERSSectionProps {
 }
 
 // Material analysis result from sustainability calculations
-// Updated to match the fields used in SustainabilityAnalyzer
+// Updated to match the fields used in SustainabilityAnalyzer and use SustainableMaterial[]
 export interface MaterialAnalysisResult {
   materialScores?: Record<string, number>;
   impactSummary?: string;
@@ -71,11 +72,11 @@ export interface MaterialAnalysisResult {
   sustainabilityScore?: number;
   sustainabilityPercentage?: number;
   recommendations?: string[];
-  alternatives?: Record<string, string[]>;
+  alternatives?: Record<string, SustainableMaterial[]>;
   sustainabilityIssues?: { id: string; title: string; description: string; recommendation: string; }[];
   categories?: Record<string, MaterialInput[]>;
   materialCount?: number;
   sustainabilityStrengths?: { id: string; title: string; description: string; impact: string; }[];
   averageCarbonFootprint?: number;
-  materialWithHighestFootprint?: MaterialInput;
+  materialWithHighestFootprint?: any;
 }
