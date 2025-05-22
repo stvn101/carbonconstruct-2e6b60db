@@ -83,6 +83,36 @@
   .filter-item {
     @apply w-full mb-2;
   }
+  
+  /* Custom styles for Grok AI components */
+  .grok-chat-container {
+    max-height: calc(100vh - 240px);
+    height: calc(100vh - 240px);
+  }
+  
+  .grok-input {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+  
+  .grok-message {
+    max-width: 90%;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .grok-compliance-card {
+    padding: 0.75rem;
+  }
+  
+  .grok-compliance-title {
+    font-size: 1rem;
+  }
+  
+  .grok-badge {
+    font-size: 0.7rem;
+  }
 }
 
 /* Ensure tooltips stay within viewport on all screen sizes */
@@ -220,6 +250,19 @@
   /* Ensure buttons have sufficient touch targets */
   .dialog-actions button {
     @apply py-2 px-3;
+  }
+  
+  /* Grok AI specific adjustments */
+  .grok-chat-message {
+    @apply text-sm;
+  }
+  
+  .grok-analyze-button {
+    @apply w-full justify-center;
+  }
+  
+  .grok-analysis-section {
+    @apply p-2;
   }
 }
 
