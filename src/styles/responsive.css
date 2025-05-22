@@ -13,6 +13,16 @@
   @apply min-h-[44px] min-w-[44px];
 }
 
+/* Offline mode styling */
+.offline-mode .network-dependent {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.offline-indicator {
+  @apply fixed bottom-20 left-4 right-4 sm:left-auto sm:w-80 p-4 rounded-lg shadow-lg z-50;
+}
+
 @media (max-width: 640px) {
   /* Improve spacing around interactive elements */
   button, a, input, select, textarea {
@@ -97,6 +107,22 @@
   .scroll-container {
     @apply -mx-4 px-4 overflow-x-auto scrollbar-thin flex pb-2;
   }
+  
+  /* Optimize images for mobile */
+  img.responsive {
+    @apply w-full h-auto max-w-full;
+    content-visibility: auto;
+  }
+  
+  /* Optimize forms for mobile */
+  .mobile-form-grid {
+    @apply grid grid-cols-1 gap-4;
+  }
+  
+  /* Optimize buttons for mobile */
+  .mobile-button-group {
+    @apply flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2;
+  }
 }
 
 /* Medium devices (tablets) */
@@ -118,12 +144,26 @@
   .mobile-landscape-adjust {
     @apply max-h-[80vh] overflow-y-auto;
   }
+  
+  /* Adjust mobile navigation for landscape */
+  .bottom-navigation {
+    @apply h-12 py-1;
+  }
+  
+  .bottom-navigation .flex {
+    @apply flex-row justify-around;
+  }
 }
 
 /* Specific device adjustments for notched iOS devices */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .ios-safe-padding {
     @apply pb-[env(safe-area-inset-bottom)];
+  }
+  
+  /* Fix modals on iOS */
+  .ios-modal-fix {
+    margin-bottom: env(safe-area-inset-bottom);
   }
 }
 
