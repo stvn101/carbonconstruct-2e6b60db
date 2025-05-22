@@ -9,6 +9,7 @@ import { withNetworkErrorHandling } from '@/utils/errorHandling';
 import GrokAnalysisStatus from './GrokAnalysisStatus';
 import ComplianceAnalysisSection from './ComplianceAnalysisSection';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useSimpleOfflineMode } from '@/hooks/useSimpleOfflineMode';
 
 interface GrokComplianceInsightsProps {
   nccData?: ComplianceData;
@@ -31,6 +32,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
   const [nabersAnalysisStream, setNabersAnalysisStream] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const { isMobile } = useIsMobile();
+  const { isOffline } = useSimpleOfflineMode();
   
   // Check if we have both compliance data sets
   const hasComplianceData = nccData && nabersData && 
@@ -38,7 +40,12 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
   
   // Function to analyze compliance data with Grok using streaming
   const analyzeComplianceData = async () => {
-    if (!hasComplianceData || !isConfigured || isProcessing) return;
+    if (!hasComplianceData || !isConfigured || isProcessing || isOffline) {
+      if (isOffline) {
+        setError("You're currently offline. Please reconnect to use Grok AI services.");
+      }
+      return;
+    }
     
     setIsAnalyzing(true);
     setError(null);
@@ -73,19 +80,36 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
   // Process both NCC and NABERS compliance analysis
   const processComplianceAnalysis = async (complianceContext: any) => {
     try {
-      // Use streamGrok for NCC analysis
-      const nccStream = streamGrok(
-        "Analyze this NCC 2025 compliance data and provide insights on compliance issues, suggest improvements, and explain implications. Focus on practical suggestions that would help improve compliance.", 
-        { compliance: complianceContext.ncc, type: 'NCC 2025' },
-        'compliance_check'
-      );
+      // Use streamGrok for NCC analysis with error handling
+      let nccStream;
+      let nabersStream;
       
-      // Use streamGrok for NABERS analysis
-      const nabersStream = streamGrok(
-        "Analyze this NABERS compliance data and provide insights on the rating, suggest improvements to achieve higher ratings, and explain implications. Focus on practical energy efficiency measures.", 
-        { compliance: complianceContext.nabers, type: 'NABERS' },
-        'compliance_check'
-      );
+      try {
+        nccStream = streamGrok(
+          "Analyze this NCC 2025 compliance data and provide insights on compliance issues, suggest improvements, and explain implications. Focus on practical suggestions that would help improve compliance.", 
+          { compliance: complianceContext.ncc, type: 'NCC 2025' },
+          'compliance_check'
+        );
+      } catch (error) {
+        console.error("Error creating NCC stream:", error);
+        setError("Unable to analyze NCC data. Please try again later.");
+        setIsAnalyzing(false);
+        return;
+      }
+      
+      try {
+        // Use streamGrok for NABERS analysis
+        nabersStream = streamGrok(
+          "Analyze this NABERS compliance data and provide insights on the rating, suggest improvements to achieve higher ratings, and explain implications. Focus on practical energy efficiency measures.", 
+          { compliance: complianceContext.nabers, type: 'NABERS' },
+          'compliance_check'
+        );
+      } catch (error) {
+        console.error("Error creating NABERS stream:", error);
+        setError("Unable to analyze NABERS data. Please try again later.");
+        setIsAnalyzing(false);
+        return;
+      }
       
       // Process the NCC stream
       handleNccStream(nccStream);
@@ -177,7 +201,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
             AI-powered analysis and recommendations for improving compliance
           </CardDescription>
         </div>
-        {isConfigured && (
+        {isConfigured && !isOffline && (
           <Button 
             variant="outline" 
             size="sm"
@@ -204,6 +228,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
           isConfigured={isConfigured}
           error={error}
           isAnalyzing={isAnalyzing}
+          isOffline={isOffline}
         />
         
         {isConfigured && !error && (
@@ -215,6 +240,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
               analysis={nccAnalysis}
               analysisStream={nccAnalysisStream}
               isAnalyzing={isAnalyzing}
+              isOffline={isOffline}
               isMobile={isMobile}
             />
             
@@ -226,6 +252,7 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
               analysis={nabersAnalysis}
               analysisStream={nabersAnalysisStream}
               isAnalyzing={isAnalyzing}
+              isOffline={isOffline}
               isMobile={isMobile}
             />
           </div>
