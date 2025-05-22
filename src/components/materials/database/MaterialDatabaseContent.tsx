@@ -9,6 +9,7 @@ import DatabaseHeader from "./components/DatabaseHeader";
 import SearchBar from "./components/SearchBar";
 import DatabaseErrorState from "./components/DatabaseErrorState";
 import DatabaseStats from "./components/DatabaseStats";
+import { useAdvancedMaterialSearch } from "@/hooks/useAdvancedMaterialSearch";
 
 interface MaterialDatabaseContentProps {
   searchTerm: string;
@@ -51,9 +52,19 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
   materialCount,
   resetFilters
 }) => {
-  const [useAdvancedSearch, setUseAdvancedSearch] = useState(false);
-  const [advancedFilteredMaterials, setAdvancedFilteredMaterials] = useState<ExtendedMaterialData[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Use our custom hook for advanced search
+  const { 
+    useAdvancedSearch, 
+    advancedFilteredMaterials, 
+    toggleAdvancedSearch, 
+    handleAdvancedSearch, 
+    resetAdvancedSearch 
+  } = useAdvancedMaterialSearch({
+    materials,
+    onResetFilters: resetFilters
+  });
 
   // Effect to check if we have enough materials
   useEffect(() => {
@@ -77,58 +88,9 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
     setSearchTerm(e.target.value);
   };
 
-  const handleAdvancedSearch = (searchParams: SearchParams) => {
-    if (!materials) return;
-    
-    // Apply advanced search filters
-    const filteredMaterials = materials.filter(material => {
-      // Apply text search
-      const matchesTerm = !searchParams.term || 
-        material.name?.toLowerCase().includes(searchParams.term.toLowerCase()) ||
-        material.description?.toLowerCase().includes(searchParams.term.toLowerCase()) ||
-        material.category?.toLowerCase().includes(searchParams.term.toLowerCase());
-      
-      // Apply category filter
-      const matchesCategory = searchParams.categories.length === 0 || 
-        (material.category && searchParams.categories.includes(material.category));
-      
-      // Apply region filter
-      const matchesRegion = searchParams.regions.length === 0 || 
-        (material.region && searchParams.regions.includes(material.region));
-      
-      // Apply tag filter
-      const matchesTags = searchParams.tags.length === 0 || 
-        (material.tags && material.tags.some(tag => searchParams.tags.includes(tag)));
-      
-      // Apply carbon range filter
-      const carbonFootprint = material.carbon_footprint_kgco2e_kg || 0;
-      const matchesCarbon = carbonFootprint >= searchParams.carbonRange[0] && 
-                           carbonFootprint <= searchParams.carbonRange[1];
-      
-      // Apply sustainability score filter
-      const sustainabilityScore = material.sustainabilityScore || 0;
-      const matchesSustainability = sustainabilityScore >= searchParams.sustainabilityScore[0] && 
-                                   sustainabilityScore <= searchParams.sustainabilityScore[1];
-      
-      // Apply recyclability filter
-      const matchesRecyclability = searchParams.recyclability.length === 0 || 
-        (material.recyclability && searchParams.recyclability.includes(material.recyclability));
-      
-      // Apply alternatives filter
-      const matchesAlternatives = !searchParams.showOnlyAlternatives || 
-        (material.alternativeTo && material.alternativeTo.length > 0);
-      
-      return matchesTerm && matchesCategory && matchesRegion && matchesTags && 
-             matchesCarbon && matchesSustainability && matchesRecyclability &&
-             matchesAlternatives;
-    });
-    
-    setAdvancedFilteredMaterials(filteredMaterials);
-  };
-
   const handleResetFilters = () => {
     resetFilters();
-    setAdvancedFilteredMaterials([]);
+    resetAdvancedSearch();
   };
 
   const handleRefresh = async () => {
@@ -142,10 +104,7 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
     }
   };
 
-  const toggleAdvancedSearch = () => {
-    setUseAdvancedSearch(!useAdvancedSearch);
-  };
-
+  // Determine which materials to display
   const displayedMaterials = useAdvancedSearch && advancedFilteredMaterials.length > 0
     ? advancedFilteredMaterials
     : filteredMaterials;
