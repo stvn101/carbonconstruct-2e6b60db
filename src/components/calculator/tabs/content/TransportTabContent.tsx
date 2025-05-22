@@ -24,7 +24,7 @@ const TransportTabContent: React.FC<TransportTabContentProps> = ({
   onCalculate,
   onPrev
 }) => {
-  // Debugging for transport data
+  // Debug logging for transport data
   console.log("Transport Tab Content - Transport Data:", transport);
   
   return (
@@ -43,7 +43,7 @@ const TransportTabContent: React.FC<TransportTabContentProps> = ({
         </div>
         
         {(!transport || transport.length === 0) ? (
-          <Card>
+          <Card className="border border-yellow-300 dark:border-yellow-800">
             <CardContent className="flex items-center justify-center p-6">
               <div className="text-center space-y-2">
                 <AlertTriangle className="h-12 w-12 mx-auto text-yellow-400" />

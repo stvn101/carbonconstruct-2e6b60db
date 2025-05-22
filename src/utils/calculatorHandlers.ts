@@ -68,12 +68,16 @@ export const handleAddTransport = (calculationInput: CalculationInput): Calculat
     type: "truck" // Set type to match mode for compatibility
   };
   
+  // Debug logging
   console.log("Adding new transport item:", newTransport);
-  console.log("Current transport items:", calculationInput.transport);
+  
+  // Ensure transport array exists
+  const currentTransport = calculationInput.transport || [];
+  console.log("Current transport items:", currentTransport);
   
   return {
     ...calculationInput,
-    transport: [...(calculationInput.transport || []), newTransport]
+    transport: [...currentTransport, newTransport]
   };
 };
 
@@ -83,7 +87,9 @@ export const handleUpdateTransport = (
   field: keyof TransportInput,
   value: any
 ): CalculationInput => {
-  const updatedTransport = [...(calculationInput.transport || [])];
+  // Ensure transport array exists
+  const currentTransport = calculationInput.transport || [];
+  const updatedTransport = [...currentTransport];
   
   // Convert numeric fields to numbers
   let processedValue = value;
@@ -92,6 +98,18 @@ export const handleUpdateTransport = (
   }
   
   console.log(`Updating transport item ${index}, field ${String(field)} to:`, processedValue);
+  
+  // Make sure the item exists
+  if (!updatedTransport[index]) {
+    console.warn(`Transport item at index ${index} doesn't exist. Creating it.`);
+    updatedTransport[index] = {
+      mode: "truck",
+      distance: 0,
+      weight: 0,
+      carbonFootprint: 0.1,
+      type: "truck"
+    };
+  }
   
   updatedTransport[index] = {
     ...updatedTransport[index],
@@ -113,8 +131,11 @@ export const handleRemoveTransport = (
   calculationInput: CalculationInput,
   index: number
 ): CalculationInput => {
-  const updatedTransport = [...(calculationInput.transport || [])];
+  // Ensure transport array exists
+  const currentTransport = calculationInput.transport || [];
+  const updatedTransport = [...currentTransport];
   updatedTransport.splice(index, 1);
+  
   return {
     ...calculationInput,
     transport: updatedTransport

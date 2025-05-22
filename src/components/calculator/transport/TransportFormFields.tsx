@@ -25,10 +25,13 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
 }) => {
   // Ensure we have valid values for select fields
   const transportMode = item.mode || item.type || 'truck';
+  
+  // Debug what we're rendering
+  console.log(`Rendering transport form fields for item ${index}:`, item);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between py-3">
+    <Card className="border border-gray-200 dark:border-gray-700">
+      <CardHeader className="flex flex-row items-center justify-between py-3 bg-gray-50 dark:bg-gray-800">
         <h3 className="font-medium">Transport #{index + 1}</h3>
         <Button 
           variant="ghost" 
@@ -40,7 +43,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
           <span className="sr-only">Remove transport item</span>
         </Button>
       </CardHeader>
-      <CardContent className="grid gap-4 pt-0">
+      <CardContent className="grid gap-4 pt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor={`transport-mode-${index}`}>Transport Mode</Label>
@@ -52,7 +55,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
                 onUpdate('type', value);
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger id={`transport-mode-${index}`}>
                 <SelectValue placeholder="Select transport mode" />
               </SelectTrigger>
               <SelectContent>
@@ -72,7 +75,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
               min="0"
               step="0.01"
               value={item.distance || ''}
-              onChange={(e) => onUpdate('distance', e.target.value)}
+              onChange={(e) => onUpdate('distance', parseFloat(e.target.value))}
               placeholder="Enter distance"
             />
           </div>
@@ -87,7 +90,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
               min="0"
               step="0.01"
               value={item.weight || ''}
-              onChange={(e) => onUpdate('weight', e.target.value)}
+              onChange={(e) => onUpdate('weight', parseFloat(e.target.value))}
               placeholder="Enter weight"
             />
           </div>
