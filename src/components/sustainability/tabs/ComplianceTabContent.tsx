@@ -1,14 +1,18 @@
 
 import React from "react";
-import ComplianceStatus from "../compliance/ComplianceStatus";
-import { ComplianceData } from "../types";
-import { MaterialInput } from "@/lib/carbonExports";
+import { Button } from "@/components/ui/button";
+import { FileCheck, AlertCircle } from "lucide-react";
+import { MaterialInput, EnergyInput } from "@/lib/carbonExports";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import NCCSection from "../compliance/NCCSection";
+import NABERSSection from "../compliance/NABERSSection";
+import { ComplianceData } from "../compliance/types";
 
 interface ComplianceTabContentProps {
-  nccData: ComplianceData | null;
-  nabersData: ComplianceData | null;
-  materials?: MaterialInput[];
-  energy?: any;
+  nccData: ComplianceData;
+  nabersData: ComplianceData;
+  materials: MaterialInput[];
+  energy: EnergyInput[];
   onRunCheck: () => void;
   isLoading: boolean;
 }
@@ -16,17 +20,70 @@ interface ComplianceTabContentProps {
 const ComplianceTabContent: React.FC<ComplianceTabContentProps> = ({
   nccData,
   nabersData,
+  materials,
+  energy,
   onRunCheck,
   isLoading
 }) => {
+  const hasNccData = nccData && typeof nccData.compliant !== 'undefined';
+  const hasNabersData = nabersData && typeof nabersData.compliant !== 'undefined';
+
+  // Ensure the compliance data objects have all required properties
+  const completeNccData = {
+    compliant: nccData?.compliant || false,
+    score: nccData?.score || 0,
+    details: nccData?.details || null,
+    error: nccData?.error || undefined,
+    grokAnalysis: nccData?.grokAnalysis || undefined
+  };
+
+  const completeNabersData = {
+    compliant: nabersData?.compliant || false,
+    score: nabersData?.score || 0,
+    details: nabersData?.details || null,
+    error: nabersData?.error || undefined
+  };
+
   return (
-    <div className="mt-4">
-      <ComplianceStatus
-        nccData={nccData}
-        nabersData={nabersData}
-        onRunCheck={onRunCheck}
-        isLoading={isLoading}
-      />
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Compliance Analysis</h2>
+        <Button 
+          variant="outline" 
+          onClick={onRunCheck}
+          disabled={isLoading}
+          size="sm"
+        >
+          <FileCheck className="mr-1 h-4 w-4" />
+          Run Compliance Check
+        </Button>
+      </div>
+      
+      {(!hasNccData && !hasNabersData && !isLoading) && (
+        <Alert className="mb-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>No Compliance Data Available</AlertTitle>
+          <AlertDescription>
+            Run a compliance check to evaluate your project against the NCC 2025 and NABERS standards.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <NCCSection 
+          nccData={completeNccData}
+          materials={materials}
+          onRunCheck={onRunCheck}
+          isLoading={isLoading}
+        />
+        
+        <NABERSSection 
+          nabersData={completeNabersData}
+          energy={energy}
+          onRunCheck={onRunCheck}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 };

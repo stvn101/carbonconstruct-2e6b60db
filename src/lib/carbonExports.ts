@@ -17,6 +17,7 @@ export interface TransportInput {
   distance: number;
   weight: number;
   carbonFootprint: number;
+  type?: string; // Added for backward compatibility
 }
 
 export interface EnergyInput {
@@ -36,6 +37,7 @@ export interface CalculationInput {
 
 export interface CalculationResult {
   totalCO2: number;
+  totalEmissions?: number; // Added for compatibility with carbonCalculations
   breakdownByCategory: Record<string, number>;
   breakdownByMaterial: Record<string, number>;
   breakdownByTransport?: Record<string, number>;
@@ -44,7 +46,6 @@ export interface CalculationResult {
   materialEmissions?: number;
   transportEmissions?: number;
   energyEmissions?: number;
-  totalEmissions?: number;
   breakdown?: {
     materials: number;
     transport: number;
@@ -94,3 +95,5 @@ export const TRANSPORT_FACTORS: Record<string, {
   ship: { name: "Ship Transport", factor: 0.015, unit: "tonne-km" },
   air: { name: "Air Transport", factor: 0.8, unit: "tonne-km" }
 };
+
+export * from './carbonTypes';

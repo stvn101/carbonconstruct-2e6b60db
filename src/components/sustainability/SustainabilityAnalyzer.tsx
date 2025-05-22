@@ -8,6 +8,7 @@ import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestio
 import { useMaterialAnalysis } from "@/hooks/sustainability/useMaterialAnalysis";
 import { useComplianceChecks } from "@/hooks/sustainability/useComplianceChecks";
 import { SustainabilityAnalyzerProps } from "./types";
+import { MaterialAnalysisResult } from "./compliance/types";
 
 // Import tab content components
 import TabNavigation from "./TabNavigation";
@@ -48,10 +49,29 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     runComplianceChecks
   } = useComplianceChecks();
 
+  // Convert suggestion objects to strings when needed
+  const convertSuggestionsToStrings = (suggestions: any[]) => {
+    if (!suggestions || suggestions.length === 0) return [];
+    return suggestions.map(s => typeof s === 'string' ? s : (s.description || s.title || ''));
+  };
+
   // Use material analysis data from report if available
   React.useEffect(() => {
     if (report?.materialAnalysis) {
-      setMaterialAnalysis(report.materialAnalysis);
+      const defaultAnalysis: MaterialAnalysisResult = {
+        materialScores: {},
+        impactSummary: "",
+        highImpactMaterials: [],
+        sustainabilityScore: 0,
+        sustainabilityPercentage: 0,
+        recommendations: [],
+        alternatives: {}
+      };
+      
+      setMaterialAnalysis({
+        ...defaultAnalysis,
+        ...report.materialAnalysis
+      });
     }
   }, [report, setMaterialAnalysis]);
   
@@ -89,6 +109,20 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
       transition: { duration: 0.4 }
     }
   };
+
+  // Ensure we have complete material analysis data
+  const completeAnalysis: MaterialAnalysisResult = {
+    materialScores: materialAnalysis?.materialScores || {},
+    impactSummary: materialAnalysis?.impactSummary || "",
+    highImpactMaterials: materialAnalysis?.highImpactMaterials || [],
+    sustainabilityScore: materialAnalysis?.sustainabilityScore || 0,
+    sustainabilityPercentage: materialAnalysis?.sustainabilityPercentage || 0,
+    recommendations: materialAnalysis?.recommendations || [],
+    alternatives: materialAnalysis?.alternatives || {}
+  };
+  
+  const suggestionStrings = convertSuggestionsToStrings(suggestions);
+  const priorityStrings = convertSuggestionsToStrings(prioritySuggestions);
   
   return (
     <motion.div 
@@ -118,8 +152,8 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
               
               <TabsContent value="dashboard">
                 <DashboardTabContent 
-                  materialAnalysis={materialAnalysis}
-                  prioritySuggestions={prioritySuggestions}
+                  materialAnalysis={completeAnalysis}
+                  prioritySuggestions={priorityStrings}
                 />
               </TabsContent>
               
@@ -136,7 +170,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
               
               <TabsContent value="materials">
                 <MaterialsTabContent
-                  materialAnalysis={materialAnalysis}
+                  materialAnalysis={completeAnalysis}
                   materials={calculationInput.materials}
                 />
               </TabsContent>
@@ -152,12 +186,12 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
                   calculationInput={calculationInput}
                   calculationResult={calculationResult}
                   sustainabilityReport={report}
-                  materialAnalysis={materialAnalysis}
+                  materialAnalysis={completeAnalysis}
                   complianceData={{
                     ncc: nccCompliance,
                     nabers: nabersCompliance
                   }}
-                  suggestions={suggestions || []}
+                  suggestions={suggestionStrings}
                 />
               </TabsContent>
             </Tabs>

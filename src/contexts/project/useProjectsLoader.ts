@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/auth';
 import { useCalculator } from '@/contexts/calculator';
 import { loadProjects } from '@/utils/projectLoader';
 import { useProjectOperations } from './useProjectOperations';
+import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
 import React from 'react';
 
 // Define ProjectsContextType
@@ -40,9 +41,25 @@ export const ProjectsProvider = ({ children }: { children: React.ReactNode }) =>
     const calculator = useCalculator();
     resetCalculator = calculator.setCalculationInput ? 
       () => calculator.setCalculationInput({
-        materials: [{ type: "concrete", quantity: 1000 }],
-        transport: [{ type: "truck", distance: 100, weight: 1000 }],
-        energy: [{ type: "electricity", amount: 500 }]
+        materials: [{ 
+          name: "Concrete", 
+          type: "concrete", 
+          quantity: 1000, 
+          unit: "kg", 
+          carbonFootprint: 0.12 
+        }],
+        transport: [{ 
+          mode: "truck", 
+          distance: 100, 
+          weight: 1000, 
+          carbonFootprint: 0.1 
+        }],
+        energy: [{ 
+          type: "electricity", 
+          amount: 500, 
+          unit: "kWh", 
+          carbonFootprint: 0.5 
+        }]
       }) : 
       () => console.log('Calculator reset not available');
   } catch (error) {
