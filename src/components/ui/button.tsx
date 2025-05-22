@@ -19,18 +19,31 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        success: "bg-green-600 text-white hover:bg-green-700",
+        warning: "bg-amber-500 text-white hover:bg-amber-600",
+        info: "bg-blue-500 text-white hover:bg-blue-600",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-10 px-4 py-2 sm:h-9",
+        sm: "h-9 rounded-md px-3 sm:h-8",
+        lg: "h-11 rounded-md px-8 sm:h-10",
+        icon: "h-10 w-10 sm:h-9 sm:w-9",
+        mobile: "h-12 px-5 py-2.5 text-base", // New mobile-friendly size
       },
+      fullWidth: {
+        true: "w-full",
+      }
     },
     defaultVariants: {
       variant: "default",
       size: "default",
     },
+    compoundVariants: [
+      {
+        size: ["default", "sm", "lg"],
+        className: "min-h-[44px] sm:min-h-0" // Ensure touch-friendly targets on mobile
+      }
+    ]
   }
 )
 
@@ -38,14 +51,15 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  fullWidth?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, fullWidth, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
         ref={ref}
         {...props}
       />

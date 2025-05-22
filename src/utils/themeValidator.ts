@@ -1,112 +1,174 @@
 
 /**
- * Theme validation utilities for ensuring consistent theme application across components
+ * Utility functions to validate theme consistency
  */
-import { useTheme } from '@/components/ThemeProvider';
 
-export const themeColorPalette = [
-  {
-    name: "Primary Colors",
-    colors: [
-      { name: "background", day: "#F8F9FA", night: "#212529", description: "Main background" },
-      { name: "foreground", day: "#212529", night: "#F8F9FA", description: "Main text" },
-      { name: "primary", day: "#2B8A3E", night: "#2B8A3E", description: "Primary accent" },
-      { name: "primary-foreground", day: "#FFFFFF", night: "#FFFFFF", description: "Text on primary" },
-    ]
-  },
-  {
-    name: "UI Components",
-    colors: [
-      { name: "card", day: "#FFFFFF", night: "#343A40", description: "Card background" },
-      { name: "card-foreground", day: "#212529", night: "#F8F9FA", description: "Card text" },
-      { name: "popover", day: "#FFFFFF", night: "#343A40", description: "Popover background" },
-      { name: "popover-foreground", day: "#212529", night: "#F8F9FA", description: "Popover text" },
-      { name: "border", day: "#DEE2E6", night: "#495057", description: "Border color" },
-    ]
-  },
-  {
-    name: "Semantic Colors",
-    colors: [
-      { name: "muted", day: "#E9ECEF", night: "#343A40", description: "Muted background" },
-      { name: "muted-foreground", day: "#6C757D", night: "#ADB5BD", description: "Muted text" },
-      { name: "accent", day: "#E9ECEF", night: "#343A40", description: "Accent background" },
-      { name: "accent-foreground", day: "#212529", night: "#F8F9FA", description: "Accent text" },
-      { name: "destructive", day: "#DC3545", night: "#DC3545", description: "Error state" },
-      { name: "destructive-foreground", day: "#FFFFFF", night: "#FFFFFF", description: "Error text" },
-    ]
-  },
-];
+interface ValidationResult {
+  isValid: boolean;
+  issues: string[];
+}
 
 /**
- * Get the computed style value for a CSS variable
+ * Validates that all theme colors are correctly defined and applied
+ * @returns ValidationResult with any issues found
  */
-const getComputedThemeValue = (variableName: string): string => {
-  try {
-    // Get the computed style on the document element
-    const styles = getComputedStyle(document.documentElement);
-    return styles.getPropertyValue(variableName).trim();
-  } catch (e) {
-    console.error(`Failed to get computed value for ${variableName}:`, e);
-    return '';
-  }
-};
-
-/**
- * Validate if a theme variable is properly defined and applied
- */
-const validateThemeVariable = (variableName: string): { isValid: boolean; value: string } => {
-  const value = getComputedThemeValue(`--${variableName}`);
-  
-  // Check if the value exists and is not just whitespace
-  const isValid = Boolean(value && value !== 'initial' && value !== 'inherit');
-  
-  return { isValid, value };
-};
-
-/**
- * Validate all theme colors and identify any inconsistencies
- */
-export const validateAllThemeColors = (): { isValid: boolean; issues: string[] } => {
+export function validateAllThemeColors(): ValidationResult {
   const issues: string[] = [];
-  let allValid = true;
+  const root = document.documentElement;
+  const style = getComputedStyle(root);
   
-  // Validate all color categories
-  themeColorPalette.forEach(category => {
-    category.colors.forEach(color => {
-      const { isValid, value } = validateThemeVariable(color.name);
-      
-      if (!isValid) {
-        issues.push(`"${color.name}" is not properly defined (${value || 'empty'}).`);
-        allValid = false;
-      }
-    });
-  });
+  // Core theme colors that should be defined
+  const requiredColors = [
+    'background',
+    'foreground',
+    'card',
+    'card-foreground',
+    'popover',
+    'popover-foreground',
+    'primary',
+    'primary-foreground',
+    'secondary',
+    'secondary-foreground',
+    'muted',
+    'muted-foreground',
+    'accent',
+    'accent-foreground',
+    'destructive',
+    'destructive-foreground',
+    'border',
+    'input',
+    'ring',
+  ];
   
-  // Check contrast ratios for accessibility
-  const bgColor = getComputedThemeValue('--background');
-  const textColor = getComputedThemeValue('--foreground');
-  
-  if (bgColor && textColor) {
-    // This is a simplified check - a real contrast ratio calculation would be more complex
-    if (bgColor === textColor) {
-      issues.push('Background and foreground colors have identical values, causing contrast issues.');
-      allValid = false;
+  // Check if all required colors are defined
+  for (const color of requiredColors) {
+    const colorValue = style.getPropertyValue(`--${color}`).trim();
+    if (!colorValue) {
+      issues.push(`Missing theme color definition: --${color}`);
     }
   }
   
-  return { isValid: allValid, issues };
-};
-
-/**
- * Hook to validate theme and get current theme status
- */
-export const useThemeValidator = () => {
-  const { theme } = useTheme();
-  const validation = validateAllThemeColors();
+  // Check contrast ratios for accessibility
+  const backgroundHsl = style.getPropertyValue('--background').trim();
+  const foregroundHsl = style.getPropertyValue('--foreground').trim();
+  
+  if (backgroundHsl && foregroundHsl) {
+    try {
+      const backgroundRgb = hslToRgb(backgroundHsl);
+      const foregroundRgb = hslToRgb(foregroundHsl);
+      const contrast = calculateContrastRatio(backgroundRgb, foregroundRgb);
+      
+      if (contrast < 4.5) {
+        issues.push(`Insufficient contrast ratio (${contrast.toFixed(2)}) between background and foreground colors. WCAG AA requires at least 4.5:1.`);
+      }
+    } catch (error) {
+      issues.push(`Error calculating contrast: ${(error as Error).message}`);
+    }
+  }
+  
+  // Check for consistent dark mode styling
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  if (isDarkMode) {
+    // Sample some key elements to ensure they have dark mode styling
+    const dropdowns = document.querySelectorAll('[data-radix-popper-content-wrapper]');
+    for (let i = 0; i < dropdowns.length; i++) {
+      const dropdown = dropdowns[i] as HTMLElement;
+      const bgColor = window.getComputedStyle(dropdown).backgroundColor;
+      
+      if (bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') {
+        issues.push('Dropdowns have transparent backgrounds in dark mode, which may cause readability issues');
+        break;
+      }
+    }
+  }
   
   return {
-    theme,
-    validation,
-    isDark: theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    isValid: issues.length === 0,
+    issues,
   };
-};
+}
+
+/**
+ * Convert HSL color string to RGB values
+ * @param hsl HSL color string like "210 100% 50%"
+ * @returns RGB values as [r, g, b]
+ */
+function hslToRgb(hsl: string): [number, number, number] {
+  const [h, s, l] = hsl.split(' ').map(val => {
+    return parseFloat(val.replace('%', '')) / (val.includes('%') ? 100 : 1);
+  });
+  
+  let r, g, b;
+
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hueToRgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    
+    r = hueToRgb(p, q, h + 1/3);
+    g = hueToRgb(p, q, h);
+    b = hueToRgb(p, q, h - 1/3);
+  }
+
+  return [
+    Math.round(r * 255),
+    Math.round(g * 255),
+    Math.round(b * 255)
+  ];
+}
+
+/**
+ * Calculate the contrast ratio between two colors
+ * @param rgb1 RGB values of first color
+ * @param rgb2 RGB values of second color
+ * @returns Contrast ratio (1-21)
+ */
+function calculateContrastRatio(rgb1: [number, number, number], rgb2: [number, number, number]): number {
+  // Calculate luminance for a color
+  const luminance = (rgb: [number, number, number]) => {
+    const [r, g, b] = rgb.map(val => {
+      val /= 255;
+      return val <= 0.03928
+        ? val / 12.92
+        : Math.pow((val + 0.055) / 1.055, 2.4);
+    });
+    
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  
+  const l1 = luminance(rgb1);
+  const l2 = luminance(rgb2);
+  
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * Detects if device is iOS
+ */
+export function isIOS(): boolean {
+  return typeof navigator !== 'undefined' && 
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+    !(window as any).MSStream;
+}
+
+/**
+ * Helper to apply iOS-specific styles
+ */
+export function applyIOSSpecificStyles() {
+  if (isIOS()) {
+    document.documentElement.classList.add('ios');
+  }
+}
