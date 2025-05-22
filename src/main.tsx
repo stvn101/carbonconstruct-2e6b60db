@@ -1,7 +1,5 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 import errorTrackingService from './services/errorTrackingService';
@@ -58,16 +56,14 @@ try {
   
   const root = ReactDOM.createRoot(rootElement);
   
-  // Mount React app with priority
+  // Mount React app with priority - removed the BrowserRouter here since it exists in App.tsx
   root.render(
     <React.StrictMode>
-      <BrowserRouter>
-        <HelmetProvider>
-          <CachedCalculationsProvider>
-            <App />
-          </CachedCalculationsProvider>
-        </HelmetProvider>
-      </BrowserRouter>
+      <HelmetProvider>
+        <CachedCalculationsProvider>
+          <App />
+        </CachedCalculationsProvider>
+      </HelmetProvider>
     </React.StrictMode>
   );
 
