@@ -1,5 +1,11 @@
 
-/* Import all CSS files */
+/* Import base Tailwind directives */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Import theme variables and component styles */
+@import './theme-variables.css';
 @import './base.css';
 @import './variables.css';
 @import './components.css';
@@ -10,5 +16,5 @@
 @import './layout.css';
 @import './typography.css';
 @import './responsive.css';
+@import './dark-mode/components.css';
 @import './light-mode/auth.css';
-
