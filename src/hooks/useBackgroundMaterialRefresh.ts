@@ -18,7 +18,7 @@ interface UseBackgroundMaterialRefreshOptions {
  */
 export function useBackgroundMaterialRefresh(options: UseBackgroundMaterialRefreshOptions = {}) {
   const {
-    enabled = true,
+    enabled = false, // Changed from true to false (disabled by default)
     interval = 15 * 60 * 1000, // Default: 15 minutes
     onSuccess,
     onError
@@ -67,7 +67,7 @@ export function useBackgroundMaterialRefresh(options: UseBackgroundMaterialRefre
     return () => {
       clearInterval(intervalId);
     };
-  }, [enabled, interval, onSuccess, onError]);
+  }, [enabled, interval, onSuccess, onError, isRefreshing]); // Added isRefreshing to dependencies
   
   return {
     isRefreshing,

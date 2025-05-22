@@ -28,9 +28,9 @@ const MaterialDatabaseContainer: React.FC = () => {
   // Use the material cache hook for efficient data loading
   const { materials, loading, error, refreshCache, cacheStats } = useMaterialCache();
   
-  // Set up background refresh of materials
+  // Set up background refresh of materials - DISABLED to prevent constant refreshing
   const { isRefreshing } = useBackgroundMaterialRefresh({
-    enabled: true, // Enable background refresh
+    enabled: false, // Explicitly disable background refresh
     onSuccess: () => {
       console.log("Background refresh completed successfully");
     },
