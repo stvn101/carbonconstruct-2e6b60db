@@ -16,7 +16,8 @@
 /* Improved dark mode dropdown visibility */
 .dark .dropdown-menu,
 .dark .dropdown-menu-content {
-  @apply bg-gray-800 border-gray-700 opacity-100 !important;
+  @apply bg-gray-800 border-gray-700 !important;
+  opacity: 1 !important;
 }
 
 /* Select dropdown visibility fix */
@@ -45,6 +46,7 @@
 /* Force solid backgrounds on dropdown menus */
 .dark .dropdown-menu,
 .dark [data-radix-dropdown-menu-content] {
-  @apply bg-gray-800 border border-gray-700 opacity-100 !important;
+  @apply bg-gray-800 border border-gray-700 !important;
+  opacity: 1 !important;
   backdrop-filter: none !important;
 }
