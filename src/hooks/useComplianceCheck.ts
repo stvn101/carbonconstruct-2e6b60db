@@ -54,7 +54,8 @@ export function useComplianceCheck() {
     try {
       // Wrap the compliance check in the recovery utility
       const complianceResult = await recoverConnection(
-        'compliance-check',
+        3, // Number of retries (using number instead of string)
+        2000, // Delay between retries
         async () => {
           // For now we're simulating the compliance check with a local implementation
           // In a full implementation, this would call the Supabase function
@@ -131,29 +132,19 @@ export function useComplianceCheck() {
           await new Promise(resolve => setTimeout(resolve, 500));
           
           return result;
-        },
-        {
-          onSuccess: () => {
-            setRetryCount(0);
-          },
-          onFailure: (err) => {
-            // Handle the final failure
-            setError(err.message || "Failed to check compliance after multiple attempts");
-            // Increment retry count to show in UI
-            setRetryCount(prev => prev + 1);
-          }
         }
       );
       
       if (complianceResult) {
-        setResult(complianceResult);
+        // Make sure complianceResult is of type ComplianceResult before setting
+        setResult(complianceResult as ComplianceResult);
         toast.success("Compliance check complete", {
           description: "Project analyzed against NCC 2025 and NABERS standards"
         });
       }
       
       setIsLoading(false);
-      return complianceResult;
+      return complianceResult as ComplianceResult;
     } catch (err: any) {
       console.error("Error checking compliance:", err);
       
