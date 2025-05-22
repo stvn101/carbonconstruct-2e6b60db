@@ -2,33 +2,10 @@
 import { useState, useEffect } from 'react';
 import { MaterialInput } from '@/lib/carbonExports';
 import { SustainableMaterial } from '@/lib/materialCategories';
+import { MaterialAnalysisResult as ComponentMaterialAnalysisResult } from '@/components/sustainability/types';
 
-export interface MaterialAnalysisResult {
-  categories: Record<string, MaterialInput[]>;
-  materialCount: number;
-  sustainabilityIssues: {
-    id: string;
-    title: string;
-    description: string;
-    recommendation: string;
-  }[];
-  sustainabilityStrengths: {
-    id: string;
-    title: string;
-    description: string;
-    impact: string;
-  }[];
-  averageCarbonFootprint: number;
-  materialWithHighestFootprint?: MaterialInput;
-  // Adding these fields to make it compatible with the interface in SustainabilityAnalyzer
-  materialScores?: Record<string, number>;
-  impactSummary?: string;
-  highImpactMaterials?: { id: string; name: string; carbonFootprint: number; quantity?: number; }[];
-  sustainabilityScore?: number;
-  sustainabilityPercentage?: number;
-  recommendations?: string[];
-  alternatives?: Record<string, SustainableMaterial[]>;
-}
+// Using the interface from components/sustainability/types.ts for consistency
+export type MaterialAnalysisResult = ComponentMaterialAnalysisResult;
 
 export function useMaterialAnalysis(
   materials: MaterialInput[],
