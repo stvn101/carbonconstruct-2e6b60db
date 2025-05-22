@@ -24,6 +24,9 @@ const TransportTabContent: React.FC<TransportTabContentProps> = ({
   onCalculate,
   onPrev
 }) => {
+  // Debugging for transport data
+  console.log("Transport Tab Content - Transport Data:", transport);
+  
   return (
     <TabsContent value="transport">
       <div className="space-y-6">
@@ -39,7 +42,7 @@ const TransportTabContent: React.FC<TransportTabContentProps> = ({
           </Button>
         </div>
         
-        {transport.length === 0 ? (
+        {(!transport || transport.length === 0) ? (
           <Card>
             <CardContent className="flex items-center justify-center p-6">
               <div className="text-center space-y-2">

@@ -67,9 +67,13 @@ export const handleAddTransport = (calculationInput: CalculationInput): Calculat
     carbonFootprint: 0.1,
     type: "truck" // Set type to match mode for compatibility
   };
+  
+  console.log("Adding new transport item:", newTransport);
+  console.log("Current transport items:", calculationInput.transport);
+  
   return {
     ...calculationInput,
-    transport: [...calculationInput.transport, newTransport]
+    transport: [...(calculationInput.transport || []), newTransport]
   };
 };
 
@@ -79,13 +83,15 @@ export const handleUpdateTransport = (
   field: keyof TransportInput,
   value: any
 ): CalculationInput => {
-  const updatedTransport = [...calculationInput.transport];
+  const updatedTransport = [...(calculationInput.transport || [])];
   
   // Convert numeric fields to numbers
   let processedValue = value;
   if (field === 'distance' || field === 'weight' || field === 'carbonFootprint') {
     processedValue = Number(value);
   }
+  
+  console.log(`Updating transport item ${index}, field ${String(field)} to:`, processedValue);
   
   updatedTransport[index] = {
     ...updatedTransport[index],
@@ -107,7 +113,7 @@ export const handleRemoveTransport = (
   calculationInput: CalculationInput,
   index: number
 ): CalculationInput => {
-  const updatedTransport = [...calculationInput.transport];
+  const updatedTransport = [...(calculationInput.transport || [])];
   updatedTransport.splice(index, 1);
   return {
     ...calculationInput,
