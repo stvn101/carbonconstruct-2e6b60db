@@ -56,7 +56,6 @@ export function useSustainabilitySuggestions() {
     
     try {
       // Use the recovery utility for network resilience
-      // Fix: Pass correct parameters to retryWithRecovery
       const result = await retryWithRecovery(
         async () => {
           const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
@@ -112,7 +111,6 @@ export function useSustainabilitySuggestions() {
     setError(null);
     
     try {
-      // Fix: Pass correct parameters to retryWithRecovery
       const result = await retryWithRecovery(
         async () => {
           const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {

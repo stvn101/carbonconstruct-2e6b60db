@@ -54,7 +54,7 @@ export function useComplianceCheck() {
     try {
       // Wrap the compliance check in the recovery utility
       const complianceResult = await recoverConnection(
-        3, // Number of retries (using number instead of string)
+        3, // Number of retries
         2000, // Delay between retries
         async () => {
           // For now we're simulating the compliance check with a local implementation

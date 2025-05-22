@@ -1,10 +1,8 @@
 
 export interface ExtendedMaterialData {
   id?: string;
-  name: string;
-  factor: number;
-  carbon_footprint_kgco2e_kg?: number;
-  carbon_footprint_kgco2e_tonne?: number;
+  name?: string;
+  factor?: number;
   unit?: string;
   region?: string;
   tags?: string[];
@@ -13,12 +11,27 @@ export interface ExtendedMaterialData {
   alternativeTo?: string;
   notes?: string;
   category?: string;
-  description?: string; // Adding the missing description property
+  carbon_footprint_kgco2e_kg?: number;
+  carbon_footprint_kgco2e_tonne?: number;
 }
 
-export type MaterialsByRegion = Record<string, number>;
+export enum MATERIAL_TYPES {
+  CONCRETE = 'concrete',
+  STEEL = 'steel',
+  TIMBER = 'timber',
+  GLASS = 'glass',
+  BRICK = 'brick',
+  INSULATION = 'insulation',
+  ALUMINUM = 'aluminum',
+  PLASTIC = 'plastic',
+  COPPER = 'copper',
+  GYPSUM = 'gypsum'
+}
 
-export interface MaterialOption {
-  id: string;
-  name: string;
+export enum REGIONS {
+  AUSTRALIA = 'Australia',
+  EUROPE = 'Europe',
+  NORTH_AMERICA = 'North America',
+  ASIA = 'Asia',
+  GLOBAL = 'Global'
 }

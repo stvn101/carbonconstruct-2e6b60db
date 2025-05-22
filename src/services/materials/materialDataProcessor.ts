@@ -1,220 +1,79 @@
 
-/**
- * Material Data Processor
- * Processes and transforms material data
- */
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 
-const BATCH_SIZE = 100; // Process materials in batches of 100
-
 /**
- * Process data in batches to avoid blocking the main thread
+ * Process data in batches to avoid blocking the UI thread
+ * @param items Array of items to process
+ * @param processFn Function to process each item
+ * @param batchSize Number of items to process in each batch
  */
 export async function processDataInBatches<T, R>(
   items: T[],
   processFn: (item: T) => R,
-  batchSize = BATCH_SIZE
+  batchSize: number = 50
 ): Promise<R[]> {
-  const result: R[] = [];
+  const results: R[] = [];
   
+  // Process in batches
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize);
     
-    // Process current batch
-    const processedBatch = batch.map(processFn);
-    result.push(...processedBatch);
+    // Process batch and allow UI thread to update between batches
+    const batchResults = await new Promise<R[]>((resolve) => {
+      setTimeout(() => {
+        const processed = batch.map(processFn);
+        resolve(processed);
+      }, 0);
+    });
     
-    // Allow other operations to run between batches
-    if (i + batchSize < items.length) {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    }
+    results.push(...batchResults);
   }
   
-  return result;
+  return results;
 }
 
 /**
- * Calculate sustainability score based on material properties
+ * Calculate sustainability score based on CO2 footprint
+ * @param co2eValue CO2 equivalent value
+ * @param maxCO2e Maximum CO2 equivalent value in the dataset
+ * @param minCO2e Minimum CO2 equivalent value in the dataset
  */
-export function calculateSustainabilityScore(material: ExtendedMaterialData): number {
-  // Base score starting point
-  let baseScore = 60;
-  
-  // Adjust based on carbon footprint (lower is better)
-  const carbonFootprint = material.carbon_footprint_kgco2e_kg || material.factor || 0;
-  if (carbonFootprint < 0.1) baseScore += 15;
-  else if (carbonFootprint < 0.5) baseScore += 10;
-  else if (carbonFootprint < 1) baseScore += 5;
-  else if (carbonFootprint > 2) baseScore -= 5;
-  else if (carbonFootprint > 5) baseScore -= 10;
-  
-  // Adjust based on recyclability
-  if (material.recyclability === 'High') baseScore += 15;
-  else if (material.recyclability === 'Medium') baseScore += 5;
-  else if (material.recyclability === 'Low') baseScore -= 5;
-  
-  // Adjust based on categories
-  if (material.category) {
-    const categoryLower = material.category.toLowerCase();
-    
-    if (categoryLower.includes('timber') || categoryLower.includes('wood')) {
-      baseScore += 10; // Renewable material
-    }
-    
-    if (categoryLower.includes('recycled')) {
-      baseScore += 15; // Recycled material
-    }
-  }
-  
-  // Adjust based on name keywords
-  if (material.name) {
-    const nameLower = material.name.toLowerCase();
-    
-    if (
-      nameLower.includes('recycled') || 
-      nameLower.includes('reclaimed') ||
-      nameLower.includes('reused')
-    ) {
-      baseScore += 10;
-    }
-    
-    if (nameLower.includes('low carbon') || nameLower.includes('low-carbon')) {
-      baseScore += 10;
-    }
-    
-    if (nameLower.includes('sustainable') || nameLower.includes('eco')) {
-      baseScore += 5;
-    }
-  }
-  
-  // Adjust based on tags
-  if (material.tags) {
-    if (material.tags.includes('sustainable')) baseScore += 5;
-    if (material.tags.includes('recycled')) baseScore += 10;
-    if (material.tags.includes('local')) baseScore += 5;
-  }
-  
-  // Ensure score is between 0-100
-  return Math.min(100, Math.max(0, baseScore));
+export function calculateSustainabilityScore(
+  co2eValue: number,
+  maxCO2e: number = 5000,
+  minCO2e: number = 50
+): number {
+  // Invert the scale: lower CO2e = higher score
+  const normalizedValue = Math.max(0, Math.min(1, (maxCO2e - co2eValue) / (maxCO2e - minCO2e)));
+  return Math.round(normalizedValue * 100);
 }
 
 /**
- * Determine recyclability based on material properties
+ * Determine recyclability based on sustainability score
+ * @param score Sustainability score
  */
-export function determineRecyclability(material: ExtendedMaterialData): 'High' | 'Medium' | 'Low' {
-  if (material.recyclability) {
-    return material.recyclability;
-  }
-  
-  // Default to medium
-  let recyclability: 'High' | 'Medium' | 'Low' = 'Medium';
-  
-  // Check material name and category
-  const nameLower = (material.name || '').toLowerCase();
-  const categoryLower = (material.category || '').toLowerCase();
-  
-  // Materials with typically high recyclability
-  if (
-    nameLower.includes('steel') ||
-    nameLower.includes('metal') ||
-    nameLower.includes('aluminum') ||
-    nameLower.includes('aluminium') ||
-    nameLower.includes('glass') ||
-    categoryLower.includes('steel') ||
-    categoryLower.includes('metal') ||
-    categoryLower.includes('aluminum') ||
-    categoryLower.includes('aluminium') ||
-    categoryLower.includes('glass')
-  ) {
-    recyclability = 'High';
-  }
-  
-  // Materials with typically medium recyclability
-  else if (
-    nameLower.includes('concrete') ||
-    nameLower.includes('timber') ||
-    nameLower.includes('wood') ||
-    nameLower.includes('brick') ||
-    categoryLower.includes('concrete') ||
-    categoryLower.includes('timber') ||
-    categoryLower.includes('wood') ||
-    categoryLower.includes('brick')
-  ) {
-    recyclability = 'Medium';
-  }
-  
-  // Materials with typically low recyclability
-  else if (
-    nameLower.includes('insulation') ||
-    nameLower.includes('plastic') ||
-    nameLower.includes('composite') ||
-    nameLower.includes('foam') ||
-    categoryLower.includes('insulation') ||
-    categoryLower.includes('plastic') ||
-    categoryLower.includes('composite') ||
-    categoryLower.includes('foam')
-  ) {
-    recyclability = 'Low';
-  }
-  
-  // Check for keywords that indicate higher recyclability
-  if (
-    nameLower.includes('recycled') ||
-    nameLower.includes('recyclable') ||
-    (material.tags && (
-      material.tags.includes('recycled') ||
-      material.tags.includes('recyclable')
-    ))
-  ) {
-    // Upgrade by one level if possible
-    if (recyclability === 'Medium') recyclability = 'High';
-    else if (recyclability === 'Low') recyclability = 'Medium';
-  }
-  
-  return recyclability;
+export function determineRecyclability(score?: number): 'High' | 'Medium' | 'Low' {
+  if (!score) return 'Medium';
+  if (score >= 75) return 'High';
+  if (score >= 40) return 'Medium';
+  return 'Low';
 }
 
 /**
- * Enriches material data with additional information
+ * Enhance material data with additional calculated fields
+ * @param material Basic material data
  */
-export function enrichMaterialData(material: ExtendedMaterialData): ExtendedMaterialData {
-  // Create a copy to avoid modifying the original
-  const enriched = { ...material };
+export function enhanceMaterialData(material: any): ExtendedMaterialData {
+  const co2eValue = material.carbon_footprint_kgco2e_kg || material.factor || 0;
+  const sustainabilityScore = material.sustainabilityScore || 
+    calculateSustainabilityScore(co2eValue * 1000);
   
-  // Calculate sustainability score if not present
-  if (!enriched.sustainabilityScore) {
-    enriched.sustainabilityScore = calculateSustainabilityScore(material);
-  }
-  
-  // Determine recyclability if not present
-  if (!enriched.recyclability) {
-    enriched.recyclability = determineRecyclability(material);
-  }
-  
-  // Ensure carbon footprint is set
-  if (!enriched.carbon_footprint_kgco2e_kg && enriched.factor) {
-    enriched.carbon_footprint_kgco2e_kg = enriched.factor;
-  }
-  
-  // Ensure unit is set
-  if (!enriched.unit) {
-    enriched.unit = 'kg';
-  }
-  
-  // Ensure region is set
-  if (!enriched.region) {
-    enriched.region = 'Global';
-  }
-  
-  // Ensure tags array exists
-  if (!enriched.tags) {
-    enriched.tags = [];
-  }
-  
-  // Add category as tag if not already present
-  if (enriched.category && !enriched.tags.includes(enriched.category)) {
-    enriched.tags.push(enriched.category);
-  }
-  
-  return enriched;
+  return {
+    ...material,
+    sustainabilityScore,
+    recyclability: material.recyclability || determineRecyclability(sustainabilityScore),
+    tags: material.tags || ['construction'],
+    notes: material.notes || '',
+    unit: material.unit || 'kg'
+  };
 }
