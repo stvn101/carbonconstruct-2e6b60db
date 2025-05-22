@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/contexts/auth';
 import { NavLink } from "@/types/navigation";
-import { Home, Calculator, Database, Brain, BarChart2 } from "lucide-react";
+import { Home, Calculator, Database, Brain, Book, BarChart2 } from "lucide-react";
 
 export function useUserNavLinks() {
   const { profile, user } = useAuth();
@@ -28,6 +28,11 @@ export function useUserNavLinks() {
       title: "Grok AI",
       path: "/grok-ai",
       icon: <Brain className="h-5 w-5" />
+    },
+    {
+      title: "Resources",
+      path: "/resources",
+      icon: <Book className="h-5 w-5" />
     },
     {
       title: "Benchmarking",

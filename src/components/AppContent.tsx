@@ -19,8 +19,11 @@ import { projectRoutes } from '../routes/projectRoutes';
 import { protectedRoutes } from '../routes/protectedRoutes';
 import { CalculatorProvider } from '../contexts/CalculatorContext';
 import MobileNavigation from './MobileNavigation';
+import { useDevice } from '../hooks/use-device';
 
 export const AppContent: React.FC = () => {
+  const { isIOS } = useDevice();
+  
   // Apply app-wide accessibility improvements
   useEffect(() => {
     // Initialize performance monitoring
@@ -72,7 +75,7 @@ export const AppContent: React.FC = () => {
         <MobileNavigation />
         
         {/* Add bottom padding on mobile to account for navigation */}
-        <div className="pb-16 sm:pb-0"></div>
+        <div className={`pb-16 sm:pb-0 ${isIOS ? 'pb-[env(safe-area-inset-bottom,0)]' : ''}`}></div>
       </div>
     </CalculatorProvider>
   );
