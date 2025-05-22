@@ -6,4 +6,4 @@ export { default as GrokUsageDisplay } from './GrokUsageDisplay';
 export { default as MaterialAnalysis } from './material-analysis';
 
 // Export error components
-export { default as GrokChatError } from './GrokChatError';
+export { default as GrokChatError } from './chat/GrokChatError';
