@@ -1,6 +1,8 @@
+
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+@import './styles/theme-variables.css'; /* Import our new unified theme */
 @import './styles/dark-mode-variables.css'; /* Import dark mode variables */
 
 /* Ensure the page is scrollable */
@@ -14,6 +16,9 @@ html, body {
 body {
   overflow-y: auto;
   position: relative;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -25,61 +30,43 @@ body {
 
 /* App specific styling */
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 162 80% 35.7%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 142.1 76.2% 36.3%;
-    --radius: 0.5rem;
-
-    --carbon-50: 162 58% 97.1%;
-    --carbon-100: 165 67% 93.5%;
-    --carbon-200: 164 66% 84.7%;
-    --carbon-300: 163 55% 73.9%;
-    --carbon-400: 162 53.5% 58.4%;
-    --carbon-500: 162 80% 35.7%;
-    --carbon-600: 162 80% 30.7%;
-    --carbon-700: 164 74% 26.1%;
-    --carbon-800: 164 77% 21.8%;
-    --carbon-900: 165 82% 16.5%;
-    --carbon-950: 165 80% 9.0%;
+  /* ... keep existing code (fallback variables) */
+  
+  /* Ensure all buttons have consistent styling */
+  button.btn-primary, 
+  a.btn-primary {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-6);
+    font-weight: 500;
   }
-
-  .dark {
-    --background: 214 73% 5%;
-    --foreground: 210 40% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 40% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 162 75% 35.7%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 162 75% 35.7%;
+  
+  /* Ensure all cards have consistent styling */
+  .card, 
+  .card-component {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* Ensure all inputs have consistent styling */
+  input, 
+  select, 
+  textarea {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+  }
+  
+  /* Improve focus states for accessibility */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 
@@ -95,4 +82,40 @@ main {
 [role="dialog"] {
   max-height: 90vh;
   overflow-y: auto;
+  background-color: hsl(var(--background)); /* Consistent background */
+  color: hsl(var(--foreground)); /* Consistent text color */
+}
+
+/* Ensure dropdown menus are consistently styled */
+[data-radix-popper-content-wrapper] {
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  z-index: var(--z-dropdown);
+}
+
+/* Z-index consistency */
+.z-navbar {
+  z-index: var(--z-navbar);
+}
+
+.z-dropdown {
+  z-index: var(--z-dropdown);
+}
+
+.z-tooltip {
+  z-index: var(--z-tooltip);
+}
+
+.z-modal {
+  z-index: var(--z-modal);
+}
+
+/* Touch target sizes for mobile */
+@media (max-width: 767px) {
+  button, 
+  a.button,
+  .clickable {
+    min-height: var(--touch-target-size, 44px);
+    min-width: var(--touch-target-size, 44px);
+  }
 }

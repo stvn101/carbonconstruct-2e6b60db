@@ -1,59 +1,71 @@
 
 /* Dark mode variables for consistent theming */
 :root {
-  --carbon-50: 236, 254, 255;
-  --carbon-100: 207, 250, 254;
-  --carbon-200: 165, 243, 252;
-  --carbon-300: 103, 232, 249;
-  --carbon-400: 34, 211, 238;
-  --carbon-500: 6, 182, 212;
-  --carbon-600: 8, 145, 178;
-  --carbon-700: 14, 116, 144;
-  --carbon-800: 21, 94, 117;
-  --carbon-900: 22, 78, 99;
-  --carbon-950: 8, 51, 68;
+  /* Carbon theme colors mapped to our consolidated palette */
+  --carbon-50: 248, 249, 250; /* #F8F9FA */
+  --carbon-100: 233, 236, 239; /* #E9ECEF */
+  --carbon-200: 222, 226, 230; /* #DEE2E6 */
+  --carbon-300: 206, 212, 218; /* #CED4DA */
+  --carbon-400: 173, 181, 189; /* #ADB5BD */
+  --carbon-500: 108, 117, 125; /* #6C757D */
+  --carbon-600: 73, 80, 87; /* #495057 */
+  --carbon-700: 52, 58, 64; /* #343A40 */
+  --carbon-800: 33, 37, 41; /* #212529 */
+  --carbon-900: 18, 20, 22; /* #121416 */
   
   /* Additional consistent UI colors */
   --background: 255, 255, 255;
-  --foreground: 15, 23, 42;
-  --muted: 241, 245, 249;
-  --muted-foreground: 100, 116, 139;
+  --foreground: 33, 37, 41; /* #212529 */
+  --muted: 233, 236, 239; /* #E9ECEF */
+  --muted-foreground: 108, 117, 125; /* #6C757D */
   --card: 255, 255, 255;
-  --card-foreground: 15, 23, 42;
+  --card-foreground: 33, 37, 41; /* #212529 */
   --popover: 255, 255, 255;
-  --popover-foreground: 15, 23, 42;
-  --border: 226, 232, 240;
-  --input: 226, 232, 240;
-  --primary: var(--carbon-600);
+  --popover-foreground: 33, 37, 41; /* #212529 */
+  --border: 222, 226, 230; /* #DEE2E6 */
+  --input: 222, 226, 230; /* #DEE2E6 */
+  --primary: 43, 138, 62; /* #2B8A3E */
   --primary-foreground: 255, 255, 255;
-  --secondary: 241, 245, 249;
-  --secondary-foreground: 15, 23, 42;
-  --accent: 241, 245, 249;
-  --accent-foreground: 15, 23, 42;
-  --destructive: 239, 68, 68;
+  --secondary: 233, 236, 239; /* #E9ECEF */
+  --secondary-foreground: 33, 37, 41; /* #212529 */
+  --accent: 233, 236, 239; /* #E9ECEF */
+  --accent-foreground: 33, 37, 41; /* #212529 */
+  --destructive: 220, 53, 69; /* #DC3545 */
   --destructive-foreground: 255, 255, 255;
-  --ring: var(--carbon-600);
+  --ring: 43, 138, 62; /* #2B8A3E */
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: 15, 23, 42;
-  --foreground: 226, 232, 240;
-  --muted: 30, 41, 59;
-  --muted-foreground: 148, 163, 184;
-  --card: 30, 41, 59;
-  --card-foreground: 226, 232, 240;
-  --popover: 30, 41, 59;
-  --popover-foreground: 226, 232, 240;
-  --border: 51, 65, 85;
-  --input: 51, 65, 85;
-  --primary: var(--carbon-500);
-  --primary-foreground: 15, 23, 42;
-  --secondary: 51, 65, 85;
-  --secondary-foreground: 226, 232, 240;
-  --accent: 51, 65, 85;
-  --accent-foreground: 226, 232, 240;
-  --destructive: 239, 68, 68;
+  --background: 33, 37, 41; /* #212529 */
+  --foreground: 248, 249, 250; /* #F8F9FA */
+  --muted: 52, 58, 64; /* #343A40 */
+  --muted-foreground: 173, 181, 189; /* #ADB5BD */
+  --card: 52, 58, 64; /* #343A40 */
+  --card-foreground: 248, 249, 250; /* #F8F9FA */
+  --popover: 52, 58, 64; /* #343A40 */
+  --popover-foreground: 248, 249, 250; /* #F8F9FA */
+  --border: 73, 80, 87; /* #495057 */
+  --input: 73, 80, 87; /* #495057 */
+  --primary: 43, 138, 62; /* #2B8A3E - kept same */
+  --primary-foreground: 255, 255, 255;
+  --secondary: 52, 58, 64; /* #343A40 */
+  --secondary-foreground: 248, 249, 250; /* #F8F9FA */
+  --accent: 52, 58, 64; /* #343A40 */
+  --accent-foreground: 248, 249, 250; /* #F8F9FA */
+  --destructive: 220, 53, 69; /* #DC3545 - kept same */
   --destructive-foreground: 255, 255, 255;
-  --ring: var(--carbon-500);
+  --ring: 43, 138, 62; /* #2B8A3E - kept same */
+  
+  /* Carbon theme colors for dark mode - mapped to lighter values */
+  --carbon-50: 18, 20, 22; /* #121416 */
+  --carbon-100: 33, 37, 41; /* #212529 */
+  --carbon-200: 52, 58, 64; /* #343A40 */
+  --carbon-300: 73, 80, 87; /* #495057 */
+  --carbon-400: 108, 117, 125; /* #6C757D */
+  --carbon-500: 173, 181, 189; /* #ADB5BD */
+  --carbon-600: 206, 212, 218; /* #CED4DA */
+  --carbon-700: 222, 226, 230; /* #DEE2E6 */
+  --carbon-800: 233, 236, 239; /* #E9ECEF */
+  --carbon-900: 248, 249, 250; /* #F8F9FA */
 }

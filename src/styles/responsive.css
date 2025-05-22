@@ -22,7 +22,7 @@
   /* Better dropdown positioning for mobile */
   [data-radix-popper-content-wrapper] {
     max-width: calc(100vw - 24px) !important;
-    z-index: 999 !important;
+    z-index: var(--z-dropdown) !important;
   }
   
   /* Fix mobile scrolling with fixed elements */
@@ -48,6 +48,9 @@
     overflow-wrap: break-word !important;
     white-space: normal !important;
     font-size: 12px !important;
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
   }
 
   /* Fix navbar on mobile */
@@ -83,42 +86,12 @@
   .filter-item {
     @apply w-full mb-2;
   }
-  
-  /* Custom styles for Grok AI components */
-  .grok-chat-container {
-    max-height: calc(100vh - 240px);
-    height: calc(100vh - 240px);
-  }
-  
-  .grok-input {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    font-size: 16px; /* Prevent iOS zoom */
-  }
-  
-  .grok-message {
-    max-width: 90%;
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-  }
-  
-  .grok-compliance-card {
-    padding: 0.75rem;
-  }
-  
-  .grok-compliance-title {
-    font-size: 1rem;
-  }
-  
-  .grok-badge {
-    font-size: 0.7rem;
-  }
 }
 
 /* Ensure tooltips stay within viewport on all screen sizes */
 .recharts-tooltip-wrapper {
   pointer-events: none;
-  z-index: 1000 !important;
+  z-index: var(--z-tooltip) !important;
 }
 
 /* Fix for chart tooltips that may get cut off at viewport edges */
@@ -134,7 +107,7 @@
 
 /* Fix mobile menu layering */
 .mobile-menu {
-  z-index: 50;
+  z-index: var(--z-navbar);
 }
 
 /* Improve mobile form inputs */
@@ -147,7 +120,9 @@
   textarea {
     @apply w-full text-base;
     -webkit-appearance: none;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 
   /* Fix for iOS input shadows */
@@ -207,7 +182,8 @@
   }
   
   .material-alternative {
-    @apply text-xs text-green-600 dark:text-green-400;
+    @apply text-xs;
+    color: hsl(var(--success, 142.1 76.2% 36.3%));
   }
 }
 
@@ -216,7 +192,7 @@
   .sticky-header {
     position: -webkit-sticky;
     top: 0;
-    z-index: 40;
+    z-index: var(--z-navbar);
   }
   
   /* Safe area insets for modern iOS */
@@ -252,17 +228,10 @@
     @apply py-2 px-3;
   }
   
-  /* Grok AI specific adjustments */
-  .grok-chat-message {
-    @apply text-sm;
-  }
-  
-  .grok-analyze-button {
-    @apply w-full justify-center;
-  }
-  
-  .grok-analysis-section {
-    @apply p-2;
+  /* Ensure dialog has proper background and text color */
+  [role="dialog"] {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 }
 
@@ -285,4 +254,27 @@
   .material-stats-grid {
     @apply grid-cols-2;
   }
+  
+  /* Ensure card background colors in mobile */
+  .card, [class*="Card"] {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+}
+
+/* Fix background colors for cards in dark mode */
+.dark .card,
+.dark [class*="Card"] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+/* Ensure consistent text colors in dark mode */
+.dark .text-foreground {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
 }

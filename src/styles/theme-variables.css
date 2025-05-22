@@ -1,0 +1,136 @@
+
+/*
+ * CarbonConstruct Theme Variables
+ * A unified set of color variables for consistent theming across the application
+ */
+
+:root {
+  /* Primary Colors - Day Mode */
+  --background-day: #F8F9FA;
+  --foreground-day: #212529;
+  --secondary-bg-day: #E9ECEF;
+  --accent-day: #2B8A3E;
+  --muted-day: #6C757D;
+  --border-day: #DEE2E6;
+  --card-day: #FFFFFF;
+  --error-day: #DC3545;
+  --success-day: #198754;
+  --warning-day: #FFC107;
+  --info-day: #0DCAF0;
+  
+  /* Primary Colors - Night Mode */
+  --background-night: #212529;
+  --foreground-night: #F8F9FA;
+  --secondary-bg-night: #343A40;
+  --accent-night: #2B8A3E; /* Same green for continuity */
+  --muted-night: #ADB5BD;
+  --border-night: #495057;
+  --card-night: #343A40;
+  --error-night: #DC3545;
+  --success-night: #20C997;
+  --warning-night: #FFC107;
+  --info-night: #0DCAF0;
+  
+  /* Carbon Theme - Consistent Palette */
+  --carbon-50: #F8F9FA;
+  --carbon-100: #E9ECEF;
+  --carbon-200: #DEE2E6;
+  --carbon-300: #CED4DA;
+  --carbon-400: #ADB5BD;
+  --carbon-500: #6C757D;
+  --carbon-600: #495057;
+  --carbon-700: #343A40;
+  --carbon-800: #212529;
+  --carbon-900: #121416;
+  
+  /* Green Accent Colors */
+  --green-50: #EBFBEE;
+  --green-100: #D3F9D8;
+  --green-200: #B2F2BB;
+  --green-300: #8CE99A;
+  --green-400: #69DB7C;
+  --green-500: #51CF66;
+  --green-600: #40C057;
+  --green-700: #2B8A3E; /* Primary accent color */
+  --green-800: #237032;
+  --green-900: #1B5C2A;
+  
+  /* Spacing Constants */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  /* Apply light theme by default */
+  --background: var(--background-day);
+  --foreground: var(--foreground-day);
+  --secondary-bg: var(--secondary-bg-day);
+  --accent: var(--accent-day);
+  --muted: var(--muted-day);
+  --border: var(--border-day);
+  --card: var(--card-day);
+  --shadow: var(--shadow-md);
+  
+  /* Tailwind compatibility */
+  --primary: 43, 138, 62; /* #2B8A3E in RGB */
+  --primary-foreground: 255, 255, 255; /* white */
+  --secondary: 233, 236, 239; /* #E9ECEF in RGB */
+  --secondary-foreground: 33, 37, 41; /* #212529 in RGB */
+  --muted: 108, 117, 125; /* #6C757D in RGB */
+  --muted-foreground: 108, 117, 125; /* #6C757D in RGB */
+  --card: 255, 255, 255; /* #FFFFFF in RGB */
+  --card-foreground: 33, 37, 41; /* #212529 in RGB */
+  
+  /* Z-index hierarchy */
+  --z-tooltip: 50;
+  --z-dropdown: 40;
+  --z-modal: 30;
+  --z-navbar: 20;
+  --z-theme-toggle: 15;
+  --z-base: 10;
+}
+
+/* Dark theme class */
+.dark {
+  --background: var(--background-night);
+  --foreground: var(--foreground-night);
+  --secondary-bg: var(--secondary-bg-night);
+  --accent: var(--accent-night);
+  --muted: var(--muted-night);
+  --border: var(--border-night);
+  --card: var(--card-night);
+  --shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  
+  /* Tailwind compatibility in dark mode */
+  --primary: 43, 138, 62; /* #2B8A3E in RGB - kept the same */
+  --primary-foreground: 255, 255, 255; /* white */
+  --secondary: 52, 58, 64; /* #343A40 in RGB */
+  --secondary-foreground: 248, 249, 250; /* #F8F9FA in RGB */
+  --muted: 173, 181, 189; /* #ADB5BD in RGB */
+  --muted-foreground: 173, 181, 189; /* #ADB5BD in RGB */
+  --card: 52, 58, 64; /* #343A40 in RGB */
+  --card-foreground: 248, 249, 250; /* #F8F9FA in RGB */
+}
+
+/* Touch-friendly sizing for mobile */
+@media (max-width: 767px) {
+  :root {
+    --touch-target-size: 48px;
+  }
+}

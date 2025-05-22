@@ -15,10 +15,10 @@ const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContaine
     <motion.nav 
       className={`py-4 border-b fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
-          ? "border-border/50 bg-stone-100 dark:bg-gray-800 shadow-sm" 
-          : "border-transparent bg-stone-100 dark:bg-gray-800"
+          ? "border-border bg-background shadow-sm" 
+          : "border-transparent bg-background"
       } ${
-        isDarkMode ? "dark dark-navbar text-carbon-200" : ""
+        isDarkMode ? "dark" : ""
       } ${isPremiumUser ? 'premium-user' : ''}`}
       initial={{ y: -100 }}
       animate={{ 
@@ -27,7 +27,7 @@ const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContaine
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
     >
-      <div className="w-full">
+      <div className="container mx-auto px-4">
         {children}
       </div>
     </motion.nav>
