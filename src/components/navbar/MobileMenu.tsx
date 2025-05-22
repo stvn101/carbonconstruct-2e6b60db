@@ -1,7 +1,8 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavLink } from "@/types/navigation";
+import { cn } from "@/lib/utils";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -10,6 +11,8 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
+  const location = useLocation();
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -24,27 +27,36 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
           aria-label="Mobile navigation menu"
         >
           <nav className="flex flex-col space-y-1">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.path}
-                to={link.path} 
-                className={`px-4 py-3 text-foreground/80 hover:text-foreground transition-colors hover:bg-accent rounded-md ${link.premium ? 'premium-feature' : ''}`}
-                onClick={() => {
-                  onClose();
-                }}
-                role="menuitem"
-              >
-                <span className="flex items-center">
-                  {link.icon && <span className="mr-3">{link.icon}</span>}
-                  {link.title}
-                  {link.premium && (
-                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Premium
-                    </span>
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              
+              return (
+                <Link 
+                  key={link.path}
+                  to={link.path} 
+                  className={cn(
+                    "px-4 py-3 text-foreground/80 hover:text-foreground transition-colors rounded-md",
+                    "hover:bg-accent hover:text-foreground",
+                    isActive && "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-medium",
+                    link.premium && "premium-feature"
                   )}
-                </span>
-              </Link>
-            ))}
+                  onClick={() => {
+                    onClose();
+                  }}
+                  role="menuitem"
+                >
+                  <span className="flex items-center">
+                    {link.icon && <span className="mr-3">{link.icon}</span>}
+                    {link.title}
+                    {link.premium && (
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Premium
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              );
+            })}
           </nav>
         </motion.div>
       )}

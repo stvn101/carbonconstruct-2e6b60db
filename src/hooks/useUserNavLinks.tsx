@@ -49,3 +49,5 @@ export function useUserNavLinks() {
   
   return { navLinks: filteredNavLinks };
 }
+
+export default useUserNavLinks;
