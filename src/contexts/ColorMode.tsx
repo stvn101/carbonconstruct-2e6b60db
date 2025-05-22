@@ -1,5 +1,5 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useTheme } from '@/components/ThemeProvider';
 
 type ColorMode = 'light' | 'dark';
 type ColorModeContextType = {
@@ -19,38 +19,32 @@ export const useColorMode = (): ColorModeContextType => {
 };
 
 export const ColorModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [colorMode, setColorMode] = useState<ColorMode>(() => {
-    const savedMode = localStorage.getItem('color-mode');
-    if (savedMode === 'dark' || savedMode === 'light') {
-      return savedMode;
-    }
-    
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    
-    return 'light';
-  });
+  const { theme, setTheme } = useTheme();
+  
+  // Convert theme to color mode
+  const isDark = theme === 'dark' || 
+    (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  
+  const [colorMode, setColorMode] = useState<ColorMode>(isDark ? 'dark' : 'light');
 
+  // Keep colorMode in sync with theme
   useEffect(() => {
-    localStorage.setItem('color-mode', colorMode);
-    
-    // Apply to document
-    if (colorMode === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [colorMode]);
+    const newColorMode: ColorMode = isDark ? 'dark' : 'light';
+    setColorMode(newColorMode);
+  }, [theme, isDark]);
 
   const toggleColorMode = () => {
-    setColorMode(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
+    const newMode = colorMode === 'light' ? 'dark' : 'light';
+    setColorMode(newMode);
+    setTheme(newMode);
   };
 
   const value = {
     colorMode,
-    setColorMode,
+    setColorMode: (mode: ColorMode) => {
+      setColorMode(mode);
+      setTheme(mode);
+    },
     toggleColorMode,
   };
 

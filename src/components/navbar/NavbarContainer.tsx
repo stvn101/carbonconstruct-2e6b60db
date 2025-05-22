@@ -1,25 +1,27 @@
 
 import { motion } from "framer-motion";
 import { useNavbarVisibility } from "@/hooks/use-navbar-visibility";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface NavbarContainerProps {
   children: React.ReactNode;
-  isDarkMode: boolean;
   isPremiumUser: boolean;
 }
 
-const NavbarContainer = ({ children, isDarkMode, isPremiumUser }: NavbarContainerProps) => {
+const NavbarContainer = ({ children, isPremiumUser }: NavbarContainerProps) => {
   const { isVisible, scrolled } = useNavbarVisibility();
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   
   return (
     <motion.nav 
-      className={`py-4 border-b fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`py-4 border-b fixed top-0 w-full z-navbar transition-all duration-300 ${
         scrolled 
-          ? "border-border bg-background shadow-sm" 
+          ? "border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-sm" 
           : "border-transparent bg-background"
       } ${
-        isDarkMode ? "dark" : ""
-      } ${isPremiumUser ? 'premium-user' : ''}`}
+        isPremiumUser ? 'premium-user' : ''
+      }`}
       initial={{ y: -100 }}
       animate={{ 
         y: isVisible ? 0 : -100,

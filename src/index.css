@@ -2,8 +2,7 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
-@import './styles/theme-variables.css'; /* Import our new unified theme */
-@import './styles/dark-mode-variables.css'; /* Import dark mode variables */
+@import './styles/theme-variables.css'; /* Import our unified theme */
 
 /* Ensure the page is scrollable */
 html, body {
@@ -19,6 +18,7 @@ body {
   color: hsl(var(--foreground));
   background-color: hsl(var(--background));
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 #root {
@@ -30,7 +30,11 @@ body {
 
 /* App specific styling */
 @layer base {
-  /* ... keep existing code (fallback variables) */
+  /* Selection styling */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.2);
+    color: hsl(var(--primary));
+  }
   
   /* Ensure all buttons have consistent styling */
   button.btn-primary, 
@@ -67,6 +71,13 @@ body {
   :focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
+  }
+  
+  /* Consistent heading styles */
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--foreground));
+    font-weight: 600;
+    line-height: 1.2;
   }
 }
 
@@ -118,4 +129,65 @@ main {
     min-height: var(--touch-target-size, 44px);
     min-width: var(--touch-target-size, 44px);
   }
+  
+  /* Improve form element spacing on mobile */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  /* Ensure labels are clear on mobile */
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  /* Larger text for mobile */
+  input, select, textarea, button {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Ensure mobile-friendly containers */
+.container {
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Fix backdrop and transparency issues */
+.dark [class*="backdrop-blur"],
+[role="dialog"],
+[data-radix-popper-content-wrapper] > div {
+  backdrop-filter: none !important;
+}
+
+.dark [data-radix-popper-content-wrapper] > div {
+  background-color: hsl(var(--popover)) !important;
 }
