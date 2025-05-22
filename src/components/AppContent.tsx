@@ -12,6 +12,7 @@ import AboutPage from '../pages/About';
 import CalculatorPage from '../pages/Calculator';
 import MaterialDatabasePage from '../pages/MaterialDatabase';
 import GrokAIAssistant from '../pages/GrokAIAssistant';
+import ThemeTestRoute from '../routes/ThemeTestRoute';
 import { authRoutes } from '../routes/authRoutes';
 import { marketingRoutes } from '../routes/marketingRoutes';
 import { projectRoutes } from '../routes/projectRoutes';
@@ -48,6 +49,7 @@ export const AppContent: React.FC = () => {
             <Route path="/calculator" element={<CalculatorPage />} />
             <Route path="/materials" element={<MaterialDatabasePage />} />
             <Route path="/grok-ai" element={<GrokAIAssistant />} />
+            <Route path="/theme-test" element={<ThemeTestRoute />} />
             
             {/* Auth routes */}
             {authRoutes}
