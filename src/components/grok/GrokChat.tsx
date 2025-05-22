@@ -19,6 +19,7 @@ const GrokChat: React.FC<GrokChatProps> = ({
     isLoading,
     input,
     isConfigured,
+    isOffline,
     handleInputChange,
     handleSubmit
   } = useGrokChatLogic({ initialContext });

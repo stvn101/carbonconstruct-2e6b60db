@@ -2,7 +2,7 @@
 import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { SendIcon, User } from 'lucide-react';
+import { SendIcon, User, WifiOff } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GrokChatFormProps {
@@ -12,6 +12,7 @@ interface GrokChatFormProps {
   placeholder: string;
   isLoading: boolean;
   isConfigured: boolean;
+  isOffline?: boolean;
 }
 
 const GrokChatForm: React.FC<GrokChatFormProps> = ({
@@ -20,7 +21,8 @@ const GrokChatForm: React.FC<GrokChatFormProps> = ({
   handleSubmit,
   placeholder,
   isLoading,
-  isConfigured
+  isConfigured,
+  isOffline = false
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isMobile } = useIsMobile();
@@ -35,11 +37,11 @@ const GrokChatForm: React.FC<GrokChatFormProps> = ({
         <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           ref={inputRef}
-          placeholder={placeholder}
+          placeholder={isOffline ? "Offline mode - limited functionality" : placeholder}
           value={input}
           onChange={handleInputChange}
-          className="pl-9"
-          disabled={isLoading}
+          className={`pl-9 ${isOffline ? 'bg-muted text-muted-foreground' : ''}`}
+          disabled={isLoading || isOffline}
           autoComplete="off"
           style={isMobile ? { fontSize: '16px', paddingTop: '10px', paddingBottom: '10px' } : {}}
         />
@@ -47,11 +49,15 @@ const GrokChatForm: React.FC<GrokChatFormProps> = ({
       <Button 
         type="submit" 
         size={isMobile ? "default" : "icon"} 
-        disabled={!input.trim() || isLoading}
+        disabled={!input.trim() || isLoading || isOffline}
         className={isMobile ? "h-10 px-4" : ""}
       >
-        <SendIcon className="h-4 w-4" />
-        {isMobile && <span className="ml-2">Send</span>}
+        {isOffline ? (
+          <WifiOff className="h-4 w-4" />
+        ) : (
+          <SendIcon className="h-4 w-4" />
+        )}
+        {isMobile && <span className="ml-2">{isOffline ? "Offline" : "Send"}</span>}
       </Button>
     </form>
   );
