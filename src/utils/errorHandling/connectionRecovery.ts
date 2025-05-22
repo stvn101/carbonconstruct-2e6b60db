@@ -108,3 +108,138 @@ export const checkConnectionAndRun = async (
     return false;
   }
 };
+
+/**
+ * Retry an operation with connection recovery
+ * @param operationKey A unique key for this operation (for toast management)
+ * @param operation The async operation to perform
+ * @param options Configuration options
+ * @returns Result of the operation
+ */
+export const recoverConnection = async <T>(
+  operationKey: string,
+  operation: () => Promise<T>,
+  options?: {
+    maxAttempts?: number;
+    onSuccess?: () => void;
+    onFailure?: (error: Error) => void;
+  }
+): Promise<T> => {
+  const { maxAttempts = 3, onSuccess, onFailure } = options || {};
+  
+  try {
+    // First attempt
+    return await operation();
+  } catch (error) {
+    // Check if we're offline
+    const isOnline = await checkNetworkStatus();
+    
+    if (!isOnline) {
+      // We're offline, start recovery process
+      return new Promise((resolve, reject) => {
+        const cleanup = attemptConnectionRecovery(
+          // On successful recovery
+          async () => {
+            if (onSuccess) onSuccess();
+            
+            try {
+              // Retry the operation
+              const result = await operation();
+              resolve(result);
+            } catch (retryError) {
+              reject(retryError);
+            }
+          },
+          // On failure
+          (attemptCount) => {
+            if (attemptCount >= maxAttempts) {
+              if (onFailure) {
+                onFailure(new Error(`Failed to recover connection after ${maxAttempts} attempts`));
+              }
+              reject(new Error(`Operation failed: Unable to establish connection`));
+            }
+          },
+          maxAttempts
+        );
+      });
+    }
+    
+    // If we're online but operation failed for other reasons, rethrow
+    throw error;
+  }
+};
+
+/**
+ * Retry an operation with recovery for connection issues
+ * Similar to retryWithBackoff but with connection recovery
+ * @param operation Function to retry
+ * @param options Configuration options
+ * @returns Result of the operation
+ */
+export const retryWithRecovery = async <T>(
+  operation: () => Promise<T>,
+  options?: {
+    maxAttempts?: number;
+    baseDelay?: number;
+    onRetry?: (attempt: number) => void;
+    onSuccess?: () => void;
+    onFailure?: (error: Error) => void;
+  }
+): Promise<T> => {
+  const { 
+    maxAttempts = 3, 
+    baseDelay = 2000, 
+    onRetry, 
+    onSuccess, 
+    onFailure 
+  } = options || {};
+  
+  let attempt = 0;
+  let lastError: Error;
+  
+  while (attempt < maxAttempts) {
+    try {
+      if (attempt > 0 && onRetry) {
+        onRetry(attempt);
+      }
+      
+      const result = await operation();
+      
+      if (onSuccess) onSuccess();
+      
+      return result;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // Check if we're offline
+      const isOnline = await checkNetworkStatus();
+      
+      if (!isOnline) {
+        // If we're offline, try to recover connection
+        await new Promise<void>((resolve) => {
+          const cleanup = attemptConnectionRecovery(
+            () => resolve(),
+            undefined,
+            1 // Just one attempt before continuing with normal retries
+          );
+          
+          // Set a timeout for this recovery attempt
+          const timeoutId = setTimeout(() => {
+            cleanup();
+            resolve();
+          }, baseDelay);
+        });
+      } else {
+        // If we're online but operation failed, wait before retry
+        await new Promise(resolve => setTimeout(resolve, baseDelay * Math.pow(1.5, attempt)));
+      }
+      
+      attempt += 1;
+    }
+  }
+  
+  // All attempts failed
+  if (onFailure) onFailure(lastError);
+  
+  throw lastError;
+};

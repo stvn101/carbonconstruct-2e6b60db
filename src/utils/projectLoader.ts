@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { fetchUserProjects } from '@/services/projectService';
 import { 
@@ -60,24 +61,8 @@ export const loadProjects = async (
       () => fetchUserProjects(userId, page, limit),
       2, // Max retries (reduced from 3 to 2)
       5000, // Initial delay (increased from 2000ms to 5000ms)
-      {
-        onRetry: (attempt) => {
-          console.info(`Retrying project fetch (${attempt}/2)...`);
-        },
-        shouldRetry: (error) => {
-          // Only retry network/timeout errors, not permission or other errors
-          // and don't retry if we're now offline
-          return (
-            !isOffline() && 
-            (error instanceof TypeError || 
-             (error instanceof Error && 
-              (error.message.includes('timeout') || 
-               error.message.includes('network') ||
-               error.message.includes('connection'))))
-          );
-        },
-        maxDelay: 30000, // Cap delay at 30 seconds
-        factor: 1.5     // Use a more conservative growth factor
+      (attempt: number, delay: number) => {
+        console.info(`Retrying project fetch (${attempt}/2)...`);
       }
     );
     
