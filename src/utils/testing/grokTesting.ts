@@ -31,6 +31,9 @@ export const simulateNetworkCondition = (
   // Variables for intermittent scenario
   let intervalId: number | null = null;
   
+  // Store original fetch function
+  const originalFetch = window.fetch;
+  
   switch (condition) {
     case 'offline':
       // Simply set to offline
@@ -42,7 +45,6 @@ export const simulateNetworkCondition = (
       
     case 'slow':
       // Remain online but slow down fetch
-      const originalFetch = window.fetch;
       window.fetch = async function(...args) {
         // Add artificial delay
         await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
