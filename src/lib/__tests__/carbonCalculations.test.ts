@@ -27,7 +27,7 @@ describe('Carbon Calculations', () => {
       transport: [
         { 
           mode: 'truck', 
-          type: 'truck',  // Explicitly add type to match both interfaces
+          type: 'truck',  // Explicitly adding type to match both interfaces
           distance: 100, 
           weight: 1500, 
           carbonFootprint: 0.1 
