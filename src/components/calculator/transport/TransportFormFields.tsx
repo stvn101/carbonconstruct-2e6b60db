@@ -23,6 +23,9 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
   onRemove,
   errors
 }) => {
+  // Ensure we have valid values for select fields
+  const transportMode = item.mode || item.type || 'truck';
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between py-3">
@@ -42,8 +45,12 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
           <div className="space-y-2">
             <Label htmlFor={`transport-mode-${index}`}>Transport Mode</Label>
             <Select
-              value={item.mode}
-              onValueChange={(value) => onUpdate('mode', value)}
+              value={transportMode}
+              onValueChange={(value) => {
+                onUpdate('mode', value);
+                // Also update type for backward compatibility
+                onUpdate('type', value);
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select transport mode" />
@@ -64,7 +71,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
               type="number"
               min="0"
               step="0.01"
-              value={item.distance}
+              value={item.distance || ''}
               onChange={(e) => onUpdate('distance', e.target.value)}
               placeholder="Enter distance"
             />
@@ -79,7 +86,7 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
               type="number"
               min="0"
               step="0.01"
-              value={item.weight}
+              value={item.weight || ''}
               onChange={(e) => onUpdate('weight', e.target.value)}
               placeholder="Enter weight"
             />

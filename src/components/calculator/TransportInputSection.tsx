@@ -32,6 +32,9 @@ const TransportInputSection = ({
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
+  // Debug logging for transport data
+  console.log("TransportInputSection - transport data:", transport);
+
   const handleDistanceChange = (index: number, value: string) => {
     const numValue = Number(value);
     
@@ -111,22 +114,35 @@ const TransportInputSection = ({
         )}
       </div>
       
-      {transport.map((transportItem, index) => (
-        <TransportFormFields
-          key={`transport-${index}`}
-          index={index}
-          item={transportItem}
-          errors={errors[index]}
-          onRemove={() => onRemoveTransport(index)}
-          onUpdate={(field, value) => {
-            if (field === "distance") {
-              handleDistanceChange(index, String(value));
-            } else {
-              onUpdateTransport(index, field as keyof TransportInput, value);
-            }
-          }}
-        />
-      ))}
+      {(!transport || transport.length === 0) ? (
+        <div className="text-center p-6 border border-dashed border-gray-300 rounded-lg">
+          <Truck className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+          <p className="text-muted-foreground mb-4">No transport items added yet.</p>
+          <Button 
+            onClick={onAddTransport}
+            className="bg-carbon-600 hover:bg-carbon-700 text-white"
+          >
+            Add First Transport Item
+          </Button>
+        </div>
+      ) : (
+        transport.map((transportItem, index) => (
+          <TransportFormFields
+            key={`transport-${index}`}
+            index={index}
+            item={transportItem}
+            errors={errors[index]}
+            onRemove={() => onRemoveTransport(index)}
+            onUpdate={(field, value) => {
+              if (field === "distance") {
+                handleDistanceChange(index, String(value));
+              } else {
+                onUpdateTransport(index, field as keyof TransportInput, value);
+              }
+            }}
+          />
+        ))
+      )}
       
       <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mt-4">
         <Button 
