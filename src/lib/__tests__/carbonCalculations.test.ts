@@ -1,9 +1,9 @@
 
 import { expect, test, describe } from 'vitest';
 import { 
-  CalculationInput,
-  calculateTotalEmissions
-} from '../carbonExports';
+  CalculationInput
+} from '../carbonTypes';
+import { calculateTotalEmissions } from '../carbonExports';
 
 describe('Carbon Calculations', () => {
   test('calculateTotalEmissions returns expected results', () => {
@@ -27,7 +27,7 @@ describe('Carbon Calculations', () => {
       transport: [
         { 
           mode: 'truck', 
-          type: 'truck',  // Explicitly adding type to match both interfaces
+          type: 'truck',  // Explicitly required type field
           distance: 100, 
           weight: 1500, 
           carbonFootprint: 0.1 
