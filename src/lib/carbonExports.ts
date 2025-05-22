@@ -1,4 +1,6 @@
 
+import { CalculationResult as CalculationResultType, CalculationInput as CalculationInputType } from './carbonTypes';
+
 export interface MaterialInput {
   id?: string;
   name: string;
@@ -17,7 +19,7 @@ export interface TransportInput {
   distance: number;
   weight: number;
   carbonFootprint: number;
-  type?: string; // Added for backward compatibility
+  type?: string; // For backward compatibility
 }
 
 export interface EnergyInput {
@@ -26,7 +28,7 @@ export interface EnergyInput {
   amount: number;
   unit: string;
   carbonFootprint: number;
-  quantity?: number; // Added for backward compatibility
+  quantity?: number; // For backward compatibility
 }
 
 export interface CalculationInput {
@@ -35,18 +37,19 @@ export interface CalculationInput {
   energy: EnergyInput[];
 }
 
+// Making this interface compatible with the one in carbonCalculations.ts
 export interface CalculationResult {
   totalCO2: number;
-  totalEmissions?: number; // Added for compatibility with carbonCalculations
+  totalEmissions: number; // Added to match carbonCalculations.ts
   breakdownByCategory: Record<string, number>;
   breakdownByMaterial: Record<string, number>;
   breakdownByTransport?: Record<string, number>;
   breakdownByEnergy?: Record<string, number>;
   sustainabilityScore: number;
-  materialEmissions?: number;
-  transportEmissions?: number;
-  energyEmissions?: number;
-  breakdown?: {
+  materialEmissions: number;
+  transportEmissions: number;
+  energyEmissions: number;
+  breakdown: {
     materials: number;
     transport: number;
     energy: number;
@@ -96,4 +99,8 @@ export const TRANSPORT_FACTORS: Record<string, {
   air: { name: "Air Transport", factor: 0.8, unit: "tonne-km" }
 };
 
+// Re-export functions from carbonCalculations
+export { calculateTotalEmissions } from './carbonCalculations';
+
+// Re-export types from carbonTypes 
 export * from './carbonTypes';

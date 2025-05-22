@@ -1,19 +1,18 @@
 
 import React from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Lightbulb } from "lucide-react";
 import { ComplianceTipProps } from "./types";
 
-const ComplianceTip: React.FC<ComplianceTipProps> = ({ children }) => {
+const ComplianceTip: React.FC<ComplianceTipProps> = ({ tip, category, children }) => {
   return (
-    <div className="mt-3 bg-muted p-3 rounded-md">
-      <div className="flex items-start">
-        <Lightbulb className="h-4 w-4 text-carbon-600 mr-2 mt-0.5" />
-        <div>
-          <span className="font-medium text-sm">Tip: </span>
-          <span className="text-sm">{children}</span>
-        </div>
-      </div>
-    </div>
+    <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+      <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+      <AlertDescription className="text-blue-800 dark:text-blue-200">
+        {children || tip}
+        {category && <span className="text-xs block mt-1 opacity-70">Category: {category}</span>}
+      </AlertDescription>
+    </Alert>
   );
 };
 

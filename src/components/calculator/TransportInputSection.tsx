@@ -114,8 +114,8 @@ const TransportInputSection = ({
       {transport.map((transportItem, index) => (
         <TransportFormFields
           key={`transport-${index}`}
-          item={transportItem}
           index={index}
+          item={transportItem}
           errors={errors[index]}
           onRemove={() => onRemoveTransport(index)}
           onUpdate={(field, value) => {

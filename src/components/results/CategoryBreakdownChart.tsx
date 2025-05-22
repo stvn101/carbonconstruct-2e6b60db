@@ -50,9 +50,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({ result,
   ];
   
   // Format tick values to be more readable
-  const formatYAxisTick = (value: any) => {
-    if (typeof value !== 'number') return '';
-    
+  const formatYAxisTick = (value: number) => {
     if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
     return value.toString();
   };
@@ -66,7 +64,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({ result,
       return (
         <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 shadow-sm rounded">
           <p className="font-medium">{data.name}</p>
-          <p className="text-sm">{data.value.toFixed(2)} kg CO₂e</p>
+          <p className="text-sm">{Number(data.value).toFixed(2)} kg CO₂e</p>
           <p className="text-xs text-muted-foreground">{percentage}% of total</p>
         </div>
       );
@@ -93,7 +91,7 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({ result,
                 />
                 <YAxis 
                   width={40} 
-                  tickFormatter={formatYAxisTick}
+                  tickFormatter={(value) => formatYAxisTick(Number(value))}
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip content={renderTooltip} />

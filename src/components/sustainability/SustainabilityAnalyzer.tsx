@@ -50,7 +50,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
   } = useComplianceChecks();
 
   // Convert suggestion objects to strings when needed
-  const convertSuggestionsToStrings = (suggestions: any[]) => {
+  const convertSuggestionsToStrings = (suggestions: any[] | undefined): string[] => {
     if (!suggestions || suggestions.length === 0) return [];
     return suggestions.map(s => typeof s === 'string' ? s : (s.description || s.title || ''));
   };
@@ -110,7 +110,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     }
   };
 
-  // Ensure we have complete material analysis data
+  // Ensure we have complete material analysis data with all required fields
   const completeAnalysis: MaterialAnalysisResult = {
     materialScores: materialAnalysis?.materialScores || {},
     impactSummary: materialAnalysis?.impactSummary || "",
@@ -118,7 +118,8 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     sustainabilityScore: materialAnalysis?.sustainabilityScore || 0,
     sustainabilityPercentage: materialAnalysis?.sustainabilityPercentage || 0,
     recommendations: materialAnalysis?.recommendations || [],
-    alternatives: materialAnalysis?.alternatives || {}
+    alternatives: materialAnalysis?.alternatives || {},
+    sustainabilityIssues: materialAnalysis?.sustainabilityIssues || []
   };
   
   const suggestionStrings = convertSuggestionsToStrings(suggestions);

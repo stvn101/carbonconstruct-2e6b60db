@@ -12,9 +12,14 @@ export interface ComplianceData {
 
 // Props for the compliance status component
 export interface ComplianceStatusProps {
-  status: 'passed' | 'failed' | 'warning' | 'loading';
-  label: string;
+  status?: 'passed' | 'failed' | 'warning' | 'loading';
+  label?: string;
   score?: number | string;
+  nccData?: ComplianceData;
+  nabersData?: ComplianceData;
+  onRunCheck?: () => void;
+  isLoading?: boolean;
+  className?: string;
 }
 
 // Props for the compliance details component
@@ -30,28 +35,31 @@ export interface ComplianceSectionProps {
   description?: string;
   children: React.ReactNode;
   icon?: React.ReactNode;
+  compliant?: boolean;
+  badgeText?: string;
 }
 
 // Props for the compliance tip component
 export interface ComplianceTipProps {
   tip: string;
   category?: string;
+  children?: React.ReactNode;
 }
 
 // Props for the NCC section component
 export interface NCCSectionProps {
   nccData: ComplianceData;
-  materials: MaterialInput[];
-  onRunCheck: () => void;
-  isLoading: boolean;
+  materials?: MaterialInput[];
+  onRunCheck?: () => void;
+  isLoading?: boolean;
 }
 
 // Props for the NABERS section component
 export interface NABERSSectionProps {
   nabersData: ComplianceData;
-  energy: EnergyInput[];
-  onRunCheck: () => void;
-  isLoading: boolean;
+  energy?: EnergyInput[];
+  onRunCheck?: () => void;
+  isLoading?: boolean;
 }
 
 // Material analysis result from sustainability calculations
@@ -63,4 +71,5 @@ export interface MaterialAnalysisResult {
   sustainabilityPercentage?: number;
   recommendations?: string[];
   alternatives?: Record<string, string[]>;
+  sustainabilityIssues?: string[];
 }
