@@ -28,12 +28,18 @@ export const handleUpdateMaterial = (
   value: any
 ): CalculationInput => {
   const updatedMaterials = [...calculationInput.materials];
+  
+  // Convert numeric fields to numbers
+  let processedValue = value;
+  if (field === 'quantity' || field === 'carbonFootprint' || field === 'recycledContent') {
+    processedValue = Number(value);
+  }
+  
   updatedMaterials[index] = {
     ...updatedMaterials[index],
-    [field]: field === 'quantity' || field === 'carbonFootprint' || field === 'recycledContent' 
-      ? Number(value) 
-      : value
+    [field]: processedValue
   };
+  
   return {
     ...calculationInput,
     materials: updatedMaterials
@@ -58,7 +64,8 @@ export const handleAddTransport = (calculationInput: CalculationInput): Calculat
     mode: "truck",
     distance: 0,
     weight: 0,
-    carbonFootprint: 0.1
+    carbonFootprint: 0.1,
+    type: "truck" // Set type to match mode for compatibility
   };
   return {
     ...calculationInput,
@@ -73,11 +80,16 @@ export const handleUpdateTransport = (
   value: any
 ): CalculationInput => {
   const updatedTransport = [...calculationInput.transport];
+  
+  // Convert numeric fields to numbers
+  let processedValue = value;
+  if (field === 'distance' || field === 'weight' || field === 'carbonFootprint') {
+    processedValue = Number(value);
+  }
+  
   updatedTransport[index] = {
     ...updatedTransport[index],
-    [field]: field === 'distance' || field === 'weight' || field === 'carbonFootprint'
-      ? Number(value)
-      : value
+    [field]: processedValue
   };
   
   // For backward compatibility, sync type with mode if updating mode
@@ -109,7 +121,8 @@ export const handleAddEnergy = (calculationInput: CalculationInput): Calculation
     type: "electricity",
     amount: 0,
     unit: "kWh",
-    carbonFootprint: 0.5
+    carbonFootprint: 0.5,
+    quantity: 0 // For backward compatibility
   };
   return {
     ...calculationInput,
@@ -124,16 +137,23 @@ export const handleUpdateEnergy = (
   value: any
 ): CalculationInput => {
   const updatedEnergy = [...calculationInput.energy];
+  
+  // Convert numeric fields to numbers
+  let processedValue = value;
+  if (field === 'amount' || field === 'carbonFootprint' || field === 'quantity') {
+    processedValue = Number(value);
+  }
+  
   updatedEnergy[index] = {
     ...updatedEnergy[index],
-    [field]: field === 'amount' || field === 'carbonFootprint'
-      ? Number(value)
-      : value
+    [field]: processedValue
   };
   
   // For backward compatibility, sync quantity with amount if updating amount
   if (field === 'amount') {
     updatedEnergy[index].quantity = Number(value);
+  } else if (field === 'quantity') {
+    updatedEnergy[index].amount = Number(value);
   }
   
   return {

@@ -78,8 +78,8 @@ export function validateCalculationInput(input: CalculationInput): ValidationErr
     }
     
     // Check either amount or quantity is specified and valid
-    const hasAmount = energy.amount !== undefined && energy.amount !== '';
-    const hasQuantity = energy.quantity !== undefined && energy.quantity !== '';
+    const hasAmount = energy.amount !== undefined && energy.amount !== null;
+    const hasQuantity = energy.quantity !== undefined && energy.quantity !== null;
     
     if (!hasAmount && !hasQuantity) {
       errors.push({
