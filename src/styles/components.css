@@ -114,4 +114,52 @@ div[data-state] {
   label {
     @apply text-sm font-medium mb-1.5 block;
   }
+
+  /* Make dialog content better fit mobile screens */
+  [role="dialog"] {
+    @apply p-4;
+    width: calc(100% - 32px) !important;
+    max-width: 500px;
+  }
+
+  /* Improve heading sizes on mobile */
+  h1 { @apply text-2xl leading-tight; }
+  h2 { @apply text-xl leading-tight; }
+  h3 { @apply text-lg leading-tight; }
+
+  /* Ensure card contents are readable */
+  .card-content {
+    @apply text-base;
+  }
+  
+  /* Improve tooltip readability */
+  [data-tooltip] {
+    @apply text-sm max-w-[250px];
+  }
+}
+
+/* Add mobile-friendly container class */
+.mobile-friendly-container {
+  @apply w-full px-4 sm:px-6 md:px-8 mx-auto;
+  max-width: 100%;
+}
+
+/* Create responsive grid layouts */
+.responsive-grid {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+/* Fix footer spacing on mobile */
+.footer-content {
+  @apply px-4 py-6 sm:px-6;
+}
+
+/* Ensure form row elements stack properly on mobile */
+.form-row {
+  @apply flex flex-col sm:flex-row gap-4;
+}
+
+/* Add consistent spacing for sections */
+.section-spacing {
+  @apply py-8 sm:py-12;
 }
