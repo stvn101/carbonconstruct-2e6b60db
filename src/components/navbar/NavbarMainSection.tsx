@@ -16,18 +16,20 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
   const { navLinks } = useUserNavLinks();
 
   return (
-    <div className="flex items-center justify-between h-[56px] max-w-[1400px] mx-auto w-full px-4">
-      {/* Logo on the left */}
+    <div className="flex items-center justify-between h-[56px] max-w-[1400px] mx-auto w-full px-6">
+      {/* Logo on the left with consistent margin */}
       <div className="flex items-center">
         <NavbarLogo />
       </div>
       
-      {/* Navigation and sign-in for desktop */}
-      <div className="hidden md:flex items-center justify-end space-x-6 flex-1">
-        <div className="flex-grow text-right mr-6">
+      {/* Navigation and sign-in for desktop with proper alignment */}
+      <div className="hidden md:flex items-center space-x-2 flex-1 justify-end">
+        <div className="flex items-center">
           <NavbarDesktopItems navLinks={navLinks} />
         </div>
-        <NavbarLinks />
+        <div className="pl-6">
+          <NavbarLinks />
+        </div>
       </div>
       
       {/* Navigation and toggle for mobile */}
