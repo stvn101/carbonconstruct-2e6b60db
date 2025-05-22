@@ -132,7 +132,7 @@ const MaterialDatabaseContainer: React.FC = () => {
   return (
     <ErrorBoundaryWrapper feature="Material Database">
       <motion.div
-        className="min-h-screen"
+        className="min-h-screen content-top-spacing" // Added content-top-spacing class
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}

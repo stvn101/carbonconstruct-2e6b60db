@@ -1,8 +1,8 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, RefreshCw, AlertTriangle, Database } from "lucide-react";
 import MaterialFilters from "./MaterialFilters";
@@ -10,6 +10,7 @@ import MaterialGrid from "./MaterialGrid";
 import { ExtendedMaterialData } from "@/lib/materials/materialTypes";
 import { formatDate } from "@/lib/formatters";
 import AdvancedMaterialSearch, { SearchParams } from "./AdvancedMaterialSearch";
+import { toast } from "sonner";
 
 interface MaterialDatabaseContentProps {
   searchTerm: string;
@@ -54,6 +55,25 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
 }) => {
   const [useAdvancedSearch, setUseAdvancedSearch] = useState(false);
   const [advancedFilteredMaterials, setAdvancedFilteredMaterials] = useState<ExtendedMaterialData[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Effect to check if we have enough materials
+  useEffect(() => {
+    if (materials && materials.length < 20 && !loading && !error) {
+      // Show a warning if we have too few materials
+      toast.warning(
+        "Limited materials database detected. Some features may be restricted.", 
+        { 
+          id: "limited-materials-warning",
+          duration: 8000,
+          action: {
+            label: "Refresh",
+            onClick: () => handleRefresh()
+          }
+        }
+      );
+    }
+  }, [materials, loading, error]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -113,6 +133,17 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
     setAdvancedFilteredMaterials([]);
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshCache();
+    } catch (error) {
+      console.error("Failed to refresh materials:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const displayedMaterials = useAdvancedSearch && advancedFilteredMaterials.length > 0
     ? advancedFilteredMaterials
     : filteredMaterials;
@@ -137,12 +168,12 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={refreshCache} 
-            disabled={loading}
+            onClick={handleRefresh} 
+            disabled={loading || isRefreshing}
             className="flex items-center"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Refreshing...' : 'Refresh'}
+            <RefreshCw className={`h-4 w-4 mr-2 ${(loading || isRefreshing) ? 'animate-spin' : ''}`} />
+            {loading || isRefreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
       </div>
@@ -196,7 +227,10 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
               <h3 className="text-lg font-medium">Error loading materials</h3>
             </div>
             <p className="text-muted-foreground">{error.message}</p>
-            <Button variant="outline" className="mt-4" onClick={refreshCache}>
+            <p className="text-sm text-muted-foreground mt-2">
+              This might be due to database access restrictions or connectivity issues.
+            </p>
+            <Button variant="outline" className="mt-4" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again
             </Button>
@@ -213,7 +247,7 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
 
           <MaterialGrid 
             materials={displayedMaterials}
-            loading={loading}
+            loading={loading || isRefreshing}
           />
         </>
       )}
