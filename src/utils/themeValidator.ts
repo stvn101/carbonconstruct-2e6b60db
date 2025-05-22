@@ -9,6 +9,129 @@ interface ValidationResult {
 }
 
 /**
+ * Theme color palette for display in the theme test component
+ * Provides a visual reference for all theme colors with their day/night values
+ */
+export const themeColorPalette = [
+  {
+    name: "Primary Colors",
+    colors: [
+      {
+        name: "Primary",
+        day: "hsl(var(--primary))",
+        night: "hsl(var(--primary))",
+        description: "Main brand color"
+      },
+      {
+        name: "Primary Foreground",
+        day: "hsl(var(--primary-foreground))",
+        night: "hsl(var(--primary-foreground))",
+        description: "Text on primary"
+      },
+      {
+        name: "Secondary",
+        day: "hsl(var(--secondary))",
+        night: "hsl(var(--secondary))",
+        description: "Secondary UI elements"
+      },
+      {
+        name: "Secondary Foreground",
+        day: "hsl(var(--secondary-foreground))",
+        night: "hsl(var(--secondary-foreground))",
+        description: "Text on secondary"
+      }
+    ]
+  },
+  {
+    name: "UI Colors",
+    colors: [
+      {
+        name: "Background",
+        day: "hsl(var(--background))",
+        night: "hsl(var(--background))",
+        description: "Page background"
+      },
+      {
+        name: "Foreground",
+        day: "hsl(var(--foreground))",
+        night: "hsl(var(--foreground))",
+        description: "Main text color"
+      },
+      {
+        name: "Card",
+        day: "hsl(var(--card))",
+        night: "hsl(var(--card))",
+        description: "Card backgrounds"
+      },
+      {
+        name: "Card Foreground",
+        day: "hsl(var(--card-foreground))",
+        night: "hsl(var(--card-foreground))",
+        description: "Card text"
+      }
+    ]
+  },
+  {
+    name: "Accent Colors",
+    colors: [
+      {
+        name: "Accent",
+        day: "hsl(var(--accent))",
+        night: "hsl(var(--accent))",
+        description: "Accent elements"
+      },
+      {
+        name: "Accent Foreground",
+        day: "hsl(var(--accent-foreground))",
+        night: "hsl(var(--accent-foreground))",
+        description: "Text on accent"
+      },
+      {
+        name: "Destructive",
+        day: "hsl(var(--destructive))",
+        night: "hsl(var(--destructive))",
+        description: "Error states"
+      },
+      {
+        name: "Destructive Foreground",
+        day: "hsl(var(--destructive-foreground))",
+        night: "hsl(var(--destructive-foreground))",
+        description: "Text on destructive"
+      }
+    ]
+  },
+  {
+    name: "UI Utility Colors",
+    colors: [
+      {
+        name: "Muted",
+        day: "hsl(var(--muted))",
+        night: "hsl(var(--muted))",
+        description: "Subtle backgrounds"
+      },
+      {
+        name: "Muted Foreground",
+        day: "hsl(var(--muted-foreground))",
+        night: "hsl(var(--muted-foreground))",
+        description: "Subtle text"
+      },
+      {
+        name: "Border",
+        day: "hsl(var(--border))",
+        night: "hsl(var(--border))",
+        description: "Borders and dividers"
+      },
+      {
+        name: "Ring",
+        day: "hsl(var(--ring))",
+        night: "hsl(var(--ring))",
+        description: "Focus rings"
+      }
+    ]
+  }
+];
+
+/**
  * Validates that all theme colors are correctly defined and applied
  * @returns ValidationResult with any issues found
  */
