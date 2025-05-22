@@ -30,22 +30,25 @@
 .dark [class*="backdrop-"],
 .dark .bg-opacity,
 .dark .backdrop-blur {
-  @apply bg-gray-800 opacity-100 !important;
+  @apply bg-gray-800 !important;
   backdrop-filter: none !important;
+  opacity: 1 !important;
 }
 
 /* Force all cards to be opaque - no transparency */
 .dark .card,
 .dark [class*="card"],
 .dark [data-radix-popper-content-wrapper] > * {
-  @apply bg-gray-800 border-gray-700 opacity-100 !important;
+  @apply bg-gray-800 border-gray-700 !important;
   backdrop-filter: none !important;
+  opacity: 1 !important;
 }
 
 /* Remove all backdrop-blur effects in dark mode */
 .dark [class*="backdrop-blur"] {
   backdrop-filter: none !important;
-  @apply bg-gray-800 opacity-100 !important;
+  @apply bg-gray-800 !important;
+  opacity: 1 !important;
 }
 
 /* Make dialogs completely opaque */
@@ -67,11 +70,13 @@
 /* Ensure dropdown content is visible */
 .dark [data-radix-dropdown-menu-content] {
   @apply bg-gray-800 !important;
+  opacity: 1 !important;
 }
 
 /* Ensure dialog content is visible */
 .dark [role="dialog"] {
   @apply bg-gray-800 !important;
+  opacity: 1 !important;
 }
 
 /* Improve material detail buttons in dark mode */

@@ -97,4 +97,21 @@ div[data-state] {
   .card {
     @apply p-4;
   }
+  
+  /* Improve spacing for form fields on mobile */
+  input,
+  select,
+  textarea {
+    @apply text-base py-2.5;
+  }
+  
+  /* Fix touch target size for interactive elements */
+  .interactive-control {
+    @apply min-h-[44px];
+  }
+  
+  /* Ensure labels are visible */
+  label {
+    @apply text-sm font-medium mb-1.5 block;
+  }
 }

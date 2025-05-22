@@ -9,8 +9,53 @@
 .dark [role="textbox"],
 .dark [role="combobox"],
 .dark [role="dialog"],
-.dark textarea {
+.dark textarea,
+.dark select {
   background-color: hsl(220, 14%, 13%) !important;
   color: hsl(123, 30%, 80%) !important;
   border-color: hsl(220, 10%, 25%) !important;
+}
+
+/* Focus states for form elements */
+.dark input:focus,
+.dark .Input:focus,
+.dark .input:focus,
+.dark [role="textbox"]:focus,
+.dark [role="combobox"]:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: hsl(123, 40%, 40%) !important;
+  box-shadow: 0 0 0 1px hsl(123, 40%, 30%) !important;
+}
+
+/* Placeholder text color */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: hsl(220, 10%, 50%) !important;
+}
+
+/* Disabled form elements */
+.dark input:disabled,
+.dark .Input:disabled,
+.dark .input:disabled,
+.dark select:disabled,
+.dark textarea:disabled {
+  background-color: hsl(220, 10%, 18%) !important;
+  color: hsl(220, 10%, 50%) !important;
+  cursor: not-allowed;
+}
+
+/* Labels */
+.dark label,
+.dark .Label {
+  color: hsl(123, 10%, 70%) !important;
+}
+
+/* Form validation states */
+.dark .error-input {
+  border-color: hsl(0, 65%, 50%) !important;
+}
+
+.dark .success-input {
+  border-color: hsl(123, 50%, 45%) !important;
 }
