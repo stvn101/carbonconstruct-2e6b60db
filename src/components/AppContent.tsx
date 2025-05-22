@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ErrorBoundaryWrapper from './error/ErrorBoundaryWrapper';
 import RouteChangeTracker from './RouteChangeTracker';
 import SkipToContent from './SkipToContent';
-import { Toaster } from './ui/sonner';
 import { useAccessibility } from '../hooks/useAccessibility';
 import ErrorTrackingService from '../services/errorTrackingService';
 import performanceMonitoringService from '../services/performanceMonitoringService';
