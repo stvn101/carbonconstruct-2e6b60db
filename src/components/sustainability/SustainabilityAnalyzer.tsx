@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +6,7 @@ import { Leaf } from "lucide-react";
 import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestions";
 import { useMaterialAnalysis } from "@/hooks/sustainability/useMaterialAnalysis";
 import { useComplianceChecks } from "@/hooks/sustainability/useComplianceChecks";
-import { SustainabilityAnalyzerProps } from "./types";
-import { MaterialAnalysisResult } from "./compliance/types";
+import { SustainabilityAnalyzerProps, MaterialAnalysisResult } from "./types";
 
 // Import tab content components
 import TabNavigation from "./TabNavigation";
