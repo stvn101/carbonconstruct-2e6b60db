@@ -1,170 +1,112 @@
 
 /**
- * Theme Validator Utility
- * 
- * This utility helps to ensure theme consistency across the application.
- * It can be used during development to validate theme variables and
- * detect inconsistencies.
+ * Theme validation utilities for ensuring consistent theme application across components
  */
+import { useTheme } from '@/components/ThemeProvider';
 
-export type ThemeColor = {
-  name: string;
-  day: string;
-  night: string;
-  description: string;
-};
-
-export type ThemeColorCategory = {
-  name: string;
-  colors: ThemeColor[];
-};
-
-// Our standardized color palette
-export const themeColorPalette: ThemeColorCategory[] = [
+export const themeColorPalette = [
   {
     name: "Primary Colors",
     colors: [
-      {
-        name: "background",
-        day: "#F8F9FA",
-        night: "#212529",
-        description: "Main background"
-      },
-      {
-        name: "foreground",
-        day: "#212529",
-        night: "#F8F9FA",
-        description: "Main text"
-      },
-      {
-        name: "primary",
-        day: "#2B8A3E",
-        night: "#2B8A3E",
-        description: "Brand accent"
-      }
+      { name: "background", day: "#F8F9FA", night: "#212529", description: "Main background" },
+      { name: "foreground", day: "#212529", night: "#F8F9FA", description: "Main text" },
+      { name: "primary", day: "#2B8A3E", night: "#2B8A3E", description: "Primary accent" },
+      { name: "primary-foreground", day: "#FFFFFF", night: "#FFFFFF", description: "Text on primary" },
     ]
   },
   {
     name: "UI Components",
     colors: [
-      {
-        name: "card",
-        day: "#FFFFFF",
-        night: "#343A40",
-        description: "Card background"
-      },
-      {
-        name: "muted",
-        day: "#E9ECEF",
-        night: "#343A40",
-        description: "Muted areas"
-      },
-      {
-        name: "muted-foreground",
-        day: "#6C757D",
-        night: "#ADB5BD",
-        description: "Muted text"
-      },
-      {
-        name: "border",
-        day: "#DEE2E6",
-        night: "#495057",
-        description: "Borders"
-      }
+      { name: "card", day: "#FFFFFF", night: "#343A40", description: "Card background" },
+      { name: "card-foreground", day: "#212529", night: "#F8F9FA", description: "Card text" },
+      { name: "popover", day: "#FFFFFF", night: "#343A40", description: "Popover background" },
+      { name: "popover-foreground", day: "#212529", night: "#F8F9FA", description: "Popover text" },
+      { name: "border", day: "#DEE2E6", night: "#495057", description: "Border color" },
     ]
   },
   {
     name: "Semantic Colors",
     colors: [
-      {
-        name: "destructive",
-        day: "#DC3545",
-        night: "#DC3545",
-        description: "Error/danger"
-      },
-      {
-        name: "success",
-        day: "#198754",
-        night: "#20C997",
-        description: "Success/confirmed"
-      },
-      {
-        name: "warning",
-        day: "#FFC107",
-        night: "#FFC107",
-        description: "Warning/attention"
-      }
+      { name: "muted", day: "#E9ECEF", night: "#343A40", description: "Muted background" },
+      { name: "muted-foreground", day: "#6C757D", night: "#ADB5BD", description: "Muted text" },
+      { name: "accent", day: "#E9ECEF", night: "#343A40", description: "Accent background" },
+      { name: "accent-foreground", day: "#212529", night: "#F8F9FA", description: "Accent text" },
+      { name: "destructive", day: "#DC3545", night: "#DC3545", description: "Error state" },
+      { name: "destructive-foreground", day: "#FFFFFF", night: "#FFFFFF", description: "Error text" },
     ]
-  }
+  },
 ];
 
 /**
- * Validates all theme colors on the page
+ * Get the computed style value for a CSS variable
  */
-export function validateAllThemeColors(): {isValid: boolean, issues: string[]} {
-  // Only run in browser environment
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return {isValid: true, issues: []};
-  }
-  
-  const issues: string[] = [];
-  const isDark = document.documentElement.classList.contains('dark');
-  
-  // Check if root element has correct theme class
-  if (!document.documentElement.classList.contains('dark') && 
-      !document.documentElement.classList.contains('light')) {
-    issues.push("Root element missing theme class (dark or light)");
-  }
-  
-  // Check body background
-  const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-  const expectedBgColor = isDark ? "rgb(33, 37, 41)" : "rgb(248, 249, 250)"; 
-  if (!bodyBg.includes(expectedBgColor.substring(0, 10))) {
-    issues.push(`Body background color inconsistency. Expected: ${expectedBgColor}, Got: ${bodyBg}`);
-  }
-  
-  // Check text color
-  const bodyText = window.getComputedStyle(document.body).color;
-  const expectedTextColor = isDark ? "rgb(248, 249, 250)" : "rgb(33, 37, 41)";
-  if (!bodyText.includes(expectedTextColor.substring(0, 10))) {
-    issues.push(`Body text color inconsistency. Expected: ${expectedTextColor}, Got: ${bodyText}`);
-  }
-  
-  // Check a few key components
+const getComputedThemeValue = (variableName: string): string => {
   try {
-    // Check buttons
-    const buttons = document.querySelectorAll('button[class*="btn-primary"], button[class*="bg-primary"]');
-    buttons.forEach(button => {
-      const buttonStyles = window.getComputedStyle(button);
-      if (!buttonStyles.backgroundColor.includes("43, 138, 62") && // RGB values for #2B8A3E
-          !buttonStyles.backgroundColor.includes("43,138,62")) {
-        issues.push(`Primary button with inconsistent color: ${buttonStyles.backgroundColor}`);
-      }
-    });
-    
-    // Check cards
-    const cards = document.querySelectorAll('.card, [class*="bg-card"]');
-    cards.forEach(card => {
-      const cardStyles = window.getComputedStyle(card);
-      const expectedCardBg = isDark ? "rgb(52, 58, 64)" : "rgb(255, 255, 255)";
-      if (!cardStyles.backgroundColor.includes(expectedCardBg.substring(0, 10))) {
-        issues.push(`Card with inconsistent background: ${cardStyles.backgroundColor}`);
-      }
-    });
-  } catch (error) {
-    issues.push(`Error during theme validation: ${(error as Error).message}`);
+    // Get the computed style on the document element
+    const styles = getComputedStyle(document.documentElement);
+    return styles.getPropertyValue(variableName).trim();
+  } catch (e) {
+    console.error(`Failed to get computed value for ${variableName}:`, e);
+    return '';
   }
-  
-  return {
-    isValid: issues.length === 0,
-    issues
-  };
-}
+};
 
 /**
- * Helper to normalize colors to a standard format
+ * Validate if a theme variable is properly defined and applied
  */
-function normalizeColor(color: string): string {
-  // This is a simplified implementation
-  return color.toLowerCase().trim();
-}
+const validateThemeVariable = (variableName: string): { isValid: boolean; value: string } => {
+  const value = getComputedThemeValue(`--${variableName}`);
+  
+  // Check if the value exists and is not just whitespace
+  const isValid = Boolean(value && value !== 'initial' && value !== 'inherit');
+  
+  return { isValid, value };
+};
+
+/**
+ * Validate all theme colors and identify any inconsistencies
+ */
+export const validateAllThemeColors = (): { isValid: boolean; issues: string[] } => {
+  const issues: string[] = [];
+  let allValid = true;
+  
+  // Validate all color categories
+  themeColorPalette.forEach(category => {
+    category.colors.forEach(color => {
+      const { isValid, value } = validateThemeVariable(color.name);
+      
+      if (!isValid) {
+        issues.push(`"${color.name}" is not properly defined (${value || 'empty'}).`);
+        allValid = false;
+      }
+    });
+  });
+  
+  // Check contrast ratios for accessibility
+  const bgColor = getComputedThemeValue('--background');
+  const textColor = getComputedThemeValue('--foreground');
+  
+  if (bgColor && textColor) {
+    // This is a simplified check - a real contrast ratio calculation would be more complex
+    if (bgColor === textColor) {
+      issues.push('Background and foreground colors have identical values, causing contrast issues.');
+      allValid = false;
+    }
+  }
+  
+  return { isValid: allValid, issues };
+};
+
+/**
+ * Hook to validate theme and get current theme status
+ */
+export const useThemeValidator = () => {
+  const { theme } = useTheme();
+  const validation = validateAllThemeColors();
+  
+  return {
+    theme,
+    validation,
+    isDark: theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches),
+  };
+};

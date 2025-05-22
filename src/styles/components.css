@@ -14,13 +14,13 @@
 
 /* Card styling - ensure solid backgrounds */
 .card {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm;
+  @apply bg-card border border-border shadow-sm;
 }
 
-/* Remove any backdrop filters */
+/* Remove backdrop filters for better compatibility */
 [class*="backdrop-blur"] {
   backdrop-filter: none !important;
-  @apply bg-white dark:bg-gray-800 opacity-100;
+  @apply bg-background/95 dark:bg-background/95;
 }
 
 /* Force solid backgrounds on common UI components */
@@ -29,51 +29,72 @@
 .dialog,
 .sheet,
 [data-radix-popper-content-wrapper] > * {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 !important;
+  @apply bg-popover border border-border !important;
   backdrop-filter: none !important;
-  opacity: 1 !important;
-  z-index: 9999; /* Ensure it is on top */
+  z-index: var(--z-dropdown);
 }
 
 /* Ensure sections with secondary backgrounds are solid */
 [class*="bg-secondary"] {
-  @apply bg-gray-50 dark:bg-gray-800 !important;
+  @apply bg-secondary !important;
 }
 
 /* Make dialogs completely opaque */
 [role="dialog"],
 div[data-state] {
-  @apply bg-white dark:bg-gray-800 !important;
-  opacity: 1 !important;
+  @apply bg-card !important;
   backdrop-filter: none !important;
 }
 
 /* Specifically target Radix UI Dialog content */
 [data-radix-popper-content-wrapper],
 [data-state] > [role="dialog"] {
-  @apply bg-white dark:bg-gray-800 !important;
-  opacity: 1 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25) !important;
-  z-index: 9999;
+  @apply bg-popover !important;
+  box-shadow: var(--shadow-md) !important;
+  z-index: var(--z-dropdown);
 }
 
 /* Details button styling */
 .details-btn {
-  @apply bg-carbon-400 hover:bg-carbon-500 border-carbon-500 dark:bg-carbon-600 dark:hover:bg-carbon-500 dark:border-carbon-500 dark:text-white transition-colors;
+  @apply bg-primary hover:bg-primary/90 border-primary dark:bg-primary dark:hover:bg-primary/90 dark:border-primary text-primary-foreground transition-colors;
 }
 
-/* Force all backdrop blur elements fully opaque and no transparency */
+/* Force all backdrop blur elements fully opaque */
 .dark [class*="backdrop-blur"] {
   backdrop-filter: none !important;
-  @apply bg-gray-800 opacity-100 !important;
+  @apply bg-background/95 !important;
 }
 
 /* Improve dropdown menu item visibility */
 [data-radix-dropdown-menu-content] {
-  @apply bg-white dark:bg-gray-800 !important;
+  @apply bg-popover !important;
 }
 
 /* Fix transparency in content containers */
 [data-radix-tabs-content] {
   @apply bg-transparent !important;
+}
+
+/* Improve mobile touch targets */
+@media (max-width: 640px) {
+  button, 
+  a.button,
+  .interactive-element {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Improve spacing between form elements */
+  .form-group + .form-group {
+    @apply mt-4;
+  }
+  
+  /* Stack buttons on mobile */
+  .button-group {
+    @apply flex flex-col space-y-2;
+  }
+  
+  /* Make card padding consistent */
+  .card {
+    @apply p-4;
+  }
 }
