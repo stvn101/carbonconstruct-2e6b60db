@@ -71,6 +71,7 @@ export function GrokProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       const errorResponse: VercelGrokResponse = {
         text: "Error processing your request. Please try again.",
+        response: "Error processing your request. Please try again.", // For backward compatibility
         error: error instanceof Error ? error.message : String(error)
       };
       setLastResponse(errorResponse);
@@ -80,7 +81,7 @@ export function GrokProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  // New method for streaming responses
+  // Method for streaming responses
   const streamGrok = (prompt: string, context?: any, mode?: GrokMode): AsyncIterable<string> => {
     setIsProcessing(true);
     
@@ -107,7 +108,8 @@ export function GrokProvider({ children }: { children: ReactNode }) {
           
           // Update last response
           setLastResponse({
-            text: responseText
+            text: responseText,
+            response: responseText // For backward compatibility
           });
         } catch (error) {
           console.error("Error in Grok stream:", error);

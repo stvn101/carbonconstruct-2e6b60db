@@ -93,7 +93,7 @@ const GrokChat: React.FC<GrokChatProps> = ({
           maxRetries: 2,
           context: 'chat',
           fallback: () => ({
-            response: "I'm currently having trouble connecting to my knowledge base. Please try again shortly, or ask a different question.",
+            text: "I'm currently having trouble connecting to my knowledge base. Please try again shortly, or ask a different question.",
             error: undefined
           })
         }
@@ -105,7 +105,7 @@ const GrokChat: React.FC<GrokChatProps> = ({
           ? {
               id: tempAssistantId,
               role: 'assistant',
-              content: response.response,
+              content: response.text,
               timestamp: new Date()
             }
           : msg

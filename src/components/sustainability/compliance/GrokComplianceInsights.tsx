@@ -75,16 +75,16 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
       
       // Update state with analysis results
       if (!nccResponse.error) {
-        setNccAnalysis(nccResponse.response);
+        setNccAnalysis(nccResponse.text);
       }
       
       if (!nabersResponse.error) {
-        setNabersAnalysis(nabersResponse.response);
+        setNabersAnalysis(nabersResponse.text);
       }
       
       // Call the callback if provided
       if (onGrokAnalysisComplete && !nccResponse.error && !nabersResponse.error) {
-        onGrokAnalysisComplete(nccResponse.response, nabersResponse.response);
+        onGrokAnalysisComplete(nccResponse.text, nabersResponse.text);
       }
       
       if (nccResponse.error || nabersResponse.error) {

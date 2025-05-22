@@ -73,7 +73,7 @@ const MaterialAnalysis: React.FC<MaterialAnalysisProps> = ({
 
       // Parse the response
       const results = {
-        insights: response.response,
+        insights: response.text,
         materials: materialData,
         timestamp: new Date().toISOString()
       };
