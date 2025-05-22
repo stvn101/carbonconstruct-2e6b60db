@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCalculator } from '@/contexts/CalculatorContext';
 import { toast } from 'sonner';
 import { retryWithRecovery } from '@/utils/errorHandling/connectionRecovery';
+import { CalculationInput } from '@/lib/carbonExports';
 
 export interface SustainabilitySuggestion {
   id: string;
@@ -16,11 +17,19 @@ export interface SustainabilitySuggestion {
   action?: string;
 }
 
+export interface SuggestionMetadata {
+  generatedTimestamp?: string;
+  analysisVersion?: string;
+  source?: string;
+  confidence?: number;
+}
+
 export function useSustainabilitySuggestions() {
   const { materials, transport, energy, calculationResult } = useCalculator();
   const [suggestions, setSuggestions] = useState<SustainabilitySuggestion[]>([]);
   const [prioritySuggestions, setPrioritySuggestions] = useState<SustainabilitySuggestion[]>([]);
   const [report, setReport] = useState<any>(null);
+  const [metadata, setMetadata] = useState<SuggestionMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -73,6 +82,7 @@ export function useSustainabilitySuggestions() {
         setSuggestions(result.suggestions || []);
         setPrioritySuggestions(result.prioritySuggestions || []);
         setReport(result.report || null);
+        setMetadata(result.metadata || null);
       }
     } catch (err) {
       console.error("Error fetching sustainability suggestions:", err);
@@ -89,12 +99,67 @@ export function useSustainabilitySuggestions() {
     }
   };
   
+  const getSuggestions = async (
+    materials: any[], 
+    transport: any[], 
+    energy: any[], 
+    options: any = {}
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Implementation similar to getSustainabilitySuggestions but takes explicit parameters
+      const result = await retryWithRecovery(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
+            body: {
+              materials,
+              transport,
+              energy,
+              options
+            }
+          });
+          
+          if (error) throw error;
+          return data;
+        },
+        {
+          onRetry: (attempt) => {
+            console.log(`Retry attempt ${attempt} for sustainability suggestions`);
+          },
+          onFailure: (err) => {
+            console.error("Failed to get sustainability suggestions after retries:", err);
+            setError(err.message || "Failed to fetch sustainability suggestions");
+          }
+        }
+      );
+      
+      if (result) {
+        setSuggestions(result.suggestions || []);
+        setPrioritySuggestions(result.prioritySuggestions || []);
+        setReport(result.report || null);
+        setMetadata(result.metadata || null);
+      }
+      
+      return result;
+    } catch (err) {
+      console.error("Error fetching sustainability suggestions:", err);
+      setError(err instanceof Error ? err.message : String(err));
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return {
     suggestions,
     prioritySuggestions,
     report,
+    metadata,
     isLoading,
     error,
-    refreshSuggestions: getSustainabilitySuggestions
+    refreshSuggestions: getSustainabilitySuggestions,
+    getSuggestions
   };
 }

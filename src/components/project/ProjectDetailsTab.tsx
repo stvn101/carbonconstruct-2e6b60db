@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { SavedProject } from "@/contexts/ProjectContext";
-import { MATERIAL_FACTORS, ENERGY_FACTORS } from "@/lib/carbonExports";
+import { MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 
 interface ProjectDetailsTabProps {
   project: SavedProject;
@@ -18,16 +18,16 @@ const ProjectDetailsTab: React.FC<ProjectDetailsTabProps> = ({
   onExportCSV 
 }) => {
   // Material, transport, and energy data for display
-  const materialList = project.materials.map(m => ({
-    name: MATERIAL_FACTORS[m.type].name,
+  const materialList = (project.materials || []).map((m: MaterialInput) => ({
+    name: m.name,
     quantity: m.quantity,
-    unit: MATERIAL_FACTORS[m.type].unit
+    unit: m.unit
   }));
   
-  const energyList = project.energy.map(e => ({
-    name: ENERGY_FACTORS[e.type].name,
+  const energyList = (project.energy || []).map((e: EnergyInput) => ({
+    name: e.type,
     amount: e.amount,
-    unit: ENERGY_FACTORS[e.type].unit
+    unit: e.unit
   }));
 
   return (
@@ -54,9 +54,9 @@ const ProjectDetailsTab: React.FC<ProjectDetailsTabProps> = ({
           <div>
             <h3 className="text-lg font-semibold mb-2">Transport</h3>
             <ul className="list-disc pl-5">
-              {project.transport.map((transport, index) => (
+              {(project.transport || []).map((transport: TransportInput, index) => (
                 <li key={index}>
-                  {transport.type}: {transport.distance} km, {transport.weight} kg
+                  {transport.mode}: {transport.distance} km, {transport.weight} kg
                 </li>
               ))}
             </ul>

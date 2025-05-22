@@ -1,110 +1,90 @@
 
-import React from "react";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TransportInput } from "@/lib/carbonExports";
-import { TRANSPORT_FACTORS } from "@/lib/carbonData";
-import { TransportFactorKey } from "@/lib/carbonData";
+import React from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
+import { TransportInput } from '@/lib/carbonExports';
 
 interface TransportFormFieldsProps {
-  transport: TransportInput;
   index: number;
-  errors?: string;
+  item: TransportInput;
+  onUpdate: (field: string, value: any) => void;
   onRemove: () => void;
-  onUpdate: (field: keyof TransportInput, value: string | number) => void;
 }
 
 const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
-  transport,
   index,
-  errors,
-  onRemove,
-  onUpdate
+  item,
+  onUpdate,
+  onRemove
 }) => {
-  const transportTypes = Object.keys(TRANSPORT_FACTORS);
-  
   return (
-    <div className={`grid grid-cols-1 gap-3 items-end border p-3 md:p-4 rounded-lg ${errors ? "border-red-300 bg-red-50" : "border-carbon-100"}`}>
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr] gap-3">
-          {/* Transport Type */}
-          <div>
-            <label htmlFor={`transport-type-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-              Transport Type
-            </label>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between py-3">
+        <h3 className="font-medium">Transport #{index + 1}</h3>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onRemove} 
+          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Remove transport item</span>
+        </Button>
+      </CardHeader>
+      <CardContent className="grid gap-4 pt-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor={`transport-mode-${index}`}>Transport Mode</Label>
             <Select
-              value={transport.type}
-              onValueChange={(value) => onUpdate("type", value)}
+              value={item.mode}
+              onValueChange={(value) => onUpdate('mode', value)}
             >
-              <SelectTrigger id={`transport-type-${index}`}>
-                <SelectValue placeholder="Select transport type" />
+              <SelectTrigger>
+                <SelectValue placeholder="Select transport mode" />
               </SelectTrigger>
               <SelectContent>
-                {transportTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {TRANSPORT_FACTORS[type as TransportFactorKey]?.name || type}
-                  </SelectItem>
-                ))}
+                <SelectItem value="truck">Truck</SelectItem>
+                <SelectItem value="rail">Rail</SelectItem>
+                <SelectItem value="ship">Ship</SelectItem>
+                <SelectItem value="air">Air Freight</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
-          {/* Distance */}
-          <div>
-            <label htmlFor={`transport-distance-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-              Distance (km)
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor={`transport-distance-${index}`}>Distance (km)</Label>
             <Input
               id={`transport-distance-${index}`}
               type="number"
               min="0"
-              max="20000"
-              value={transport.distance}
-              onChange={(e) => onUpdate("distance", e.target.value)}
-              className={errors ? "border-red-300 bg-red-50" : ""}
-              aria-invalid={errors ? "true" : "false"}
-              aria-describedby={errors ? `transport-error-${index}` : undefined}
-            />
-          </div>
-          
-          {/* Weight */}
-          <div>
-            <label htmlFor={`transport-weight-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-              Weight (kg)
-            </label>
-            <Input
-              id={`transport-weight-${index}`}
-              type="number"
-              min="0"
-              max="100000"
-              value={transport.weight || ""}
-              onChange={(e) => onUpdate("weight", e.target.value)}
-              className={errors ? "border-red-300 bg-red-50" : ""}
+              step="0.01"
+              value={item.distance}
+              onChange={(e) => onUpdate('distance', e.target.value)}
+              placeholder="Enter distance"
             />
           </div>
         </div>
         
-        <div className="self-end">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onRemove}
-            className="h-9 w-9"
-            aria-label="Remove transport"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor={`transport-weight-${index}`}>Weight (kg)</Label>
+            <Input
+              id={`transport-weight-${index}`}
+              type="number"
+              min="0"
+              step="0.01"
+              value={item.weight}
+              onChange={(e) => onUpdate('weight', e.target.value)}
+              placeholder="Enter weight"
+            />
+          </div>
         </div>
-      </div>
-      {errors && (
-        <p id={`transport-error-${index}`} className="mt-1 text-xs text-red-600">
-          {errors}
-        </p>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

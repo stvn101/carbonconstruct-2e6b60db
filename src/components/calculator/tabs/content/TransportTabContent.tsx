@@ -1,106 +1,90 @@
 
-import React from "react";
-import { useCalculator } from "@/contexts/calculator";
-import TransportInputSection from "../../TransportInputSection";
+import React from 'react';
+import { TabsContent } from "@/components/ui/tabs"; 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { TransportInput } from '@/lib/carbonExports';
+import { AlertTriangle, Plus } from 'lucide-react';
+import TransportFormFields from '@/components/calculator/transport/TransportFormFields';
 
-const TransportTabContent: React.FC = () => {
-  const {
-    calculationInput,
-    handleUpdateTransport,
-    handleAddTransport,
-    handleRemoveTransport,
-    handleNextTab,
-    handlePrevTab
-  } = useCalculator();
+interface TransportTabContentProps {
+  transport?: TransportInput[];
+  onUpdateTransport?: (index: number, field: keyof TransportInput, value: any) => void;
+  onAddTransport?: () => void;
+  onRemoveTransport?: (index: number) => void;
+  onCalculate?: () => void;
+  onPrev?: () => void;
+}
 
+const TransportTabContent: React.FC<TransportTabContentProps> = ({
+  transport = [],
+  onUpdateTransport,
+  onAddTransport,
+  onRemoveTransport,
+  onCalculate,
+  onPrev
+}) => {
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="text-md md:text-lg font-medium flex items-center gap-2">
-        <span>Transport Inputs</span>
-      </div>
-      
-      {calculationInput.transport && calculationInput.transport.map((transportItem, index) => (
-        <div key={`transport-${index}`} className="grid grid-cols-1 gap-3 items-end border border-gray-200 dark:border-gray-700 p-3 md:p-4 rounded-lg">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Transport Type
-            </label>
-            <select
-              value={transportItem.type}
-              onChange={(e) => handleUpdateTransport(index, "type", e.target.value)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-            >
-              <option value="truck">Truck</option>
-              <option value="train">Train</option>
-              <option value="ship">Ship</option>
-            </select>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Distance (km)
-              </label>
-              <input
-                type="number"
-                value={transportItem.distance || ""}
-                onChange={(e) => handleUpdateTransport(index, "distance", e.target.value)}
-                placeholder="Enter distance in km"
-                className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Weight (kg)
-              </label>
-              <input
-                type="number"
-                value={transportItem.weight || ""}
-                onChange={(e) => handleUpdateTransport(index, "weight", e.target.value)}
-                placeholder="Enter weight in kg"
-                className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-          
-          <div className="flex justify-end">
-            <button 
-              type="button"
-              onClick={() => handleRemoveTransport(index)}
-              className="text-xs inline-flex items-center justify-center whitespace-nowrap rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              Remove
-            </button>
-          </div>
+    <TabsContent value="transport">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+          <h2 className="text-xl font-bold">Transport Details</h2>
+          <Button 
+            onClick={onAddTransport} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Transport</span>
+          </Button>
         </div>
-      ))}
-      
-      <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mt-4">
-        <button 
-          type="button" 
-          onClick={handleAddTransport}
-          className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm px-4 py-2 rounded-md"
-        >
-          Add Transport
-        </button>
-        <div className="flex gap-2">
-          <button 
-            type="button" 
-            onClick={handlePrevTab}
-            className="w-full sm:w-auto border border-carbon-600 text-carbon-600 hover:bg-carbon-50 text-xs md:text-sm px-4 py-2 rounded-md"
+        
+        {transport.length === 0 ? (
+          <Card>
+            <CardContent className="flex items-center justify-center p-6">
+              <div className="text-center space-y-2">
+                <AlertTriangle className="h-12 w-12 mx-auto text-yellow-400" />
+                <h3 className="font-semibold text-lg">No Transport Items</h3>
+                <p className="text-muted-foreground">
+                  Add transport information to account for emissions from moving materials.
+                </p>
+                <Button 
+                  onClick={onAddTransport} 
+                  className="mt-4 bg-carbon-600 hover:bg-carbon-700 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Transport Item
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {transport.map((item, index) => (
+              <TransportFormFields
+                key={index}
+                index={index}
+                item={item}
+                onUpdate={(field, value) => onUpdateTransport && onUpdateTransport(index, field as keyof TransportInput, value)}
+                onRemove={() => onRemoveTransport && onRemoveTransport(index)}
+              />
+            ))}
+          </div>
+        )}
+        
+        <div className="flex justify-between pt-4">
+          <Button variant="outline" onClick={onPrev}>
+            Previous Step
+          </Button>
+          <Button 
+            onClick={onCalculate} 
+            className="bg-carbon-600 hover:bg-carbon-700 text-white"
           >
-            Previous: Materials
-          </button>
-          <button 
-            type="button" 
-            onClick={handleNextTab}
-            className="w-full sm:w-auto bg-carbon-600 hover:bg-carbon-700 text-white text-xs md:text-sm px-4 py-2 rounded-md"
-          >
-            Next: Energy
-          </button>
+            Next Step
+          </Button>
         </div>
       </div>
-    </div>
+    </TabsContent>
   );
 };
 
