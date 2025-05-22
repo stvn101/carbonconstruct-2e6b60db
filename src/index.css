@@ -32,7 +32,7 @@ body {
 @layer base {
   /* Selection styling */
   ::selection {
-    background-color: hsl(var(--primary) / 0.2);
+    background-color: rgba(34, 197, 94, 0.2);
     color: hsl(var(--primary));
   }
   
@@ -56,6 +56,12 @@ body {
     box-shadow: var(--shadow-sm);
   }
   
+  /* Add green border accent to cards on hover */
+  .card:hover, 
+  .card-component:hover {
+    border-color: rgb(22, 163, 74);
+  }
+  
   /* Ensure all inputs have consistent styling */
   input, 
   select, 
@@ -67,9 +73,17 @@ body {
     padding: var(--space-2) var(--space-3);
   }
   
+  /* Add green focus ring for inputs */
+  input:focus, 
+  select:focus, 
+  textarea:focus {
+    border-color: rgb(22, 163, 74);
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+  }
+  
   /* Improve focus states for accessibility */
   :focus-visible {
-    outline: 2px solid hsl(var(--ring));
+    outline: 2px solid rgb(22, 163, 74);
     outline-offset: 2px;
   }
   
@@ -79,8 +93,30 @@ body {
     font-weight: 600;
     line-height: 1.2;
   }
+  
+  /* Add green underline accent to headings */
+  h1::after, h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, rgb(34, 197, 94), rgb(22, 163, 74));
+    margin-top: 0.3em;
+    border-radius: 2px;
+  }
 }
 
+/* Green accent for active navigation items */
+.active-nav-item {
+  border-left: 3px solid rgb(22, 163, 74);
+}
+
+/* Green accent for sustainability-related elements */
+.sustainability-element {
+  border-left: 4px solid rgb(22, 163, 74);
+}
+
+/* Keep the rest of the existing CSS */
 .content-top-spacing {
   padding-top: 5rem; /* Equivalent to pt-20 in Tailwind */
 }

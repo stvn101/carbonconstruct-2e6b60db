@@ -13,21 +13,13 @@ const MobileNavigation: React.FC = () => {
   // Don't show mobile navigation on theme test page
   if (location.pathname === '/theme-test') return null;
   
-  // Map our nav links to mobile nav items
-  const mobileNavItems = [
-    { path: '/', label: 'Home', icon: <Home size={22} /> },
-    { path: '/calculator', label: 'Calculator', icon: <Calculator size={22} /> },
-    { path: '/materials', label: 'Materials', icon: <Database size={22} /> },
-    { path: '/grok-ai', label: 'Grok AI', icon: <Brain size={22} /> },
-    { path: '/resources', label: 'Resources', icon: <Book size={22} /> },
-    { path: '/benchmarking', label: 'Benchmarking', icon: <BarChart2 size={22} />, premium: true }
-  ].filter(item => {
-    // Filter premium items if they're not in navLinks
-    if (item.premium) {
-      return navLinks.some(navLink => navLink.path === item.path);
-    }
-    return true;
-  });
+  // Use navLinks from the hook to ensure consistency
+  const mobileNavItems = navLinks.map(link => ({
+    path: link.path,
+    label: link.title,
+    icon: link.icon,
+    premium: link.premium
+  }));
   
   return (
     <nav className={`fixed bottom-0 left-0 right-0 bg-background border-t border-border sm:hidden z-navbar bottom-navigation ${isIOS ? 'pb-[env(safe-area-inset-bottom,0)]' : ''}`}>
@@ -39,7 +31,7 @@ const MobileNavigation: React.FC = () => {
             className={({ isActive }) =>
               `flex flex-col items-center px-3 py-2 min-h-[56px] w-full justify-center ${
                 isActive 
-                  ? 'text-primary' 
+                  ? 'text-green-600 dark:text-green-400' 
                   : 'text-muted-foreground hover:text-foreground'
               }`
             }
