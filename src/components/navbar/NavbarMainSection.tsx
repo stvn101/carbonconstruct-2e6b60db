@@ -27,10 +27,6 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
         <NavbarLinks />
         <NavbarMobileToggle isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       </div>
-      {/* Show NavbarLinks on desktop in the right section */}
-      <div className="hidden md:flex items-center">
-        <NavbarLinks />
-      </div>
     </div>
   );
 };
