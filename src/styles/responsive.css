@@ -1,331 +1,164 @@
 
-/* Improve touch targets on mobile */
+/* Mobile-specific utilities and responsive design adjustments */
+
+/* Base responsive scale adjustments */
 @media (max-width: 640px) {
-  button, 
-  a.button,
-  .clickable {
-    min-height: 44px; /* Updated to meet WCAG guidelines */
-    min-width: 44px;
-    padding: 0.5rem 1rem;
+  html {
+    font-size: 15px; /* Slightly larger base size for better readability */
   }
-  
-  input, select, textarea {
-    padding: 0.75rem;
-    font-size: 16px; /* Prevent iOS zoom */
-  }
+}
 
-  /* Consistent form field spacing on mobile */
-  .form-field {
-    @apply mb-4;
-  }
-  
-  /* Better dropdown positioning for mobile */
-  [data-radix-popper-content-wrapper] {
-    max-width: calc(100vw - 24px) !important;
-    z-index: var(--z-dropdown) !important;
-  }
-  
-  /* Fix mobile scrolling with fixed elements */
-  html, body {
-    max-width: 100vw;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Improve text readability on mobile */
-  .text-sm {
-    font-size: 0.9375rem;
-    line-height: 1.5rem;
-  }
+/* Touch target sizes for mobile devices */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
 
-  /* Ensure chart tooltips don't get cut off on mobile screens */
-  .recharts-tooltip-wrapper {
-    max-width: 80vw !important;
-  }
-
-  .recharts-default-tooltip {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-    white-space: normal !important;
-    font-size: 12px !important;
-    background-color: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
-    border-color: hsl(var(--border)) !important;
-  }
-
-  /* Fix navbar on mobile */
-  .navbar-container {
-    @apply px-4;
+@media (max-width: 640px) {
+  /* Improve spacing around interactive elements */
+  button, a, input, select, textarea {
+    @apply touch-target;
   }
   
-  /* Material table improvements for mobile */
-  .materials-table th,
-  .materials-table td {
-    @apply px-2 py-3 text-sm;
+  /* Bottom margin for form groups to prevent crowding */
+  .form-group:not(:last-child) {
+    @apply mb-5;
   }
   
-  /* Material cards for very small screens */
-  .material-card {
-    @apply p-3;
-  }
-  
-  .material-card-title {
+  /* Increase font size for inputs and labels on mobile */
+  input, select, textarea, label {
     @apply text-base;
   }
   
-  /* Fix database header on small screens */
-  .database-header-title {
-    @apply text-2xl;
+  /* Increase tap targets for checkboxes and radio buttons */
+  input[type="checkbox"] + label,
+  input[type="radio"] + label {
+    @apply min-h-[24px] py-1 inline-block cursor-pointer;
   }
   
-  /* Fix filter layout on mobile */
-  .filter-container {
-    @apply flex-col;
-  }
-  
-  .filter-item {
-    @apply w-full mb-2;
-  }
-  
-  /* Ensure buttons have sufficient touch targets */
-  .dialog-actions button,
-  .form-actions button {
-    @apply py-2.5 px-4 min-h-[44px];
-  }
-  
-  /* Improve form group spacing */
-  .form-group + .form-group {
-    @apply mt-4;
-  }
-  
-  /* Ensure readable font sizes for all content */
-  p, li, span:not(.icon) {
-    @apply text-base;
-  }
-  
-  /* Improve headings on mobile */
-  h1 { @apply text-2xl; }
-  h2 { @apply text-xl; }
-  h3 { @apply text-lg; }
-  
-  /* Fix long text overflow */
-  .truncate-mobile {
-    @apply truncate max-w-full;
-  }
-  
-  /* Fix shadcn Dialog on mobile */
+  /* Ensure modals and dialogs are properly sized */
   [role="dialog"] {
-    @apply p-4 w-[calc(100vw-32px)] max-w-md mx-auto;
+    @apply w-[calc(100%-32px)] mx-auto max-w-md;
+  }
+  
+  /* Fix spacing in card grids */
+  .card-grid {
+    @apply grid grid-cols-1 gap-4;
+  }
+  
+  /* Mobile-first table styles */
+  table {
+    @apply w-full;
+  }
+  
+  /* Stack tables responsively on small screens */
+  .responsive-table {
+    @apply block w-full;
+  }
+  
+  .responsive-table thead {
+    @apply hidden;
+  }
+  
+  .responsive-table tbody, 
+  .responsive-table tr {
+    @apply block w-full;
+  }
+  
+  .responsive-table td {
+    @apply block w-full py-2 text-left;
+  }
+  
+  .responsive-table td::before {
+    @apply font-medium mr-2 content-[attr(data-label)]:;
+  }
+  
+  /* Improved mobile tabs - full width, larger hit area */
+  .tabs-list button,
+  .tab-trigger {
+    @apply min-h-[44px] px-4;
+  }
+  
+  /* Make sure dropdowns are full width on mobile */
+  .mobile-full-width {
+    @apply !w-full max-w-full;
+  }
+  
+  /* Handle iOS safe areas */
+  .safe-bottom {
+    @apply pb-[env(safe-area-inset-bottom,16px)];
+  }
+  
+  /* Navigation safe areas for notched devices */
+  .bottom-navigation {
+    @apply pb-[env(safe-area-inset-bottom,0)];
+  }
+  
+  /* Improved scrolling on mobile */
+  .scroll-container {
+    @apply -mx-4 px-4 overflow-x-auto scrollbar-thin flex pb-2;
   }
 }
 
-/* Ensure tooltips stay within viewport on all screen sizes */
-.recharts-tooltip-wrapper {
-  pointer-events: none;
-  z-index: var(--z-tooltip) !important;
-}
-
-/* Fix for chart tooltips that may get cut off at viewport edges */
-[data-radix-popper-content-wrapper],
-.recharts-tooltip-wrapper {
-  overflow: visible !important;
-  pointer-events: none;
-}
-
-.recharts-tooltip-container {
-  max-width: calc(100vw - 40px);
-}
-
-/* Fix mobile menu layering */
-.mobile-menu {
-  z-index: var(--z-navbar);
-}
-
-/* Improve mobile form inputs */
-@media (max-width: 640px) {
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="password"],
-  select,
-  textarea {
-    @apply w-full text-base;
-    -webkit-appearance: none;
-    border-radius: var(--radius-md);
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-  }
-
-  /* Fix for iOS input shadows */
-  input,
-  textarea {
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  
-  /* Material database specific mobile optimizations */
-  .database-filter-card {
-    @apply p-3;
-  }
-  
-  .database-filter-title {
-    @apply text-base;
-  }
-  
-  .database-results-table {
-    @apply overflow-x-auto -mx-4 px-4;
-    width: calc(100% + 2rem);
-  }
-  
-  .database-stats {
-    @apply grid-cols-2 gap-2;
-  }
-  
-  .database-stats-item {
-    @apply p-2;
-  }
-  
-  .database-stats-value {
-    @apply text-lg;
-  }
-}
-
-/* Responsive table adjustments */
-@media (max-width: 640px) {
-  .table-responsive {
-    display: block;
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Material table row tweaks */
-  .material-name {
-    @apply font-medium mb-1;
-  }
-  
-  .material-meta {
-    @apply text-xs text-muted-foreground;
-  }
-  
-  .material-carbon {
-    @apply text-sm font-medium;
-  }
-  
-  .material-alternative {
-    @apply text-xs;
-    color: hsl(var(--success, 142.1 76.2% 36.3%));
-  }
-}
-
-/* Fix sticky header on mobile */
-@supports (-webkit-touch-callout: none) {
-  .sticky-header {
-    position: -webkit-sticky;
-    top: 0;
-    z-index: var(--z-navbar);
-  }
-  
-  /* Safe area insets for modern iOS */
-  .safe-inset-padding {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-  
-  /* Fix bottom navigation bar spacing */
-  .bottom-nav-safe {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
-  }
-}
-
-/* Modals and dialogs on mobile */
-@media (max-width: 640px) {
-  .dialog-content {
-    @apply p-4 w-[95vw] max-h-[90vh];
-  }
-  
-  .dialog-title {
-    @apply text-lg;
-  }
-  
-  .dialog-description {
-    @apply text-sm;
-  }
-  
-  /* Ensure buttons have sufficient touch targets */
-  .dialog-actions button {
-    @apply py-2 px-3;
-  }
-}
-
-/* Material database specific media queries */
-@media (max-width: 768px) {
-  .material-filter-tabs {
-    @apply overflow-x-auto flex-nowrap;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-  }
-  
-  .material-filter-tabs::-webkit-scrollbar {
-    display: none; /* Chrome/Safari/Opera */
-  }
-  
-  .material-tags-list {
-    @apply flex-wrap;
-  }
-  
-  .material-stats-grid {
+/* Medium devices (tablets) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet-specific styles */
+  .tablet-grid {
     @apply grid-cols-2;
   }
+  
+  /* Adjust side panels for tablets */
+  .side-panel {
+    @apply w-[320px];
+  }
 }
 
-/* Fix background colors for cards in dark mode */
-.dark .card,
-.dark [class*="Card"] {
-  background-color: hsl(var(--card)) !important;
-  color: hsl(var(--card-foreground)) !important;
+/* Landscape orientation specific styles */
+@media (max-width: 640px) and (orientation: landscape) {
+  /* When in landscape on mobile, adjust critical components */
+  .mobile-landscape-adjust {
+    @apply max-h-[80vh] overflow-y-auto;
+  }
 }
 
-/* Ensure consistent text colors in dark mode */
-.dark .text-foreground {
-  color: hsl(var(--foreground)) !important;
+/* Specific device adjustments for notched iOS devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .ios-safe-padding {
+    @apply pb-[env(safe-area-inset-bottom)];
+  }
 }
 
-.dark .text-muted-foreground {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-/* Create a mobile-friendly container class */
-.mobile-container {
-  @apply mx-auto px-4 sm:px-6 md:px-8 w-full;
-  max-width: 100%;
-}
-
-/* Responsive grid layouts */
-.responsive-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
-}
-
-/* Fix bottom navigation spacing on mobile */
-.bottom-navigation {
-  @apply fixed bottom-0 left-0 right-0 py-2 px-4 bg-background border-t border-border;
-  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
-}
-
-/* Ensure form elements are properly spaced in stacked layouts on mobile */
-@media (max-width: 640px) {
-  .form-row {
-    @apply flex-col;
+/* High-contrast mode adjustments */
+@media (forced-colors: active) {
+  /* Ensure buttons have visible borders in high contrast mode */
+  button, .button {
+    @apply border border-current;
   }
   
-  .form-col {
-    @apply w-full mb-4;
+  /* Ensure links are underlined in high contrast mode */
+  a:not(.button) {
+    @apply underline;
+  }
+}
+
+/* Print styles */
+@media print {
+  /* Hide navigation and interactive elements when printing */
+  nav, button, .interactive, .no-print {
+    @apply hidden;
   }
   
-  /* Better form field spacing */
-  .form-field:not(:last-child) {
-    @apply mb-4;
+  /* Reset backgrounds for printing */
+  body, .card, .container, .content {
+    @apply bg-white text-black m-0 p-0;
+  }
+  
+  /* Ensure text is readable in print */
+  p, h1, h2, h3, h4, h5, h6, span {
+    @apply text-black;
+  }
+  
+  /* Reset container width for print */
+  .container {
+    @apply max-w-full;
   }
 }
