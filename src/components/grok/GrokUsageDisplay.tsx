@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info, BarChart, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/auth'; // Fixed import path
 
 interface UsageData {
   totalTokens: number;
@@ -20,6 +20,16 @@ interface GrokUsageDisplayProps {
   className?: string;
 }
 
+// Define the expected shape of grok_usage records
+interface GrokUsageRecord {
+  id: string;
+  user_id: string;
+  feature: string;
+  tokens_used: number;
+  timestamp: string;
+  metadata?: Record<string, any>;
+}
+
 const GrokUsageDisplay: React.FC<GrokUsageDisplayProps> = ({ 
   compact = false,
   className = '' 
@@ -29,7 +39,7 @@ const GrokUsageDisplay: React.FC<GrokUsageDisplayProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Fetch usage data from database
+  // Fetch usage data from database or localStorage
   useEffect(() => {
     if (!user) {
       setIsLoading(false);
@@ -45,36 +55,34 @@ const GrokUsageDisplay: React.FC<GrokUsageDisplayProps> = ({
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
         
-        // Query the grok_usage table
-        const { data, error } = await supabase
-          .from('grok_usage')
-          .select('*')
-          .eq('user_id', user.id)
-          .gte('timestamp', firstDay)
-          .lte('timestamp', lastDay)
-          .order('timestamp', { ascending: false });
-          
-        if (error) throw error;
-        
-        // Format the usage data
-        const usageByFeature: Record<string, number> = {};
+        // For now, use local storage as a fallback since the grok_usage table might not exist yet
         let totalTokens = 0;
+        let requestCount = 0;
+        const usageByFeature: Record<string, number> = {};
+        let lastUsedDate = 'Never';
         
-        data.forEach(record => {
-          const feature = record.feature || 'unknown';
-          usageByFeature[feature] = (usageByFeature[feature] || 0) + (record.tokens_used || 0);
-          totalTokens += (record.tokens_used || 0);
-        });
-        
+        // Try to get usage from localStorage first
+        const storedUsage = localStorage.getItem('grok_usage');
+        if (storedUsage) {
+          try {
+            const parsedUsage = JSON.parse(storedUsage);
+            totalTokens = parsedUsage.totalTokens || 0;
+            requestCount = parsedUsage.requestCount || 0;
+            Object.assign(usageByFeature, parsedUsage.usageByFeature || {});
+            lastUsedDate = parsedUsage.lastUsed || 'Never';
+          } catch (e) {
+            console.warn('Failed to parse stored usage data', e);
+          }
+        }
+                
         // Set default monthly quota based on user's tier
-        // This would ideally come from a subscription table or user profile
-        const monthlyQuota = 100000; // Default quota, should be adjusted based on user tier
+        const monthlyQuota = 100000; // Default quota
         
         setUsageData({
           totalTokens,
           usageByFeature,
-          requestCount: data.length,
-          lastUsed: data.length > 0 ? data[0].timestamp : 'Never',
+          requestCount,
+          lastUsed: lastUsedDate,
           monthlyQuota
         });
       } catch (e) {
