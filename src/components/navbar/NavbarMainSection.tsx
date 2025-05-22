@@ -23,6 +23,9 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
       <div className="hidden md:flex items-center space-x-4">
         <NavbarDesktopItems navLinks={navLinks} />
       </div>
+      <div className="hidden md:flex items-center">
+        <NavbarLinks />
+      </div>
       <div className="md:hidden flex items-center">
         <NavbarLinks />
         <NavbarMobileToggle isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
