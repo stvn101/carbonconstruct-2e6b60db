@@ -13,6 +13,7 @@ export interface ExtendedMaterialData {
   category?: string;
   carbon_footprint_kgco2e_kg?: number;
   carbon_footprint_kgco2e_tonne?: number;
+  description?: string; // Added description field
 }
 
 export enum MATERIAL_TYPES {
@@ -35,3 +36,10 @@ export enum REGIONS {
   ASIA = 'Asia',
   GLOBAL = 'Global'
 }
+
+// Adding these types to fix missing exports in types/index.ts
+export type MaterialsByRegion = Record<string, number>;
+export type MaterialOption = {
+  id: string;
+  name: string;
+};

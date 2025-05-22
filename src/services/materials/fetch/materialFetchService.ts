@@ -1,4 +1,3 @@
-
 /**
  * Material Fetch Service
  * Handles fetching material data from API and database sources
@@ -7,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
 import { cacheMaterials } from '../cache';
+import { adaptSupabaseMaterialToExtended } from '@/hooks/materialCache/utils/typeAdapters';
 
 const DEMO_DELAY = 800; // Simulate network delay in demo mode
 
@@ -222,101 +222,41 @@ export async function fetchSustainabilityData(): Promise<Record<string, {
 function processAndValidateMaterials(materials: any[]): ExtendedMaterialData[] {
   return materials.map(material => {
     // Ensure required fields are present
-    return {
-      ...material,
+    const processedMaterial: ExtendedMaterialData = {
       id: material.id || `material-${Math.random().toString(36).substring(7)}`,
-      name: material.name || 'Unknown Material',
-      factor: material.factor || material.carbon_footprint_kgco2e_kg || 1,
+      name: material.name || material.material || 'Unknown Material',
+      factor: material.factor || material.carbon_footprint_kgco2e_kg || material.co2e_avg || 1,
       unit: material.unit || 'kg',
       region: material.region || 'Australia',
       tags: material.tags || [],
-      sustainabilityScore: material.sustainabilityscore || 
+      sustainabilityScore: material.sustainabilityScore || 
         material.sustainability_score || 
         Math.floor(Math.random() * 40) + 60,
-      recyclability: material.recyclability || 
-        (['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low')
+      recyclability: normalizeRecyclability(material.recyclability),
+      description: material.description || material.notes || material.sustainability_notes || '',
+      category: material.category || guessCategoryFromName(material.name || material.material || 'Unknown Material')
     };
+    
+    return processedMaterial;
   });
 }
 
 /**
- * Generates fallback materials when the database is unavailable
+ * Normalize recyclability to one of the supported values
  */
-function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
-  return new Promise((resolve) => {
-    // Simulate network delay
-    setTimeout(() => {
-      const materials: ExtendedMaterialData[] = [];
-      
-      // Convert MATERIAL_FACTORS to ExtendedMaterialData format
-      Object.entries(MATERIAL_FACTORS).forEach(([key, value]) => {
-        materials.push({
-          id: key,
-          name: value.name || key,
-          factor: value.factor,
-          carbon_footprint_kgco2e_kg: value.factor,
-          unit: value.unit || 'kg',
-          region: 'Australia',
-          tags: ['construction'],
-          sustainabilityScore: Math.floor(Math.random() * 40) + 60,
-          recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low',
-          category: guessCategoryFromName(value.name || key),
-          description: generateDescriptionFromName(value.name || key)
-        });
-      });
-      
-      // Add some alternative materials
-      materials.push(
-        {
-          id: 'alt-concrete-1',
-          name: 'Low-Carbon Concrete',
-          factor: 0.13, // Lower carbon footprint
-          carbon_footprint_kgco2e_kg: 0.13,
-          unit: 'kg',
-          region: 'Australia',
-          tags: ['construction', 'sustainable', 'alternative'],
-          sustainabilityScore: 85,
-          recyclability: 'Medium',
-          alternativeTo: 'concrete',
-          category: 'Structural',
-          description: 'A sustainable alternative to traditional concrete that reduces carbon emissions by using alternative cementitious materials.'
-        },
-        {
-          id: 'alt-steel-1',
-          name: 'Recycled Steel',
-          factor: 0.7, // Lower carbon footprint
-          carbon_footprint_kgco2e_kg: 0.7,
-          unit: 'kg',
-          region: 'Australia',
-          tags: ['construction', 'recycled', 'alternative'],
-          sustainabilityScore: 90,
-          recyclability: 'High',
-          alternativeTo: 'steel',
-          category: 'Structural',
-          description: '100% recycled steel with significantly lower embodied carbon compared to virgin steel production.'
-        },
-        {
-          id: 'alt-insulation-1',
-          name: 'Sheep\'s Wool Insulation',
-          factor: 0.8,
-          carbon_footprint_kgco2e_kg: 0.8,
-          unit: 'kg',
-          region: 'Australia',
-          tags: ['construction', 'natural', 'alternative'],
-          sustainabilityScore: 95,
-          recyclability: 'High',
-          alternativeTo: 'insulation',
-          category: 'Insulation',
-          description: 'Natural insulation material made from sheep\'s wool with excellent thermal and acoustic properties.'
-        }
-      );
-      
-      // Cache the generated materials
-      cacheMaterials(materials).catch(console.error);
-      
-      resolve(materials);
-    }, DEMO_DELAY);
-  });
+function normalizeRecyclability(value?: string): 'High' | 'Medium' | 'Low' {
+  if (!value) return 'Medium';
+  
+  // Check if it's already one of the valid values
+  if (['High', 'Medium', 'Low'].includes(value)) {
+    return value as 'High' | 'Medium' | 'Low';
+  }
+  
+  // Otherwise, normalize string
+  const normalized = value.toLowerCase();
+  if (normalized.includes('high')) return 'High';
+  if (normalized.includes('low')) return 'Low';
+  return 'Medium';
 }
 
 /**
@@ -416,4 +356,84 @@ function generateDescriptionFromName(name: string): string {
   }
   
   return `${name} is a construction material used in building projects.`;
+}
+
+/**
+ * Generates fallback materials when the database is unavailable
+ */
+function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
+  return new Promise((resolve) => {
+    // Simulate network delay
+    setTimeout(() => {
+      const materials: ExtendedMaterialData[] = [];
+      
+      // Convert MATERIAL_FACTORS to ExtendedMaterialData format
+      Object.entries(MATERIAL_FACTORS).forEach(([key, value]) => {
+        materials.push({
+          id: key,
+          name: value.name || key,
+          factor: value.factor,
+          carbon_footprint_kgco2e_kg: value.factor,
+          unit: value.unit || 'kg',
+          region: 'Australia',
+          tags: ['construction'],
+          sustainabilityScore: Math.floor(Math.random() * 40) + 60,
+          recyclability: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] as 'High' | 'Medium' | 'Low',
+          category: guessCategoryFromName(value.name || key),
+          description: generateDescriptionFromName(value.name || key)
+        });
+      });
+      
+      // Add some alternative materials with specific data
+      materials.push(
+        {
+          id: 'alt-concrete-1',
+          name: 'Low-Carbon Concrete',
+          factor: 0.13, // Lower carbon footprint
+          carbon_footprint_kgco2e_kg: 0.13,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'sustainable', 'alternative'],
+          sustainabilityScore: 85,
+          recyclability: 'Medium',
+          alternativeTo: 'concrete',
+          category: 'Structural',
+          description: 'A sustainable alternative to traditional concrete that reduces carbon emissions by using alternative cementitious materials.'
+        },
+        {
+          id: 'alt-steel-1',
+          name: 'Recycled Steel',
+          factor: 0.7, // Lower carbon footprint
+          carbon_footprint_kgco2e_kg: 0.7,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'recycled', 'alternative'],
+          sustainabilityScore: 90,
+          recyclability: 'High',
+          alternativeTo: 'steel',
+          category: 'Structural',
+          description: '100% recycled steel with significantly lower embodied carbon compared to virgin steel production.'
+        },
+        {
+          id: 'alt-insulation-1',
+          name: 'Sheep\'s Wool Insulation',
+          factor: 0.8,
+          carbon_footprint_kgco2e_kg: 0.8,
+          unit: 'kg',
+          region: 'Australia',
+          tags: ['construction', 'natural', 'alternative'],
+          sustainabilityScore: 95,
+          recyclability: 'High',
+          alternativeTo: 'insulation',
+          category: 'Insulation',
+          description: 'Natural insulation material made from sheep\'s wool with excellent thermal and acoustic properties.'
+        }
+      );
+      
+      // Cache the generated materials
+      cacheMaterials(materials).catch(console.error);
+      
+      resolve(materials);
+    }, DEMO_DELAY);
+  });
 }

@@ -1,3 +1,4 @@
+
 /**
  * Material Adapter
  * 
@@ -98,19 +99,19 @@ export function convertFromDatabaseFormat(dbMaterial: any): ExtendedMaterialData
   
   return {
     id: dbMaterial.id,
-    name: dbMaterial.name,
+    name: dbMaterial.name || dbMaterial.material || 'Unknown Material',
     factor: dbMaterial.factor || dbMaterial.carbon_footprint_kgco2e_kg || 1,
     carbon_footprint_kgco2e_kg: dbMaterial.carbon_footprint_kgco2e_kg,
     carbon_footprint_kgco2e_tonne: dbMaterial.carbon_footprint_kgco2e_tonne,
     unit: dbMaterial.unit || 'kg',
     region: dbMaterial.region || 'Global',
     tags: dbMaterial.tags || [],
-    sustainabilityScore: dbMaterial.sustainabilityscore || 50,
+    sustainabilityScore: dbMaterial.sustainabilityscore || dbMaterial.sustainability_score || 50,
     recyclability: recyclability,
     alternativeTo: dbMaterial.alternativeto,
-    notes: dbMaterial.notes,
+    notes: dbMaterial.notes || dbMaterial.sustainability_notes,
     category: dbMaterial.category,
-    description: dbMaterial.notes // Use notes as description since description doesn't exist
+    description: dbMaterial.notes || dbMaterial.description || dbMaterial.sustainability_notes || ''
   };
 }
 

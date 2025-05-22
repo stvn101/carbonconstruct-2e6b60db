@@ -1,7 +1,7 @@
 
 export interface SupabaseMaterial {
-  id: number;
-  material: string;
+  id: number | string;
+  material?: string;
   description?: string;
   co2e_min?: number;
   co2e_max?: number;
@@ -13,6 +13,19 @@ export interface SupabaseMaterial {
   created_at?: string;
   updated_at?: string;
   category_id?: number;
+  // Adding fields that are being used but weren't defined
+  name?: string;
+  factor?: number;
+  unit?: string;
+  region?: string;
+  tags?: string[];
+  sustainabilityScore?: number;
+  recyclability?: string;
+  alternativeTo?: string;
+  notes?: string;
+  category?: string;
+  carbon_footprint_kgco2e_kg?: number;
+  carbon_footprint_kgco2e_tonne?: number;
 }
 
 export interface MaterialWithSustainabilityData {

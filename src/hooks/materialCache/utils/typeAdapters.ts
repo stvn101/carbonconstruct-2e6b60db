@@ -8,19 +8,20 @@ import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
  */
 export function adaptSupabaseMaterialToExtended(material: SupabaseMaterial): ExtendedMaterialData {
   return {
-    id: material.id,
-    name: material.name || '',
-    factor: material.factor || 1.0, // Default factor if not provided
-    unit: material.unit,
-    region: material.region,
-    tags: material.tags,
-    sustainabilityScore: material.sustainabilityScore,
-    recyclability: normalizeRecyclabilityValue(material.recyclability),
-    alternativeTo: material.alternativeTo,
-    notes: material.notes,
-    category: material.category,
-    carbon_footprint_kgco2e_kg: material.carbon_footprint_kgco2e_kg,
-    carbon_footprint_kgco2e_tonne: material.carbon_footprint_kgco2e_tonne
+    id: material.id?.toString() || '',
+    name: material.name || material.material || '',
+    factor: material.factor || material.co2e_avg || 1.0, // Default factor if not provided
+    unit: material.unit || 'kg',
+    region: material.region || 'Global',
+    tags: material.tags || [],
+    sustainabilityScore: material.sustainabilityScore || material.sustainability_score || 50,
+    recyclability: normalizeRecyclabilityValue(material.recyclability || ''),
+    alternativeTo: material.alternativeTo || '',
+    notes: material.notes || material.sustainability_notes || '',
+    category: material.category || '',
+    carbon_footprint_kgco2e_kg: material.carbon_footprint_kgco2e_kg || material.co2e_avg || 0,
+    carbon_footprint_kgco2e_tonne: material.carbon_footprint_kgco2e_tonne || 0,
+    description: material.description || material.notes || material.sustainability_notes || ''
   };
 }
 
