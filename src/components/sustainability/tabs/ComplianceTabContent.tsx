@@ -8,7 +8,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import NCCSection from "../compliance/NCCSection";
 import NABERSSection from "../compliance/NABERSSection";
 import { ComplianceData } from "../compliance/types";
-import { GrokComplianceInsights } from "../compliance/insights";
+import GrokComplianceInsights from "../compliance/insights";
 
 interface ComplianceTabContentProps {
   nccData: ComplianceData;
