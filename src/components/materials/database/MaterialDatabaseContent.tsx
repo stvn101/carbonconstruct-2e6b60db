@@ -54,13 +54,14 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Use our custom hook for advanced search
+  // Use our improved custom hook for advanced search
   const { 
     useAdvancedSearch, 
     advancedFilteredMaterials, 
     toggleAdvancedSearch, 
     handleAdvancedSearch, 
-    resetAdvancedSearch 
+    resetAdvancedSearch,
+    isFiltering 
   } = useAdvancedMaterialSearch({
     materials,
     onResetFilters: resetFilters
@@ -108,6 +109,9 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
   const displayedMaterials = useAdvancedSearch && advancedFilteredMaterials.length > 0
     ? advancedFilteredMaterials
     : filteredMaterials;
+
+  // Determine if the grid should show loading state
+  const isLoading = loading || isRefreshing || isFiltering;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -157,7 +161,7 @@ const MaterialDatabaseContent: React.FC<MaterialDatabaseContentProps> = ({
 
           <MaterialGrid 
             materials={displayedMaterials}
-            loading={loading || isRefreshing}
+            loading={isLoading}
           />
         </>
       )}
