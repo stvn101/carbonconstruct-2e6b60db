@@ -4,11 +4,13 @@
  * Exports all material-related types from a central location
  */
 export * from './unifiedMaterialTypes';
-// Export specific types from materialTypes to avoid duplicate exports
-export type {
-  MaterialsByRegion,
-  MaterialOption
-} from '@/lib/materials/materialTypes';
+
+// Import types from materialTypes
+import { MaterialsByRegion, MaterialOption } from '@/lib/materials/materialTypes';
+
+// Re-export needed types
+export type { MaterialsByRegion, MaterialOption };
+
 export * from '../materialAdapter';
 export * from '../materialTypes';
 
@@ -16,3 +18,4 @@ export * from '../materialTypes';
 export const MATERIAL_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 export const DEFAULT_MATERIAL_FACTOR = 1.0;
 export const DEFAULT_MATERIAL_UNIT = 'kg';
+export const CONNECTION_TIMEOUT = 15000; // 15 seconds timeout for connections

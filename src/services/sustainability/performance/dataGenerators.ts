@@ -1,158 +1,124 @@
 
 /**
- * Data generators for sample/fallback data
+ * Data generation utilities for sustainability performance
  */
-import { SustainabilityTrendData, MaterialRecommendation } from './types';
-import { MaterialInput } from '@/lib/carbonExports';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 
 /**
- * Generates sample trend data for demo purposes or when no real data is available
+ * Generate sustainable material alternatives for a given set of materials
  */
-export function generateSampleTrendData(materialType: string): SustainabilityTrendData {
-  const dataPoints = [];
-  const now = new Date();
-  
-  // Generate data points for the past 30 days
-  for (let i = 30; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    
-    // Generate some realistic looking values with a general improvement trend
-    const baseCarbonFootprint = 100 - (i * 1.5);
-    const randomVariation = (Math.random() * 20) - 10; // -10 to +10
-    
-    dataPoints.push({
-      timestamp: date.toISOString(),
-      carbonFootprint: Math.max(50, baseCarbonFootprint + randomVariation),
-      sustainabilityScore: Math.min(100, 60 + (i * 0.8)),
-      quantity: 1000 - (i * 10)
-    });
-  }
-  
-  return {
-    materialName: materialType,
-    materialId: materialType,
-    dataPoints,
-    improvement: 28.5, // Sample improvement percentage
-    averageFootprint: 75.3, // Sample average
-    projectedFootprint: 42.8 // Sample projection
-  };
-}
-
-/**
- * Finds alternative materials for a given material type
- */
-export async function findAlternativeMaterials(materialType: string): Promise<ExtendedMaterialData[]> {
-  // For demo purposes, generate some alternative materials
+export function generateSustainableAlternatives(
+  materials: ExtendedMaterialData[], 
+  options = { count: 3 }
+): ExtendedMaterialData[] {
+  // Implementation for generating sustainable alternatives
   const alternatives: ExtendedMaterialData[] = [];
   
-  if (materialType.includes('concrete')) {
-    alternatives.push({
-      id: 'alt-concrete-1',
-      name: 'Low-Carbon Concrete',
-      factor: 0.13,
-      carbon_footprint_kgco2e_kg: 0.13,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['sustainable', 'alternative'],
-      sustainabilityScore: 85,
-      recyclability: 'Medium',
-      alternativeTo: 'concrete',
-      category: 'Concrete',
-      description: 'A sustainable alternative to traditional concrete that reduces carbon emissions.'
-    });
-  }
+  // Process each material to find potential alternatives
+  materials.forEach(material => {
+    // Skip materials that are already alternatives
+    if (material.alternativeTo) return;
+    
+    // Generate alternatives for common material types
+    const materialName = material.name?.toLowerCase() || '';
+    const materialCategory = material.category?.toLowerCase() || '';
+    
+    if (materialName.includes('concrete') || materialCategory.includes('concrete')) {
+      // Generate sustainable concrete alternatives
+      alternatives.push(
+        createAlternativeMaterial(
+          'Low-Carbon Concrete',
+          material.id || 'concrete',
+          0.7, // 70% of original carbon footprint
+          'Concrete with supplementary cementitious materials like fly ash or slag',
+          'Concrete',
+          'High'
+        )
+      );
+    } else if (materialName.includes('steel') || materialCategory.includes('steel')) {
+      // Generate sustainable steel alternatives
+      alternatives.push(
+        createAlternativeMaterial(
+          'Recycled Steel',
+          material.id || 'steel',
+          0.5, // 50% of original carbon footprint
+          'Steel made from recycled content, reducing energy requirements and emissions',
+          'Steel',
+          'High'
+        )
+      );
+    }
+  });
   
-  if (materialType.includes('steel')) {
-    alternatives.push({
-      id: 'alt-steel-1',
-      name: 'Recycled Steel',
-      factor: 0.7,
-      carbon_footprint_kgco2e_kg: 0.7,
-      unit: 'kg',
-      region: 'Australia',
-      tags: ['recycled', 'alternative'],
-      sustainabilityScore: 90,
-      recyclability: 'High',
-      alternativeTo: 'steel',
-      category: 'Steel',
-      description: 'Steel produced from recycled materials with lower embodied carbon.'
-    });
-  }
-  
-  return alternatives;
+  // Limit to requested count
+  return alternatives.slice(0, options.count);
 }
 
 /**
- * Generates sample recommendations for demo purposes
+ * Create an alternative material with improved sustainability characteristics
  */
-export function generateSampleRecommendations(materials: MaterialInput[]): MaterialRecommendation[] {
-  if (!materials.length) return [];
-  
-  // Generate sample recommendations for the first 2 materials
-  const recommendations: MaterialRecommendation[] = [];
-  
-  const sampleDetails: Record<string, {
-    alternative: string;
-    reduction: number;
-    details: string;
-  }> = {
-    'concrete': {
-      alternative: 'Low-Carbon Concrete',
-      reduction: 32.5,
-      details: 'Low-carbon concrete reduces emissions by using alternative cementitious materials and optimized mix designs.'
-    },
-    'timber': {
-      alternative: 'FSC-Certified Engineered Timber',
-      reduction: 25.7,
-      details: 'FSC-certified engineered timber products come from sustainably managed forests and have improved structural properties.'
-    },
-    'steel': {
-      alternative: 'Recycled Steel',
-      reduction: 40.2,
-      details: 'Recycled steel reduces carbon emissions by avoiding energy-intensive primary production while maintaining strength.'
-    },
-    'glass': {
-      alternative: 'Low-E Triple-Glazed Glass',
-      reduction: 22.8,
-      details: 'Triple-glazed glass with low-e coatings offers superior insulation performance, reducing energy consumption.'
-    }
+function createAlternativeMaterial(
+  name: string,
+  alternativeTo: string,
+  carbonReductionFactor: number,
+  description: string,
+  category: string,
+  recyclability: 'High' | 'Medium' | 'Low'
+): ExtendedMaterialData {
+  return {
+    id: `alt-${alternativeTo}-${Math.random().toString(36).substring(2, 7)}`,
+    name,
+    factor: carbonReductionFactor,
+    unit: 'kg',
+    region: 'Global',
+    tags: ['sustainable', 'alternative'],
+    sustainabilityScore: 85 + Math.floor(Math.random() * 15), // 85-100
+    recyclability,
+    alternativeTo,
+    category,
+    notes: description,
+    description // Add the description field
   };
+}
+
+/**
+ * Generate performance benchmarks for materials
+ */
+export function generatePerformanceBenchmarks(materials: ExtendedMaterialData[]): Record<string, any> {
+  // Implementation for generating performance benchmarks
+  const benchmarks: Record<string, any> = {};
   
-  // Generate recommendations for up to 3 materials
-  const materialsToProcess = materials.slice(0, 3);
+  // Group materials by category
+  const categorizedMaterials: Record<string, ExtendedMaterialData[]> = {};
   
-  materialsToProcess.forEach(material => {
-    const materialLower = material.type.toLowerCase();
-    let recommendationInfo = null;
-    
-    // Find matching sample data
-    for (const [key, info] of Object.entries(sampleDetails)) {
-      if (materialLower.includes(key)) {
-        recommendationInfo = info;
-        break;
-      }
+  materials.forEach(material => {
+    const category = material.category || 'Other';
+    if (!categorizedMaterials[category]) {
+      categorizedMaterials[category] = [];
     }
-    
-    // If no match found, create generic recommendation
-    if (!recommendationInfo) {
-      recommendationInfo = {
-        alternative: `Eco-Friendly ${material.type}`,
-        reduction: 15 + Math.round(Math.random() * 20),
-        details: `This sustainable alternative to ${material.type} reduces carbon footprint while maintaining performance.`
-      };
-    }
-    
-    recommendations.push({
-      originalMaterial: material.type,
-      recommendedMaterial: recommendationInfo.alternative,
-      potentialReduction: recommendationInfo.reduction,
-      costImpact: Math.random() > 0.5 ? 'similar' : 'higher',
-      availability: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
-      details: recommendationInfo.details
-    });
+    categorizedMaterials[category].push(material);
   });
   
-  return recommendations;
+  // Calculate benchmarks for each category
+  Object.entries(categorizedMaterials).forEach(([category, materialsList]) => {
+    // Calculate average carbon footprint
+    const totalCarbonFootprint = materialsList.reduce((sum, mat) => 
+      sum + (mat.carbon_footprint_kgco2e_kg || mat.factor || 0), 0);
+    const averageCarbonFootprint = totalCarbonFootprint / materialsList.length;
+    
+    // Calculate average sustainability score
+    const totalSustainabilityScore = materialsList.reduce((sum, mat) => 
+      sum + (mat.sustainabilityScore || 0), 0);
+    const averageSustainabilityScore = totalSustainabilityScore / materialsList.length;
+    
+    // Store benchmarks
+    benchmarks[category] = {
+      averageCarbonFootprint,
+      averageSustainabilityScore,
+      sampleSize: materialsList.length,
+      description: `Performance benchmark for ${category} based on ${materialsList.length} samples`
+    };
+  });
+  
+  return benchmarks;
 }

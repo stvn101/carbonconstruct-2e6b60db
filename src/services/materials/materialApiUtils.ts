@@ -1,116 +1,76 @@
 
 /**
- * Utility functions for material API operations
+ * Material API Utils
+ * Utility functions for handling API calls related to materials
  */
-import { supabase } from '@/integrations/supabase/client';
-import { isOffline } from '@/utils/errorHandling';
-import { toast } from 'sonner';
-import { retryWithBackoff } from '@/utils/errorHandling/retryUtils';
 import { SupabaseMaterial } from './materialTypes';
-import { CONNECTION_TIMEOUT } from './materialTypes';
+import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
+import { supabase } from '@/integrations/supabase/client';
+import { adaptSupabaseMaterialToExtended } from '@/hooks/materialCache/utils/typeAdapters';
+import { CONNECTION_TIMEOUT } from './types';
 
 /**
- * Fetch materials from the Supabase API with retry capability
+ * Fetch materials with timeout protection
  */
-export async function fetchMaterialsFromApi(): Promise<SupabaseMaterial[]> {
-  if (isOffline()) {
-    console.log('Offline mode detected, skipping API request');
-    throw new Error('Network offline');
-  }
-  
+export async function fetchMaterialsWithTimeout(): Promise<ExtendedMaterialData[]> {
   try {
-    console.log('Fetching materials from API');
-    const { data, error } = await retryWithBackoff(
-      async () => supabase.from('materials_view').select('*').order('name'),
-      2,
-      2000,
-      {
-        onRetry: (attempt) => {
-          console.log(`Retry attempt ${attempt} for materials fetch`);
-        },
-        shouldRetry: (err) => !isOffline(),
-        maxDelay: CONNECTION_TIMEOUT
-      }
-    );
-    
-    if (error) {
-      console.error('Supabase error:', error);
-      throw error;
-    }
-    
-    if (!data || data.length === 0) {
-      console.log('No materials returned from API');
-      throw new Error('No materials found');
-    }
-    
-    // Type assertion to ensure it matches our expected type
-    return data as SupabaseMaterial[];
-  } catch (err) {
-    console.error('Error fetching materials from API:', err);
-    throw err;
-  }
-}
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Connection timeout')), CONNECTION_TIMEOUT);
+    });
 
-/**
- * Fetch material categories from Supabase
- */
-export async function fetchCategoriesFromApi(): Promise<string[]> {
-  if (isOffline()) {
-    console.log('Offline, skipping categories API request');
-    throw new Error('Network offline');
-  }
-  
-  try {
-    console.log('Fetching categories from API');
-    // Using the RPC function we created
-    const { data, error } = await retryWithBackoff(
-      async () => supabase.rpc('get_material_categories'),
-      2,
-      2000
-    );
+    const fetchPromise = fetchMaterialsFromView();
     
-    if (error) {
-      console.error('Error fetching categories:', error);
-      throw error;
-    }
-    
-    // Extract categories safely
-    if (data && Array.isArray(data)) {
-      const categories = data.map(item => item?.category).filter(Boolean);
-      console.log('Categories fetched:', categories);
-      return categories;
-    }
-    
-    console.log('No categories found');
-    throw new Error('No categories found');
+    // Race between fetch and timeout
+    const materials = await Promise.race([fetchPromise, timeoutPromise]) as ExtendedMaterialData[];
+    return materials;
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    console.error('Error fetching materials with timeout:', error);
     throw error;
   }
 }
 
 /**
- * Display appropriate toast messages based on error type
+ * Fetch materials from the materials_view
  */
-export function handleMaterialApiError(error: unknown, context: string): void {
-  if (isOffline()) {
-    toast.info("You're offline. Using fallback material data.", {
-      id: "offline-materials",
-      duration: 3000
+export async function fetchMaterialsFromView(): Promise<ExtendedMaterialData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('materials_view')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching from materials_view:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('No materials found in materials_view');
+      return [];
+    }
+
+    // Convert the data to the expected format
+    const materials = data.map(item => {
+      // Adapt each item to our ExtendedMaterialData format
+      return adaptSupabaseMaterialToExtended({
+        id: item.id,
+        material: item.name || '',
+        co2e_avg: item.carbon_footprint_kgco2e_kg || 0,
+        sustainability_score: item.sustainabilityscore || 0,
+        sustainability_notes: item.notes || '',
+        // Add additional fields as needed
+        name: item.name || '',
+        factor: item.factor || 0,
+        unit: item.unit || '',
+        region: item.region || '',
+        tags: item.tags || [],
+        recyclability: item.recyclability || '',
+        category: item.category || ''
+      });
     });
-    return;
+
+    return materials;
+  } catch (error) {
+    console.error('Error in fetchMaterialsFromView:', error);
+    throw error;
   }
-  
-  if (error instanceof Error && error.message === 'No materials found') {
-    toast.warning("No materials found in database. Using default materials.", {
-      id: "no-materials",
-      duration: 3000
-    });
-    return;
-  }
-  
-  toast.error(`Failed to ${context}. Using fallback data.`, {
-    id: "materials-error",
-    duration: 3000
-  });
 }
