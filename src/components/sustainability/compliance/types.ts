@@ -1,25 +1,19 @@
 
-import { ComplianceData } from "../types";
-
 export interface ComplianceStatusProps {
-  nccData: ComplianceData | null;
-  nabersData: ComplianceData | null;
+  nccData: {
+    compliant: boolean;
+    score: number;
+    details?: any;
+    error?: string;
+    grokAnalysis?: string;
+  } | null;
+  nabersData: {
+    compliant: boolean;
+    score: number;
+    details?: any;
+    error?: string;
+  } | null;
   onRunCheck?: () => void;
   isLoading?: boolean;
   className?: string;
-}
-
-export interface ComplianceDetailProps {
-  details: Record<string, any> | null | undefined;
-}
-
-export interface ComplianceTipProps {
-  children: React.ReactNode;
-}
-
-export interface ComplianceSectionProps {
-  title: string;
-  compliant: boolean;
-  badgeText: string;
-  children: React.ReactNode;
 }

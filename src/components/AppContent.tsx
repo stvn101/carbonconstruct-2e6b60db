@@ -12,10 +12,12 @@ import HomePage from '../pages/Home';
 import AboutPage from '../pages/About';
 import CalculatorPage from '../pages/Calculator';
 import MaterialDatabasePage from '../pages/MaterialDatabase';
+import GrokAIAssistant from '../pages/GrokAIAssistant';
 import { authRoutes } from '../routes/authRoutes';
 import { marketingRoutes } from '../routes/marketingRoutes';
 import { projectRoutes } from '../routes/projectRoutes';
 import { protectedRoutes } from '../routes/protectedRoutes';
+import { CalculatorProvider } from '../contexts/CalculatorContext';
 
 export const AppContent: React.FC = () => {
   // Apply app-wide accessibility improvements
@@ -30,37 +32,40 @@ export const AppContent: React.FC = () => {
   }, []);
   
   return (
-    <div className="flex flex-col min-h-screen">
-      <SkipToContent />
-      <RouteChangeTracker />
-      <ErrorBoundaryWrapper 
-        feature="Application Routes"
-        onReset={() => {
-          // Force page reload on critical error
-          window.location.reload();
-        }}
-      >
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/calculator" element={<CalculatorPage />} />
-          <Route path="/materials" element={<MaterialDatabasePage />} />
-          
-          {/* Auth routes */}
-          {authRoutes}
+    <CalculatorProvider>
+      <div className="flex flex-col min-h-screen">
+        <SkipToContent />
+        <RouteChangeTracker />
+        <ErrorBoundaryWrapper 
+          feature="Application Routes"
+          onReset={() => {
+            // Force page reload on critical error
+            window.location.reload();
+          }}
+        >
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/calculator" element={<CalculatorPage />} />
+            <Route path="/materials" element={<MaterialDatabasePage />} />
+            <Route path="/grok-ai" element={<GrokAIAssistant />} />
+            
+            {/* Auth routes */}
+            {authRoutes}
 
-          {/* Marketing routes */}
-          {marketingRoutes}
+            {/* Marketing routes */}
+            {marketingRoutes}
 
-          {/* Protected routes */}
-          {protectedRoutes}
+            {/* Protected routes */}
+            {protectedRoutes}
 
-          {/* Project routes */}
-          {projectRoutes}
+            {/* Project routes */}
+            {projectRoutes}
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </ErrorBoundaryWrapper>
-    </div>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ErrorBoundaryWrapper>
+      </div>
+    </CalculatorProvider>
   );
 };

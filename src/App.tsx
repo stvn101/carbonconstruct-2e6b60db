@@ -1,72 +1,47 @@
 
-import { Route, Routes } from "react-router-dom";
-import HomePage from "./pages/Home";
-import AboutPage from "./pages/About";
-import CalculatorPage from "./pages/Calculator";
-import MaterialDatabasePage from "./pages/MaterialDatabase";
-import GrokAIPage from "./pages/GrokAI";
-import { Helmet } from "react-helmet-async";
-import { ColorModeProvider } from "./contexts/ColorMode";
-import { RegionProvider } from "./contexts/RegionContext";
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "./components/ui/sonner";
-import { useEffect } from "react";
-import { fetchMaterials } from "./services/materialService";
-import { refreshMaterialFactors } from "./lib/carbonFactors";
-import { AuthProvider } from "./contexts/auth/AuthProvider";
-import { ProjectProvider } from "./contexts/ProjectContext";
+import { ErrorBoundary } from "react-error-boundary";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { AppContent } from "./components/AppContent";
+import { AuthProvider } from "./contexts/auth";
+import { Toaster } from "./components/ui/sonner";
+import { LoggingProvider } from "./contexts/logging";
+
+import "./App.css";
 
 // Create a client for React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes
       retry: 1,
+      refetchOnWindowFocus: false,
     },
   },
 });
 
 function App() {
-  // Initialize material factors from database
-  useEffect(() => {
-    console.log("App: Loading materials from database for factors");
-    fetchMaterials(false)
-      .then(materials => {
-        // Convert format for refreshMaterialFactors
-        if (materials && materials.length > 0) {
-          const dbMaterials = materials.map(mat => ({
-            id: mat.id ? Number(mat.id) : 0,
-            material: mat.name,
-            co2e_avg: mat.factor || mat.carbon_footprint_kgco2e_kg
-          }));
-          
-          refreshMaterialFactors(dbMaterials);
-        }
-      })
-      .catch(error => {
-        console.error("Failed to load materials for factors:", error);
-      });
-  }, []);
-
   return (
-    <>
-      <Helmet>
-        <meta name="theme-color" content="#006064" />
-      </Helmet>
-      <QueryClientProvider client={queryClient}>
-        <ColorModeProvider>
-          <RegionProvider>
-            <AuthProvider>
-              <ProjectProvider>
-                <AppContent />
-                <Toaster position="top-center" />
-              </ProjectProvider>
-            </AuthProvider>
-          </RegionProvider>
-        </ColorModeProvider>
-      </QueryClientProvider>
-    </>
+    <HelmetProvider>
+      <ThemeProvider>
+        <ErrorBoundary fallback={<div>Something went wrong. Please refresh the page.</div>}>
+          <BrowserRouter>
+            <QueryClientProvider client={queryClient}>
+              <LoggingProvider>
+                <AuthProvider>
+                  <AppContent />
+                  <Toaster position="top-right" richColors closeButton />
+                </AuthProvider>
+              </LoggingProvider>
+            </QueryClientProvider>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

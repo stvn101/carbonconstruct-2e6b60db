@@ -1,26 +1,24 @@
 
 import React from "react";
+import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ShieldX } from "lucide-react";
 
 interface EmptyStateProps {
   onRunCheck: () => void;
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ onRunCheck, isLoading }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ onRunCheck, isLoading = false }) => {
   return (
-    <div className="text-center py-4">
-      <ShieldX className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-      <h3 className="font-medium mb-1">No Compliance Data</h3>
-      <p className="text-muted-foreground mb-4">
-        Run a compliance check to analyze your project against NCC 2025 and NABERS standards.
+    <div className="flex flex-col items-center justify-center py-6 text-center">
+      <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+        <Shield className="h-6 w-6 text-carbon-600 dark:text-carbon-400" />
+      </div>
+      <h3 className="text-lg font-medium mb-2">No compliance data available</h3>
+      <p className="text-sm text-muted-foreground mb-4 max-w-md">
+        Run a compliance check to verify if your project meets the NCC 2025 and NABERS requirements
       </p>
-      <Button 
-        onClick={onRunCheck} 
-        disabled={isLoading || !onRunCheck}
-        className="bg-carbon-600 hover:bg-carbon-700 text-white"
-      >
+      <Button onClick={onRunCheck} disabled={isLoading}>
         {isLoading ? 'Checking...' : 'Run Compliance Check'}
       </Button>
     </div>

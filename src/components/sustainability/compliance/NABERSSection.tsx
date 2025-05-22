@@ -1,85 +1,114 @@
 
 import React from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle, XCircle, Star, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Shield, AlertTriangle, Info } from "lucide-react";
-import ComplianceDetails from "./ComplianceDetails";
-import ComplianceTip from "./ComplianceTip";
-import ComplianceSection from "./ComplianceSection";
-import { ComplianceData } from "../types";
 
 interface NABERSSectionProps {
-  nabersData: ComplianceData | null;
+  nabersData: {
+    compliant: boolean;
+    score: number;
+    details?: any;
+    error?: string;
+  } | null;
 }
 
 const NABERSSection: React.FC<NABERSSectionProps> = ({ nabersData }) => {
-  const hasNabersData = nabersData && !nabersData.error;
+  if (!nabersData) return null;
   
-  const getBadgeColor = (rating?: number) => {
-    if (!rating) return "";
-    return rating >= 5 ? "bg-green-500" : 
-           rating >= 4 ? "bg-green-400" :
-           rating >= 3 ? "bg-yellow-500" :
-           "bg-red-500";
-  };
-
-  const getNabersContent = () => {
-    if (!hasNabersData) return null;
-    
+  if (nabersData.error) {
     return (
-      <div>
-        <Alert 
-          variant={nabersData.rating && nabersData.rating >= 4 ? "default" : "warning"} 
-          className={nabersData.rating && nabersData.rating >= 4 ? "bg-green-50 text-green-800 border-green-200" : ""}
-        >
-          {nabersData.rating && nabersData.rating >= 4 ? (
-            <Shield className="h-4 w-4 text-green-600" />
-          ) : (
-            <AlertTriangle className="h-4 w-4" />
-          )}
-          <AlertTitle>NABERS {nabersData.rating} Star Rating</AlertTitle>
-          <AlertDescription className={nabersData.rating && nabersData.rating >= 4 ? "text-green-700" : ""}>
-            {nabersData.rating && nabersData.rating >= 4 
-              ? `Excellent! Your project achieves a ${nabersData.rating} star NABERS rating.`
-              : `Your project currently achieves a ${nabersData.rating} star NABERS rating. Consider improvements to achieve 5 stars.`
-            }
-            <ComplianceDetails details={nabersData.details} />
-          </AlertDescription>
-        </Alert>
-        
-        <ComplianceTip>
-          {nabersData.rating && nabersData.rating < 5 
-            ? "Consider integrating renewable energy sources to improve your NABERS rating. The 2025 criteria emphasize on-site renewable generation."
-            : "Maintain your excellent NABERS rating by regularly monitoring energy usage and continuing sustainable practices."
-          }
-        </ComplianceTip>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-medium">NABERS</h3>
+          <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Error
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">{nabersData.error}</p>
       </div>
     );
-  };
+  }
   
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="font-medium">NABERS Rating</h3>
-        {hasNabersData ? (
-          <Badge className={getBadgeColor(nabersData.rating)}>
-            {nabersData.rating} Stars
-          </Badge>
-        ) : (
-          <Badge variant="outline">No Data</Badge>
-        )}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-medium">NABERS Rating</h3>
+        <div className="flex items-center">
+          {nabersData.compliant ? (
+            <Badge className="bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Compliant
+            </Badge>
+          ) : (
+            <Badge className="bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800">
+              <XCircle className="h-3 w-3 mr-1" />
+              Non-Compliant
+            </Badge>
+          )}
+        </div>
       </div>
       
-      {hasNabersData ? (
-        getNabersContent()
-      ) : (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            No NABERS rating data available.
-          </AlertDescription>
-        </Alert>
-      )}
+      <div className="p-3 border rounded-md">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center">
+            <span className="text-sm font-medium mr-2">Star Rating:</span>
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`h-5 w-5 ${
+                    i < nabersData.score 
+                      ? "text-amber-400 fill-amber-400" 
+                      : "text-gray-300 dark:text-gray-600"
+                  }`} 
+                />
+              ))}
+            </div>
+          </div>
+          <span className="text-sm font-medium">{nabersData.score}-Star</span>
+        </div>
+        
+        {nabersData.details && (
+          <div className="mt-3 pt-3 border-t text-xs">
+            <div className="text-xs text-muted-foreground mb-2">
+              {nabersData.compliant 
+                ? "Your project meets the NABERS 4-star minimum requirement"
+                : "Your project needs to achieve at least a 4-star rating to be compliant"}
+            </div>
+            
+            {nabersData.details.requirements && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Current requirements */}
+                {nabersData.details.requirements.current && 
+                 nabersData.details.requirements.current.length > 0 && (
+                  <div>
+                    <h5 className="font-medium mb-1">Met Requirements</h5>
+                    <ul className="space-y-1 pl-5">
+                      {nabersData.details.requirements.current.map((req: string, idx: number) => (
+                        <li key={idx} className="list-disc">{req}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Missing requirements */}
+                {nabersData.details.requirements.missing && 
+                 nabersData.details.requirements.missing.length > 0 && (
+                  <div>
+                    <h5 className="font-medium mb-1">Missing Requirements</h5>
+                    <ul className="space-y-1 pl-5">
+                      {nabersData.details.requirements.missing.map((req: string, idx: number) => (
+                        <li key={idx} className="list-disc">{req}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
