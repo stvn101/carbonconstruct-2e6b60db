@@ -13,7 +13,22 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const RegionSelector = () => {
-  const { selectedRegion, setSelectedRegion, regions } = useRegion();
+  // Get region context or use defaults if not available
+  let selectedRegion = "Australia";
+  let regions = ["Australia"];
+  let setSelectedRegion = (value: string) => {
+    console.log("Region selection is fixed to Australia");
+  };
+
+  try {
+    const regionContext = useRegion();
+    selectedRegion = regionContext.selectedRegion;
+    regions = regionContext.regions;
+    setSelectedRegion = regionContext.setSelectedRegion;
+  } catch (error) {
+    console.log("RegionContext not available, using default values");
+  }
+  
   const isMobile = useIsMobile();
   
   return (
