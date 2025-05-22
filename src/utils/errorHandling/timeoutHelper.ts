@@ -1,92 +1,111 @@
-/**
- * Creates a timeout promise that rejects after specified milliseconds
- */
-export const timeoutPromise = (ms: number): Promise<never> => {
-  return new Promise((_, reject) => {
-    setTimeout(() => reject(new Error(`Operation timed out after ${ms}ms`)), ms);
-  });
-};
 
 /**
- * Execute a promise with timeout
+ * Timeout and retry utilities for promise-based operations
  */
-export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
-  return Promise.race([
-    promise,
-    timeoutPromise(ms)
-  ]);
-};
 
 /**
- * Helper to identify if an error is network-related
+ * Check if an error is a timeout or network related error
  */
-export const isNetworkError = (error: unknown): boolean => {
+export function isNetworkError(error: unknown): boolean {
   if (!error) return false;
-  
-  const errorString = String(error);
+
+  const errorString = String(error).toLowerCase();
   return (
-    errorString.includes('Failed to fetch') ||
-    errorString.includes('Network Error') ||
-    errorString.includes('NetworkError') ||
     errorString.includes('timeout') ||
-    errorString.includes('ETIMEDOUT') ||
-    errorString.includes('ECONNREFUSED') ||
-    errorString.includes('ECONNRESET') ||
-    errorString.includes('EAI_AGAIN') ||
-    errorString.includes('network')
+    errorString.includes('network') ||
+    errorString.includes('failed to fetch') ||
+    errorString.includes('aborted')
   );
-};
+}
 
 /**
- * More conservative retry utility with exponential backoff and jitter
+ * Creates a promise that rejects after a specified timeout
  */
-export const retryWithBackoff = async <T>(
-  operation: () => Promise<T>,
-  maxRetries: number = 2,
-  initialDelay: number = 4000,
-  options: {
-    onRetry?: (attempt: number) => void;
-    shouldRetry?: (error: unknown) => boolean;
-    maxDelay?: number;
-    factor?: number;
-  } = {}
-): Promise<T> => {
-  const { 
-    onRetry, 
-    shouldRetry = isNetworkError,
-    maxDelay = 60000,
-    factor = 1.5
-  } = options;
+export function timeoutPromise<T = void>(ms: number, message: string = 'Operation timed out'): Promise<T> {
+  return new Promise<T>((_, reject) => {
+    const id = setTimeout(() => {
+      reject(new Error(message));
+    }, ms);
+    
+    // Ensure timeout is cleared if the promise instance is explicitly garbage collected
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', () => clearTimeout(id));
+    }
+  });
+}
+
+/**
+ * Wraps a promise with a timeout
+ */
+export async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  try {
+    // Use Promise.race to compete between the actual promise and a timeout
+    const result = await Promise.race([
+      promise,
+      timeoutPromise<T>(ms, `Operation timed out after ${ms}ms`)
+    ]);
+    
+    // Return original promise resolution
+    return result;
+    
+  } catch (error) {
+    // Enhance error message for debugging
+    if (String(error).includes('timed out')) {
+      throw new Error(`Network request timed out after ${ms}ms`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Retry a promise with exponential backoff
+ */
+export async function retryWithBackoff<T>(
+  promiseFn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelayMs: number = 1000,
+  onRetry?: (attempt: number, delay: number) => void
+): Promise<T> {
+  let lastError: unknown;
   
-  let attempt = 0;
-  
-  while (true) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await operation();
-    } catch (error) {
-      attempt++;
+      // First attempt immediately, then use backoff for retries
+      if (attempt > 0) {
+        // Calculate delay with exponential backoff and some randomization
+        const delay = Math.min(
+          baseDelayMs * Math.pow(2, attempt - 1) * (0.75 + Math.random() * 0.5),
+          30000 // Cap at 30 seconds
+        );
+        
+        // Notify about retry if callback provided
+        if (onRetry) {
+          onRetry(attempt, delay);
+        }
+        
+        // Wait before next retry
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
       
-      if (attempt >= maxRetries || !shouldRetry(error)) {
+      // Try the operation
+      return await promiseFn();
+      
+    } catch (error) {
+      // Store the error for potential re-throw
+      lastError = error;
+      
+      // Only retry network errors, rethrow others immediately
+      if (!isNetworkError(error)) {
         throw error;
       }
       
-      const baseDelay = Math.min(
-        initialDelay * Math.pow(factor, attempt - 1),
-        maxDelay
-      );
-      
-      const jitterFactor = 0.25 * (Math.random() * 2 - 1);
-      const delay = Math.floor(baseDelay * (1 + jitterFactor));
-      
-      if (onRetry) {
-        onRetry(attempt);
+      // If this was the last attempt, throw the error
+      if (attempt === maxRetries) {
+        throw new Error(`Operation failed after ${maxRetries} retries: ${error instanceof Error ? error.message : String(error)}`);
       }
-      
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        throw new Error('Network offline');
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
-};
+  
+  // This should never be reached due to throw in the loop
+  throw lastError || new Error('Unknown retry error');
+}

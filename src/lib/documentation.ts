@@ -164,7 +164,7 @@
  * import { useIsMobile } from "@/hooks/use-mobile";
  * 
  * const ResponsiveComponent = () => {
- *   const isMobile = useIsMobile();
+ *   const { isMobile } = useIsMobile();
  *   
  *   return (
  *     <div>
@@ -229,3 +229,127 @@
  *   );
  * };
  */
+
+/**
+ * @name GrokIntegration
+ * @description Documentation for Grok AI Assistant integration within CarbonConstruct.
+ * 
+ * @overview
+ * The Grok AI integration provides intelligent assistance for construction sustainability
+ * through natural language interaction, compliance analysis, and material recommendations.
+ * It operates in both online and offline modes with robust error handling.
+ * 
+ * @components
+ * - GrokChat: Main chat interface component
+ * - GrokChatContainer: Container that manages chat display and input
+ * - GrokComplianceInsights: AI-powered compliance analysis
+ * 
+ * @hooks
+ * - useGrok: Central hook for Grok AI functionality
+ * - useGrokUsage: Tracks Grok usage for quota management
+ * - useSimpleOfflineMode: Manages offline state detection
+ * 
+ * @errorHandling
+ * The integration includes comprehensive error handling with:
+ * - Network error detection and recovery
+ * - Rate limit management
+ * - Timeout handling with automatic retries
+ * - Graceful degradation in offline mode
+ * 
+ * @example
+ * // Using the GrokChat component
+ * import GrokChat from "@/components/grok/GrokChat";
+ * 
+ * const MyComponent = () => {
+ *   return (
+ *     <GrokProvider>
+ *       <GrokChat
+ *         placeholder="Ask about sustainability..."
+ *         title="Construction Assistant"
+ *       />
+ *     </GrokProvider>
+ *   );
+ * };
+ * 
+ * @offlineSupport
+ * The Grok integration supports offline mode with:
+ * - Clear UI indicators for offline state
+ * - Cached data access where possible
+ * - Automatic reconnection attempts
+ * - Session persistence across connectivity changes
+ */
+
+/**
+ * @name useSimpleOfflineMode
+ * @description Hook for detecting and managing offline status with network recovery.
+ * 
+ * @example
+ * import { useSimpleOfflineMode } from "@/hooks/useSimpleOfflineMode";
+ * 
+ * const OfflineAwareComponent = () => {
+ *   const { isOffline, checkConnection } = useSimpleOfflineMode();
+ *   
+ *   return (
+ *     <div>
+ *       {isOffline ? (
+ *         <div>
+ *           <p>You are currently offline</p>
+ *           <button onClick={checkConnection}>
+ *             Check Connection
+ *           </button>
+ *         </div>
+ *       ) : (
+ *         <OnlineContent />
+ *       )}
+ *     </div>
+ *   );
+ * };
+ * 
+ * @returns {Object} Object containing:
+ * - isOffline: Boolean indicating if the app is offline
+ * - checkConnection: Function to manually check connection status
+ * - setOfflineStatus: Function to manually set offline status
+ */
+
+/**
+ * @name NetworkErrorHandling
+ * @description Documentation for the network error handling system in CarbonConstruct.
+ * 
+ * @overview
+ * The application includes a comprehensive system for handling network errors
+ * across all API interactions, with special focus on Grok AI communication.
+ * 
+ * @components
+ * - isNetworkError: Detects if an error is network-related
+ * - withNetworkErrorHandling: HOF for wrapping promises with error handling
+ * - withGrokErrorHandling: Specialized for Grok API error handling
+ * 
+ * @retryMechanisms
+ * - Automatic retry with exponential backoff
+ * - Connection recovery attempts
+ * - Graceful degradation to offline mode
+ * 
+ * @userFeedback
+ * - Toast notifications for connection status
+ * - In-UI indicators for offline state
+ * - Clear error messages with recovery options
+ * 
+ * @example
+ * // Using network error handling
+ * import { withNetworkErrorHandling } from "@/utils/errorHandling";
+ * 
+ * const fetchWithErrorHandling = async () => {
+ *   try {
+ *     const data = await withNetworkErrorHandling(
+ *       fetch('https://api.example.com/data'),
+ *       5000, // timeout in ms
+ *       2     // max retries
+ *     );
+ *     return data;
+ *   } catch (error) {
+ *     // Handle unrecoverable errors
+ *     console.error("Failed after retries:", error);
+ *   }
+ * };
+ */
+
