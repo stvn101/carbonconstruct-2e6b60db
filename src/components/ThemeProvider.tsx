@@ -42,11 +42,11 @@ export function ThemeProvider({
         : "light";
       root.classList.add(systemTheme);
       
-      // Apply dark mode to body when using system preference
+      // Apply consistent dark mode styles to body when using system preference
       if (systemTheme === "dark") {
         document.body.classList.add("dark-mode-body");
         document.body.style.backgroundColor = "hsl(220, 14%, 10%)";
-        document.body.style.color = "hsl(123, 30%, 92%)";
+        document.body.style.color = "hsl(0, 0%, 98%)";
       } else {
         document.body.classList.remove("dark-mode-body");
         document.body.style.backgroundColor = "";
@@ -57,11 +57,12 @@ export function ThemeProvider({
 
     root.classList.add(theme);
 
-    // Apply consistent dark mode styling to body
+    // Apply consistent color styles to body
     if (theme === "dark") {
       document.body.classList.add("dark-mode-body");
-      document.body.style.backgroundColor = "hsl(220, 14%, 10%)";
-      document.body.style.color = "hsl(123, 30%, 92%)";
+      // Use our theme colors for background and text
+      document.body.style.backgroundColor = "hsl(210, 11%, 15%)"; // #212529
+      document.body.style.color = "hsl(210, 17%, 98%)"; // #F8F9FA
     } else {
       document.body.classList.remove("dark-mode-body");
       document.body.style.backgroundColor = "";
@@ -80,8 +81,9 @@ export function ThemeProvider({
           root.classList.remove("light");
           root.classList.add("dark");
           document.body.classList.add("dark-mode-body");
-          document.body.style.backgroundColor = "hsl(220, 14%, 10%)";
-          document.body.style.color = "hsl(123, 30%, 92%)";
+          // Use our theme colors for background and text
+          document.body.style.backgroundColor = "hsl(210, 11%, 15%)"; // #212529
+          document.body.style.color = "hsl(210, 17%, 98%)"; // #F8F9FA
         } else {
           root.classList.remove("dark");
           root.classList.add("light");
