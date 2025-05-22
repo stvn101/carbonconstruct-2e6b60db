@@ -13,7 +13,16 @@ const MaterialDatabaseContainer: React.FC = () => {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedAlternative, setSelectedAlternative] = React.useState<string>("none");
   const [selectedTag, setSelectedTag] = React.useState<string>("all");
-  const { selectedRegion } = useRegion();
+  
+  // Get region context safely - default to Australia if not available
+  let region = "Australia"; // Default value
+  try {
+    const { selectedRegion } = useRegion();
+    region = selectedRegion;
+  } catch (error) {
+    console.log("RegionContext not available, using default region: Australia");
+  }
+  
   const [loadAttempts, setLoadAttempts] = React.useState(0);
   
   // Use the material cache hook for efficient data loading
@@ -63,7 +72,7 @@ const MaterialDatabaseContainer: React.FC = () => {
     allRegions
   } = useMaterialData({
     searchTerm,
-    selectedRegion: "Australia", // Always Australia
+    selectedRegion: "Australia", // Always use Australia regardless of context
     selectedAlternative,
     selectedTag,
     materials

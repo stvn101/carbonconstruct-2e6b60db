@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/auth/AuthProvider';
 import { CalculatorProvider } from '@/contexts/calculator';
 import { ProjectProvider } from '@/contexts/ProjectContext';
+import { RegionProvider } from '@/contexts/RegionContext';
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -12,7 +13,9 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
       <AuthProvider>
         <CalculatorProvider>
           <ProjectProvider>
-            {children}
+            <RegionProvider>
+              {children}
+            </RegionProvider>
           </ProjectProvider>
         </CalculatorProvider>
       </AuthProvider>

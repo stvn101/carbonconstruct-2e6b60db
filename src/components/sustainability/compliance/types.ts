@@ -64,7 +64,6 @@ export interface NABERSSectionProps {
 
 // Material analysis result from sustainability calculations
 export interface MaterialAnalysisResult {
-  // We need to ensure this interface has all required properties
   materialScores?: Record<string, number>;
   impactSummary?: string;
   highImpactMaterials?: { id: string; name: string; carbonFootprint: number; quantity?: number; }[];

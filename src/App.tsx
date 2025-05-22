@@ -9,6 +9,7 @@ import { AppContent } from "./components/AppContent";
 import { AuthProvider } from "./contexts/auth";
 import { Toaster } from "./components/ui/sonner";
 import { LoggingProvider } from "./contexts/logging";
+import { RegionProvider } from "./contexts/RegionContext";
 
 import "./App.css";
 
@@ -33,8 +34,10 @@ function App() {
             <QueryClientProvider client={queryClient}>
               <LoggingProvider>
                 <AuthProvider>
-                  <AppContent />
-                  <Toaster position="top-right" richColors closeButton />
+                  <RegionProvider>
+                    <AppContent />
+                    <Toaster position="top-right" richColors closeButton />
+                  </RegionProvider>
                 </AuthProvider>
               </LoggingProvider>
             </QueryClientProvider>
