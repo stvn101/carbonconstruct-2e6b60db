@@ -1,6 +1,6 @@
 
 import { MaterialInput, CalculationInput, CalculationResult } from "@/lib/carbonExports";
-import { MaterialAnalysisResult } from "@/lib/materialCategories";
+import { MaterialAnalysisResult } from "@/components/sustainability/compliance/types";
 
 export interface ComplianceData {
   compliant: boolean;

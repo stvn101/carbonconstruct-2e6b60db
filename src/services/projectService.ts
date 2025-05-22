@@ -70,7 +70,7 @@ export async function fetchUserProjects(
           result: result,
           tags: project.tags || [],
           // Add required properties with default values if not present
-          status: project.status || 'draft', // Default to 'draft'
+          status: (project as any).status || 'draft', // Default to 'draft'
           total_emissions: project.total || 0, // Use the 'total' column for emissions
           premium_only: false // Default to false
         };
@@ -129,6 +129,8 @@ export async function createProject(
         result: resultWithTimestamp as unknown as Json,
         tags: project.tags || [],
         total: project.total_emissions || 0, // Ensure we update the 'total' column
+        // Add status field if available 
+        ...(project.status ? { status: project.status } : {})
       };
 
       const { data, error } = await supabase
@@ -171,7 +173,7 @@ export async function createProject(
         } : undefined,
         tags: data.tags || [],
         // Add required properties with default values
-        status: data.status || 'draft',
+        status: (data as any).status || 'draft',
         total_emissions: data.total || 0,
         premium_only: false
       };
@@ -207,6 +209,8 @@ export async function updateProject(project: SavedProject): Promise<SavedProject
           result: resultWithTimestamp as unknown as Json,
           tags: project.tags,
           total: project.total_emissions, // Ensure we update the 'total' column
+          // Add status field if available in the project
+          ...(project.status ? { status: project.status } : {}),
           updated_at: new Date().toISOString()
         })
         .eq('id', project.id);

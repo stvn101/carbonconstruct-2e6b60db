@@ -30,20 +30,21 @@ export interface SustainableMaterial {
   locallySourced?: boolean;
 }
 
-// Adding MaterialAnalysisResult interface
+// Updated MaterialAnalysisResult interface to include all properties used in SustainabilityAnalyzer
 export interface MaterialAnalysisResult {
-  highImpactMaterials: {
-    id: string;
-    name: string;
-    carbonFootprint: number;
-    quantity?: number;
-  }[];
-  sustainabilityScore: number;
-  sustainabilityPercentage: number;
-  recommendations: string[];
-  alternatives: {
-    [materialId: string]: SustainableMaterial[];
-  };
+  materialScores?: Record<string, number>;
+  impactSummary?: string;
+  highImpactMaterials?: { id: string; name: string; carbonFootprint: number; quantity?: number; }[];
+  sustainabilityScore?: number;
+  sustainabilityPercentage?: number;
+  recommendations?: string[];
+  alternatives?: Record<string, SustainableMaterial[]>;
+  sustainabilityIssues?: { id: string; title: string; description: string; recommendation: string; }[];
+  categories?: Record<string, Material[]>;
+  materialCount?: number;
+  sustainabilityStrengths?: { id: string; title: string; description: string; impact: string; }[];
+  averageCarbonFootprint?: number;
+  materialWithHighestFootprint?: any;
 }
 
 /**
@@ -104,6 +105,8 @@ export function generateMaterialAnalysis(materials: {
     sustainabilityScore,
     sustainabilityPercentage,
     recommendations,
-    alternatives: {} // This would be populated by actual alternatives data
+    alternatives: {}, // This would be populated by actual alternatives data
+    materialScores: {},
+    impactSummary: `Analysis based on ${materials.length} materials with average carbon footprint of ${avgCarbonFootprint.toFixed(2)} kg CO2e/kg`
   };
 }
