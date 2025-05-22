@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { CalculationInput, CalculationResult } from "@/lib/carbonExports";
 import { CarbonReduction } from "./recommendations/CarbonReduction";
 import { AreasOfConcern } from "./recommendations/AreasOfConcern";
-import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestions";
+import { useSustainabilitySuggestions, SustainabilitySuggestion } from "@/hooks/useSustainabilitySuggestions";
 import SuggestionsSection from "./results/SuggestionsSection";
 import { Loader, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,6 +18,11 @@ interface RecommendationsSectionProps {
   calculationResult: CalculationResult | null;
   suggestions?: string[];
 }
+
+// Helper function to convert SustainabilitySuggestion[] to string[]
+const convertSuggestionsToStrings = (suggestions: SustainabilitySuggestion[]): string[] => {
+  return suggestions.map(suggestion => suggestion.description || suggestion.title);
+};
 
 // Memoize the component to prevent unnecessary re-renders
 const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
@@ -84,6 +89,10 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
       transition: { duration: 0.4 }
     }
   };
+  
+  // Convert SustainabilitySuggestion[] to string[] for components expecting strings
+  const suggestionStrings = suggestions.length > 0 ? convertSuggestionsToStrings(suggestions) : initialSuggestions;
+  const prioritySuggestionStrings = prioritySuggestions.length > 0 ? convertSuggestionsToStrings(prioritySuggestions) : [];
 
   return (
     <motion.div 
@@ -147,14 +156,14 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
             <CarbonReduction
               calculationInput={calculationInput}
               calculationResult={calculationResult}
-              suggestions={suggestions.length > 0 ? suggestions : initialSuggestions}
+              suggestions={suggestionStrings}
             />
           </motion.div>
 
           <motion.div variants={itemVariants} className="dark:text-carbon-200">
             <SuggestionsSection 
-              suggestions={suggestions.length > 0 ? suggestions : initialSuggestions}
-              prioritySuggestions={prioritySuggestions}
+              suggestions={suggestionStrings}
+              prioritySuggestions={prioritySuggestionStrings}
               metadata={metadata}
               onRecalculate={() => setFetchTriggered(false)}
             />

@@ -17,14 +17,26 @@ export const CarbonReduction: React.FC<CarbonReductionProps> = ({
   calculationResult,
   suggestions
 }) => {
-  const potentialSavings = calculatePotentialSavings(calculationInput);
-  const totalPotentialSavings = potentialSavings.reduce(
-    (total, item) => total + item.savings, 
-    0
-  );
-  const percentageSaving = calculationResult.totalEmissions > 0
-    ? (totalPotentialSavings / calculationResult.totalEmissions) * 100
-    : 0;
+  // Safely calculate potential savings
+  let potentialSavings = [];
+  let totalPotentialSavings = 0;
+  let percentageSaving = 0;
+  
+  try {
+    potentialSavings = calculatePotentialSavings(calculationInput);
+    totalPotentialSavings = potentialSavings.reduce(
+      (total, item) => total + item.savings, 
+      0
+    );
+    
+    const totalEmissions = calculationResult?.totalEmissions || calculationResult?.totalCO2 || 0;
+    percentageSaving = totalEmissions > 0
+      ? (totalPotentialSavings / totalEmissions) * 100
+      : 0;
+  } catch (error) {
+    console.error("Error calculating potential savings:", error);
+    // Use default values defined above
+  }
 
   return (
     <Card>
