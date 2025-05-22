@@ -1,93 +1,100 @@
 
-import { useState } from 'react';
-import { MaterialInput, TransportInput, EnergyInput } from '@/lib/carbonExports';
-import { 
-  SuggestionsResponse, 
-  SuggestionMetadata,
-  SustainabilityAnalysisOptions
-} from './sustainability/types';
-import { generateLocalFallbackSuggestions } from './sustainability/fallbackSuggestions';
-import { createCacheKey, getCachedSuggestion, setCachedSuggestion } from './sustainability/suggestionCache';
-import { fetchSustainabilitySuggestions } from './sustainability/sustainabilityService';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useCalculator } from '@/contexts/CalculatorContext';
+import { toast } from 'sonner';
+import { retryWithRecovery } from '@/utils/errorHandling/connectionRecovery';
 
-export type { SuggestionMetadata, SuggestionsResponse } from './sustainability/types';
+export interface SustainabilitySuggestion {
+  id: string;
+  title: string;
+  description: string;
+  details?: string;
+  category?: string;
+  priority?: number;
+  impact?: string;
+  action?: string;
+}
 
 export function useSustainabilitySuggestions() {
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [prioritySuggestions, setPrioritySuggestions] = useState<string[]>([]);
-  const [metadata, setMetadata] = useState<SuggestionMetadata | null>(null);
-  const [report, setReport] = useState<any | null>(null);
+  const { materials, transport, energy, calculationResult } = useCalculator();
+  const [suggestions, setSuggestions] = useState<SustainabilitySuggestion[]>([]);
+  const [prioritySuggestions, setPrioritySuggestions] = useState<SustainabilitySuggestion[]>([]);
+  const [report, setReport] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasCachedResult, setHasCachedResult] = useState(false);
-
-  const getSuggestions = async (
-    materials: MaterialInput[],
-    transport: TransportInput[],
-    energy: EnergyInput[],
-    options?: SustainabilityAnalysisOptions
-  ): Promise<SuggestionsResponse> => {
+  
+  // Fetch sustainability suggestions when materials or energy data changes
+  useEffect(() => {
+    // Only fetch suggestions if we have materials data
+    if (materials && materials.length > 0 && calculationResult) {
+      getSustainabilitySuggestions();
+    }
+  }, [materials, energy, calculationResult]);
+  
+  const getSustainabilitySuggestions = async () => {
+    // Don't fetch if no materials or already loading
+    if (!materials || materials.length === 0 || isLoading) return;
+    
     setIsLoading(true);
     setError(null);
     
-    // Generate cache key for this specific input combination
-    const cacheKey = createCacheKey(materials, transport, energy, options);
-    
-    // Check if we have a cached result
-    const cachedResult = getCachedSuggestion(cacheKey);
-    if (cachedResult) {
-      setHasCachedResult(true);
-      setSuggestions(cachedResult.suggestions);
-      setPrioritySuggestions(cachedResult.prioritySuggestions || []);
-      setMetadata(cachedResult.metadata || null);
-      setReport(cachedResult.report || null);
-      setIsLoading(false);
-      return cachedResult;
-    }
-    
     try {
-      const result = await fetchSustainabilitySuggestions(materials, transport, energy, options);
-      
-      // Update state with the result
-      setSuggestions(result.suggestions);
-      setPrioritySuggestions(result.prioritySuggestions || []);
-      setMetadata(result.metadata || null);
-      setReport(result.report || null);
-      
-      // Cache the result
-      setCachedSuggestion(cacheKey, result);
-      
-      return result;
-    } catch (err: any) {
-      console.error('Error getting sustainability suggestions:', err);
-      const errorMsg = err.message || 'Failed to get sustainability suggestions';
-      setError(errorMsg);
-      
-      // Generate local fallback suggestions as a last resort
-      const fallbackResult = generateLocalFallbackSuggestions(
-        materials as any[], 
-        transport as any[], 
-        energy as any[]
+      // Use the recovery utility for network resilience
+      const result = await retryWithRecovery(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
+            body: {
+              materials: materials,
+              transport: transport || [],
+              energy: energy || [],
+              options: { 
+                format: 'detailed',
+                includeComplianceDetails: true
+              }
+            }
+          });
+          
+          if (error) throw error;
+          return data;
+        },
+        {
+          onRetry: (attempt) => {
+            console.log(`Retry attempt ${attempt} for sustainability suggestions`);
+          },
+          onFailure: (err) => {
+            console.error("Failed to get sustainability suggestions after retries:", err);
+            setError(err.message || "Failed to fetch sustainability suggestions");
+          }
+        }
       );
-      setSuggestions(fallbackResult.suggestions);
-      setPrioritySuggestions(fallbackResult.prioritySuggestions || []);
-      setMetadata(fallbackResult.metadata);
-      setReport(null);
       
-      return fallbackResult;
+      if (result) {
+        setSuggestions(result.suggestions || []);
+        setPrioritySuggestions(result.prioritySuggestions || []);
+        setReport(result.report || null);
+      }
+    } catch (err) {
+      console.error("Error fetching sustainability suggestions:", err);
+      setError(err instanceof Error ? err.message : String(err));
+      
+      // Show error toast only for non-network errors (network errors handled by retryWithRecovery)
+      if (!(err instanceof Error && err.message.toLowerCase().includes('network'))) {
+        toast.error("Failed to fetch sustainability suggestions", {
+          description: err instanceof Error ? err.message : "An unexpected error occurred"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return {
     suggestions,
     prioritySuggestions,
-    metadata,
     report,
     isLoading,
     error,
-    hasCachedResult,
-    getSuggestions
+    refreshSuggestions: getSustainabilitySuggestions
   };
 }

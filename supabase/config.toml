@@ -1,17 +1,5 @@
 
-project_id = "jaqzoyouuzhchuyzafii"
+project_id = "your-project-id"
 
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "storage"]
-
-[db]
-port = 54322
-
-[studio]
-port = 54323
-
-[functions]
 [functions.get-sustainability-suggestions]
-verify_jwt = false
+verify_jwt = true

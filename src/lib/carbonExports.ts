@@ -1,35 +1,35 @@
 
-import { CalculationResult as CalculationResultType } from "./carbonCalculations";
-import { MaterialInput as MaterialInputType, TransportInput as TransportInputType, EnergyInput as EnergyInputType } from "./carbonTypes";
-
-// Re-export types from carbonTypes.ts
-export type MaterialInput = MaterialInputType;
-export type TransportInput = TransportInputType;
-export type EnergyInput = EnergyInputType;
-
-// Export Material, Transport and Energy types
-export { type Material, type Transport, type Energy } from "./carbonTypes";
-
-// Export the calculation types
-export interface CalculationInput {
-  materials: MaterialInput[];
-  transport: TransportInput[];
-  energy: EnergyInput[];
-  project?: {
-    name: string;
-    location: string;
-    area: string;
-    type: string;
-  };
+export interface MaterialInput {
+  id?: string;
+  name: string;
+  type?: string;
+  quantity: number;
+  unit: string;
+  carbonFootprint: number;
+  recycledContent?: number;
+  origin?: string;
+  notes?: string;
 }
 
-// Extend the CalculationResult to include timestamp
-export interface CalculationResult extends CalculationResultType {
-  timestamp: string;
+export interface TransportInput {
+  id?: string;
+  mode: string;
+  distance: number;
+  weight: number;
+  carbonFootprint: number;
 }
 
-// Export the factor maps
-export { MATERIAL_FACTORS, TRANSPORT_FACTORS, ENERGY_FACTORS } from "./carbonData";
+export interface EnergyInput {
+  id?: string;
+  type: string;
+  amount: number;
+  unit: string;
+  carbonFootprint: number;
+}
 
-// Re-export the calculation function
-export { calculateTotalEmissions } from "./carbonCalculations";
+export interface CarbonCalculation {
+  totalCO2: number;
+  breakdownByCategory: Record<string, number>;
+  breakdownByMaterial: Record<string, number>;
+  sustainabilityScore: number;
+}
