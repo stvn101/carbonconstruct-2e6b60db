@@ -1,4 +1,3 @@
-
 /**
  * Connection recovery utilities
  * Provides functions to recover from connection issues and retry operations
@@ -9,18 +8,24 @@
  * 
  * @param retries Maximum number of retries
  * @param delay Delay between retries in ms
- * @param onRetry Callback for retry attempts
- * @returns Promise that resolves when connection is recovered
+ * @param operation Optional operation to perform when connection is recovered
+ * @returns Promise that resolves to the operation result or connection status
  */
-export const recoverConnection = async (
+export const recoverConnection = async <T>(
   retries: number = 3,
   delay: number = 2000,
-  onRetry?: (attempt: number, currentDelay: number) => void
-): Promise<boolean> => {
+  operation?: () => Promise<T>
+): Promise<T | boolean> => {
   let attempts = 0;
   
   while (attempts < retries) {
     try {
+      // If an operation was provided, try to run it
+      if (operation) {
+        return await operation();
+      }
+      
+      // Otherwise, just check connection
       const response = await fetch('/api/health-check', { 
         method: 'HEAD',
         cache: 'no-store',
@@ -39,11 +44,6 @@ export const recoverConnection = async (
     
     if (attempts < retries) {
       const currentDelay = delay * Math.pow(1.5, attempts - 1); // Exponential backoff
-      
-      if (onRetry) {
-        onRetry(attempts, currentDelay);
-      }
-      
       await new Promise(resolve => setTimeout(resolve, currentDelay));
     }
   }
@@ -66,7 +66,7 @@ export const retryWithRecovery = async <T>(
   retries: number = 3,
   delay: number = 2000,
   onRetry?: (attempt: number, currentDelay: number) => void
-): Promise<T> => {
+): Promise<T | null> => {
   let attempts = 0;
   
   while (true) {

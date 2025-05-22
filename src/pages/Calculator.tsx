@@ -51,7 +51,8 @@ function Calculator() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 pt-24 pb-12" id="main-content" tabIndex={-1}>
+      {/* Increased top padding to avoid navbar overlap */}
+      <main className="flex-grow container mx-auto px-4 pt-28 pb-12" id="main-content" tabIndex={-1}>
         <CalculatorHeader />
         
         {isOffline && (

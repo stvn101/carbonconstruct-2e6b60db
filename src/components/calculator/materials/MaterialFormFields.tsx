@@ -26,12 +26,14 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
   onUpdate
 }) => {
   const [databaseMaterials, setDatabaseMaterials] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
+  // Load materials from database on component mount
   useEffect(() => {
     setIsLoading(true);
     fetchMaterials(false)
       .then(materials => {
+        console.log(`MaterialFormFields: Loaded ${materials.length} materials`);
         setDatabaseMaterials(materials || []);
         setIsLoading(false);
       })
@@ -44,6 +46,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
   // Generate material options dynamically from MATERIAL_FACTORS and database materials
   const materialOptions = useMemo(() => {
     try {
+      // Start with default options from carbon factors
       const baseOptions = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
         value: key,
         label: value.name || key
@@ -52,7 +55,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
       // Add options from database materials
       const dbOptions = databaseMaterials.map(mat => ({
         value: `db-${mat.id}`,
-        label: mat.name
+        label: mat.name || mat.material || "Unknown Material"
       }));
       
       // Combine and remove duplicates
@@ -67,6 +70,9 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
           existingLabels.add(option.label.toLowerCase());
         }
       });
+      
+      // Log the number of options for debugging
+      console.log(`MaterialFormFields: Generated ${combinedOptions.length} material options (${baseOptions.length} from factors, ${dbOptions.length} from database)`);
       
       // Ensure we have at least the default options
       if (combinedOptions.length === 0) {
@@ -109,7 +115,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
             <SelectTrigger id={`material-type-${index}`}>
               <SelectValue placeholder={isLoading ? "Loading materials..." : "Select material"} />
             </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
+            <SelectContent className="max-h-[300px] overflow-y-auto">
               {materialOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -150,6 +156,6 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
       </div>
     </div>
   );
-};
+}
 
 export default MaterialFormFields;
