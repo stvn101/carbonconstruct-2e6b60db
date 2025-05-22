@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import NCCSection from "../compliance/NCCSection";
 import NABERSSection from "../compliance/NABERSSection";
 import { ComplianceData } from "../compliance/types";
-import GrokComplianceInsights from "../compliance/GrokComplianceInsights";
+import { GrokComplianceInsights } from "../compliance/insights";
 
 interface ComplianceTabContentProps {
   nccData: ComplianceData;
