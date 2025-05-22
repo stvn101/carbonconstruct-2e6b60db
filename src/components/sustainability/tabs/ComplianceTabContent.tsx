@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FileCheck, AlertCircle } from "lucide-react";
 import { MaterialInput, EnergyInput } from "@/lib/carbonExports";
@@ -7,6 +7,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import NCCSection from "../compliance/NCCSection";
 import NABERSSection from "../compliance/NABERSSection";
 import { ComplianceData } from "../compliance/types";
+import GrokComplianceInsights from "../compliance/GrokComplianceInsights";
 
 interface ComplianceTabContentProps {
   nccData: ComplianceData;
@@ -27,6 +28,10 @@ const ComplianceTabContent: React.FC<ComplianceTabContentProps> = ({
 }) => {
   const hasNccData = nccData && typeof nccData.compliant !== 'undefined';
   const hasNabersData = nabersData && typeof nabersData.compliant !== 'undefined';
+  
+  // State to store Grok analysis results
+  const [nccGrokAnalysis, setNccGrokAnalysis] = useState<string | undefined>(nccData?.grokAnalysis);
+  const [nabersGrokAnalysis, setNabersGrokAnalysis] = useState<string | undefined>(nabersData?.grokAnalysis);
 
   // Ensure the compliance data objects have all required properties
   const completeNccData: ComplianceData = {
@@ -34,14 +39,21 @@ const ComplianceTabContent: React.FC<ComplianceTabContentProps> = ({
     score: nccData?.score || 0,
     details: nccData?.details || null,
     error: nccData?.error || undefined,
-    grokAnalysis: nccData?.grokAnalysis || undefined
+    grokAnalysis: nccGrokAnalysis
   };
 
   const completeNabersData: ComplianceData = {
     compliant: nabersData?.compliant || false,
     score: nabersData?.score || 0,
     details: nabersData?.details || null,
-    error: nabersData?.error || undefined
+    error: nabersData?.error || undefined,
+    grokAnalysis: nabersGrokAnalysis
+  };
+  
+  // Handle when Grok analysis is complete
+  const handleGrokAnalysisComplete = (nccAnalysis: string, nabersAnalysis: string) => {
+    setNccGrokAnalysis(nccAnalysis);
+    setNabersGrokAnalysis(nabersAnalysis);
   };
 
   return (
@@ -78,6 +90,15 @@ const ComplianceTabContent: React.FC<ComplianceTabContentProps> = ({
           nabersData={completeNabersData}
         />
       </div>
+      
+      {/* Add Grok AI Compliance Insights */}
+      {(hasNccData || hasNabersData) && (
+        <GrokComplianceInsights 
+          nccData={completeNccData}
+          nabersData={completeNabersData}
+          onGrokAnalysisComplete={handleGrokAnalysisComplete}
+        />
+      )}
     </div>
   );
 };

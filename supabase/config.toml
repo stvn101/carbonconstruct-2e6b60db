@@ -1,5 +1,8 @@
 
-project_id = "your-project-id"
+project_id = "jaqzoyouuzhchuyzafii"
+
+[functions.grok-ai]
+verify_jwt = true
 
 [functions.get-sustainability-suggestions]
 verify_jwt = true
