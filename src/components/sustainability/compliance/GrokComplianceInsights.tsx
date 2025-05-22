@@ -21,22 +21,26 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
   onGrokAnalysisComplete,
   className
 }) => {
-  const { askGrok, isConfigured, isProcessing } = useGrok();
+  const { askGrok, streamGrok, isConfigured, isProcessing } = useGrok();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [nccAnalysis, setNccAnalysis] = useState<string | null>(nccData?.grokAnalysis || null);
   const [nabersAnalysis, setNabersAnalysis] = useState<string | null>(nabersData?.grokAnalysis || null);
+  const [nccAnalysisStream, setNccAnalysisStream] = useState<string>('');
+  const [nabersAnalysisStream, setNabersAnalysisStream] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   
   // Check if we have both compliance data sets
   const hasComplianceData = nccData && nabersData && 
     (typeof nccData.compliant !== 'undefined' || typeof nabersData.compliant !== 'undefined');
   
-  // Function to analyze compliance data with Grok
+  // Function to analyze compliance data with Grok using streaming
   const analyzeComplianceData = async () => {
     if (!hasComplianceData || !isConfigured || isProcessing) return;
     
     setIsAnalyzing(true);
     setError(null);
+    setNccAnalysisStream('');
+    setNabersAnalysisStream('');
     
     try {
       // Create a structured context for Grok to analyze
@@ -54,49 +58,88 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
         }
       };
       
-      // Use withNetworkErrorHandling to make the API calls resilient
-      const nccResponse = await withNetworkErrorHandling(
-        askGrok(
-          "Analyze this NCC 2025 compliance data and provide insights on compliance issues, suggest improvements, and explain implications. Focus on practical suggestions that would help improve compliance.", 
-          { compliance: complianceContext.ncc, type: 'NCC 2025' },
-          'compliance_check'
-        ),
-        20000 // 20 second timeout
+      // Use streamGrok for NCC analysis
+      const nccStream = streamGrok(
+        "Analyze this NCC 2025 compliance data and provide insights on compliance issues, suggest improvements, and explain implications. Focus on practical suggestions that would help improve compliance.", 
+        { compliance: complianceContext.ncc, type: 'NCC 2025' },
+        'compliance_check'
       );
       
-      const nabersResponse = await withNetworkErrorHandling(
-        askGrok(
-          "Analyze this NABERS compliance data and provide insights on the rating, suggest improvements to achieve higher ratings, and explain implications. Focus on practical energy efficiency measures.", 
-          { compliance: complianceContext.nabers, type: 'NABERS' },
-          'compliance_check'
-        ),
-        20000 // 20 second timeout
+      // Process the NCC stream
+      let nccFullResponse = '';
+      (async () => {
+        try {
+          for await (const chunk of nccStream) {
+            nccFullResponse += chunk;
+            setNccAnalysisStream(nccFullResponse);
+          }
+          
+          // When stream completes, set the final analysis
+          setNccAnalysis(nccFullResponse);
+          
+          // Check if both analyses are complete for callback
+          if (nabersAnalysis && onGrokAnalysisComplete) {
+            onGrokAnalysisComplete(nccFullResponse, nabersAnalysis);
+          }
+        } catch (err) {
+          console.error("Error in NCC stream:", err);
+          setError("NCC analysis failed. Please try again.");
+        }
+      })();
+      
+      // Use streamGrok for NABERS analysis
+      const nabersStream = streamGrok(
+        "Analyze this NABERS compliance data and provide insights on the rating, suggest improvements to achieve higher ratings, and explain implications. Focus on practical energy efficiency measures.", 
+        { compliance: complianceContext.nabers, type: 'NABERS' },
+        'compliance_check'
       );
       
-      // Update state with analysis results
-      if (!nccResponse.error) {
-        setNccAnalysis(nccResponse.text);
-      }
+      // Process the NABERS stream
+      let nabersFullResponse = '';
+      (async () => {
+        try {
+          for await (const chunk of nabersStream) {
+            nabersFullResponse += chunk;
+            setNabersAnalysisStream(nabersFullResponse);
+          }
+          
+          // When stream completes, set the final analysis
+          setNabersAnalysis(nabersFullResponse);
+          
+          // Check if both analyses are complete for callback
+          if (nccAnalysis && onGrokAnalysisComplete) {
+            onGrokAnalysisComplete(nccAnalysis, nabersFullResponse);
+          }
+        } catch (err) {
+          console.error("Error in NABERS stream:", err);
+          setError("NABERS analysis failed. Please try again.");
+        }
+      })();
       
-      if (!nabersResponse.error) {
-        setNabersAnalysis(nabersResponse.text);
-      }
+      // When both streams are processed, we'll be done analyzing
+      Promise.all([
+        processStream(nccStream),
+        processStream(nabersStream)
+      ]).then(() => {
+        setIsAnalyzing(false);
+      }).catch((err) => {
+        console.error("Error processing streams:", err);
+        setIsAnalyzing(false);
+      });
       
-      // Call the callback if provided
-      if (onGrokAnalysisComplete && !nccResponse.error && !nabersResponse.error) {
-        onGrokAnalysisComplete(nccResponse.text, nabersResponse.text);
-      }
-      
-      if (nccResponse.error || nabersResponse.error) {
-        setError("Some analysis could not be completed. Please try again.");
-      }
     } catch (error) {
       setError("Failed to analyze compliance data. Please check your connection and try again.");
       console.error("Grok compliance analysis error:", error);
-    } finally {
       setIsAnalyzing(false);
     }
   };
+  
+  // Helper function to process a stream without returning content (just for completion)
+  async function processStream(stream: AsyncIterable<string>): Promise<void> {
+    for await (const _ of stream) {
+      // Just exhaust the stream to completion
+    }
+  }
   
   if (!hasComplianceData) {
     return null;
@@ -179,6 +222,11 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
                 <div className="text-sm text-carbon-700 dark:text-carbon-300 bg-carbon-50 dark:bg-carbon-800 p-3 rounded-md border border-carbon-100 dark:border-carbon-700">
                   {nccAnalysis}
                 </div>
+              ) : isAnalyzing && nccAnalysisStream ? (
+                <div className="text-sm text-carbon-700 dark:text-carbon-300 bg-carbon-50 dark:bg-carbon-800 p-3 rounded-md border border-carbon-100 dark:border-carbon-700">
+                  {nccAnalysisStream}
+                  <span className="inline-block animate-pulse">▋</span>
+                </div>
               ) : isAnalyzing ? (
                 <div className="h-24 flex items-center justify-center text-sm text-muted-foreground">
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -216,6 +264,11 @@ const GrokComplianceInsights: React.FC<GrokComplianceInsightsProps> = ({
               {nabersAnalysis ? (
                 <div className="text-sm text-carbon-700 dark:text-carbon-300 bg-carbon-50 dark:bg-carbon-800 p-3 rounded-md border border-carbon-100 dark:border-carbon-700">
                   {nabersAnalysis}
+                </div>
+              ) : isAnalyzing && nabersAnalysisStream ? (
+                <div className="text-sm text-carbon-700 dark:text-carbon-300 bg-carbon-50 dark:bg-carbon-800 p-3 rounded-md border border-carbon-100 dark:border-carbon-700">
+                  {nabersAnalysisStream}
+                  <span className="inline-block animate-pulse">▋</span>
                 </div>
               ) : isAnalyzing ? (
                 <div className="h-24 flex items-center justify-center text-sm text-muted-foreground">
