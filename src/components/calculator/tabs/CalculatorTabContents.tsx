@@ -59,6 +59,9 @@ const CalculatorTabContents = ({
   console.log("Has energy:", calculationInput.energy?.length);
   console.log("Has calculation result:", calculationResult ? "Yes" : "No");
 
+  // Log the actual transport data
+  console.log("Transport data:", calculationInput.transport);
+
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-4">
       <TabsContent value="materials" className="mt-6">
@@ -73,7 +76,14 @@ const CalculatorTabContents = ({
       </TabsContent>
       
       <TabsContent value="transport" className="mt-6">
-        <TransportTabContent />
+        <TransportTabContent 
+          transport={calculationInput.transport || []}
+          onUpdateTransport={onUpdateTransport}
+          onAddTransport={onAddTransport}
+          onRemoveTransport={onRemoveTransport}
+          onCalculate={onNext}
+          onPrev={onPrev}
+        />
       </TabsContent>
       
       <TabsContent value="energy" className="mt-6">
@@ -92,7 +102,7 @@ const CalculatorTabContents = ({
         <ResultsTabContent 
           calculationResult={calculationResult}
           materials={calculationInput.materials}
-          transport={calculationInput.transport}
+          transport={calculationInput.transport || []}
           energy={calculationInput.energy}
           onCalculate={onCalculate}
           onPrev={onPrev}

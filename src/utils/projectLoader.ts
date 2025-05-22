@@ -61,7 +61,7 @@ export const loadProjects = async (
       () => fetchUserProjects(userId, page, limit),
       2, // Max retries (reduced from 3 to 2)
       5000, // Initial delay (increased from 2000ms to 5000ms)
-      (attempt: number, delay: number) => {
+      (attempt, delay) => {
         console.info(`Retrying project fetch (${attempt}/2)...`);
       }
     );

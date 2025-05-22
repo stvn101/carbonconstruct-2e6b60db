@@ -74,11 +74,13 @@ function Calculator() {
           </Alert>
         )}
         
-        <CalculatorProvider>
-          <CarbonCalculator 
-            demoMode={!user || demoMode || isOffline}
-          />
-        </CalculatorProvider>
+        <ProjectProvider>
+          <CalculatorProvider>
+            <CarbonCalculator 
+              demoMode={!user || demoMode || isOffline}
+            />
+          </CalculatorProvider>
+        </ProjectProvider>
       </main>
       <Footer />
     </div>
