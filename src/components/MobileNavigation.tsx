@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useLocation, NavLink } from 'react-router-dom';
-import { Home, Calculator, Database, Brain, Book, BarChart2 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 import { useUserNavLinks } from '@/hooks/useUserNavLinks';
 
