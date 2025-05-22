@@ -135,16 +135,27 @@ export function useComplianceCheck() {
         }
       );
       
+      // Check if complianceResult exists and handle it safely
       if (complianceResult) {
-        // Fixed type issue: The function now correctly returns a ComplianceResult
+        // If recoverConnection returned a connection status boolean instead of our expected result
+        if (typeof complianceResult === 'boolean') {
+          // Handle the case where we only got a connection status back
+          console.warn("Received connection status instead of compliance result");
+          setIsLoading(false);
+          return null; // Return null instead of the boolean
+        }
+        
+        // Set the result with the actual compliance data
         setResult(complianceResult as ComplianceResult);
         toast.success("Compliance check complete", {
           description: "Project analyzed against NCC 2025 and NABERS standards"
         });
+        
+        return complianceResult as ComplianceResult;
       }
       
       setIsLoading(false);
-      return complianceResult as ComplianceResult;
+      return null; // Return null if complianceResult is falsy
     } catch (err: any) {
       console.error("Error checking compliance:", err);
       
