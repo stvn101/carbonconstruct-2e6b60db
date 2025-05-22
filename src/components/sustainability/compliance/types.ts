@@ -64,7 +64,7 @@ export interface NABERSSectionProps {
 }
 
 // Material analysis result from sustainability calculations
-// Updated to match the fields used in SustainabilityAnalyzer and use SustainableMaterial[]
+// Updated to match the fields used in SustainabilityAnalyzer and use MaterialInput[]
 export interface MaterialAnalysisResult {
   materialScores?: Record<string, number>;
   impactSummary?: string;

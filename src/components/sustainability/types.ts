@@ -26,7 +26,7 @@ export interface SustainabilityAnalyzerProps {
   className?: string;
 }
 
-// Adding this interface to be consistent with both compliance/types.ts and materialCategories.ts
+// Updated MaterialAnalysisResult to ensure compatibility with lib/materialCategories.ts
 export interface MaterialAnalysisResult {
   materialScores?: Record<string, number>;
   impactSummary?: string;

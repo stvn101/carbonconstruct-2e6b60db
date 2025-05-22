@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,11 +120,11 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     recommendations: materialAnalysis?.recommendations || [],
     alternatives: materialAnalysis?.alternatives || {},
     sustainabilityIssues: materialAnalysis?.sustainabilityIssues || [],
-    categories: materialAnalysis?.categories,
-    materialCount: materialAnalysis?.materialCount,
-    sustainabilityStrengths: materialAnalysis?.sustainabilityStrengths,
-    averageCarbonFootprint: materialAnalysis?.averageCarbonFootprint,
-    materialWithHighestFootprint: materialAnalysis?.materialWithHighestFootprint
+    categories: materialAnalysis?.categories || {},
+    materialCount: materialAnalysis?.materialCount || 0,
+    sustainabilityStrengths: materialAnalysis?.sustainabilityStrengths || [],
+    averageCarbonFootprint: materialAnalysis?.averageCarbonFootprint || 0,
+    materialWithHighestFootprint: materialAnalysis?.materialWithHighestFootprint || null
   };
   
   const suggestionStrings = convertSuggestionsToStrings(suggestions);
