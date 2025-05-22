@@ -13,23 +13,24 @@ describe('Carbon Calculations', () => {
           type: 'concrete', 
           quantity: 1000, 
           unit: 'kg',
-          // Name is removed as it's not in MaterialInput type
-          carbonFootprint: 0.12 
+          // Using factor instead of carbonFootprint as per the MaterialInput type
+          factor: 0.12 
         },
         { 
           type: 'steel', 
           quantity: 500, 
           unit: 'kg',
-          // Name is removed as it's not in MaterialInput type
-          carbonFootprint: 1.85 
+          // Using factor instead of carbonFootprint as per the MaterialInput type
+          factor: 1.85
         }
       ],
       transport: [
         { 
-          type: 'truck',  // Using only type, not mode
+          type: 'truck',
           distance: 100, 
           weight: 1500, 
-          carbonFootprint: 0.1 
+          // Using factor instead of carbonFootprint as per the TransportInput type
+          factor: 0.1 
         }
       ],
       energy: [
@@ -37,8 +38,8 @@ describe('Carbon Calculations', () => {
           type: 'electricity', 
           amount: 1000, 
           unit: 'kWh', 
-          // Carbon footprint is removed as it's not in EnergyInput type
-          emissionFactor: 0.94 // Using emissionFactor instead
+          // Using factor instead of emissionFactor as per the EnergyInput type
+          factor: 0.94
         }
       ]
     };
