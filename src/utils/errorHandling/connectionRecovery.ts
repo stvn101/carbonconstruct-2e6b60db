@@ -1,117 +1,110 @@
 
-import { toast } from "sonner";
-import { CONNECTION_TOAST_STATE } from "./connectionToast";
+/**
+ * Utilities for recovering from connection issues and network errors
+ */
 
-// Retry backoff timing in milliseconds
-const RETRY_DELAYS = [1000, 2000, 5000, 10000];
-const MAX_RETRIES = 3;
+// Import necessary utilities
+import { checkNetworkStatus } from './networkChecker';
+import { showErrorToast, showSuccessToast } from './toastHelpers';
+import { CONNECTION_TOAST_STATE, resetToastState } from './connectionToast';
 
-interface RetryConfig {
-  onRetry?: (attempt: number) => void;
-  onSuccess?: () => void;
-  onFailure?: (error: Error) => void;
-  maxRetries?: number;
-}
+// Progressive backoff timing for reconnection attempts
+const RECONNECT_INTERVALS = [2000, 5000, 10000, 30000]; // 2s, 5s, 10s, 30s
 
 /**
- * Attempts to recover a failed operation with exponential backoff
+ * Attempt to recover connection with progressive backoff
+ * @param onSuccess Callback fired when connection is restored
+ * @param onFailure Callback fired when connection recovery fails
+ * @param maxAttempts Maximum number of recovery attempts
+ * @returns Cleanup function to cancel recovery attempts
  */
-export const retryWithRecovery = async <T>(
-  operation: () => Promise<T>,
-  config?: RetryConfig
-): Promise<T | null> => {
-  const {
-    onRetry,
-    onSuccess,
-    onFailure,
-    maxRetries = MAX_RETRIES,
-  } = config || {};
-  
-  let attempt = 0;
-  
-  while (attempt <= maxRetries) {
+export const attemptConnectionRecovery = (
+  onSuccess: () => void,
+  onFailure?: (attemptCount: number) => void,
+  maxAttempts: number = RECONNECT_INTERVALS.length
+): () => void => {
+  let attemptCount = 0;
+  let timeoutIds: number[] = [];
+  let isCancelled = false;
+
+  const attemptReconnect = async () => {
+    if (isCancelled || attemptCount >= maxAttempts) return;
+    
     try {
-      // Wait with exponential backoff before retrying
-      if (attempt > 0) {
-        const delay = RETRY_DELAYS[Math.min(attempt - 1, RETRY_DELAYS.length - 1)];
-        await new Promise(resolve => setTimeout(resolve, delay));
-        
-        // Notify of retry attempt
-        if (onRetry) {
-          onRetry(attempt);
+      // Check if we're back online
+      const isOnline = await checkNetworkStatus();
+      
+      if (isOnline) {
+        // Connection restored
+        if (!CONNECTION_TOAST_STATE.success) {
+          showSuccessToast("Connection restored!", "connection-recovery");
+          resetToastState();
         }
-      }
-      
-      // Attempt the operation
-      const result = await operation();
-      
-      // If successful and we had shown a connection error before,
-      // show a success toast
-      if (attempt > 0 && CONNECTION_TOAST_STATE.failure) {
-        toast.success("Connection restored", {
-          description: "Your connection has been restored."
-        });
-        CONNECTION_TOAST_STATE.failure = false;
-        CONNECTION_TOAST_STATE.success = true;
-      }
-      
-      if (onSuccess) {
+        
         onSuccess();
+        return;
       }
-      
-      return result;
     } catch (error) {
-      attempt++;
-      
-      // If we've exhausted all retries, give up
-      if (attempt > maxRetries) {
-        if (onFailure) {
-          onFailure(error instanceof Error ? error : new Error(String(error)));
-        }
-        return null;
-      }
+      // Network check itself failed, consider still offline
     }
-  }
-  
-  return null;
-};
-
-/**
- * Utility to trigger connection recovery for specific contexts
- */
-export const recoverConnection = async (
-  context: string,
-  operation: () => Promise<any>,
-  config?: Omit<RetryConfig, 'onRetry'>
-): Promise<any> => {
-  // Show a toast during the first retry
-  const enhancedConfig: RetryConfig = {
-    ...config,
-    onRetry: (attempt) => {
-      if (attempt === 1 && !CONNECTION_TOAST_STATE.failure) {
-        // Only show the toast once
-        const toastId = `connection-recovery-${context}`;
-        toast.warning("Attempting to reconnect...", {
-          id: toastId,
-          duration: 0 // Persist until connection recovers
-        });
-        
-        // Update the toast state
-        CONNECTION_TOAST_STATE.failure = true;
-        CONNECTION_TOAST_STATE.id = toastId;
-      }
-    },
-    onSuccess: () => {
-      // Dismiss the connection recovery toast
-      if (CONNECTION_TOAST_STATE.id) {
-        toast.dismiss(CONNECTION_TOAST_STATE.id);
-      }
-      // Call the original onSuccess if provided
-      if (config?.onSuccess) {
-        config.onSuccess();
-      }
+    
+    // Connection still not available
+    attemptCount++;
+    
+    // Notify of continued failure if callback provided
+    if (onFailure) {
+      onFailure(attemptCount);
+    }
+    
+    // Schedule next attempt if we haven't reached max
+    if (attemptCount < maxAttempts) {
+      const nextInterval = RECONNECT_INTERVALS[attemptCount] || RECONNECT_INTERVALS[RECONNECT_INTERVALS.length - 1];
+      const nextTimeoutId = window.setTimeout(attemptReconnect, nextInterval);
+      timeoutIds.push(nextTimeoutId);
+    } else if (!CONNECTION_TOAST_STATE.failure) {
+      // We've exhausted all attempts - show a persistent toast
+      showErrorToast(
+        "Unable to restore connection. Please check your internet and try again.",
+        "connection-recovery-failed",
+        { persistent: true }
+      );
     }
   };
   
-  return retryWithRecovery(operation, enhancedConfig);
+  // Start the first attempt
+  const initialTimeoutId = window.setTimeout(attemptReconnect, RECONNECT_INTERVALS[0]);
+  timeoutIds.push(initialTimeoutId);
+  
+  // Return cleanup function
+  return () => {
+    isCancelled = true;
+    timeoutIds.forEach((id) => window.clearTimeout(id));
+  };
+};
+
+/**
+ * Check connection status and run appropriate callback
+ * @param onOnline Function to run if online
+ * @param onOffline Function to run if offline
+ * @returns Promise resolving to boolean indicating online status
+ */
+export const checkConnectionAndRun = async (
+  onOnline: () => void | Promise<void>,
+  onOffline: () => void | Promise<void>
+): Promise<boolean> => {
+  try {
+    const isOnline = await checkNetworkStatus();
+    
+    if (isOnline) {
+      await onOnline();
+      return true;
+    } else {
+      await onOffline();
+      return false;
+    }
+  } catch (error) {
+    // If the check fails, assume we're offline
+    await onOffline();
+    return false;
+  }
 };
