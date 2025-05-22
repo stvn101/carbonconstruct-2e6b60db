@@ -49,8 +49,8 @@ const ResultsSection = ({
   const hasValidMaterials = materials?.some(m => Number(m.quantity) > 0) || false;
   const hasValidTransport = transport?.some(t => Number(t.distance) > 0 && (t.weight ? Number(t.weight) > 0 : true)) || false;
   const hasValidEnergy = energy?.some(e => 
-    (e.amount ? Number(e.amount) > 0 : false) || 
-    (e.quantity ? Number(e.quantity) > 0 : false)
+    (e.amount !== undefined ? Number(e.amount) > 0 : false) || 
+    (e.quantity !== undefined ? Number(e.quantity) > 0 : false)
   ) || false;
   
   // Check if calculation result has any data
