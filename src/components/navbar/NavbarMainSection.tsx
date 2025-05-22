@@ -16,13 +16,12 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
   const { navLinks } = useUserNavLinks();
 
   return (
-    <div className="flex items-center justify-between h-[56px]">
+    <div className="flex items-center justify-between h-[56px] max-w-[1400px] mx-auto w-full">
       <div className="flex items-center">
         <NavbarLogo />
-        {/* Added spacing between logo and nav items */}
-        <div className="hidden md:flex items-center ml-6 lg:ml-10 space-x-1 lg:space-x-4">
-          <NavbarDesktopItems navLinks={navLinks} />
-        </div>
+      </div>
+      <div className="hidden md:flex items-center space-x-4">
+        <NavbarDesktopItems navLinks={navLinks} />
       </div>
       <div className="md:hidden flex items-center">
         <NavbarLinks />
