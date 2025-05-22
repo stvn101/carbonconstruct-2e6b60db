@@ -1,24 +1,26 @@
 
 import React from "react";
-import { Info } from "lucide-react";
 import { ComplianceDetailProps } from "./types";
 
-const ComplianceDetails: React.FC<ComplianceDetailProps> = ({ details }) => {
-  if (!details) return <p className="text-muted-foreground text-sm">No detailed information available.</p>;
-  
+const ComplianceDetail: React.FC<ComplianceDetailProps> = ({ 
+  title, 
+  details,
+  color = "text-carbon-800 dark:text-carbon-200"
+}) => {
   return (
-    <ul className="space-y-2 mt-2">
-      {Object.entries(details).map(([key, value]) => (
-        <li key={key} className="flex items-start">
-          <Info className="h-4 w-4 mr-2 mt-0.5 text-carbon-500" />
-          <div>
-            <span className="font-medium">{key}: </span>
-            <span>{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-2">
+      <h4 className={`font-medium ${color}`}>{title}</h4>
+      {typeof details === 'string' ? (
+        <p className="text-sm">{details}</p>
+      ) : typeof details === 'object' && details !== null ? (
+        <pre className="p-2 bg-muted rounded-md overflow-x-auto text-xs">
+          {JSON.stringify(details, null, 2)}
+        </pre>
+      ) : (
+        <p className="text-sm text-muted-foreground">No details available</p>
+      )}
+    </div>
   );
 };
 
-export default ComplianceDetails;
+export default ComplianceDetail;

@@ -1,6 +1,6 @@
+
 import React, { createContext, useState, useEffect, useCallback, useMemo } from "react";
-import { CalculationResult, CalculationInput, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
-import { calculateTotalEmissions } from "@/lib/carbonCalculations";
+import { CalculationResult, CalculationInput, MaterialInput, TransportInput, EnergyInput, calculateTotalEmissions } from "@/lib/carbonExports";
 import { CalculatorContextType } from "./types";
 import {
   handleAddMaterial,
@@ -87,12 +87,21 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Perform the calculation with a small delay to allow UI to update
       setTimeout(() => {
         try {
-          // Convert the calculationInput to the format expected by calculateTotalEmissions
-          const result = calculateTotalEmissions(calculationInput);
+          // Convert input types to ensure compatibility
+          const calculationInputModified = {
+            ...calculationInput,
+            transport: calculationInput.transport.map(t => ({
+              ...t,
+              type: t.mode // Ensure we have a type property for compatibility
+            }))
+          };
+          
+          // Perform the calculation
+          const result = calculateTotalEmissions(calculationInputModified);
           console.log('Calculation completed with result:', result);
           
-          // Add timestamp to the result
-          const resultWithTimestamp = {
+          // Add required fields to match the CalculationResult type
+          const resultWithFormattedData: CalculationResult = {
             ...result,
             totalCO2: result.totalEmissions,
             breakdownByCategory: {
@@ -115,7 +124,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             toast.success("Calculation completed successfully!");
           }
           
-          setCalculationResult(resultWithTimestamp);
+          setCalculationResult(resultWithFormattedData);
           setActiveTab("results");
         } catch (error) {
           console.error("Error during calculation:", error);
@@ -145,10 +154,19 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Slight delay to allow UI to update before heavy calculation
       setTimeout(() => {
         try {
-          const result = calculateTotalEmissions(calculationInput);
+          // Convert input types to ensure compatibility
+          const calculationInputModified = {
+            ...calculationInput,
+            transport: calculationInput.transport.map(t => ({
+              ...t,
+              type: t.mode // Ensure we have a type property for compatibility
+            }))
+          };
           
-          // Add timestamp and required fields to the result
-          const resultWithTimestamp = {
+          const result = calculateTotalEmissions(calculationInputModified);
+          
+          // Add required fields to match the CalculationResult type
+          const resultWithFormattedData: CalculationResult = {
             ...result,
             totalCO2: result.totalEmissions,
             breakdownByCategory: {
@@ -160,7 +178,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             timestamp: new Date().toISOString()
           };
           
-          setCalculationResult(resultWithTimestamp);
+          setCalculationResult(resultWithFormattedData);
           setActiveTab("results");
         } catch (error) {
           console.error("Error during calculation:", error);

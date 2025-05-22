@@ -29,7 +29,7 @@ const ComplianceTabContent: React.FC<ComplianceTabContentProps> = ({
   const hasNabersData = nabersData && typeof nabersData.compliant !== 'undefined';
 
   // Ensure the compliance data objects have all required properties
-  const completeNccData = {
+  const completeNccData: ComplianceData = {
     compliant: nccData?.compliant || false,
     score: nccData?.score || 0,
     details: nccData?.details || null,
@@ -37,7 +37,7 @@ const ComplianceTabContent: React.FC<ComplianceTabContentProps> = ({
     grokAnalysis: nccData?.grokAnalysis || undefined
   };
 
-  const completeNabersData = {
+  const completeNabersData: ComplianceData = {
     compliant: nabersData?.compliant || false,
     score: nabersData?.score || 0,
     details: nabersData?.details || null,
@@ -72,16 +72,10 @@ const ComplianceTabContent: React.FC<ComplianceTabContentProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <NCCSection 
           nccData={completeNccData}
-          materials={materials}
-          onRunCheck={onRunCheck}
-          isLoading={isLoading}
         />
         
         <NABERSSection 
           nabersData={completeNabersData}
-          energy={energy}
-          onRunCheck={onRunCheck}
-          isLoading={isLoading}
         />
       </div>
     </div>
