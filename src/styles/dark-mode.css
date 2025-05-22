@@ -9,42 +9,52 @@
 @import './dark-mode/auth.css';
 @import './dark-mode/switch.css';
 
-/* Global dark mode variables to ensure consistency */
-:root.dark {
-  --carbon-50: #f8fafc;
-  --carbon-100: #f1f5f9;
-  --carbon-200: #e2e8f0;
-  --carbon-300: #cbd5e1;
-  --carbon-400: #94a3b8;
-  --carbon-500: #64748b;
-  --carbon-600: #475569;
-  --carbon-700: #334155;
-  --carbon-800: #1e293b;
-  --carbon-900: #0f172a;
-  --carbon-950: #020617;
-  
-  /* Semantic colors */
-  --color-text-primary: var(--carbon-50);
-  --color-text-secondary: var(--carbon-300);
-  --color-text-muted: var(--carbon-400);
-  --color-background-primary: var(--carbon-900);
-  --color-background-secondary: var(--carbon-800);
-  --color-background-tertiary: var(--carbon-700);
-  --color-border: var(--carbon-700);
-  --color-accent: #9b87f5;
+/* Core dark mode rules */
+.dark body {
+  @apply bg-background text-foreground;
+  color-scheme: dark;
 }
 
-/* Standardized dark mode components */
-.dark .btn-primary {
-  background-color: var(--color-accent);
-  color: white;
+/* Improved focus states for dark mode */
+.dark :focus-visible {
+  outline-color: hsl(var(--ring));
 }
 
-.dark .card {
-  background-color: var(--color-background-secondary);
-  border-color: var(--color-border);
+/* Improve link accessibility in dark mode */
+.dark a:not([class]) {
+  @apply underline text-primary hover:text-primary/90;
 }
 
-.dark .text-muted {
-  color: var(--color-text-muted);
+/* Make sure charts are visible in dark mode */
+.dark .recharts-surface {
+  filter: brightness(0.85);
+}
+
+/* Fix chart tooltips in dark mode */
+.dark .recharts-default-tooltip {
+  @apply bg-card text-card-foreground border-border !important;
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-gray-600;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.dark ::-webkit-scrollbar {
+  @apply w-2 h-2;
+}
+
+/* Improve selection color in dark mode */
+.dark ::selection {
+  @apply bg-primary/30 text-primary-foreground;
+}
+
+/* Make inputs more visible */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  @apply text-gray-500;
 }

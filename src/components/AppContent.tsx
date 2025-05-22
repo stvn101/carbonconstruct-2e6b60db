@@ -18,6 +18,7 @@ import { marketingRoutes } from '../routes/marketingRoutes';
 import { projectRoutes } from '../routes/projectRoutes';
 import { protectedRoutes } from '../routes/protectedRoutes';
 import { CalculatorProvider } from '../contexts/CalculatorContext';
+import MobileNavigation from './MobileNavigation';
 
 export const AppContent: React.FC = () => {
   // Apply app-wide accessibility improvements
@@ -66,6 +67,12 @@ export const AppContent: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundaryWrapper>
+        
+        {/* Add mobile navigation for small screens */}
+        <MobileNavigation />
+        
+        {/* Add bottom padding on mobile to account for navigation */}
+        <div className="pb-16 sm:pb-0"></div>
       </div>
     </CalculatorProvider>
   );
