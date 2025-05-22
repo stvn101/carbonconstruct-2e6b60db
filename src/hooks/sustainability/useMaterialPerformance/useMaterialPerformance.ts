@@ -40,13 +40,9 @@ export function useMaterialPerformance({
 
   // Wrap trackPerformance to also update trends
   const trackPerformanceNow = async () => {
-    const newPerformanceData = await trackPerformance();
-    if (newPerformanceData && newPerformanceData.length > 0) {
-      // Also update trends and recommendations
-      await fetchRecommendations();
-      return newPerformanceData;
-    }
-    return [];
+    await trackPerformance();
+    // Also update trends and recommendations
+    await fetchRecommendations();
   };
   
   // Toggle tracking on/off
