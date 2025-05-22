@@ -8,18 +8,20 @@ import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { TransportInput } from '@/lib/carbonExports';
 
-interface TransportFormFieldsProps {
+export interface TransportFormFieldsProps {
   index: number;
   item: TransportInput;
   onUpdate: (field: string, value: any) => void;
   onRemove: () => void;
+  errors?: string;
 }
 
 const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
   index,
   item,
   onUpdate,
-  onRemove
+  onRemove,
+  errors
 }) => {
   return (
     <Card>
@@ -83,6 +85,12 @@ const TransportFormFields: React.FC<TransportFormFieldsProps> = ({
             />
           </div>
         </div>
+        
+        {errors && (
+          <div className="text-sm text-destructive">
+            {errors}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

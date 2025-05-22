@@ -50,9 +50,11 @@ const CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = ({ result,
   ];
   
   // Format tick values to be more readable
-  const formatYAxisTick = (value: number) => {
+  const formatYAxisTick = (value: any) => {
+    if (typeof value !== 'number') return '';
+    
     if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
-    return value;
+    return value.toString();
   };
   
   // Custom tooltip formatter

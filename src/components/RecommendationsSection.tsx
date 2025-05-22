@@ -21,7 +21,7 @@ interface RecommendationsSectionProps {
 
 // Helper function to convert SustainabilitySuggestion[] to string[]
 const convertSuggestionsToStrings = (suggestions: SustainabilitySuggestion[]): string[] => {
-  return suggestions.map(suggestion => suggestion.description || suggestion.title);
+  return suggestions.map(suggestion => suggestion.description || suggestion.title || "");
 };
 
 // Memoize the component to prevent unnecessary re-renders
@@ -30,22 +30,24 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = memo(({
   calculationResult,
   suggestions: initialSuggestions = []
 }) => {
-  const { 
-    suggestions,
-    prioritySuggestions, 
-    metadata,
-    report,
-    isLoading, 
-    error,
-    getSuggestions
-  } = useSustainabilitySuggestions();
+  const hookResult = useSustainabilitySuggestions();
+  const suggestions = hookResult.suggestions || [];
+  const prioritySuggestions = hookResult.prioritySuggestions || [];
+  const report = hookResult.report;
+  const isLoading = hookResult.isLoading;
+  const error = hookResult.error;
+  const refreshSuggestions = hookResult.refreshSuggestions;
+  
+  // Extract metadata and getSuggestions if they exist
+  const metadata = (hookResult as any).metadata;
+  const getSuggestions = (hookResult as any).getSuggestions;
   
   const [fetchTriggered, setFetchTriggered] = useState(false);
   const [activeView, setActiveView] = useState<"basic" | "advanced">("basic");
 
   useEffect(() => {
     const fetchSustainabilitySuggestions = async () => {
-      if (calculationResult && !fetchTriggered) {
+      if (calculationResult && !fetchTriggered && typeof getSuggestions === 'function') {
         setFetchTriggered(true);
         try {
           const options: SustainabilityAnalysisOptions = {

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useCallback, useMemo } from "react";
 import { CalculationResult, CalculationInput, MaterialInput, TransportInput, EnergyInput } from "@/lib/carbonExports";
 import { calculateTotalEmissions } from "@/lib/carbonCalculations";
@@ -18,9 +17,9 @@ import { validateCalculationInput } from "@/utils/calculatorValidation";
 import { toast } from "sonner";
 
 const DEFAULT_CALCULATION_INPUT: CalculationInput = {
-  materials: [{ type: "concrete", quantity: "1000" }],
-  transport: [{ type: "truck", distance: "100", weight: "1000" }],
-  energy: [{ type: "electricity", amount: "500" }]
+  materials: [{ name: "Concrete", type: "concrete", quantity: 1000, unit: "kg", carbonFootprint: 0.12 }],
+  transport: [{ mode: "truck", distance: 100, weight: 1000, carbonFootprint: 0.1 }],
+  energy: [{ type: "electricity", amount: 500, unit: "kWh", carbonFootprint: 0.5 }]
 };
 
 export const CalculatorContext = createContext<CalculatorContextType | undefined>(undefined);
@@ -89,18 +88,19 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setTimeout(() => {
         try {
           // Convert the calculationInput to the format expected by calculateTotalEmissions
-          const convertedInput = {
-            materials: calculationInput.materials,
-            transport: calculationInput.transport,
-            energy: calculationInput.energy
-          };
-
-          const result = calculateTotalEmissions(convertedInput);
+          const result = calculateTotalEmissions(calculationInput);
           console.log('Calculation completed with result:', result);
           
           // Add timestamp to the result
-          const resultWithTimestamp: CalculationResult = {
+          const resultWithTimestamp = {
             ...result,
+            totalCO2: result.totalEmissions,
+            breakdownByCategory: {
+              materials: result.breakdown.materials,
+              transport: result.breakdown.transport,
+              energy: result.breakdown.energy
+            },
+            sustainabilityScore: 50, // Default score
             timestamp: new Date().toISOString()
           };
           
@@ -145,18 +145,18 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Slight delay to allow UI to update before heavy calculation
       setTimeout(() => {
         try {
-          // Convert the calculationInput to the format expected by calculateTotalEmissions
-          const convertedInput = {
-            materials: calculationInput.materials,
-            transport: calculationInput.transport,
-            energy: calculationInput.energy
-          };
-
-          const result = calculateTotalEmissions(convertedInput);
+          const result = calculateTotalEmissions(calculationInput);
           
-          // Add timestamp to the result
-          const resultWithTimestamp: CalculationResult = {
+          // Add timestamp and required fields to the result
+          const resultWithTimestamp = {
             ...result,
+            totalCO2: result.totalEmissions,
+            breakdownByCategory: {
+              materials: result.breakdown.materials,
+              transport: result.breakdown.transport,
+              energy: result.breakdown.energy
+            },
+            sustainabilityScore: 50, // Default score
             timestamp: new Date().toISOString()
           };
           

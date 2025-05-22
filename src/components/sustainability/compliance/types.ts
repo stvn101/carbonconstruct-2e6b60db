@@ -1,19 +1,66 @@
 
+import { MaterialInput, EnergyInput } from "@/lib/carbonExports";
+
+// Basic compliance data structure
+export interface ComplianceData {
+  compliant: boolean;
+  score?: number;
+  details?: any;
+  error?: string;
+  grokAnalysis?: string;
+}
+
+// Props for the compliance status component
 export interface ComplianceStatusProps {
-  nccData: {
-    compliant: boolean;
-    score: number;
-    details?: any;
-    error?: string;
-    grokAnalysis?: string;
-  } | null;
-  nabersData: {
-    compliant: boolean;
-    score: number;
-    details?: any;
-    error?: string;
-  } | null;
-  onRunCheck?: () => void;
-  isLoading?: boolean;
-  className?: string;
+  status: 'passed' | 'failed' | 'warning' | 'loading';
+  label: string;
+  score?: number | string;
+}
+
+// Props for the compliance details component
+export interface ComplianceDetailProps {
+  title: string;
+  details: any;
+  color?: string;
+}
+
+// Props for the compliance section component
+export interface ComplianceSectionProps {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+}
+
+// Props for the compliance tip component
+export interface ComplianceTipProps {
+  tip: string;
+  category?: string;
+}
+
+// Props for the NCC section component
+export interface NCCSectionProps {
+  nccData: ComplianceData;
+  materials: MaterialInput[];
+  onRunCheck: () => void;
+  isLoading: boolean;
+}
+
+// Props for the NABERS section component
+export interface NABERSSectionProps {
+  nabersData: ComplianceData;
+  energy: EnergyInput[];
+  onRunCheck: () => void;
+  isLoading: boolean;
+}
+
+// Material analysis result from sustainability calculations
+export interface MaterialAnalysisResult {
+  materialScores?: Record<string, number>;
+  impactSummary?: string;
+  highImpactMaterials?: string[];
+  sustainabilityScore?: number;
+  sustainabilityPercentage?: number;
+  recommendations?: string[];
+  alternatives?: Record<string, string[]>;
 }
