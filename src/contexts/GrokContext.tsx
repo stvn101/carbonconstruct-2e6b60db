@@ -14,9 +14,6 @@ interface GrokContextType {
 
 const GrokContext = createContext<GrokContextType | undefined>(undefined);
 
-// Your API key - typically this would be securely stored
-const DEFAULT_API_KEY = ''; // Empty by default, requires user to configure
-
 export function GrokProvider({ children }: { children: ReactNode }) {
   const [isConfigured, setIsConfigured] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -26,10 +23,6 @@ export function GrokProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const configStatus = grokService.isApiConfigured();
     setIsConfigured(configStatus);
-    
-    if (!configStatus && DEFAULT_API_KEY) {
-      configureGrok(DEFAULT_API_KEY);
-    }
   }, []);
   
   const configureGrok = (apiKey: string) => {
