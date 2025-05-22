@@ -20,6 +20,8 @@ import { protectedRoutes } from '../routes/protectedRoutes';
 import { CalculatorProvider } from '../contexts/CalculatorContext';
 import MobileNavigation from './MobileNavigation';
 import { useDevice } from '../hooks/use-device';
+import { useOfflineState } from '../hooks/use-offline-state';
+import { OfflineStatusIndicator } from './OfflineStatusIndicator';
 
 export const AppContent: React.FC = () => {
   const { isIOS } = useDevice();
@@ -70,6 +72,9 @@ export const AppContent: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundaryWrapper>
+        
+        {/* Offline status indicator */}
+        <OfflineStatusIndicator />
         
         {/* Add mobile navigation for small screens */}
         <MobileNavigation />

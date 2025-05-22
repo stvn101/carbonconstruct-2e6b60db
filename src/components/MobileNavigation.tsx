@@ -1,27 +1,38 @@
 
 import React from 'react';
 import { useLocation, NavLink } from 'react-router-dom';
-import { Home, Calculator, Database, Brain, Book, Settings } from 'lucide-react';
+import { Home, Calculator, Database, Brain, Book, BarChart2 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
+import { useUserNavLinks } from '@/hooks/useUserNavLinks';
 
 const MobileNavigation: React.FC = () => {
   const location = useLocation();
   const { isIOS } = useDevice();
+  const { navLinks } = useUserNavLinks();
   
-  const navItems = [
+  // Don't show mobile navigation on theme test page
+  if (location.pathname === '/theme-test') return null;
+  
+  // Map our nav links to mobile nav items
+  const mobileNavItems = [
     { path: '/', label: 'Home', icon: <Home size={22} /> },
     { path: '/calculator', label: 'Calculator', icon: <Calculator size={22} /> },
     { path: '/materials', label: 'Materials', icon: <Database size={22} /> },
     { path: '/grok-ai', label: 'Grok AI', icon: <Brain size={22} /> },
     { path: '/resources', label: 'Resources', icon: <Book size={22} /> },
-  ];
-
-  if (location.pathname === '/theme-test') return null;
+    { path: '/benchmarking', label: 'Benchmarking', icon: <BarChart2 size={22} />, premium: true }
+  ].filter(item => {
+    // Filter premium items if they're not in navLinks
+    if (item.premium) {
+      return navLinks.some(navLink => navLink.path === item.path);
+    }
+    return true;
+  });
   
   return (
     <nav className={`fixed bottom-0 left-0 right-0 bg-background border-t border-border sm:hidden z-navbar bottom-navigation ${isIOS ? 'pb-[env(safe-area-inset-bottom,0)]' : ''}`}>
       <div className="flex justify-around items-center">
-        {navItems.map((item) => (
+        {mobileNavItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
