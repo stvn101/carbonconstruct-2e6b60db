@@ -37,7 +37,7 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
                   className={cn(
                     "px-4 py-3 text-foreground/80 hover:text-foreground transition-colors rounded-md",
                     "hover:bg-accent hover:text-foreground",
-                    isActive && "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-medium border-l-2 border-green-600",
+                    isActive && "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-medium",
                     link.premium && "premium-feature"
                   )}
                   onClick={() => {
@@ -49,7 +49,7 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
                     {link.icon && <span className="mr-3">{link.icon}</span>}
                     {link.title}
                     {link.premium && (
-                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         Premium
                       </span>
                     )}

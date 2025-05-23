@@ -14,12 +14,7 @@
 
 /* Card styling - ensure solid backgrounds */
 .card {
-  @apply bg-card border border-border shadow-sm rounded-lg transition-all duration-200;
-}
-
-/* Add hover effect to cards */
-.card:hover {
-  @apply border-green-600 shadow-md transform -translate-y-0.5;
+  @apply bg-card border border-border shadow-sm;
 }
 
 /* Remove backdrop filters for better compatibility */
@@ -78,17 +73,6 @@ div[data-state] {
 /* Fix transparency in content containers */
 [data-radix-tabs-content] {
   @apply bg-transparent !important;
-}
-
-/* Premium feature indicators */
-.premium-feature:after {
-  content: "✦";
-  @apply ml-1 text-amber-500 dark:text-amber-400;
-}
-
-/* Active navigation styling */
-.active-nav-item {
-  @apply border-l-4 border-green-600 bg-green-50 dark:bg-green-900/20;
 }
 
 /* Improve mobile touch targets */
@@ -178,23 +162,4 @@ div[data-state] {
 /* Add consistent spacing for sections */
 .section-spacing {
   @apply py-8 sm:py-12;
-}
-
-/* Page headings with green accent */
-.page-heading {
-  @apply relative mb-6;
-}
-
-.page-heading:after {
-  @apply content-[''] absolute left-0 bottom-0 h-1 w-16 bg-green-600 rounded;
-}
-
-/* Section dividers */
-.section-divider {
-  @apply my-8 border-t border-border;
-}
-
-/* Button with green outline */
-.btn-green-outline {
-  @apply border border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors;
 }

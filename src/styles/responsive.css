@@ -123,21 +123,6 @@
   .mobile-button-group {
     @apply flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2;
   }
-  
-  /* Add bottom padding for pages with mobile navigation */
-  .has-mobile-nav {
-    @apply pb-20;
-  }
-  
-  /* Material cards for mobile */
-  .material-card {
-    @apply flex flex-col h-full;
-  }
-  
-  /* Mobile optimized cards */
-  .mobile-card {
-    @apply rounded-lg border border-border p-4 mb-4;
-  }
 }
 
 /* Medium devices (tablets) */

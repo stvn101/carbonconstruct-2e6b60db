@@ -1,54 +1,58 @@
 
 :root {
   /* Base colors */
+  --primary-hue: 144;
+  --primary-saturation: 61%;
+  --primary-lightness: 54%;
+
+  /* Carbon theme colors */
+  --carbon-50-hsl: 210 40% 98%;
+  --carbon-100-hsl: 210 40% 96%;
+  --carbon-200-hsl: 214 32% 91%;
+  --carbon-300-hsl: 213 27% 84%;
+  --carbon-400-hsl: 215 20% 65%;
+  --carbon-500-hsl: 215 16% 47%;
+  --carbon-600-hsl: 215 19% 35%;
+  --carbon-700-hsl: 215 25% 27%;
+  --carbon-800-hsl: 217 33% 17%;
+  --carbon-900-hsl: 222 47% 11%;
+  --carbon-950-hsl: 229 84% 5%;
+  
+  /* Shadcn colors with improved contrast */
   --background: 0 0% 100%;
-  --foreground: 222.2 47.4% 11.2%;
-  
-  /* Card colors */
+  --foreground: 224 71.4% 4.1%;
   --card: 0 0% 100%;
-  --card-foreground: 222.2 47.4% 11.2%;
-  
-  /* Popover colors */
+  --card-foreground: 224 71.4% 4.1%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 47.4% 11.2%;
+  --popover-foreground: 224 71.4% 4.1%;
+  --primary: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
+  --primary-foreground: 210 20% 98%;
+  --secondary: 220 14.3% 95.9%;
+  --secondary-foreground: 220.9 39.3% 11%;
+  --muted: 220 14.3% 95.9%;
+  --muted-foreground: 220 8.9% 46.1%;
+  --accent: 220 14.3% 95.9%;
+  --accent-foreground: 220.9 39.3% 11%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
   
-  /* Primary colors */
-  --primary: 142.1 76.2% 36.3%;
-  --primary-foreground: 355.7 100% 97.3%;
+  /* Z-index system */
+  --z-base: 1;
+  --z-theme-toggle: 15;
+  --z-navbar: 20;
+  --z-modal: 30;
+  --z-dropdown: 40;
+  --z-tooltip: 50;
   
-  /* Secondary colors */
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  
-  /* Muted colors */
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  
-  /* Accent colors */
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  
-  /* Destructive colors */
-  --destructive: 0 100% 50%;
-  --destructive-foreground: 210 40% 98%;
-  
-  /* Border */
-  --border: 214.3 31.8% 91.4%;
-  
-  /* Input background */
-  --input: 214.3 31.8% 91.4%;
-  
-  /* Ring color for focus states */
-  --ring: 142.1 76.2% 36.3%;
-  
-  /* Radius */
-  --radius-sm: 0.125rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  
-  /* Spacing */
+  /* Spacing system */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -58,81 +62,89 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+  --space-16: 4rem;
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* Shadow system */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   
-  /* Z-index layers */
-  --z-navbar: 40;
-  --z-dropdown: 50;
-  --z-tooltip: 60;
-  --z-modal: 70;
-  
-  /* Touch target size for mobile */
+  /* Touch target size (WCAG compliant) */
   --touch-target-size: 44px;
 }
 
+/* Dark mode overrides */
 .dark {
-  /* Base colors */
-  --background: 224 71% 4%;
-  --foreground: 213 31% 91%;
+  /* Adjust carbon colors for dark mode */
+  --carbon-50-hsl: 210 25% 98%;
+  --carbon-100-hsl: 210 20% 92%;
+  --carbon-200-hsl: 214 16% 82%;
+  --carbon-300-hsl: 213 15% 74%;
+  --carbon-400-hsl: 215 13% 65%;
+  --carbon-500-hsl: 215 12% 57%;
+  --carbon-600-hsl: 215 14% 45%;
+  --carbon-700-hsl: 215 18% 37%;
+  --carbon-800-hsl: 217 22% 27%;
+  --carbon-900-hsl: 222 24% 20%;
+  --carbon-950-hsl: 229 34% 15%;
+
+  /* Override shadcn colors for dark mode */
+  --background: 224 71.4% 4.1%;
+  --foreground: 210 20% 98%;
+  --card: 224 71.4% 4.1%;
+  --card-foreground: 210 20% 98%;
+  --popover: 224 71.4% 4.1%;
+  --popover-foreground: 210 20% 98%;
+  --primary: var(--primary-hue) var(--primary-saturation) calc(var(--primary-lightness) + 10%);
+  --primary-foreground: 210 20% 98%;
+  --secondary: 215 27.9% 16.9%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 215 27.9% 16.9%;
+  --muted-foreground: 217.9 10.6% 64.9%;
+  --accent: 215 27.9% 16.9%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 215 27.9% 16.9%;
+  --input: 215 27.9% 16.9%;
+  --ring: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
   
-  /* Card colors */
-  --card: 224 71% 7%;
-  --card-foreground: 213 31% 91%;
-  
-  /* Popover colors */
-  --popover: 224 71% 8%;
-  --popover-foreground: 215 20.2% 65.1%;
-  
-  /* Primary colors - green in dark mode */
-  --primary: 142.1 70.6% 45.3%;
-  --primary-foreground: 144.9 80.4% 10%;
-  
-  /* Secondary colors */
-  --secondary: 222.2 47.4% 11.2%;
-  --secondary-foreground: 210 40% 98%;
-  
-  /* Muted colors */
-  --muted: 223 47% 11%;
-  --muted-foreground: 215.4 16.3% 56.9%;
-  
-  /* Accent colors */
-  --accent: 216 34% 17%;
-  --accent-foreground: 210 40% 98%;
-  
-  /* Destructive colors */
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 210 40% 98%;
-  
-  /* Border */
-  --border: 216 34% 17%;
-  
-  /* Input background */
-  --input: 216 34% 17%;
-  
-  /* Ring color for focus states */
-  --ring: 142.1 76.2% 36.3%;
-  
-  /* Carbon Design System colors for dark mode */
-  --carbon-50: hsl(210, 20%, 98%);
-  --carbon-100: hsl(220, 14%, 96%);
-  --carbon-200: hsl(220, 13%, 91%);
-  --carbon-300: hsl(216, 12%, 84%);
-  --carbon-400: hsl(218, 11%, 65%);
-  --carbon-500: hsl(220, 9%, 46%);
-  --carbon-600: hsl(215, 14%, 34%);
-  --carbon-700: hsl(216, 15%, 24%);
-  --carbon-800: hsl(215, 16%, 18%);
-  --carbon-900: hsl(215, 28%, 12%);
-  --carbon-950: hsl(224, 71%, 4%);
-  
-  /* Shadows for dark mode */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  /* Adjust shadows for dark mode */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.4), 0 2px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.5), 0 4px 10px -4px rgba(0, 0, 0, 0.4);
+}
+
+/* Carbon color mapping for utility classes */
+:root {
+  --carbon-50: hsl(var(--carbon-50-hsl));
+  --carbon-100: hsl(var(--carbon-100-hsl));
+  --carbon-200: hsl(var(--carbon-200-hsl));
+  --carbon-300: hsl(var(--carbon-300-hsl));
+  --carbon-400: hsl(var(--carbon-400-hsl));
+  --carbon-500: hsl(var(--carbon-500-hsl));
+  --carbon-600: hsl(var(--carbon-600-hsl));
+  --carbon-700: hsl(var(--carbon-700-hsl));
+  --carbon-800: hsl(var(--carbon-800-hsl));
+  --carbon-900: hsl(var(--carbon-900-hsl));
+  --carbon-950: hsl(var(--carbon-950-hsl));
+}
+
+/* Media query variables */
+@custom-media --mobile (max-width: 640px);
+@custom-media --tablet (max-width: 768px);
+@custom-media --desktop (min-width: 769px);
+
+/* Mobile specific overrides */
+@media (max-width: 640px) {
+  :root {
+    /* Slightly larger touch targets on mobile */
+    --touch-target-size: 48px;
+    
+    /* Adjust form element sizing for mobile */
+    --form-height: 46px;
+    --form-padding-y: 10px;
+    --form-padding-x: 14px;
+    --form-text: 16px;
+  }
 }

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
@@ -6,30 +5,18 @@ import App from './App';
 import errorTrackingService from './services/errorTrackingService';
 import performanceMonitoringService from './services/performanceMonitoringService';
 import { CachedCalculationsProvider } from './contexts/CachedCalculationsContext';
-
-// Import styles before rendering
 import './index.css';
 
 // Prevent theme flickering by setting initial theme before render
 const setInitialTheme = () => {
-  try {
-    const storedTheme = localStorage.getItem('carbon-construct-ui-theme');
-    const prefersDark = window.matchMedia && 
-      window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    const isDark = storedTheme === 'dark' || 
-      (storedTheme === 'system' && prefersDark) || 
-      (!storedTheme && prefersDark);
-    
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.body.style.backgroundColor = 'hsl(220, 14%, 10%)';
-      document.body.style.color = 'hsl(0, 0%, 98%)';
-    }
-    console.log('Initial theme set:', isDark ? 'dark' : 'light');
-  } catch (err) {
-    console.error('Error setting initial theme:', err);
-    // Fallback to light theme if there's an error
+  const storedTheme = localStorage.getItem('carbon-construct-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = storedTheme === 'dark' || (storedTheme === 'system' && prefersDark) || (!storedTheme && prefersDark);
+  
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+    document.body.style.backgroundColor = 'hsl(220, 14%, 10%)';
+    document.body.style.color = 'hsl(123, 30%, 92%)';
   }
 };
 
@@ -67,10 +54,9 @@ try {
     throw new Error('Root element not found');
   }
   
-  console.log('Creating React root...');
   const root = ReactDOM.createRoot(rootElement);
   
-  // Mount React app with priority
+  // Mount React app with priority - removed the BrowserRouter here since it exists in App.tsx
   root.render(
     <React.StrictMode>
       <HelmetProvider>
@@ -80,7 +66,6 @@ try {
       </HelmetProvider>
     </React.StrictMode>
   );
-  console.log('React app mounted successfully');
 
   // Initialize non-critical services after main render
   // Use requestIdleCallback only if it's available
@@ -113,4 +98,4 @@ try {
 }
 
 // Add console log to verify app is mounting correctly
-console.log('Application initialization complete');
+console.log('Application initialized and mounting...');
