@@ -1,6 +1,7 @@
 
 // Refactored for clarity and separation of concerns
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import NavbarMainSection from "./NavbarMainSection";
 import NavbarContainer from "@/components/navbar/NavbarContainer";
 import MobileMenu from "@/components/navbar/MobileMenu";
@@ -19,9 +20,17 @@ const Navbar = () => {
   const { navLinks } = useUserNavLinks();
   const isDarkMode = useIsDarkMode();
   const [navbarInitialized, setNavbarInitialized] = useState(false);
+  const location = useLocation();
 
   useNavbarHeight("64px");
   useMobileMenu(isMenuOpen, setIsMenuOpen);
+  
+  // Get current page title based on location
+  const getCurrentPageTitle = () => {
+    const currentPath = location.pathname;
+    const currentNavLink = navLinks.find(link => link.path === currentPath);
+    return currentNavLink?.title || "CarbonConstruct";
+  };
   
   // Initialize navbar after a brief delay to avoid hydration issues
   useEffect(() => {
@@ -50,7 +59,11 @@ const Navbar = () => {
         isDarkMode={isDarkMode}
       >
         <div className="container mx-auto px-4 md:px-6">
-          <NavbarMainSection isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+          <NavbarMainSection 
+            isMenuOpen={isMenuOpen} 
+            setIsMenuOpen={setIsMenuOpen} 
+            pageTitle={getCurrentPageTitle()} 
+          />
           <div className="mobile-menu-container">
             <MobileMenu
               isOpen={isMenuOpen}
