@@ -15,7 +15,7 @@ const Footer = () => {
               </div>
               <span className="text-xl font-semibold">CarbonConstruct</span>
             </div>
-            <p className="text-sm text-muted-foreground mb-4 max-w-xs">
+            <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto text-center">
               Track, manage, and reduce your construction project's carbon footprint with our innovative SaaS platform.
             </p>
             <div className="flex justify-center space-x-4">
@@ -67,11 +67,11 @@ const Footer = () => {
         
         <div className="mt-12 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground text-center md:text-left">
               © {new Date().getFullYear()} CarbonConstruct. All rights reserved.
             </p>
             <div className="mt-4 md:mt-0">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground text-center md:text-right">
                 Building a sustainable future, one project at a time.
               </p>
             </div>

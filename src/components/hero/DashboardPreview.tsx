@@ -23,11 +23,11 @@ const DashboardPreview = ({ onLoad }: DashboardPreviewProps) => {
       onViewportEnter={handleContentLoad}
     >
       <motion.div 
-        className="relative w-full max-w-md"
+        className="relative w-full"
         variants={dashboardVariants}
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-carbon-300 to-carbon-100 dark:from-carbon-700 dark:to-carbon-500 rounded-2xl transform rotate-1"></div>
-        <div className="relative bg-white dark:bg-gray-800 border border-border rounded-2xl shadow-lg p-6 transform -rotate-1 h-full">
+        <div className="absolute inset-0 bg-gradient-to-tr from-carbon-300 to-carbon-100 dark:from-carbon-700 dark:to-carbon-500 rounded-xl transform rotate-1"></div>
+        <div className="relative bg-white dark:bg-gray-800 border border-border rounded-xl shadow-lg p-8 transform -rotate-1 h-full">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Project Carbon Dashboard</h3>
             <BarChart3 className="h-5 w-5 text-carbon-500" />
