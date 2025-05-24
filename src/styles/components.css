@@ -12,9 +12,9 @@
          selection:text-carbon-950 dark:selection:text-carbon-50;
 }
 
-/* Card styling - ensure solid backgrounds */
+/* Card styling - ensure solid backgrounds with rounded corners */
 .card {
-  @apply bg-card border border-border shadow-sm;
+  @apply bg-card border border-border shadow-sm rounded-xl;
 }
 
 /* Remove backdrop filters for better compatibility */
@@ -23,40 +23,40 @@
   @apply bg-background/95 dark:bg-background/95;
 }
 
-/* Force solid backgrounds on common UI components */
+/* Force solid backgrounds on common UI components with rounded corners */
 .dropdown-menu,
 .popover,
 .dialog,
 .sheet,
 [data-radix-popper-content-wrapper] > * {
-  @apply bg-popover border border-border !important;
+  @apply bg-popover border border-border rounded-xl !important;
   backdrop-filter: none !important;
   z-index: var(--z-dropdown);
 }
 
 /* Ensure sections with secondary backgrounds are solid */
 [class*="bg-secondary"] {
-  @apply bg-secondary !important;
+  @apply bg-secondary rounded-xl !important;
 }
 
-/* Make dialogs completely opaque */
+/* Make dialogs completely opaque with rounded corners */
 [role="dialog"],
 div[data-state] {
-  @apply bg-card !important;
+  @apply bg-card rounded-xl !important;
   backdrop-filter: none !important;
 }
 
 /* Specifically target Radix UI Dialog content */
 [data-radix-popper-content-wrapper],
 [data-state] > [role="dialog"] {
-  @apply bg-popover !important;
+  @apply bg-popover rounded-xl !important;
   box-shadow: var(--shadow-md) !important;
   z-index: var(--z-dropdown);
 }
 
 /* Details button styling */
 .details-btn {
-  @apply bg-primary hover:bg-primary/90 border-primary dark:bg-primary dark:hover:bg-primary/90 dark:border-primary text-primary-foreground transition-colors;
+  @apply bg-primary hover:bg-primary/90 border-primary dark:bg-primary dark:hover:bg-primary/90 dark:border-primary text-primary-foreground transition-colors rounded-xl;
 }
 
 /* Force all backdrop blur elements fully opaque */
@@ -67,7 +67,7 @@ div[data-state] {
 
 /* Improve dropdown menu item visibility */
 [data-radix-dropdown-menu-content] {
-  @apply bg-popover !important;
+  @apply bg-popover rounded-xl !important;
 }
 
 /* Fix transparency in content containers */
@@ -75,28 +75,15 @@ div[data-state] {
   @apply bg-transparent !important;
 }
 
-/* Consistent decorative green lines - only apply where semantically appropriate */
-.page-header-with-accent {
-  position: relative;
-}
-
-.page-header-with-accent::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -1rem;
-  width: 6px;
-  height: 3.5rem;
-  background: linear-gradient(to bottom, #16a34a, #15803d);
-  border-radius: 3px;
-}
+/* REMOVE decorative green lines - they should only appear where specifically added */
+/* Remove the automatic ::before pseudo-elements that were adding random green lines */
 
 /* Improve mobile touch targets */
 @media (max-width: 640px) {
   button, 
   a.button,
   .interactive-element {
-    @apply min-h-[44px] min-w-[44px];
+    @apply min-h-[44px] min-w-[44px] rounded-xl;
   }
   
   /* Improve spacing between form elements */
@@ -111,19 +98,19 @@ div[data-state] {
   
   /* Make card padding consistent */
   .card {
-    @apply p-4;
+    @apply p-4 rounded-xl;
   }
   
   /* Improve spacing for form fields on mobile */
   input,
   select,
   textarea {
-    @apply text-base py-2.5;
+    @apply text-base py-2.5 rounded-xl;
   }
   
   /* Fix touch target size for interactive elements */
   .interactive-control {
-    @apply min-h-[44px];
+    @apply min-h-[44px] rounded-xl;
   }
   
   /* Ensure labels are visible */
@@ -133,7 +120,7 @@ div[data-state] {
 
   /* Make dialog content better fit mobile screens */
   [role="dialog"] {
-    @apply p-4;
+    @apply p-4 rounded-xl;
     width: calc(100% - 32px) !important;
     max-width: 500px;
   }
@@ -150,7 +137,7 @@ div[data-state] {
   
   /* Improve tooltip readability */
   [data-tooltip] {
-    @apply text-sm max-w-[250px];
+    @apply text-sm max-w-[250px] rounded-xl;
   }
 }
 

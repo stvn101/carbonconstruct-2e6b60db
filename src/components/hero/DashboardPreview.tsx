@@ -15,7 +15,7 @@ const DashboardPreview = ({ onLoad }: DashboardPreviewProps) => {
 
   return (
     <motion.div 
-      className="md:w-1/2"
+      className="md:w-1/2 flex justify-end"
       initial="initial"
       whileInView="animate"
       viewport={{ once: true, amount: 0.3 }}
@@ -23,7 +23,7 @@ const DashboardPreview = ({ onLoad }: DashboardPreviewProps) => {
       onViewportEnter={handleContentLoad}
     >
       <motion.div 
-        className="relative"
+        className="relative max-w-md w-full"
         variants={dashboardVariants}
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-carbon-300 to-carbon-100 dark:from-carbon-700 dark:to-carbon-500 rounded-2xl transform rotate-1"></div>
@@ -34,7 +34,7 @@ const DashboardPreview = ({ onLoad }: DashboardPreviewProps) => {
           </div>
           <div className="space-y-4">
             <motion.div 
-              className="bg-secondary/50 p-4 rounded-lg"
+              className="bg-secondary/50 p-4 rounded-xl"
               initial={{ width: "0%" }}
               whileInView={{ width: "100%" }}
               viewport={{ once: true }}
@@ -64,7 +64,7 @@ const DashboardPreview = ({ onLoad }: DashboardPreviewProps) => {
               ].map((item, index) => (
                 <motion.div 
                   key={item.title}
-                  className="bg-secondary/50 p-3 rounded-lg"
+                  className="bg-secondary/50 p-3 rounded-xl"
                   variants={fadeInUp}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
                   whileHover={{ 

@@ -17,34 +17,29 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen, pageTitle = "CarbonConst
   const { navLinks } = useUserNavLinks();
 
   return (
-    <div className="flex items-center justify-between h-[56px] w-full mx-auto px-6">
-      {/* Logo on the left with consistent margin */}
+    <div className="flex items-center justify-between h-[64px] w-full mx-auto px-6">
+      {/* Logo on the left - made 50% larger */}
       <div className="flex items-center">
-        <NavbarLogo />
-        
-        {/* Page title - visible on desktop */}
-        <h1 className="ml-4 hidden md:block text-lg font-medium text-foreground">
-          {pageTitle}
-        </h1>
+        <div className="scale-150 origin-left">
+          <NavbarLogo />
+        </div>
       </div>
       
       {/* Navigation and sign-in for desktop with proper alignment */}
-      <div className="hidden md:flex items-center space-x-2 flex-1 justify-end">
+      <div className="hidden md:flex items-center space-x-6 flex-1 justify-end">
         <div className="flex items-center">
           <NavbarDesktopItems navLinks={navLinks} />
         </div>
-        <div className="pl-6">
+        <div className="scale-150 origin-right">
           <NavbarLinks />
         </div>
       </div>
       
       {/* Navigation and toggle for mobile */}
-      <div className="md:hidden flex items-center">
-        {/* Mobile page title */}
-        <h1 className="text-base font-medium text-foreground mr-4">
-          {pageTitle}
-        </h1>
-        <NavbarLinks />
+      <div className="md:hidden flex items-center space-x-3">
+        <div className="scale-125">
+          <NavbarLinks />
+        </div>
         <NavbarMobileToggle isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       </div>
     </div>
