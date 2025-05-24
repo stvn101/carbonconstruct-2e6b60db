@@ -11,18 +11,23 @@ const CalculatorDemoVideo = () => {
         <p className="text-md md:text-lg text-muted-foreground mb-8 text-center max-w-xl">
           Watch a quick walkthrough of our carbon calculator in action — calculate emissions from materials, transport, and energy to see your project's full carbon footprint.
         </p>
-        {/* Embedded video (replace src with your own video or YouTube link if you want) */}
+        
+        {/* Fixed video container with proper Edge browser support */}
         <div className="w-full max-w-2xl rounded-lg overflow-hidden shadow-lg">
-          <div className="aspect-w-16 aspect-h-9 bg-black">
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
             <iframe
               title="Carbon Calculator Demo"
               src="https://www.youtube.com/embed/do1AHeLpAsw"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="w-full h-64 md:h-96"
-              style={{ border: "none" }}
+              className="absolute top-0 left-0 w-full h-full border-0 rounded-lg"
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                borderRadius: '0.5rem'
+              }}
             />
-            {/* Updated with user provided video */}
           </div>
         </div>
       </div>
@@ -31,4 +36,3 @@ const CalculatorDemoVideo = () => {
 };
 
 export default CalculatorDemoVideo;
-

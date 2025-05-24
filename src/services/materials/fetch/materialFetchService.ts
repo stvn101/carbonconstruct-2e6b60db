@@ -19,7 +19,7 @@ export async function fetchMaterials(forceRefresh = true): Promise<ExtendedMater
   try {
     console.log(`Fetching materials (forceRefresh: ${forceRefresh})`);
     
-    // Try multiple strategies in sequence
+    // Try multiple strategies in sequence with materials_view as priority
     const materials = await fetchWithStrategies();
     
     if (materials && materials.length > 0) {
@@ -41,50 +41,49 @@ export async function fetchMaterials(forceRefresh = true): Promise<ExtendedMater
 }
 
 /**
- * Try multiple strategies to fetch materials
+ * Try multiple strategies to fetch materials - Updated to prioritize materials_view
  */
 async function fetchWithStrategies(): Promise<ExtendedMaterialData[]> {
   let materials: ExtendedMaterialData[] = [];
-  let attempts = 0;
   let errors = [];
   
-  // Strategy 1: Try materials_view first
+  // PRIORITY STRATEGY: Try materials_view first (contains all 153 materials)
   try {
-    console.log('Strategy 1: Fetching from materials_view');
+    console.log('Priority Strategy: Fetching from materials_view (153 materials expected)');
     materials = await fetchMaterialsFromView();
     if (materials && materials.length > 0) {
-      console.log(`Strategy 1 successful: Got ${materials.length} materials`);
+      console.log(`Priority Strategy successful: Got ${materials.length} materials from materials_view`);
       return materials;
     }
   } catch (error) {
-    console.warn('Strategy 1 failed:', error);
-    errors.push({ strategy: 'materials_view', error });
+    console.warn('Priority Strategy (materials_view) failed:', error);
+    errors.push({ strategy: 'materials_view_priority', error });
   }
   
-  // Strategy 2: Try direct materials table access
+  // Fallback Strategy 1: Try materials_backup table (should have 153 materials)
   try {
-    console.log('Strategy 2: Fetching directly from materials table');
-    materials = await fetchMaterialsFromTable();
-    if (materials && materials.length > 0) {
-      console.log(`Strategy 2 successful: Got ${materials.length} materials`);
-      return materials;
-    }
-  } catch (error) {
-    console.warn('Strategy 2 failed:', error);
-    errors.push({ strategy: 'materials_table', error });
-  }
-  
-  // Strategy 3: Try materials_backup table
-  try {
-    console.log('Strategy 3: Fetching from materials_backup table');
+    console.log('Fallback Strategy 1: Fetching from materials_backup table');
     materials = await fetchMaterialsFromBackupTable();
     if (materials && materials.length > 0) {
-      console.log(`Strategy 3 successful: Got ${materials.length} materials`);
+      console.log(`Fallback Strategy 1 successful: Got ${materials.length} materials from backup`);
       return materials;
     }
   } catch (error) {
-    console.warn('Strategy 3 failed:', error);
+    console.warn('Fallback Strategy 1 (materials_backup) failed:', error);
     errors.push({ strategy: 'materials_backup', error });
+  }
+  
+  // Fallback Strategy 2: Try direct materials table access (70 materials)
+  try {
+    console.log('Fallback Strategy 2: Fetching directly from materials table');
+    materials = await fetchMaterialsFromTable();
+    if (materials && materials.length > 0) {
+      console.log(`Fallback Strategy 2 successful: Got ${materials.length} materials from main table`);
+      return materials;
+    }
+  } catch (error) {
+    console.warn('Fallback Strategy 2 (materials_table) failed:', error);
+    errors.push({ strategy: 'materials_table', error });
   }
   
   // Log detailed errors to help diagnose the issue
@@ -113,6 +112,7 @@ export async function fetchMaterialsFromView(): Promise<ExtendedMaterialData[]> 
       return [];
     }
 
+    console.log(`Successfully fetched ${data.length} materials from materials_view`);
     // Convert the data to the expected format
     return processAndValidateMaterials(data);
   } catch (error) {
@@ -152,6 +152,7 @@ export async function fetchMaterialsFromTable(): Promise<ExtendedMaterialData[]>
       return [];
     }
 
+    console.log(`Successfully fetched ${data.length} materials from materials table`);
     // Map data from materials table to ExtendedMaterialData format
     return data.map(item => ({
       id: item.id.toString(),
@@ -193,6 +194,7 @@ export async function fetchMaterialsFromBackupTable(): Promise<ExtendedMaterialD
       return [];
     }
 
+    console.log(`Successfully fetched ${data.length} materials from materials_backup`);
     // Process the backup table data
     return processAndValidateMaterials(data);
   } catch (error) {
@@ -677,24 +679,11 @@ function generateFallbackMaterials(): Promise<ExtendedMaterialData[]> {
           sustainabilityScore: 89,
           recyclability: 'Medium',
           alternativeTo: 'concrete',
-          category: 'Concrete',
-          description: 'Concrete alternative using industrial byproducts instead of Portland cement, reducing carbon emissions.',
+          category: 'Structural',
+          description: 'Made from industrial waste materials like fly ash, offering superior durability and lower carbon footprint.',
           notes: ''
         }
       );
-      
-      // Cache the generated materials
-      cacheMaterials(materials).catch(console.error);
-      
-      // Display a toast notification to inform users we're using fallback data
-      try {
-        toast.info("Using local material database. Some features may be limited.", {
-          id: "fallback-materials-notice",
-          duration: 5000
-        });
-      } catch (error) {
-        console.warn("Could not display toast notification:", error);
-      }
       
       resolve(materials);
     }, DEMO_DELAY);
