@@ -9,9 +9,10 @@ import { useUserNavLinks } from "@/hooks/useUserNavLinks";
 interface NavbarMainSectionProps {
   isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
+  pageTitle?: string;
 }
 
-const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps) => {
+const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen, pageTitle = "CarbonConstruct" }: NavbarMainSectionProps) => {
   const isMobile = useIsMobile();
   const { navLinks } = useUserNavLinks();
 
@@ -20,6 +21,11 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
       {/* Logo on the left with consistent margin */}
       <div className="flex items-center">
         <NavbarLogo />
+        
+        {/* Page title - visible on desktop */}
+        <h1 className="ml-4 hidden md:block text-lg font-medium text-foreground">
+          {pageTitle}
+        </h1>
       </div>
       
       {/* Navigation and sign-in for desktop with proper alignment */}
@@ -34,6 +40,10 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen }: NavbarMainSectionProps
       
       {/* Navigation and toggle for mobile */}
       <div className="md:hidden flex items-center">
+        {/* Mobile page title */}
+        <h1 className="text-base font-medium text-foreground mr-4">
+          {pageTitle}
+        </h1>
         <NavbarLinks />
         <NavbarMobileToggle isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       </div>

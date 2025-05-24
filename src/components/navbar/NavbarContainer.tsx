@@ -6,7 +6,7 @@ import { useTheme } from "@/components/ThemeProvider";
 interface NavbarContainerProps {
   children: React.ReactNode;
   isPremiumUser: boolean;
-  isDarkMode?: boolean; // Added isDarkMode as an optional prop
+  isDarkMode?: boolean;
 }
 
 const NavbarContainer = ({ children, isPremiumUser, isDarkMode }: NavbarContainerProps) => {
@@ -34,7 +34,7 @@ const NavbarContainer = ({ children, isPremiumUser, isDarkMode }: NavbarContaine
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
     >
-      <div className="container mx-auto px-4">
+      <div className="w-full">
         {children}
       </div>
     </motion.nav>
