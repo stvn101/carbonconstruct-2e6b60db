@@ -6,6 +6,7 @@ import GrokChat from "@/components/grok/GrokChat";
 import GrokConfig from "@/components/grok/GrokConfig";
 import { useA11y } from "@/hooks/useA11y";
 import { Shield, MessageSquare, Settings, BarChart3 } from "lucide-react";
+import Footer from "@/components/Footer";
 
 function GrokAIAssistant() {
   // Set page title and a11y features
@@ -62,6 +63,7 @@ function GrokAIAssistant() {
             </TabsContent>
           </Tabs>
         </main>
+        <Footer />
       </div>
     </GrokProvider>
   );

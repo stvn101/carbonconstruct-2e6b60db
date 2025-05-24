@@ -20,7 +20,7 @@ const NavbarContainer = ({ children, isPremiumUser, isDarkMode }: NavbarContaine
   
   return (
     <motion.nav 
-      className={`py-4 border-b fixed top-0 w-full z-navbar transition-all duration-300 ${
+      className={`py-4 border-b fixed top-0 left-0 right-0 w-full z-navbar transition-all duration-300 ${
         scrolled 
           ? "border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-sm" 
           : "border-transparent bg-background"
@@ -34,9 +34,7 @@ const NavbarContainer = ({ children, isPremiumUser, isDarkMode }: NavbarContaine
       }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
     >
-      <div className="w-full">
-        {children}
-      </div>
+      {children}
     </motion.nav>
   );
 };

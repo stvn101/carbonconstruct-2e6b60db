@@ -17,7 +17,7 @@ const NavbarMainSection = ({ isMenuOpen, setIsMenuOpen, pageTitle = "CarbonConst
   const { navLinks } = useUserNavLinks();
 
   return (
-    <div className="flex items-center justify-between h-[56px] max-w-[1400px] mx-auto w-full px-6">
+    <div className="flex items-center justify-between h-[56px] w-full mx-auto px-6">
       {/* Logo on the left with consistent margin */}
       <div className="flex items-center">
         <NavbarLogo />
