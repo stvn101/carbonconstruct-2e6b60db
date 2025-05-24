@@ -12,3 +12,45 @@
 @import './responsive.css';
 @import './light-mode/auth.css';
 
+/* Mobile-specific safe area utilities */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Enhanced responsive utilities */
+@media (max-width: 640px) {
+  .mobile-full-width {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .mobile-py {
+    padding-top: 1.5rem;
+    padding-bottom: 5rem; /* Extra padding to account for mobile navigation */
+  }
+}
+
+/* Improved tap target sizes for mobile */
+@media (max-width: 640px) {
+  button, 
+  .button, 
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input, 
+  select, 
+  textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+}

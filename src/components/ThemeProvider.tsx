@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -33,6 +34,12 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
+    
+    // Add data-theme attribute for better CSS targeting
+    root.setAttribute('data-theme', theme === 'system' 
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : theme
+    );
 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -79,6 +86,7 @@ export function ThemeProvider({
         if (mediaQuery.matches) {
           root.classList.remove("light");
           root.classList.add("dark");
+          root.setAttribute('data-theme', 'dark');
           document.body.classList.add("dark-mode-body");
           // Use our theme colors for background and text
           document.body.style.backgroundColor = "hsl(210, 11%, 15%)"; // #212529
@@ -86,6 +94,7 @@ export function ThemeProvider({
         } else {
           root.classList.remove("dark");
           root.classList.add("light");
+          root.setAttribute('data-theme', 'light');
           document.body.classList.remove("dark-mode-body");
           document.body.style.backgroundColor = "";
           document.body.style.color = "";
