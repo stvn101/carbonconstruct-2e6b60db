@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
@@ -99,7 +98,29 @@ const HeroContent = () => {
     console.log("🔘 Learn More button clicked, attempting to scroll to features section");
     
     // 1. Try to scroll directly first as immediate feedback
-    directScrollToFeatures();
+    setTimeout(() => {
+      try {
+        // Try to find the element by id
+        const element = document.getElementById('features') || 
+                         document.querySelector('.features-section') || 
+                         document.querySelector('[data-section="features"]');
+                         
+        if (element) {
+          console.log("📍 Found features section, scrolling directly");
+          const yOffset = -100; // Adjusted offset
+          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          
+          window.scrollTo({
+            top: y,
+            behavior: 'smooth'
+          });
+        } else {
+          console.error("❌ Could not find features section for direct scroll");
+        }
+      } catch (error) {
+        console.error("❌ Error in direct scroll:", error);
+      }
+    }, 1500);
     
     // 2. Also use enhanced scrollToElement with better defaults for lazy-loaded content
     scrollToElement('features', { 
@@ -108,27 +129,6 @@ const HeroContent = () => {
       delay: 350,         // Increased delay between attempts
       initialDelay: 1500  // Much longer initial delay for lazy-loaded components to render (1.5 second)
     })(e);
-    
-    // 3. Final fallback - after a delay, try to find and scroll to any element we can
-    setTimeout(() => {
-      const fallbackElements = [
-        document.getElementById('features'),
-        document.querySelector('.features-section'),
-        document.querySelector('[data-section="features"]'),
-        document.querySelector('.features-section-loaded'),
-        document.getElementById('features-inner'),
-        document.getElementById('features-heading'),
-        document.getElementById('features-content')
-      ];
-      
-      for (const element of fallbackElements) {
-        if (element) {
-          console.log("🆘 Using fallback scroll method");
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          break;
-        }
-      }
-    }, 2000);
   };
 
   const handleTryCalculator = () => {
@@ -145,10 +145,10 @@ const HeroContent = () => {
     >
       <div className="text-center flex flex-col items-center justify-center h-full">
         <motion.h1 
-          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight gradient-heading text-center"
+          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-center"
           variants={fadeInUp}
         >
-          <span className="text-foreground dark:text-foreground">Build Greener, </span>
+          <span className="text-foreground dark:text-foreground">Build Greener, </span> 
           <br />
           <span className="text-carbon-700 dark:text-carbon-300">Measure Smarter</span>
         </motion.h1>
