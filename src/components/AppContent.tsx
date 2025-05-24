@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import ErrorBoundaryWrapper from './error/ErrorBoundaryWrapper';
+import ErrorBoundary from './ErrorBoundary';
 import RouteChangeTracker from './RouteChangeTracker';
 import SkipToContent from './SkipToContent';
 import { useAccessibility } from '../hooks/useAccessibility';
@@ -42,7 +42,7 @@ export const AppContent: React.FC = () => {
       <div className="flex flex-col min-h-screen">
         <SkipToContent />
         <RouteChangeTracker />
-        <ErrorBoundaryWrapper 
+        <ErrorBoundary 
           feature="Application Routes"
           onReset={() => {
             // Force page reload on critical error
@@ -71,7 +71,7 @@ export const AppContent: React.FC = () => {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </ErrorBoundaryWrapper>
+        </ErrorBoundary>
         
         {/* Offline status indicator */}
         <OfflineStatusIndicator />
