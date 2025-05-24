@@ -27,15 +27,22 @@ export const OfflineStatusIndicator: React.FC = () => {
   
   return (
     <div 
-      className={`fixed bottom-20 sm:bottom-4 left-4 right-4 sm:left-auto sm:w-80 p-4 rounded-lg shadow-lg z-50 flex items-center justify-between ${
-        isOffline ? 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-100' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100'
-      }`}
+      className={`fixed z-50 p-4 rounded-lg shadow-lg
+        ${isOffline 
+          ? 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-100' 
+          : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100'
+        }
+        bottom-20 sm:bottom-4 left-4 right-4 sm:left-auto sm:w-80
+        max-w-full mx-auto sm:mx-0
+        flex items-center justify-between`}
+      role="alert"
+      aria-live="polite"
     >
       <div className="flex items-center space-x-3">
         {isOffline ? (
-          <WifiOff className="h-5 w-5" />
+          <WifiOff className="h-5 w-5 flex-shrink-0" />
         ) : (
-          <Wifi className="h-5 w-5" />
+          <Wifi className="h-5 w-5 flex-shrink-0" />
         )}
         <div>
           <p className="font-medium">
@@ -61,6 +68,7 @@ export const OfflineStatusIndicator: React.FC = () => {
         <button 
           onClick={() => setDismissed(true)} 
           className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+          aria-label="Dismiss notification"
         >
           <XCircle className="h-5 w-5" />
         </button>

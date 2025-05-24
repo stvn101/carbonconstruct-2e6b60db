@@ -17,7 +17,7 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-x-0 top-16 z-40 md:hidden px-4 pb-6 pt-2 bg-background/95 backdrop-blur-sm border-b border-border/50 shadow-sm"
+          className="fixed inset-x-0 top-16 z-40 md:hidden px-4 pb-6 pt-2 bg-background/95 backdrop-blur-sm border-b border-border/50 shadow-sm overflow-y-auto max-h-[80vh]"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
@@ -26,7 +26,7 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
           aria-modal="true"
           aria-label="Mobile navigation menu"
         >
-          <nav className="flex flex-col space-y-1">
+          <nav className="flex flex-col space-y-1 py-2">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               
@@ -35,8 +35,8 @@ const MobileMenu = ({ isOpen, navLinks, onClose }: MobileMenuProps) => {
                   key={link.path}
                   to={link.path} 
                   className={cn(
-                    "px-4 py-3 text-foreground/80 hover:text-foreground transition-colors rounded-md",
-                    "hover:bg-accent hover:text-foreground",
+                    "flex items-center px-4 py-3 text-foreground/80 hover:text-foreground transition-colors rounded-md",
+                    "hover:bg-accent hover:text-foreground min-h-[44px]",
                     isActive && "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-medium",
                     link.premium && "premium-feature"
                   )}

@@ -79,8 +79,8 @@ export const AppContent: React.FC = () => {
         {/* Add mobile navigation for small screens */}
         <MobileNavigation />
         
-        {/* Add bottom padding on mobile to account for navigation */}
-        <div className={`pb-16 sm:pb-0 ${isIOS ? 'pb-[env(safe-area-inset-bottom,0)]' : ''}`}></div>
+        {/* Add responsive bottom padding on mobile to account for navigation */}
+        <div className="pb-16 sm:pb-0 safe-area-bottom"></div>
       </div>
     </CalculatorProvider>
   );

@@ -10,8 +10,11 @@ interface NavbarMenuProps {
 }
 
 const NavbarMenu = ({ navLinks, isMobile }: NavbarMenuProps) => {
+  // On mobile, we'll use a different navigation component
+  if (isMobile) return null;
+
   return (
-    <nav className="flex items-center">
+    <nav className="hidden md:flex items-center" aria-label="Main navigation">
       {navLinks.map((link) => (
         <motion.div
           key={link.path}
@@ -22,9 +25,9 @@ const NavbarMenu = ({ navLinks, isMobile }: NavbarMenuProps) => {
           <RouterNavLink 
             to={link.path} 
             className={({ isActive }) => cn(
-              "text-foreground/80 hover:text-foreground transition-colors relative px-3 py-1 mx-2 text-sm",
+              "text-foreground/80 hover:text-foreground transition-colors relative px-3 py-2 mx-1.5 text-sm",
               "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:w-0 after:bg-green-600 after:transition-all hover:after:w-full",
-              "dark:text-carbon-50 dark:hover:text-white",
+              "dark:text-carbon-50 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-background rounded",
               isActive && "text-foreground font-medium after:w-full after:bg-green-600"
             )}
           >
