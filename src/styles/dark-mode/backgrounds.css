@@ -88,3 +88,13 @@
 .dark [data-orientation] [role="tabpanel"] {
   @apply bg-transparent !important;
 }
+
+/* Ensure navbar extends full width in dark mode */
+.dark .navbar-container {
+  @apply w-full bg-gray-900;
+}
+
+/* Consistent dark mode styling for navigation */
+.dark .nav-container {
+  @apply bg-gray-900 border-gray-800;
+}
