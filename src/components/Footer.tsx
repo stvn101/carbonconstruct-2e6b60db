@@ -19,16 +19,16 @@ const Footer = () => {
               Track, manage, and reduce your construction project's carbon footprint with our innovative SaaS platform.
             </p>
             <div className="flex justify-center space-x-4">
-              <a href="https://twitter.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://twitter.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground rounded-xl">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://linkedin.com/company/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://linkedin.com/company/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground rounded-xl">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="https://facebook.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://facebook.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground rounded-xl">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://instagram.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://instagram.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground rounded-xl">
                 <Instagram className="h-5 w-5" />
               </a>
             </div>
@@ -37,30 +37,30 @@ const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Product</h3>
             <ul className="space-y-2">
-              <li><Link to="/#features" className="text-sm text-muted-foreground hover:text-foreground">Features</Link></li>
-              <li><Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</Link></li>
-              <li><Link to="/resources" className="text-sm text-muted-foreground hover:text-foreground">Resources</Link></li>
-              <li><Link to="/demo" className="text-sm text-muted-foreground hover:text-foreground">Demo</Link></li>
+              <li><Link to="/#features" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Features</Link></li>
+              <li><Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Pricing</Link></li>
+              <li><Link to="/resources" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Resources</Link></li>
+              <li><Link to="/demo" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Demo</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Company</h3>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-sm text-muted-foreground hover:text-foreground">About</Link></li>
-              <li><Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground">Blog</Link></li>
-              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground">Contact</Link></li>
-              <li><Link to="/partners" className="text-sm text-muted-foreground hover:text-foreground">Partners</Link></li>
+              <li><Link to="/about" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">About</Link></li>
+              <li><Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Blog</Link></li>
+              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Contact</Link></li>
+              <li><Link to="/partners" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Partners</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-sm font-semibold mb-4 uppercase tracking-wider">Legal</h3>
             <ul className="space-y-2">
-              <li><Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
-              <li><Link to="/terms-of-service" className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</Link></li>
-              <li><Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-foreground">Cookie Policy</Link></li>
-              <li><Link to="/data-processing" className="text-sm text-muted-foreground hover:text-foreground">Data Processing</Link></li>
+              <li><Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-service" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Terms of Service</Link></li>
+              <li><Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Cookie Policy</Link></li>
+              <li><Link to="/data-processing" className="text-sm text-muted-foreground hover:text-foreground rounded-xl">Data Processing</Link></li>
             </ul>
           </div>
         </div>

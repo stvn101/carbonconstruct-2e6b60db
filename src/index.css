@@ -87,22 +87,11 @@ body {
     outline-offset: 2px;
   }
   
-  /* Consistent heading styles */
+  /* Consistent heading styles - REMOVED ::after pseudo-elements that created green lines */
   h1, h2, h3, h4, h5, h6 {
     color: hsl(var(--foreground));
     font-weight: 600;
     line-height: 1.2;
-  }
-  
-  /* Add green underline accent to headings */
-  h1::after, h2::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, rgb(34, 197, 94), rgb(22, 163, 74));
-    margin-top: 0.3em;
-    border-radius: 2px;
   }
 }
 

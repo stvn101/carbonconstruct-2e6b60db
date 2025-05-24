@@ -1,5 +1,4 @@
 
-
 /* Gradient and headings */
 .gradient-heading {
   @apply bg-gradient-to-r from-carbon-800 via-carbon-700 to-carbon-600 bg-clip-text text-transparent dark:from-carbon-200 dark:via-carbon-300 dark:to-carbon-400 
@@ -76,12 +75,11 @@ div[data-state] {
   @apply bg-transparent !important;
 }
 
-/* COMPLETELY REMOVE all automatic pseudo-element green lines */
-/* These were causing random green lines throughout the app */
+/* COMPLETELY REMOVE all automatic pseudo-element green lines - STRENGTHENED RULES */
 *,
 *::before,
 *::after {
-  position: relative;
+  position: relative !important;
 }
 
 *::before,
@@ -91,9 +89,10 @@ div[data-state] {
   background: none !important;
   height: 0 !important;
   width: 0 !important;
+  display: none !important;
 }
 
-/* Remove any pseudo-elements that might create lines */
+/* Remove any pseudo-elements that might create lines - STRENGTHENED */
 h1::before, h1::after,
 h2::before, h2::after,
 h3::before, h3::after,
@@ -107,6 +106,10 @@ section::before, section::after,
 article::before, article::after {
   content: none !important;
   display: none !important;
+  border: none !important;
+  background: none !important;
+  height: 0 !important;
+  width: 0 !important;
 }
 
 /* Only allow green lines where explicitly defined */
@@ -202,4 +205,3 @@ article::before, article::after {
 .section-spacing {
   @apply py-8 sm:py-12;
 }
-
