@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
@@ -184,15 +185,15 @@ const HeroContent = () => {
         </motion.div>
         
         <motion.div 
-          className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center"
+          className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center w-full"
           variants={fadeInUp}
         >
           <motion.div 
-            className="flex items-center justify-center cursor-pointer"
+            className="flex items-center justify-center cursor-pointer w-full sm:w-auto"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <Link to="/construction-companies" className="flex items-center">
+            <Link to="/construction-companies" className="flex items-center bg-carbon-50 dark:bg-carbon-800 p-4 rounded-xl hover:bg-carbon-100 dark:hover:bg-carbon-700 transition-colors w-full sm:w-auto justify-center">
               <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-3 mr-3">
                 <Building2 className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
               </div>
@@ -200,11 +201,11 @@ const HeroContent = () => {
             </Link>
           </motion.div>
           <motion.div 
-            className="flex items-center justify-center cursor-pointer"
+            className="flex items-center justify-center cursor-pointer w-full sm:w-auto"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <Link to="/sustainable-building" className="flex items-center">
+            <Link to="/sustainable-building" className="flex items-center bg-carbon-50 dark:bg-carbon-800 p-4 rounded-xl hover:bg-carbon-100 dark:hover:bg-carbon-700 transition-colors w-full sm:w-auto justify-center">
               <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-3 mr-3">
                 <LeafyGreen className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
               </div>
