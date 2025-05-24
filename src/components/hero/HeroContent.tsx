@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Building2, LeafyGreen } from "lucide-react";
@@ -142,9 +143,9 @@ const HeroContent = () => {
       viewport={{ once: true, amount: 0.3 }}
       variants={staggerContainer}
     >
-      <div className="text-center">
+      <div className="text-center flex flex-col items-center justify-center h-full">
         <motion.h1 
-          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight gradient-heading"
+          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight gradient-heading text-center"
           variants={fadeInUp}
         >
           <span className="text-foreground dark:text-foreground">Build Greener, </span>
@@ -153,7 +154,7 @@ const HeroContent = () => {
         </motion.h1>
         
         <motion.p 
-          className="text-lg md:text-xl text-carbon-800 dark:text-carbon-200 mb-8 max-w-lg mx-auto"
+          className="text-lg md:text-xl text-carbon-800 dark:text-carbon-200 mb-8 max-w-lg mx-auto text-center"
           variants={fadeInUp}
         >
           Track, manage, and reduce your construction project's carbon footprint with the first SaaS platform designed specifically for construction sustainability.
@@ -181,37 +182,37 @@ const HeroContent = () => {
             Learn More
           </Button>
         </motion.div>
+        
+        <motion.div 
+          className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center"
+          variants={fadeInUp}
+        >
+          <motion.div 
+            className="flex items-center justify-center cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Link to="/construction-companies" className="flex items-center">
+              <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-3 mr-3">
+                <Building2 className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
+              </div>
+              <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">For Construction Companies</p>
+            </Link>
+          </motion.div>
+          <motion.div 
+            className="flex items-center justify-center cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Link to="/sustainable-building" className="flex items-center">
+              <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-3 mr-3">
+                <LeafyGreen className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
+              </div>
+              <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">Sustainable Building</p>
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
-      
-      <motion.div 
-        className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center"
-        variants={fadeInUp}
-      >
-        <motion.div 
-          className="flex items-center justify-center cursor-pointer"
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-        >
-          <Link to="/construction-companies" className="flex items-center">
-            <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-3 mr-3">
-              <Building2 className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
-            </div>
-            <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">For Construction Companies</p>
-          </Link>
-        </motion.div>
-        <motion.div 
-          className="flex items-center justify-center cursor-pointer"
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-        >
-          <Link to="/sustainable-building" className="flex items-center">
-            <div className="bg-carbon-100 dark:bg-carbon-700 rounded-full p-3 mr-3">
-              <LeafyGreen className="h-5 w-5 text-carbon-700 dark:text-carbon-200" />
-            </div>
-            <p className="text-sm font-medium text-carbon-800 dark:text-carbon-200">Sustainable Building</p>
-          </Link>
-        </motion.div>
-      </motion.div>
     </motion.div>
   );
 };

@@ -75,8 +75,22 @@ div[data-state] {
   @apply bg-transparent !important;
 }
 
-/* REMOVE decorative green lines - they should only appear where specifically added */
-/* Remove the automatic ::before pseudo-elements that were adding random green lines */
+/* COMPLETELY REMOVE all automatic pseudo-element green lines */
+/* These were causing random green lines throughout the app */
+* {
+  position: relative;
+}
+
+*::before,
+*::after {
+  content: none !important;
+}
+
+/* Only allow green lines where explicitly defined */
+.nav-link-active::after {
+  content: '';
+  @apply absolute bottom-0 left-2 right-2 h-0.5 bg-green-600;
+}
 
 /* Improve mobile touch targets */
 @media (max-width: 640px) {

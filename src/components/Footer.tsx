@@ -8,17 +8,17 @@ const Footer = () => {
     <footer id="contact" className="bg-background border-t border-border py-12">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <div className="flex items-center mb-4">
+          <div className="md:col-span-1 flex flex-col items-center text-center">
+            <div className="flex items-center justify-center mb-4">
               <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-carbon-600 to-carbon-400 mr-2 flex items-center justify-center">
                 <div className="h-3 w-3 bg-white rounded-full"></div>
               </div>
               <span className="text-xl font-semibold">CarbonConstruct</span>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-4 max-w-xs">
               Track, manage, and reduce your construction project's carbon footprint with our innovative SaaS platform.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex justify-center space-x-4">
               <a href="https://twitter.com/carbonconstruct" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Twitter className="h-5 w-5" />
               </a>
