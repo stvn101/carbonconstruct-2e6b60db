@@ -1,4 +1,3 @@
-
 /**
  * Simplified Material Service - Main entry point for material-related services
  */
@@ -10,7 +9,7 @@ export type { SupabaseMaterial } from './materials/materialTypes';
 export { 
   fetchMaterials, 
   fetchMaterialCategories 
-} from './materials/materialsFetchService';
+} from './materials/fetch/materialFetchService';
 
 // Re-export cache functions
 export {
@@ -31,7 +30,7 @@ export {
 // This will prime the cache when the service is first loaded
 setTimeout(() => {
   console.log("Preloading materials cache in background");
-  import('./materials/materialsFetchService')
+  import('./materials/fetch/materialFetchService')
     .then(({ fetchMaterials }) => fetchMaterials(false))
     .catch(err => console.error("Failed to preload materials cache:", err));
 }, 1000);

@@ -2,33 +2,24 @@ import { toast } from 'sonner';
 import errorTrackingService from '@/services/error/errorTrackingService';
 import { showErrorToast } from './toastHelpers';
 
-// Keep track of shown network errors to prevent duplicates
-const shownNetworkErrors = new Set<string>();
-// Cooldown period for each error type (in milliseconds)
-const ERROR_COOLDOWN = 30000; // 30 seconds
-// Track last error time
+// Track last error time to prevent spam
 const lastErrorTime: Record<string, number> = {};
+const ERROR_COOLDOWN = 5000; // 5 seconds
 
 /**
- * Handles network errors with improved messaging and deduplication
+ * Enhanced network error handler with specific error type handling
  */
 export const handleNetworkError = (error: unknown, context: string): Error => {
-  const now = Date.now();
-  
-  // Create a normalized error object
   const errorObj = error instanceof Error ? error : new Error(String(error));
+  const now = Date.now();
   
   // Track error for monitoring
   errorTrackingService.captureException(errorObj, { context });
   
-  // Handle connection errors (Failed to fetch, etc.)
-  if (errorObj.message.includes('Failed to fetch') || 
-      errorObj.message.includes('NetworkError') ||
-      errorObj.message.includes('network')) {
-    
+  // Handle network connectivity errors
+  if (errorObj.message.includes('Failed to fetch') || errorObj.message.includes('NetworkError') || !navigator.onLine) {
     const errorId = `network-${context}`;
     
-    // Check cooldown to prevent error toast spam
     if (!lastErrorTime[errorId] || now - lastErrorTime[errorId] > ERROR_COOLDOWN) {
       showErrorToast(
         "Network connection issue. Please check your internet connection.", 
@@ -36,7 +27,6 @@ export const handleNetworkError = (error: unknown, context: string): Error => {
         { duration: 5000 }
       );
       
-      // Update last shown time
       lastErrorTime[errorId] = now;
     }
     
@@ -60,7 +50,7 @@ export const handleNetworkError = (error: unknown, context: string): Error => {
     return new Error(`Timeout in ${context}: ${errorObj.message}`);
   }
   
-  // Database resource errors
+  // Handle database resource errors
   if (errorObj.message.includes('INSUFFICIENT_RESOURCES')) {
     const errorId = `db-resources-${context}`;
     

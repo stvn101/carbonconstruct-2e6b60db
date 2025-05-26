@@ -1,4 +1,3 @@
-
 /**
  * Data generation utilities for sustainability performance
  */
@@ -168,7 +167,7 @@ export function generateSampleTrendData(materialType: string): SustainabilityTre
 export async function findAlternativeMaterials(materialType: string): Promise<ExtendedMaterialData[]> {
   try {
     // Try to dynamically import material service to avoid circular dependencies
-    const { fetchMaterials } = await import('../../materials/materialsFetchService');
+    const { fetchMaterials } = await import('../../materials/fetch/materialFetchService');
     
     // Fetch all materials
     const allMaterials = await fetchMaterials(true);

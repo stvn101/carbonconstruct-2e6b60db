@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
@@ -18,11 +17,19 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        // Ensure popover fits on mobile screens and has consistent styling
+        "z-50 w-72 rounded-xl border bg-popover p-4 text-popover-foreground shadow-md outline-none",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        // Mobile optimizations
         "max-w-[calc(100vw-32px)] sm:max-w-[unset]",
-        // Improve mobile touch targets
-        "[&>*]:min-h-[36px] sm:[&>*]:min-h-0",
+        "touch-manipulation",
+        // Improved touch targets
+        "[&>*]:min-h-[44px] sm:[&>*]:min-h-0",
+        // Better mobile positioning
+        "fixed sm:absolute",
+        "left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0",
+        "bottom-[calc(100%+8px)] sm:bottom-auto",
+        // Safe area insets
+        "pb-[env(safe-area-inset-bottom,0)]",
         className
       )}
       {...props}

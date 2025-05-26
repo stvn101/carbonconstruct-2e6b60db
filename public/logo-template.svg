@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Favicon version (circles only) -->
+  <g id="favicon">
+    <!-- Background circle -->
+    <circle cx="256" cy="256" r="240" fill="#38a169"/>
+    <!-- Inner white circle -->
+    <circle cx="256" cy="256" r="120" fill="white"/>
+  </g>
+
+  <!-- Full logo version (with text) -->
+  <g id="full-logo" transform="translate(0, 0)">
+    <!-- Background circle -->
+    <circle cx="256" cy="256" r="240" fill="#38a169"/>
+    <!-- Inner white circle -->
+    <circle cx="256" cy="256" r="120" fill="white"/>
+    <!-- Text -->
+    <text x="256" y="400" 
+          font-family="Arial, sans-serif" 
+          font-size="48" 
+          fill="white" 
+          text-anchor="middle"
+          font-weight="bold">
+      CarbonConstruct
+    </text>
+  </g>
+</svg> 

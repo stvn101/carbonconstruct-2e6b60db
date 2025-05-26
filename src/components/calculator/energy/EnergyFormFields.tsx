@@ -1,12 +1,10 @@
-
 import React from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { EnergyInput } from "@/lib/carbonExports";
-import { ENERGY_FACTORS } from "@/lib/carbonData";
-import { EnergyFactorKey } from "@/lib/carbonData";
+import { ENERGY_FACTORS, EnergyFactorKey } from "@/lib/carbonFactors/energy";
 
 interface EnergyFormFieldsProps {
   energy: EnergyInput;
@@ -24,6 +22,9 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
   onUpdate
 }) => {
   const energyTypes = Object.keys(ENERGY_FACTORS);
+  
+  // Get the unit for the currently selected energy type
+  const selectedEnergyUnit = ENERGY_FACTORS[energy.type as EnergyFactorKey]?.unit || "";
   
   return (
     <div className={`grid grid-cols-1 gap-3 items-end border p-3 md:p-4 rounded-lg ${error ? "border-destructive bg-destructive/10" : "border-border"}`}>
@@ -52,7 +53,7 @@ const EnergyFormFields: React.FC<EnergyFormFieldsProps> = ({
           
           <div>
             <label htmlFor={`energy-amount-${index}`} className="block text-sm font-medium mb-1 text-foreground">
-              Amount (kWh)
+              {`Amount (${selectedEnergyUnit})`}
             </label>
             <Input
               id={`energy-amount-${index}`}

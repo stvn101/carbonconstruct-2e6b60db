@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import vercelGrokService, { VercelGrokResponse, GrokMode } from '@/services/VercelGrokService';
+import vercelGrokService, { VercelGrokResponse } from '@/services/VercelGrokService';
+import { GrokMode } from '@/services/GrokService';
 import { toast } from 'sonner';
 import { useGrokUsage } from '@/hooks/useGrokUsage';
 

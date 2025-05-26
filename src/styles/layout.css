@@ -1,81 +1,74 @@
-
 /* ======== LAYOUT & SPACING ======== */
 .content-top-spacing {
-  padding-top: calc(var(--navbar-height, 60px) + 1.5rem); /* Increased padding to ensure content is visible */
+  padding-top: calc(var(--navbar-height, 60px) + 1.5rem);
 }
 
-/* Card styling */
+/* Card styling with improved mobile padding */
 .card {
-  @apply p-3 md:p-4 lg:p-6;
+  @apply p-3 md:p-4 lg:p-6 rounded-xl;
 }
 
-/* Fix for overflow issues on mobile */
+/* Enhanced mobile container with safe areas */
 .mobile-friendly-container {
   max-width: 100%;
   overflow-x: hidden;
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
-/* Z-index hierarchy for overlapping elements */
-.z-popup {
-  z-index: 100;
-}
+/* Improved z-index hierarchy */
+.z-popup { z-index: 100; }
+.z-dropdown { z-index: 50; }
+.z-navbar { z-index: 40; }
+.z-theme-toggle { z-index: 30; }
 
-.z-dropdown {
-  z-index: 50;
-}
-
-.z-navbar {
-  z-index: 40;
-}
-
-.z-theme-toggle {
-  z-index: 30;
-}
-
-/* Safe area insets for modern mobile browsers */
+/* Enhanced safe area insets */
 @supports (padding-top: env(safe-area-inset-top)) {
   .safe-area-inset {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
   }
 }
 
-/* Navbar spacer */
+/* Improved navbar spacing */
 .navbar-spacer {
-  height: var(--navbar-height, 60px); /* Updated navbar height */
+  height: calc(var(--navbar-height, 60px) + env(safe-area-inset-top, 0));
 }
 
-/* Mobile container padding */
+/* Enhanced container padding */
 .container {
-  @apply px-3 sm:px-4 md:px-6 lg:px-8;
+  @apply px-4 sm:px-6 md:px-8;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  max-width: 100%;
 }
 
-/* Mobile section spacing */
+/* Improved section spacing */
 .section {
   @apply py-6 sm:py-8 md:py-12 lg:py-16;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
 }
 
-/* Mobile grid layouts */
+/* Enhanced mobile grid layouts */
 .grid-cols-responsive {
-  @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
 }
 
 /* Fix for page scrolling issues */
 html, body {
   height: 100%;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
   min-height: 100vh;
-  /* Use the viewport height to ensure full height */
+  min-height: -webkit-fill-available;
   display: flex;
   flex-direction: column;
 }
@@ -84,7 +77,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* Allow content to scroll within the root element */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Ensure calculator content is scrollable */
@@ -93,11 +87,12 @@ body {
   overflow-y: visible !important;
 }
 
-/* Touch-friendly elements for mobile */
+/* Enhanced mobile touch targets */
 @media (max-width: 640px) {
   .touch-target {
     min-height: 44px;
     min-width: 44px;
+    padding: 12px;
   }
   
   .touch-padding {
@@ -106,19 +101,36 @@ body {
   
   /* Fix for Grok chat elements */
   .grok-chat-form {
-    margin-bottom: env(safe-area-inset-bottom, 0);
+    margin-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
   
-  /* Improve spacing in tight mobile layouts */
+  /* Improved spacing in tight mobile layouts */
   .mobile-spacing {
     margin-bottom: 1rem;
   }
   
-  /* Fix fixed position elements on iOS */
+  /* Enhanced fixed position elements for iOS */
   .ios-fixed {
     position: fixed;
     width: 100%;
     left: 0;
     right: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Improved form element spacing */
+  .form-group + .form-group {
+    margin-top: 1rem;
+  }
+  
+  /* Enhanced button spacing */
+  .button-group {
+    @apply flex flex-col space-y-2;
+  }
+  
+  /* Improved card padding */
+  .card {
+    @apply p-4 rounded-xl;
   }
 }

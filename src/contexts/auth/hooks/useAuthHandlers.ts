@@ -86,10 +86,7 @@ export const useAuthHandlers = () => {
         throw new Error("Network unavailable");
       }
       
-      // Support both the Lovable domain and the custom domain
-      const redirectTo = typeof window !== 'undefined' 
-        ? `${window.location.origin}/auth/callback`
-        : 'https://carbonconstruct.net/auth/callback';
+      const redirectTo = `${window.location.origin}/auth/callback`;
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
@@ -98,7 +95,10 @@ export const useAuthHandlers = () => {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("GitHub OAuth error:", error);
+        throw error;
+      }
     } catch (error: any) {
       console.error("GitHub login error:", error.message);
       handleNetworkError(error, 'github-login');
@@ -115,10 +115,7 @@ export const useAuthHandlers = () => {
         throw new Error("Network unavailable");
       }
       
-      // Support both the Lovable domain and the custom domain
-      const redirectTo = typeof window !== 'undefined' 
-        ? `${window.location.origin}/auth/callback`
-        : 'https://carbonconstruct.net/auth/callback';
+      const redirectTo = `${window.location.origin}/auth/callback`;
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -131,7 +128,10 @@ export const useAuthHandlers = () => {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Google OAuth error:", error);
+        throw error;
+      }
     } catch (error: any) {
       console.error("Google login error:", error.message);
       handleNetworkError(error, 'google-login');
