@@ -26,25 +26,21 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
   onUpdate
 }) => {
   const [databaseMaterials, setDatabaseMaterials] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Load materials from database on component mount
   useEffect(() => {
-    const loadMaterials = async () => {
-      setIsLoading(true);
-      try {
-        const materials = await fetchMaterials(false);
-        console.log(`MaterialFormFields: Loaded ${materials.length} materials from database`);
+    setIsLoading(true);
+    fetchMaterials(false)
+      .then(materials => {
+        console.log(`MaterialFormFields: Loaded ${materials.length} materials`);
         setDatabaseMaterials(materials || []);
-      } catch (err) {
-        console.warn("Failed to fetch materials in MaterialFormFields:", err);
-        setDatabaseMaterials([]);
-      } finally {
         setIsLoading(false);
-      }
-    };
-    
-    loadMaterials();
+      })
+      .catch(err => {
+        console.warn("Background material fetch failed in MaterialFormFields:", err);
+        setIsLoading(false);
+      });
   }, []);
 
   // Generate material options dynamically from MATERIAL_FACTORS and database materials
@@ -53,92 +49,80 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
       // Start with default options from carbon factors
       const baseOptions = Object.entries(MATERIAL_FACTORS).map(([key, value]) => ({
         value: key,
-        label: value.name || key,
-        source: 'factors'
+        label: value.name || key
       }));
       
       // Add options from database materials
       const dbOptions = databaseMaterials.map(mat => ({
         value: `db-${mat.id}`,
-        label: mat.name || mat.material || "Unknown Material",
-        source: 'database'
+        label: mat.name || mat.material || "Unknown Material"
       }));
       
-      // Combine all options
-      const allOptions = [...baseOptions, ...dbOptions];
+      // Combine and remove duplicates
+      const combinedOptions = [...baseOptions];
       
-      // Remove duplicates based on label (case insensitive)
-      const uniqueOptions = allOptions.filter((option, index, arr) => 
-        arr.findIndex(opt => opt.label.toLowerCase() === option.label.toLowerCase()) === index
-      );
+      // Add DB materials that don't already exist by name
+      const existingLabels = new Set(baseOptions.map(opt => opt.label.toLowerCase()));
       
-      console.log(`MaterialFormFields: Generated ${uniqueOptions.length} material options (${baseOptions.length} from factors, ${dbOptions.length} from database)`);
+      dbOptions.forEach(option => {
+        if (!existingLabels.has(option.label.toLowerCase())) {
+          combinedOptions.push(option);
+          existingLabels.add(option.label.toLowerCase());
+        }
+      });
       
-      // Ensure we have at least the default options if nothing else loaded
-      if (uniqueOptions.length === 0) {
-        console.warn("No material options found, using fallback options");
+      // Log the number of options for debugging
+      console.log(`MaterialFormFields: Generated ${combinedOptions.length} material options (${baseOptions.length} from factors, ${dbOptions.length} from database)`);
+      
+      // Ensure we have at least the default options
+      if (combinedOptions.length === 0) {
+        console.warn("No material options found");
         return [
-          { value: "concrete", label: "Concrete", source: 'fallback' },
-          { value: "steel", label: "Steel", source: 'fallback' },
-          { value: "timber", label: "Timber", source: 'fallback' },
-          { value: "glass", label: "Glass", source: 'fallback' },
-          { value: "brick", label: "Brick", source: 'fallback' },
-          { value: "insulation", label: "Insulation", source: 'fallback' }
+          { value: "concrete", label: "Concrete" },
+          { value: "steel", label: "Steel" },
+          { value: "timber", label: "Timber" },
+          { value: "glass", label: "Glass" },
+          { value: "brick", label: "Brick" },
+          { value: "insulation", label: "Insulation" }
         ];
       }
       
-      // Sort by label for better UX
-      return uniqueOptions.sort((a, b) => a.label.localeCompare(b.label));
+      // Sort by label
+      return combinedOptions.sort((a, b) => a.label.localeCompare(b.label));
     } catch (err) {
-      console.error("Error generating material options:", err);
-      // Return fallback options
+      console.error("Error loading material options:", err);
       return [
-        { value: "concrete", label: "Concrete", source: 'fallback' },
-        { value: "steel", label: "Steel", source: 'fallback' },
-        { value: "timber", label: "Timber", source: 'fallback' },
-        { value: "glass", label: "Glass", source: 'fallback' },
-        { value: "brick", label: "Brick", source: 'fallback' },
-        { value: "insulation", label: "Insulation", source: 'fallback' }
+        { value: "concrete", label: "Concrete" },
+        { value: "steel", label: "Steel" },
+        { value: "timber", label: "Timber" },
+        { value: "glass", label: "Glass" },
+        { value: "brick", label: "Brick" },
+        { value: "insulation", label: "Insulation" }
       ];
     }
   }, [databaseMaterials]);
 
-  const handleMaterialChange = (value: string) => {
-    console.log(`Material selection changed to: ${value}`);
-    onUpdate("type", value);
-    
-    // Also update the name field to match the selection
-    const selectedOption = materialOptions.find(opt => opt.value === value);
-    if (selectedOption) {
-      onUpdate("name", selectedOption.label);
-    }
-  };
-
   return (
-    <div className="grid grid-cols-1 gap-3 items-end border border-gray-200 dark:border-green-600 p-3 md:p-4 rounded-lg">
+    <div className="grid grid-cols-1 gap-3 items-end border border-gray-200 dark:border-gray-700 p-3 md:p-4 rounded-lg">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label htmlFor={`material-type-${index}`}>Material Type</Label>
           <Select
             value={material.type}
-            onValueChange={handleMaterialChange}
+            onValueChange={(value) => onUpdate("type", value)}
             disabled={isLoading}
           >
-            <SelectTrigger id={`material-type-${index}`} className="dark:border-green-600">
+            <SelectTrigger id={`material-type-${index}`}>
               <SelectValue placeholder={isLoading ? "Loading materials..." : "Select material"} />
             </SelectTrigger>
-            <SelectContent className="max-h-[300px] overflow-y-auto dark:border-green-600 dark:bg-gray-800">
+            <SelectContent className="max-h-[300px] overflow-y-auto">
               {materialOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
-                  {option.source === 'database' && <span className="text-xs text-green-600 ml-2">(DB)</span>}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {isLoading && (
-            <p className="text-xs text-muted-foreground">Loading materials from database...</p>
-          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor={`material-quantity-${index}`}>
@@ -155,7 +139,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
             value={material.quantity || ""}
             onChange={(e) => onUpdate("quantity", e.target.value)}
             placeholder="Enter quantity in kg"
-            className={`dark:border-green-600 ${error ? "border-red-500" : ""}`}
+            className={error ? "border-red-500" : ""}
           />
         </div>
       </div>
@@ -165,7 +149,7 @@ const MaterialFormFields: React.FC<MaterialFormFieldsProps> = ({
           variant="outline"
           size="sm"
           onClick={onRemove}
-          className="text-xs dark:border-green-600"
+          className="text-xs"
         >
           Remove
         </Button>
