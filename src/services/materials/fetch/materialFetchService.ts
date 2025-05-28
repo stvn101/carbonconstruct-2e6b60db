@@ -5,6 +5,7 @@ import { generateFallbackMaterials } from '../utils/fallbackMaterials';
 import { MaterialFetchStrategies } from './strategies';
 import { MaterialCategory } from './types';
 import { MaterialView } from '../types/databaseTypes';
+import { processAndValidateMaterials } from '../utils/materialProcessing';
 
 /**
  * Main service class for fetching materials from various sources
@@ -45,10 +46,12 @@ class MaterialFetchService extends MaterialFetchStrategies {
 
       if (result.error) throw result.error;
 
-      // Filter by tag in memory since Supabase query might not work with arrays
-      return result.data.filter(item => 
+      // Filter by tag and transform to ExtendedMaterialData
+      const filteredData = result.data.filter(item => 
         item.tags && Array.isArray(item.tags) && item.tags.includes(tag)
       );
+
+      return processAndValidateMaterials(filteredData);
     } catch (error) {
       console.error(`Error fetching materials with tag ${tag}:`, error);
       return [];
@@ -68,10 +71,12 @@ class MaterialFetchService extends MaterialFetchStrategies {
 
       if (result.error) throw result.error;
 
-      // Filter by category in memory
-      return result.data.filter(item => 
+      // Filter by category and transform to ExtendedMaterialData
+      const filteredData = result.data.filter(item => 
         item.category && item.category.toLowerCase() === category.toLowerCase()
       );
+
+      return processAndValidateMaterials(filteredData);
     } catch (error) {
       console.error(`Error fetching materials in category ${category}:`, error);
       return [];
