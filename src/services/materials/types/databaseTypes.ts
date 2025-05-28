@@ -1,6 +1,3 @@
-/**
- * Types for database entities
- */
 
 export interface DatabaseMaterial {
   id: number;
@@ -13,25 +10,21 @@ export interface DatabaseMaterial {
   sustainability_notes?: string;
   applicable_standards?: string;
   ncc_requirements?: string;
-  category_id?: string;
+  category_id?: number;
 }
 
 export interface MaterialView {
   id: string;
   name: string;
-  material?: string;
-  factor?: number;
-  unit?: string;
-  region?: string;
-  tags?: string[];
-  sustainability_score?: number;
-  recyclability?: string;
-  notes?: string;
-  category?: string;
-  carbon_footprint_kgco2e_kg?: number;
-  carbon_footprint_kgco2e_tonne?: number;
-  description?: string;
-  applicable_standards?: string;
-  ncc_requirements?: string;
-  category_id?: string;
-} 
+  factor: number;
+  unit: string;
+  region: string;
+  tags: string[];
+  sustainabilityscore: number;
+  recyclability: string;
+  notes: string;
+  category: string;
+  carbon_footprint_kgco2e_kg: number;
+  carbon_footprint_kgco2e_tonne: number;
+  alternativeto?: string;
+}

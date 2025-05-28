@@ -1,3 +1,4 @@
+
 /**
  * Simplified Material Service - Main entry point for material-related services
  */
@@ -8,7 +9,7 @@ export type { SupabaseMaterial } from './materials/materialTypes';
 // Re-export data fetch functions
 export { 
   fetchMaterials, 
-  fetchMaterialCategories 
+  fetchCategories as fetchMaterialCategories 
 } from './materials/fetch/materialFetchService';
 
 // Re-export cache functions

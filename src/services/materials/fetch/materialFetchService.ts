@@ -1,10 +1,10 @@
+
 /**
  * Material Fetch Service
  * Handles fetching material data from API and database sources
  */
 import { supabase } from '@/integrations/supabase/client';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
-import { MATERIAL_FACTORS } from '@/lib/carbonFactors';
 import { cacheMaterials } from '../cache';
 import { toast } from 'sonner';
 import { handleNetworkError } from '@/utils/errorHandling/networkErrorHandler';
@@ -13,7 +13,8 @@ import {
   generateDescriptionFromName,
   normalizeRecyclability 
 } from '../utils/materialUtils';
-import { createFallbackMaterial } from '../utils/fallbackMaterials';
+import { generateFallbackMaterials } from '../utils/fallbackMaterials';
+import { processAndValidateMaterials } from '../utils/materialProcessing';
 import { DatabaseMaterial, MaterialView } from '../types/databaseTypes';
 
 const DEMO_DELAY = 800; // Simulate network delay in demo mode
@@ -149,7 +150,7 @@ class MaterialFetchService extends MaterialFetcher {
     );
 
     if (result.error) {
-      return result;
+      return { data: [], error: result.error };
     }
 
     return {
@@ -180,7 +181,7 @@ class MaterialFetchService extends MaterialFetcher {
     );
 
     if (result.error) {
-      return result;
+      return { data: [], error: result.error };
     }
 
     return {
@@ -213,7 +214,7 @@ class MaterialFetchService extends MaterialFetcher {
     );
 
     if (result.error) {
-      return result;
+      return { data: [], error: result.error };
     }
 
     return {
@@ -271,13 +272,17 @@ class MaterialFetchService extends MaterialFetcher {
       const { data, error } = await supabase
         .from('material_categories')
         .select('*')
-        .order('order', { ascending: true });
+        .order('id', { ascending: true });
 
       if (error) {
         throw handleNetworkError(error, 'fetchCategories');
       }
 
-      return data || [];
+      return (data || []).map(item => ({
+        id: item.id.toString(),
+        name: item.name,
+        description: item.description || undefined
+      }));
     } catch (error) {
       console.error('Error fetching categories:', error);
       return [];

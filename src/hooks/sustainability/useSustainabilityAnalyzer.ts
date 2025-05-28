@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect } from "react";
-import { SustainabilityAnalyzerProps, MaterialAnalysisResult } from "@/components/sustainability/types";
+import { SustainabilityAnalyzerProps } from "@/components/sustainability/types";
+import { MaterialAnalysisResult } from "@/types/materialAnalysis";
 import { useSustainabilitySuggestions } from "@/hooks/useSustainabilitySuggestions";
 import { useMaterialAnalysis } from "@/hooks/sustainability/useMaterialAnalysis";
 import { useComplianceChecks } from "@/hooks/sustainability/useComplianceChecks";
+import { MaterialInput } from "@/lib/carbonExports";
 
 export function useSustainabilityAnalyzer({
   calculationInput,
@@ -44,8 +46,16 @@ export function useSustainabilityAnalyzer({
   // Use material analysis data from report if available
   useEffect(() => {
     if (report?.materialAnalysis) {
+      const defaultMaterial: MaterialInput = {
+        type: calculationInput.materials[0]?.type || 'unknown',
+        quantity: calculationInput.materials[0]?.quantity || 0,
+        unit: calculationInput.materials[0]?.unit || 'kg',
+        name: calculationInput.materials[0]?.name || 'Unknown Material',
+        carbonFootprint: calculationInput.materials[0]?.carbonFootprint || 0
+      };
+      
       const defaultAnalysis: MaterialAnalysisResult = {
-        material: calculationInput.materials[0] || { type: 'unknown', quantity: 0, unit: 'kg' },
+        material: defaultMaterial,
         sustainabilityScore: 0,
         alternatives: [],
         recommendations: []
@@ -77,7 +87,13 @@ export function useSustainabilityAnalyzer({
 
   // Ensure we have complete material analysis data with all required fields
   const completeAnalysis: MaterialAnalysisResult = materialAnalysis || {
-    material: calculationInput.materials[0] || { type: 'unknown', quantity: 0, unit: 'kg' },
+    material: {
+      type: calculationInput.materials[0]?.type || 'unknown',
+      quantity: calculationInput.materials[0]?.quantity || 0,
+      unit: calculationInput.materials[0]?.unit || 'kg',
+      name: calculationInput.materials[0]?.name || 'Unknown Material',
+      carbonFootprint: calculationInput.materials[0]?.carbonFootprint || 0
+    },
     sustainabilityScore: 0,
     alternatives: [],
     recommendations: []

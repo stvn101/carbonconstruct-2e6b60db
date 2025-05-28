@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { MaterialInput } from '@/lib/carbonExports';
-import { MaterialAnalysisResult } from '@/components/sustainability/types';
+import { MaterialAnalysisResult } from '@/types/materialAnalysis';
 
 export function useMaterialAnalysis(
   materials: MaterialInput[],
@@ -29,8 +29,6 @@ function generateMaterialAnalysis(
 ): MaterialAnalysisResult {
   // Group materials by type/category
   const categories: Record<string, MaterialInput[]> = {};
-  const sustainabilityIssues = [];
-  const sustainabilityStrengths = [];
   
   // Group materials by type
   materials.forEach(material => {
@@ -49,49 +47,16 @@ function generateMaterialAnalysis(
     (b.carbonFootprint || 0) - (a.carbonFootprint || 0)
   )[0];
   
-  // Look for common sustainability issues
-  if (materials.some(m => (m.type || '').toLowerCase().includes('concrete'))) {
-    sustainabilityIssues.push({
-      id: 'high-carbon-concrete',
-      title: 'High-carbon concrete detected',
-      description: 'Traditional concrete has a significant carbon footprint',
-      recommendation: 'Consider low-carbon alternatives like geopolymer concrete or concrete with SCMs'
-    });
-  }
-  
-  if (!materials.some(m => (m.recycledContent || 0) > 30)) {
-    sustainabilityIssues.push({
-      id: 'low-recycled-content',
-      title: 'Low recycled content',
-      description: 'Most materials have low recycled content percentage',
-      recommendation: 'Source materials with higher recycled content'
-    });
-  }
-  
-  // Look for sustainability strengths
-  if (materials.some(m => 
-    (m.type || '').toLowerCase().includes('timber') || 
-    (m.type || '').toLowerCase().includes('wood'))
-  ) {
-    sustainabilityStrengths.push({
-      id: 'renewable-materials',
-      title: 'Renewable materials',
-      description: 'Project includes timber/wood which can sequester carbon',
-      impact: 'Positive carbon sequestration'
-    });
-  }
-  
-  if (materials.some(m => (m.recycledContent || 0) > 50)) {
-    sustainabilityStrengths.push({
-      id: 'high-recycled-content',
-      title: 'High recycled content',
-      description: 'Some materials contain over 50% recycled content',
-      impact: 'Reduced virgin material extraction'
-    });
-  }
+  const firstMaterial: MaterialInput = {
+    type: materials[0]?.type || 'unknown',
+    quantity: materials[0]?.quantity || 0,
+    unit: materials[0]?.unit || 'kg',
+    name: materials[0]?.name || 'Unknown Material',
+    carbonFootprint: materials[0]?.carbonFootprint || 0
+  };
   
   return {
-    material: materials[0] || { type: 'unknown', quantity: 0, unit: 'kg' },
+    material: firstMaterial,
     sustainabilityScore: Math.max(0, Math.min(100, 100 - (averageCarbonFootprint * 10))),
     alternatives: [],
     recommendations: [
