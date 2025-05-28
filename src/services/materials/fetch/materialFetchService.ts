@@ -1,101 +1,18 @@
 
-/**
- * Material Fetch Service
- * Handles fetching material data from API and database sources
- */
 import { supabase } from '@/integrations/supabase/client';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { cacheMaterials } from '../cache';
-import { toast } from 'sonner';
 import { handleNetworkError } from '@/utils/errorHandling/networkErrorHandler';
-import { 
-  guessCategoryFromName, 
-  generateDescriptionFromName,
-  normalizeRecyclability 
-} from '../utils/materialUtils';
 import { generateFallbackMaterials } from '../utils/fallbackMaterials';
 import { processAndValidateMaterials } from '../utils/materialProcessing';
-import { DatabaseMaterial, MaterialView } from '../types/databaseTypes';
-
-const DEMO_DELAY = 800; // Simulate network delay in demo mode
-const MAX_RETRIES = 3; // Maximum number of retries for fetching materials
-const RETRY_DELAY = 1000; // Delay between retries in milliseconds
-
-export interface MaterialCategory {
-  id: string;
-  name: string;
-  description?: string;
-  parent_id?: string;
-  order?: number;
-}
-
-export interface FetchError extends Error {
-  strategy?: string;
-  retryCount?: number;
-}
-
-export interface FetchResult<T> {
-  data: T[];
-  error?: Error;
-}
-
-// Define valid table names that we actually use
-type ValidTableNames = 'materials_view' | 'materials' | 'materials_backup' | 'material_categories';
-
-/**
- * Base class for material fetching operations
- */
-class MaterialFetcher {
-  protected async fetchWithRetry<T>(
-    operation: () => Promise<FetchResult<T>>,
-    context: string,
-    maxRetries = MAX_RETRIES
-  ): Promise<T[]> {
-    let retryCount = 0;
-    
-    while (retryCount < maxRetries) {
-      try {
-        const result = await operation();
-        if (result.error) throw result.error;
-        return result.data;
-      } catch (error) {
-        console.error(`Error in ${context} (attempt ${retryCount + 1}):`, error);
-        retryCount++;
-        
-        if (retryCount < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-        }
-      }
-    }
-    
-    throw new Error(`Failed to fetch after ${maxRetries} attempts`);
-  }
-
-  protected async querySupabase<T>(
-    table: ValidTableNames,
-    query: string,
-    context: string
-  ): Promise<FetchResult<T>> {
-    try {
-      const { data, error } = await supabase
-        .from(table)
-        .select(query);
-
-      if (error) {
-        throw handleNetworkError(error, context);
-      }
-
-      return { data: (data || []) as T[] };
-    } catch (error) {
-      return { data: [], error: error as Error };
-    }
-  }
-}
+import { MaterialView } from '../types/databaseTypes';
+import { MaterialFetchStrategies } from './strategies';
+import { MaterialCategory } from './types';
 
 /**
  * Service for fetching materials from various sources
  */
-class MaterialFetchService extends MaterialFetcher {
+class MaterialFetchService extends MaterialFetchStrategies {
   /**
    * Fetches materials from all available sources with fallbacks
    */
@@ -116,113 +33,6 @@ class MaterialFetchService extends MaterialFetcher {
       console.error('Error in fetchMaterials:', error);
       return generateFallbackMaterials();
     }
-  }
-
-  /**
-   * Try multiple strategies to fetch materials
-   */
-  private async fetchWithStrategies(): Promise<FetchResult<ExtendedMaterialData>> {
-    const strategies = [
-      { name: 'materials_view', fetcher: () => this.fetchFromView() },
-      { name: 'materials_backup', fetcher: () => this.fetchFromBackup() },
-      { name: 'materials_table', fetcher: () => this.fetchFromTable() }
-    ];
-
-    for (const strategy of strategies) {
-      try {
-        const result = await strategy.fetcher();
-        if (result.data.length > 0) {
-          return result;
-        }
-      } catch (error) {
-        console.warn(`Strategy ${strategy.name} failed:`, error);
-      }
-    }
-
-    return { data: [] };
-  }
-
-  /**
-   * Fetches materials from the materials_view
-   */
-  private async fetchFromView(): Promise<FetchResult<ExtendedMaterialData>> {
-    const result = await this.querySupabase<MaterialView>(
-      'materials_view',
-      '*',
-      'fetchFromView'
-    );
-
-    if (result.error) {
-      return { data: [], error: result.error };
-    }
-
-    return {
-      data: processAndValidateMaterials(result.data)
-    };
-  }
-
-  /**
-   * Fetches materials from the materials table
-   */
-  private async fetchFromTable(): Promise<FetchResult<ExtendedMaterialData>> {
-    const result = await this.querySupabase<DatabaseMaterial>(
-      'materials',
-      `
-        id,
-        material,
-        description,
-        co2e_min,
-        co2e_max,
-        co2e_avg,
-        sustainability_score,
-        sustainability_notes,
-        applicable_standards,
-        ncc_requirements,
-        category_id
-      `,
-      'fetchFromTable'
-    );
-
-    if (result.error) {
-      return { data: [], error: result.error };
-    }
-
-    return {
-      data: result.data.map(item => ({
-        id: item.id.toString(),
-        name: item.material || 'Unknown Material',
-        factor: item.co2e_avg || 1,
-        unit: 'kg',
-        region: 'Australia',
-        tags: item.applicable_standards ? [item.applicable_standards] : [],
-        sustainabilityScore: item.sustainability_score || 50,
-        recyclability: 'Medium' as const,
-        notes: item.sustainability_notes || '',
-        category: guessCategoryFromName(item.material || ''),
-        carbon_footprint_kgco2e_kg: item.co2e_avg || 0,
-        carbon_footprint_kgco2e_tonne: item.co2e_avg ? item.co2e_avg * 1000 : 0,
-        description: item.description || item.sustainability_notes || ''
-      }))
-    };
-  }
-
-  /**
-   * Fetches materials from the backup table
-   */
-  private async fetchFromBackup(): Promise<FetchResult<ExtendedMaterialData>> {
-    const result = await this.querySupabase<MaterialView>(
-      'materials_backup',
-      '*',
-      'fetchFromBackup'
-    );
-
-    if (result.error) {
-      return { data: [], error: result.error };
-    }
-
-    return {
-      data: processAndValidateMaterials(result.data)
-    };
   }
 
   /**
@@ -304,3 +114,6 @@ export const {
   fetchByCategory,
   fetchCategories
 } = materialFetchService;
+
+// Re-export types
+export type { MaterialCategory, FetchError, FetchResult } from './types';
