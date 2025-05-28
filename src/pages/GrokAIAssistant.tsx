@@ -6,6 +6,7 @@ import GrokChat from "@/components/grok/GrokChat";
 import GrokConfig from "@/components/grok/GrokConfig";
 import { useA11y } from "@/hooks/useA11y";
 import { Shield, MessageSquare, Settings, BarChart3 } from "lucide-react";
+import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 
 function GrokAIAssistant() {
@@ -19,6 +20,7 @@ function GrokAIAssistant() {
   return (
     <GrokProvider>
       <div className="flex min-h-screen flex-col">
+        <Navbar />
         <main className="flex-grow container mx-auto px-4 pt-24 pb-24 sm:pb-12" id="main-content" tabIndex={-1}>
           <div className="mb-8 relative">
             <h1 className="text-3xl font-bold text-carbon-800 dark:text-carbon-100 mb-2">Grok AI Assistant</h1>
