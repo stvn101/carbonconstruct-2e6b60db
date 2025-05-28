@@ -10,53 +10,131 @@
   @apply text-green-400;
 }
 
-/* Dropdown and menu styles */
-.dark .dropdown-menu {
-  @apply bg-gray-800 border-gray-700;
-}
-
-.dark .alert {
-  @apply bg-gray-800 border-gray-700;
-}
-
-/* Card styling */
+/* Green borders for all dark-colored boxes in dark mode */
 .dark .card,
-.dark .bg-white {
-  @apply bg-gray-800 border-gray-700 text-carbon-300;
+.dark .bg-white,
+.dark .bg-gray-800,
+.dark .bg-gray-900,
+.dark [class*="bg-gray-8"],
+.dark [class*="bg-gray-9"] {
+  @apply bg-gray-800 border-green-600 text-carbon-300;
 }
 
-/* Card hover with green accent in dark mode */
+/* Green borders for dropdown and popup elements */
+.dark .dropdown-menu,
+.dark .popover,
+.dark [data-radix-popper-content-wrapper] > div,
+.dark .DropdownMenuContent {
+  @apply bg-gray-800 border-green-600;
+}
+
+/* Green borders for dialogs and modals */
+.dark [role="dialog"],
+.dark .dialog,
+.dark .sheet {
+  @apply bg-gray-800 border-green-600 !important;
+}
+
+/* Green borders for alerts and notifications */
+.dark .alert {
+  @apply bg-gray-800 border-green-600;
+}
+
+/* Enhanced card hover with brighter green accent in dark mode */
 .dark .card:hover,
 .dark .card-component:hover {
-  @apply border-green-700;
+  @apply border-green-500;
 }
 
-/* Navbar specific styles */
+/* Navbar specific styles with green border */
 .dark-navbar {
-  @apply bg-gray-900 border-gray-800;
+  @apply bg-gray-900 border-green-700;
 }
 
 .dark .navbar-container {
-  @apply bg-gray-900;
+  @apply bg-gray-900 border-green-700;
 }
 
 /* Green accent for active nav items */
 .dark .active-nav-link {
+  @apply border-green-500;
+}
+
+/* Green borders for form elements in dark mode */
+.dark input,
+.dark select,
+.dark textarea {
+  @apply bg-gray-800 border-green-600;
+}
+
+/* Green borders for buttons with dark backgrounds */
+.dark button:not(.btn-primary):not([class*="bg-primary"]) {
   @apply border-green-600;
 }
 
-/* Ensure dropdown menus are not transparent */
+/* Green borders for tables and data displays */
+.dark table,
+.dark .table,
+.dark [role="table"] {
+  @apply border-green-600;
+}
+
+.dark th,
+.dark td,
+.dark [role="columnheader"],
+.dark [role="cell"] {
+  @apply border-green-700;
+}
+
+/* Green borders for sidebar and navigation panels */
+.dark .sidebar,
+.dark [class*="sidebar"] {
+  @apply border-green-600;
+}
+
+/* Green borders for material cards and database elements */
+.dark .material-card,
+.dark .database-card,
+.dark [class*="material"],
+.dark [class*="database"] {
+  @apply border-green-600;
+}
+
+/* Ensure dropdown menus are not transparent and have green borders */
 .dark [data-radix-popper-content-wrapper] > div {
-  @apply bg-gray-800 !important;
+  @apply bg-gray-800 border-green-600 !important;
   backdrop-filter: none !important;
 }
 
 /* Theme toggle dropdown specifically */
 .dark .DropdownMenuContent {
-  @apply bg-gray-800 border-gray-700;
+  @apply bg-gray-800 border-green-600;
 }
 
 /* Green active state for tabs in dark mode */
 .dark [data-state="active"] {
+  @apply border-green-500;
+}
+
+/* Green borders for skeleton loading components */
+.dark .skeleton,
+.dark [class*="skeleton"] {
+  @apply bg-gray-800 border-green-700;
+}
+
+/* Green borders for error and status components */
+.dark .error-card,
+.dark .status-card,
+.dark .info-card {
   @apply border-green-600;
+}
+
+/* Utility class for explicit green border styling */
+.dark .dark-box-green-border {
+  @apply border-2 border-green-600 !important;
+}
+
+/* Subtle green border for hover states */
+.dark .dark-box-green-border:hover {
+  @apply border-green-500 !important;
 }

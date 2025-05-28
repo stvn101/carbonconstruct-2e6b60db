@@ -17,6 +17,16 @@
   @apply bg-card border border-border shadow-sm rounded-xl;
 }
 
+/* Dark mode green border utility */
+.dark-green-border {
+  @apply dark:border-green-600;
+}
+
+/* Hover state for dark green borders */
+.dark-green-border-hover {
+  @apply dark:border-green-600 dark:hover:border-green-500;
+}
+
 /* Remove backdrop filters for better compatibility */
 [class*="backdrop-blur"] {
   backdrop-filter: none !important;
