@@ -39,7 +39,7 @@ export class MaterialFetcher {
   ): Promise<FetchResult<T>> {
     try {
       const { data, error } = await supabase
-        .from(table as any)
+        .from(table)
         .select(query);
 
       if (error) {

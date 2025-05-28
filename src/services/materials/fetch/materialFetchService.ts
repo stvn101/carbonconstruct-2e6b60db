@@ -1,16 +1,12 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { ExtendedMaterialData } from '@/lib/materials/materialTypes';
 import { cacheMaterials } from '../cache';
-import { handleNetworkError } from '@/utils/errorHandling/networkErrorHandler';
 import { generateFallbackMaterials } from '../utils/fallbackMaterials';
-import { processAndValidateMaterials } from '../utils/materialProcessing';
-import { MaterialView } from '../types/databaseTypes';
 import { MaterialFetchStrategies } from './strategies';
 import { MaterialCategory } from './types';
 
 /**
- * Service for fetching materials from various sources
+ * Main service class for fetching materials from various sources
  */
 class MaterialFetchService extends MaterialFetchStrategies {
   /**
@@ -40,16 +36,18 @@ class MaterialFetchService extends MaterialFetchStrategies {
    */
   public async fetchByTag(tag: string): Promise<ExtendedMaterialData[]> {
     try {
-      const { data, error } = await supabase
-        .from('materials_view')
-        .select('*')
-        .contains('tags', [tag]);
+      const result = await this.querySupabase(
+        'materials_view',
+        '*',
+        'fetchByTag'
+      );
 
-      if (error) {
-        throw handleNetworkError(error, 'fetchByTag');
-      }
+      if (result.error) throw result.error;
 
-      return processAndValidateMaterials(data || []);
+      // Filter by tag in memory since Supabase query might not work with arrays
+      return result.data.filter(item => 
+        item.tags && Array.isArray(item.tags) && item.tags.includes(tag)
+      );
     } catch (error) {
       console.error(`Error fetching materials with tag ${tag}:`, error);
       return [];
@@ -61,16 +59,18 @@ class MaterialFetchService extends MaterialFetchStrategies {
    */
   public async fetchByCategory(category: string): Promise<ExtendedMaterialData[]> {
     try {
-      const { data, error } = await supabase
-        .from('materials_view')
-        .select('*')
-        .eq('category', category);
+      const result = await this.querySupabase(
+        'materials_view',
+        '*',
+        'fetchByCategory'
+      );
 
-      if (error) {
-        throw handleNetworkError(error, 'fetchByCategory');
-      }
+      if (result.error) throw result.error;
 
-      return processAndValidateMaterials(data || []);
+      // Filter by category in memory
+      return result.data.filter(item => 
+        item.category && item.category.toLowerCase() === category.toLowerCase()
+      );
     } catch (error) {
       console.error(`Error fetching materials in category ${category}:`, error);
       return [];
@@ -82,16 +82,15 @@ class MaterialFetchService extends MaterialFetchStrategies {
    */
   public async fetchCategories(): Promise<MaterialCategory[]> {
     try {
-      const { data, error } = await supabase
-        .from('material_categories')
-        .select('*')
-        .order('id', { ascending: true });
+      const result = await this.querySupabase(
+        'material_categories',
+        '*',
+        'fetchCategories'
+      );
 
-      if (error) {
-        throw handleNetworkError(error, 'fetchCategories');
-      }
+      if (result.error) throw result.error;
 
-      return (data || []).map(item => ({
+      return result.data.map(item => ({
         id: item.id.toString(),
         name: item.name,
         description: item.description || undefined
@@ -114,6 +113,3 @@ export const {
   fetchByCategory,
   fetchCategories
 } = materialFetchService;
-
-// Re-export types
-export type { MaterialCategory, FetchError, FetchResult } from './types';
