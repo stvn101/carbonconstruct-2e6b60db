@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { handleGrokAPIError } from "@/utils/errorHandling/grokNetworkHandler";
 
@@ -110,7 +111,7 @@ class GrokService {
       const startTime = Date.now();
       
       // Call the Supabase Edge Function with timeout
-      const { data, error } = await Promise.race([
+      const result = await Promise.race([
         supabase.functions.invoke('grok-ai', {
           body: {
             prompt: request.prompt,
@@ -122,13 +123,13 @@ class GrokService {
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Request timeout')), this.DEFAULT_TIMEOUT)
         )
-      ]);
+      ]) as { data: any; error: any };
 
-      if (error) {
-        throw handleGrokAPIError(error, { context: 'queryGrok' });
+      if (result.error) {
+        throw handleGrokAPIError(result.error, { context: 'queryGrok' });
       }
 
-      const response = this.validateResponse(data);
+      const response = this.validateResponse(result.data);
       
       // Add processing time to metadata
       response.metadata = {
@@ -187,7 +188,7 @@ class GrokService {
     try {
       console.log("Requesting sustainability suggestions");
       
-      const { data, error } = await supabase.functions.invoke('get-sustainability-suggestions', {
+      const result = await supabase.functions.invoke('get-sustainability-suggestions', {
         body: {
           materials: params.materials || [],
           transport: params.transport || [],
@@ -196,12 +197,12 @@ class GrokService {
         }
       });
 
-      if (error) {
-        throw handleGrokAPIError(error, { context: 'getSustainabilitySuggestions' });
+      if (result.error) {
+        throw handleGrokAPIError(result.error, { context: 'getSustainabilitySuggestions' });
       }
 
-      console.log("Sustainability suggestions received:", data);
-      return this.validateResponse(data);
+      console.log("Sustainability suggestions received:", result.data);
+      return this.validateResponse(result.data);
     } catch (error) {
       console.error("Failed to get sustainability suggestions:", error);
       throw error;

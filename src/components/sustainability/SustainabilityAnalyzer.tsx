@@ -35,6 +35,14 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
     calculationInput,
     calculationResult
   });
+
+  const tabs = [
+    { id: "dashboard", label: "Dashboard" },
+    { id: "compliance", label: "Compliance" },
+    { id: "materials", label: "Materials" },
+    { id: "performance", label: "Performance" },
+    { id: "report", label: "Report" }
+  ];
   
   return (
     <motion.div 
@@ -60,6 +68,7 @@ const SustainabilityAnalyzer: React.FC<SustainabilityAnalyzerProps> = ({
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 navigateTab={navigateTab}
+                tabs={tabs}
               />
               
               <TabsContent value="dashboard">

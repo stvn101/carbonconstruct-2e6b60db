@@ -45,14 +45,10 @@ export function useSustainabilityAnalyzer({
   useEffect(() => {
     if (report?.materialAnalysis) {
       const defaultAnalysis: MaterialAnalysisResult = {
-        materialScores: {},
-        impactSummary: "",
-        highImpactMaterials: [],
+        material: calculationInput.materials[0] || { type: 'unknown', quantity: 0, unit: 'kg' },
         sustainabilityScore: 0,
-        sustainabilityPercentage: 0,
-        recommendations: [],
-        alternatives: {},
-        sustainabilityIssues: []
+        alternatives: [],
+        recommendations: []
       };
       
       setMaterialAnalysis({
@@ -60,7 +56,7 @@ export function useSustainabilityAnalyzer({
         ...report.materialAnalysis
       });
     }
-  }, [report, setMaterialAnalysis]);
+  }, [report, setMaterialAnalysis, calculationInput.materials]);
   
   // Navigate between tabs with animations
   const navigateTab = (direction: "next" | "prev") => {
@@ -80,20 +76,11 @@ export function useSustainabilityAnalyzer({
   };
 
   // Ensure we have complete material analysis data with all required fields
-  const completeAnalysis: MaterialAnalysisResult = {
-    materialScores: materialAnalysis?.materialScores || {},
-    impactSummary: materialAnalysis?.impactSummary || "",
-    highImpactMaterials: materialAnalysis?.highImpactMaterials || [],
-    sustainabilityScore: materialAnalysis?.sustainabilityScore || 0,
-    sustainabilityPercentage: materialAnalysis?.sustainabilityPercentage || 0,
-    recommendations: materialAnalysis?.recommendations || [],
-    alternatives: materialAnalysis?.alternatives || {},
-    sustainabilityIssues: materialAnalysis?.sustainabilityIssues || [],
-    categories: materialAnalysis?.categories || {},
-    materialCount: materialAnalysis?.materialCount || 0,
-    sustainabilityStrengths: materialAnalysis?.sustainabilityStrengths || [],
-    averageCarbonFootprint: materialAnalysis?.averageCarbonFootprint || 0,
-    materialWithHighestFootprint: materialAnalysis?.materialWithHighestFootprint || null
+  const completeAnalysis: MaterialAnalysisResult = materialAnalysis || {
+    material: calculationInput.materials[0] || { type: 'unknown', quantity: 0, unit: 'kg' },
+    sustainabilityScore: 0,
+    alternatives: [],
+    recommendations: []
   };
   
   const suggestionStrings = convertSuggestionsToStrings(suggestions);

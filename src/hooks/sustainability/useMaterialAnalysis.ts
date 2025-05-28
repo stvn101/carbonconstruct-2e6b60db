@@ -1,11 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { MaterialInput } from '@/lib/carbonExports';
-import { SustainableMaterial } from '@/lib/materialCategories';
-import { MaterialAnalysisResult as ComponentMaterialAnalysisResult } from '@/components/sustainability/types';
-
-// Using the interface from components/sustainability/types.ts for consistency
-export type MaterialAnalysisResult = ComponentMaterialAnalysisResult;
+import { MaterialAnalysisResult } from '@/components/sustainability/types';
 
 export function useMaterialAnalysis(
   materials: MaterialInput[],
@@ -95,27 +91,12 @@ function generateMaterialAnalysis(
   }
   
   return {
-    categories,
-    materialCount: materials.length,
-    sustainabilityIssues,
-    sustainabilityStrengths,
-    averageCarbonFootprint,
-    materialWithHighestFootprint,
-    // Add default values for the fields needed by SustainabilityAnalyzer
-    materialScores: {},
-    impactSummary: `Analysis of ${materials.length} materials with avg footprint of ${averageCarbonFootprint.toFixed(2)} kg CO2e/kg`,
-    highImpactMaterials: materials.slice(0, 3).map(m => ({
-      id: m.id || m.type,
-      name: m.name || m.type,
-      carbonFootprint: m.carbonFootprint || 0,
-      quantity: typeof m.quantity === 'number' ? m.quantity : Number(m.quantity) || 0
-    })),
+    material: materials[0] || { type: 'unknown', quantity: 0, unit: 'kg' },
     sustainabilityScore: Math.max(0, Math.min(100, 100 - (averageCarbonFootprint * 10))),
-    sustainabilityPercentage: (materials.filter(m => (m.carbonFootprint || 0) < 0.8).length / materials.length) * 100,
+    alternatives: [],
     recommendations: [
       "Consider replacing high-carbon materials with sustainable alternatives",
       "Source materials locally to reduce transportation emissions"
-    ],
-    alternatives: {}
+    ]
   };
 }
