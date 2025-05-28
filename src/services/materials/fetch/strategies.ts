@@ -75,38 +75,20 @@ export class MaterialFetchStrategies extends MaterialFetcher {
   }
 
   /**
-   * Fetches materials from the backup table
-   */
-  async fetchFromBackup(): Promise<FetchResult<ExtendedMaterialData>> {
-    const result = await this.querySupabaseView<MaterialView>(
-      'materials_view',
-      '*',
-      'fetchFromBackup'
-    );
-
-    if (result.error) {
-      return { data: [], error: result.error };
-    }
-
-    return {
-      data: processAndValidateMaterials(result.data)
-    };
-  }
-
-  /**
    * Try multiple strategies to fetch materials
    */
   async fetchWithStrategies(): Promise<FetchResult<ExtendedMaterialData>> {
     const strategies = [
       { name: 'materials_view', fetcher: () => this.fetchFromView() },
-      { name: 'materials_backup', fetcher: () => this.fetchFromBackup() },
       { name: 'materials_table', fetcher: () => this.fetchFromTable() }
     ];
 
     for (const strategy of strategies) {
       try {
+        console.log(`Trying strategy: ${strategy.name}`);
         const result = await strategy.fetcher();
         if (result.data.length > 0) {
+          console.log(`Strategy ${strategy.name} succeeded with ${result.data.length} materials`);
           return result;
         }
       } catch (error) {

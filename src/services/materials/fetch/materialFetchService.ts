@@ -113,9 +113,7 @@ const materialFetchService = new MaterialFetchService();
 export default materialFetchService;
 
 // Export individual functions for backward compatibility
-export const {
-  fetchMaterials,
-  fetchByTag,
-  fetchByCategory,
-  fetchCategories
-} = materialFetchService;
+export const fetchMaterials = materialFetchService.fetchMaterials.bind(materialFetchService);
+export const fetchByTag = materialFetchService.fetchByTag.bind(materialFetchService);
+export const fetchByCategory = materialFetchService.fetchByCategory.bind(materialFetchService);
+export const fetchCategories = materialFetchService.fetchCategories.bind(materialFetchService);
