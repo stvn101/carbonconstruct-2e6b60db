@@ -58,10 +58,20 @@ function generateMaterialAnalysis(
   return {
     material: firstMaterial,
     sustainabilityScore: Math.max(0, Math.min(100, 100 - (averageCarbonFootprint * 10))),
-    alternatives: [],
+    alternatives: {},
     recommendations: [
       "Consider replacing high-carbon materials with sustainable alternatives",
       "Source materials locally to reduce transportation emissions"
-    ]
+    ],
+    materialScores: {},
+    impactSummary: `Analysis based on ${materials.length} materials`,
+    highImpactMaterials: [],
+    sustainabilityPercentage: 50,
+    sustainabilityIssues: [],
+    categories,
+    materialCount: materials.length,
+    sustainabilityStrengths: [],
+    averageCarbonFootprint,
+    materialWithHighestFootprint
   };
 }

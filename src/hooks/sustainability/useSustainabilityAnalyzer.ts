@@ -57,7 +57,7 @@ export function useSustainabilityAnalyzer({
       const defaultAnalysis: MaterialAnalysisResult = {
         material: defaultMaterial,
         sustainabilityScore: 0,
-        alternatives: [],
+        alternatives: {},
         recommendations: []
       };
       
@@ -95,8 +95,18 @@ export function useSustainabilityAnalyzer({
       carbonFootprint: calculationInput.materials[0]?.carbonFootprint || 0
     },
     sustainabilityScore: 0,
-    alternatives: [],
-    recommendations: []
+    alternatives: {},
+    recommendations: [],
+    materialScores: {},
+    impactSummary: '',
+    highImpactMaterials: [],
+    sustainabilityPercentage: 0,
+    sustainabilityIssues: [],
+    categories: {},
+    materialCount: 0,
+    sustainabilityStrengths: [],
+    averageCarbonFootprint: 0,
+    materialWithHighestFootprint: null
   };
   
   const suggestionStrings = convertSuggestionsToStrings(suggestions);

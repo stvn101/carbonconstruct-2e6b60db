@@ -15,8 +15,18 @@ export interface SustainableMaterial {
 export interface MaterialAnalysisResult {
   material: MaterialInput;
   sustainabilityScore: number;
-  alternatives: { material: SustainableMaterial; improvement: number; reason: string; }[];
+  alternatives: Record<string, SustainableMaterial[]>;
   recommendations: string[];
+  materialScores?: Record<string, number>;
+  impactSummary?: string;
+  highImpactMaterials?: { id: string; name: string; carbonFootprint: number; quantity?: number; }[];
+  sustainabilityPercentage?: number;
+  sustainabilityIssues?: { id: string; title: string; description: string; recommendation: string; }[];
+  categories?: Record<string, MaterialInput[]>;
+  materialCount?: number;
+  sustainabilityStrengths?: { id: string; title: string; description: string; impact: string; }[];
+  averageCarbonFootprint?: number;
+  materialWithHighestFootprint?: any;
 }
 
 export interface SustainabilityIssue {

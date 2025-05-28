@@ -24,7 +24,8 @@ export const useSimpleMaterialData = () => {
       ]);
       
       setMaterials(materialsData || []);
-      setCategories(categoriesData || []);
+      // Convert MaterialCategory objects to strings
+      setCategories((categoriesData || []).map(cat => typeof cat === 'string' ? cat : cat.name));
       setError(null);
     } catch (err) {
       console.error('Error loading material data:', err);

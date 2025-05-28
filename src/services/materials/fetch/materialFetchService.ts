@@ -69,7 +69,7 @@ class MaterialFetcher {
   }
 
   protected async querySupabase<T>(
-    table: string,
+    table: 'materials_view' | 'materials' | 'materials_backup' | 'material_categories',
     query: string,
     context: string
   ): Promise<FetchResult<T>> {
