@@ -39,6 +39,9 @@ export interface FetchResult<T> {
   error?: Error;
 }
 
+// Define valid table names that we actually use
+type ValidTableNames = 'materials_view' | 'materials' | 'materials_backup' | 'material_categories';
+
 /**
  * Base class for material fetching operations
  */
@@ -69,7 +72,7 @@ class MaterialFetcher {
   }
 
   protected async querySupabase<T>(
-    table: string,
+    table: ValidTableNames,
     query: string,
     context: string
   ): Promise<FetchResult<T>> {
