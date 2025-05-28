@@ -14,7 +14,7 @@ export class MaterialFetchStrategies extends MaterialFetcher {
    * Fetches materials from the materials_view
    */
   async fetchFromView(): Promise<FetchResult<ExtendedMaterialData>> {
-    const result = await this.querySupabase<MaterialView>(
+    const result = await this.querySupabaseView<MaterialView>(
       'materials_view',
       '*',
       'fetchFromView'
@@ -33,7 +33,7 @@ export class MaterialFetchStrategies extends MaterialFetcher {
    * Fetches materials from the materials table
    */
   async fetchFromTable(): Promise<FetchResult<ExtendedMaterialData>> {
-    const result = await this.querySupabase<DatabaseMaterial>(
+    const result = await this.querySupabaseTable<DatabaseMaterial>(
       'materials',
       `
         id,
@@ -78,8 +78,8 @@ export class MaterialFetchStrategies extends MaterialFetcher {
    * Fetches materials from the backup table
    */
   async fetchFromBackup(): Promise<FetchResult<ExtendedMaterialData>> {
-    const result = await this.querySupabase<MaterialView>(
-      'materials_backup',
+    const result = await this.querySupabaseView<MaterialView>(
+      'materials_view',
       '*',
       'fetchFromBackup'
     );

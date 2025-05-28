@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { handleNetworkError } from '@/utils/errorHandling/networkErrorHandler';
-import { FetchResult, ValidTableNames, MAX_RETRIES, RETRY_DELAY } from './types';
+import { FetchResult, MAX_RETRIES, RETRY_DELAY } from './types';
 
 /**
  * Base class for material fetching operations
@@ -32,14 +32,34 @@ export class MaterialFetcher {
     throw new Error(`Failed to fetch after ${maxRetries} attempts`);
   }
 
-  protected async querySupabase<T>(
-    table: ValidTableNames,
+  protected async querySupabaseTable<T>(
+    table: 'materials' | 'materials_backup' | 'material_categories',
     query: string,
     context: string
   ): Promise<FetchResult<T>> {
     try {
       const { data, error } = await supabase
         .from(table)
+        .select(query);
+
+      if (error) {
+        throw handleNetworkError(error, context);
+      }
+
+      return { data: (data || []) as T[] };
+    } catch (error) {
+      return { data: [], error: error as Error };
+    }
+  }
+
+  protected async querySupabaseView<T>(
+    view: 'materials_view' | 'dependent_view1' | 'dependent_view2',
+    query: string,
+    context: string
+  ): Promise<FetchResult<T>> {
+    try {
+      const { data, error } = await supabase
+        .from(view)
         .select(query);
 
       if (error) {

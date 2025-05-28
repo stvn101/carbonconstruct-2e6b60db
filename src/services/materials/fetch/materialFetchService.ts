@@ -4,6 +4,7 @@ import { cacheMaterials } from '../cache';
 import { generateFallbackMaterials } from '../utils/fallbackMaterials';
 import { MaterialFetchStrategies } from './strategies';
 import { MaterialCategory } from './types';
+import { MaterialView } from '../types/databaseTypes';
 
 /**
  * Main service class for fetching materials from various sources
@@ -36,7 +37,7 @@ class MaterialFetchService extends MaterialFetchStrategies {
    */
   public async fetchByTag(tag: string): Promise<ExtendedMaterialData[]> {
     try {
-      const result = await this.querySupabase(
+      const result = await this.querySupabaseView<MaterialView>(
         'materials_view',
         '*',
         'fetchByTag'
@@ -59,7 +60,7 @@ class MaterialFetchService extends MaterialFetchStrategies {
    */
   public async fetchByCategory(category: string): Promise<ExtendedMaterialData[]> {
     try {
-      const result = await this.querySupabase(
+      const result = await this.querySupabaseView<MaterialView>(
         'materials_view',
         '*',
         'fetchByCategory'
@@ -82,7 +83,7 @@ class MaterialFetchService extends MaterialFetchStrategies {
    */
   public async fetchCategories(): Promise<MaterialCategory[]> {
     try {
-      const result = await this.querySupabase(
+      const result = await this.querySupabaseTable<{id: number, name: string, description?: string}>(
         'material_categories',
         '*',
         'fetchCategories'

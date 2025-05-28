@@ -19,9 +19,6 @@ export interface FetchResult<T> {
   error?: Error;
 }
 
-// Define valid table names that we actually use
-export type ValidTableNames = 'materials_view' | 'materials' | 'materials_backup' | 'material_categories';
-
 export const DEMO_DELAY = 800; // Simulate network delay in demo mode
 export const MAX_RETRIES = 3; // Maximum number of retries for fetching materials
 export const RETRY_DELAY = 1000; // Delay between retries in milliseconds
