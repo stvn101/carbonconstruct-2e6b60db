@@ -69,7 +69,7 @@ class MaterialFetcher {
   }
 
   protected async querySupabase<T>(
-    table: 'materials_view' | 'materials' | 'materials_backup' | 'material_categories',
+    table: string,
     query: string,
     context: string
   ): Promise<FetchResult<T>> {
@@ -82,7 +82,7 @@ class MaterialFetcher {
         throw handleNetworkError(error, context);
       }
 
-      return { data: data || [] };
+      return { data: (data || []) as T[] };
     } catch (error) {
       return { data: [], error: error as Error };
     }

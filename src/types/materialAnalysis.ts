@@ -10,6 +10,15 @@ export interface SustainableMaterial {
   recyclability: 'High' | 'Medium' | 'Low';
   region?: string;
   notes?: string;
+  quantity?: number;
+  unit?: string;
+  alternativeTo?: string; // ID of material this is an alternative to
+  carbonReduction: number; // percentage reduction compared to conventional
+  costDifference?: number; // percentage difference (+/- %)
+  availability?: 'low' | 'medium' | 'high';
+  recyclable?: boolean;
+  recycledContent?: number; // percentage
+  locallySourced?: boolean;
 }
 
 export interface MaterialAnalysisResult {
